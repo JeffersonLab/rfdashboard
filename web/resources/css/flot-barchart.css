@@ -1,0 +1,44 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Mar 31, 2017, 9:41:26 AM
+    Author     : adamc
+*/
+
+/*body { 
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 12px;
+}
+h1 {
+    width: 450px;
+    margin: 0 auto;
+    font-size: 12px;
+    text-align: center; 
+}*/
+
+.legend table, .legend > div {
+    height: 82px !important;
+    opacity: 1 !important;
+    right: -55px;
+    border: none;
+    top: 10px;
+    width: 116px !important;
+}
+
+#flot-tooltip {
+    font-size: 12px;
+    font-family: Verdana, Arial, sans-serif;
+    position: absolute;
+    display: none;
+    border: 2px solid;
+    padding: 2px;
+    background-color: #FFF;
+    opacity: 0.8;
+    -moz-border-radius: 5px; 
+    -webkit-border-radius: 5px; 
+    -khtml-border-radius: 5px; 
+    border-radius: 5px;
+}
