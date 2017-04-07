@@ -22,7 +22,6 @@ jlab.barChart.addLegend = function (chartId, colors, labels) {
         legendString += '<tr><td><div class=color-box style="background-color: ' + colors[i] + ';"></div></td><td>' + labels[i] + '</td></tr>';
     }
     legendString += '</table></div>';
-    console.log(chartId);
     $("#" +chartId + "-legend-panel").prepend(legendString);
 };
 
@@ -115,24 +114,26 @@ jlab.barChart.updateChart = function (chartId, url, start, end, factorBy) {
             // These prev_* variables track whether or not the plothover event is for the same bar -- removes the "flicker" effect.
             var prev_point = null;
             var prev_label = null;
-            $("#placeholder").bind("plothover", function (event, pos, item) {
+            
+            $('#' + chartId).bind("plothover", function (event, pos, item) {
                 if (item) {
                     if ((prev_point != item.dataIndex) || (prev_label != item.series.label)) {
                         prev_point = item.dataIndex;
                         prev_label = item.series.label;
 
-                        $("#flot-tooltip").remove();
+                        $('#flot-tooltip').remove();
                         // The item.datapoint is x coordinate of the bar, not of the original data point.  item.series.data contains
                         // the original data, and item.dataIndex this item's index in the data.
                         var timestamp = item.series.data[item.dataIndex][0];
                         var d = new Date(timestamp);
                         var time = jlab.triCharMonthNames[d.getMonth()] + " " + d.getDate();
                         var y = item.datapoint[1];
-                        var z = item.series.color;
-                        jlab.showTooltip(item.pageX + 20, item.pageY - 20, "<b>Series:</b> " + item.series.label + "<br /><b>Date:</b> " + time + "<br /><b>Value:</b> " + y, z);
+                        var borderColor = item.series.color;
+                        var content = "<b>Series:</b> " + item.series.label + "<br /><b>Date:</b> " + time + "<br /><b>Value:</b> " + y;
+                        jlab.showTooltip(item.pageX + 20, item.pageY - 20, content, borderColor);
                     }
                 } else {
-                    $("#flot-tooltip").remove();
+                    $('#flot-tooltip').remove();
                     prev_point = null;
                     prev_label = null;
                 }

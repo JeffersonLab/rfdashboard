@@ -50,7 +50,6 @@ public class ModAnode extends HttpServlet {
         if ( request.getAttribute("end") == null ) {
             request.setAttribute("end", sdf.format(end));
         }
-        //request.getRequestDispatcher("/WEB-INF/views/overview.jsp").forward(request, response);
         request.getRequestDispatcher("/WEB-INF/views/mod-anode.jsp").forward(request, response);
     }
  

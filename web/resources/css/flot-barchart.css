@@ -19,14 +19,6 @@ h1 {
     text-align: center; 
 }*/
 
-.legend table, .legend > div {
-    height: 82px !important;
-    opacity: 1 !important;
-    right: -55px;
-    border: none;
-    top: 10px;
-    width: 116px !important;
-}
 
 #flot-tooltip {
     font-size: 12px;

@@ -43,8 +43,9 @@
             </div>
         </div>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery/1.10.2.min.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-ui/1.10.3/jquery-ui.min.js"></script>            
+        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-ui/1.10.3/jquery-ui.min.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/timepicker/jquery-ui-timepicker-1.5.0.min.js"></script>
+        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3"></script>
         <jsp:invoke fragment="scripts"/>
     </body>
 </html>
