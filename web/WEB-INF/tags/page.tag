@@ -19,7 +19,12 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>${title}</title>
-        <link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/smoothness.css">
+        <link rel="shortcut icon" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/img/favicon.ico"/>        
+        <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-ui/1.10.3/theme/smoothness/jquery-ui.min.css"/> 
+        <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-plugins/timepicker/jquery-ui-timepicker-1.5.0.css"/>
+        <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-plugins/select2/3.5.2/select2.css"/>        
+<!--        <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jlab-theme/smoothness/1.6/css/smoothness.min.css"/>      -->
+        <link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/rfd.css">
         <jsp:invoke fragment="stylesheets"/>
     </head>
     <body>
@@ -45,7 +50,6 @@
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery/1.10.2.min.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-ui/1.10.3/jquery-ui.min.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/timepicker/jquery-ui-timepicker-1.5.0.min.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3"></script>
         <jsp:invoke fragment="scripts"/>
     </body>
 </html>

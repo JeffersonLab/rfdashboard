@@ -10,8 +10,12 @@ var jlab = jlab || {};
 // between any two points in a single series.
 jlab.getMinDataWidth = function (data) {
     var min = Number.MAX_SAFE_INTEGER;
+    var maxLength = 0;
 
     for (var i = 0; i < data.length; i++) {
+        if ( data[i].length > maxLength ) {
+            maxLength = data[i].length;
+        }
         for (var j = 1; j < data[i].length; j++) {
             width = data[i][j][0] - data[i][j - 1][0];
             if (min > width) {
@@ -20,6 +24,10 @@ jlab.getMinDataWidth = function (data) {
         }
     }
     
+    // If only one datapoint is in the list, assume a width of 1 day
+    if ( maxLength === 1 ) {
+        min = 60 * 60 * 24 * 1000;
+    }
     return min;
 };
 

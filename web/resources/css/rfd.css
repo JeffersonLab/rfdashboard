@@ -641,7 +641,7 @@ th.scrollbar-header {
     padding-right: 5px;
 }
 .chart-legend {
-    padding-left: 4em;
+    padding-left: 0em;
 }
 .chart-panel {
     width: 100%;

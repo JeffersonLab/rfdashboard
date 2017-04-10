@@ -26,7 +26,11 @@ jlab.barChart.addLegend = function (chartId, colors, labels) {
 };
 
 jlab.barChart.updateChart = function (chartId, url, start, end, factorBy) {
-
+    console.log("In jlab.barChart.update.Chart");
+        console.log("url: " + url);
+    console.log("chartId: " + chartId);
+    console.log("start: " + start);
+    console.log("end: " + end);
     var lineWidth = 1;
     var fill = true;
     var show = true;
@@ -64,7 +68,7 @@ jlab.barChart.updateChart = function (chartId, url, start, end, factorBy) {
     };
     var plotData = [];
     $.ajax({
-        url: "http://localhost:8080/RFDashboard/ajax/mod-anode",
+        url: url + "?start=" + start + "%end=" + end,
         data:
                 {
                     start: start,

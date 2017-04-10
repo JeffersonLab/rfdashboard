@@ -43,16 +43,46 @@ public class ModAnode extends HttpServlet {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
 
         Date end = new Date();
-        Date start = new Date(end.getTime() - 60*60*24*1000L*7);
-        if ( request.getAttribute("start") == null ) {
-            request.setAttribute("start", sdf.format(start));
-        }
-        if ( request.getAttribute("end") == null ) {
+        Date start;
+
+        LOGGER.log(Level.FINEST, "ModAode controler with received parameters: {0}", request.getParameterMap());
+        
+        if (request.getParameter("end") == null) {
+            LOGGER.log(Level.FINEST, "No end parameter supplied.  Defaulting to now.");
             request.setAttribute("end", sdf.format(end));
+        } else {
+            try {
+                end = sdf.parse(request.getParameter("end"));
+                request.setAttribute("end", sdf.format(end));
+            } catch (ParseException e) {
+                end = new Date();  // In case something bad happend during try.
+                LOGGER.log(Level.WARNING, "Error parsing end parameter '{0}'.  Defaulting to now", request.getParameter("end"));
+                request.setAttribute("end", sdf.format(end));
+            }
         }
-        request.getRequestDispatcher("/WEB-INF/views/mod-anode.jsp").forward(request, response);
+        
+        if (request.getParameter("start") == null ) {
+            start = new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7);
+            request.setAttribute("start", sdf.format(start));
+        } else {
+            try {
+                request.setAttribute("start", sdf.format(sdf.parse(request.getParameter("start"))));
+            } catch (ParseException e) {
+                LOGGER.log(Level.WARNING, "Error parsing start parameter '{0}'.  Defaulting to -7d", request.getParameter("start"));
+                start = new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7);
+                request.setAttribute("start", sdf.format(start));
+            }
+        }
+
+        LOGGER.log(Level.FINEST,
+                "Start: {0} - End: {1}", new Object[]{request.getAttribute("start"),
+                     request.getAttribute("end")
+                }
+        );
+        request.getRequestDispatcher(
+                "/WEB-INF/views/mod-anode.jsp").forward(request, response);
     }
- 
+
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
