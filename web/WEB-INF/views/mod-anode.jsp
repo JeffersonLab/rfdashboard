@@ -54,6 +54,7 @@
                 var jlab = jlab || {};
                 jlab.start = "${requestScope.start}";
                 jlab.end = "${requestScope.end}";
+                jlab.timeUnit = "${requestScope.timeUnit}";
             </script>
     </jsp:body>
 </t:page>

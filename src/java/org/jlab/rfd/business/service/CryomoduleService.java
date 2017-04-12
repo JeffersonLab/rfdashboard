@@ -33,8 +33,7 @@ public class CryomoduleService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
 
         String wrkspc = sdf.format(timestamp);
-        //String cmQuery = "?t=Cryomodule&p=CryomoduleType&out=json&ced=history&wrkspc=" + wrkspc;
-        String cmQuery = "?t=Cryomodule&p=ModuleType&out=json";
+        String cmQuery = "?t=Cryomodule&p=ModuleType&out=json&ced=history&wrkspc=" + wrkspc;
 
         LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cmQuery);
         URL url = new URL(CED_INVENTORY_URL + cmQuery);

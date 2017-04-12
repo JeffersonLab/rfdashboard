@@ -11,14 +11,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.jlab.rfd.business.service.ModAnodeService;
-import org.jlab.rfd.model.ModAnodeDataSpan;
 
 /**
  *
@@ -47,7 +44,7 @@ public class ModAnode extends HttpServlet {
 
         LOGGER.log(Level.FINEST, "ModAode controler with received parameters: {0}", request.getParameterMap());
         
-        if (request.getParameter("end") == null) {
+        if (request.getParameter("end") == null || request.getParameter("end").equals("")) {
             LOGGER.log(Level.FINEST, "No end parameter supplied.  Defaulting to now.");
             request.setAttribute("end", sdf.format(end));
         } else {
@@ -61,8 +58,9 @@ public class ModAnode extends HttpServlet {
             }
         }
         
-        if (request.getParameter("start") == null ) {
-            start = new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7);
+        if (request.getParameter("start") == null || request.getParameter("start").equals("") ) {
+            // Default to end - four weeks
+            start = new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7 * 4);
             request.setAttribute("start", sdf.format(start));
         } else {
             try {
@@ -72,6 +70,23 @@ public class ModAnode extends HttpServlet {
                 start = new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7);
                 request.setAttribute("start", sdf.format(start));
             }
+        }
+
+        if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
+            // Default to week
+            LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
+            request.setAttribute("timeUnit", "week");
+        } else {
+            String timeUnit; 
+            switch (request.getParameter("timeUnit")) {
+                    case "day":
+                        timeUnit = "day";
+                        break;
+                    case "week":
+                    default:
+                        timeUnit = "week";
+            }
+                request.setAttribute("timeUnit", timeUnit);
         }
 
         LOGGER.log(Level.FINEST,

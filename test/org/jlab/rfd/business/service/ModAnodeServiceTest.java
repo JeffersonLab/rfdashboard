@@ -6,14 +6,10 @@
 package org.jlab.rfd.business.service;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.TreeMap;
-import org.jlab.rfd.model.CryomoduleType;
-import org.jlab.rfd.model.LinacName;
 import org.jlab.rfd.model.ModAnodeDataPoint;
 import org.jlab.rfd.model.ModAnodeDataSpan;
 import org.junit.After;
@@ -66,20 +62,7 @@ public class ModAnodeServiceTest {
         Date end = sdf.parse("2017-03-29");
         
         ModAnodeService mas = new ModAnodeService();
-        ModAnodeDataSpan maSpan = mas.getModAnodeDataSpan(start, end);
-
-        /*
-        for(Date curr : maSpan.keySet()) {
-            HashSet<ModAnodeDataPoint> maSet = maSpan.get(curr);
-            for(ModAnodeDataPoint maDP : maSet ) {
-                System.out.println(maDP.getCavityName());
-                System.out.println(maDP.getCryomoduleType());
-                System.out.println(maDP.getLinacName());
-                System.out.println(maDP.getModAnodeVoltage());
-                System.out.println(maDP.getTimestamp());
-            }
-        }
-        */
+        ModAnodeDataSpan maSpan = mas.getModAnodeDataSpan(start, end, "day");
         
         assertTrue(7 == maSpan.size());
     }

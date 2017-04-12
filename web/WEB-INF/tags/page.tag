@@ -37,7 +37,8 @@
                 <nav id="primary-nav">
                     <ul>
                         <li${'/overview' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/overview">Overview</a></li>
-                        <li${'/Mod-Anode' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/mov-anode">Mod Anode</a></li>
+                        <li${'/mod-anode' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/mov-anode">Mod Anode</a></li>
+                        <li${'/bypassed' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/mov-anode">Bypassed</a></li>
                     </ul>
                 </nav>
             </header>

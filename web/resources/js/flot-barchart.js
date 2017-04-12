@@ -25,49 +25,24 @@ jlab.barChart.addLegend = function (chartId, colors, labels) {
     $("#" +chartId + "-legend-panel").prepend(legendString);
 };
 
-jlab.barChart.updateChart = function (chartId, url, start, end, factorBy) {
+jlab.barChart.updateChart = function (chartId, url, start, end, timeUnit, factorBy) {
     console.log("In jlab.barChart.update.Chart");
-        console.log("url: " + url);
+    console.log("url: " + url);
     console.log("chartId: " + chartId);
     console.log("start: " + start);
     console.log("end: " + end);
-    var lineWidth = 1;
-    var fill = true;
-    var show = true;
-    var fillColor = ["#AA4643", "#89A54E", "#4572A7", "#80699B"];
-    var options = {
-        xaxis: {
-            mode: "time",
-            timeformat: "%b %d<br />%Y",
-            tickSize: [1, "day"],
-            axisLabelUseCanvas: true,
-            axisLabelFontSizePixels: 12,
-            axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif',
-            axisLabelPadding: 5
-        },
-        yaxis: {
-            axisLabel: 'Value',
-            axisLabelUseCanvas: true,
-            axisLabelFontSizePixels: 12,
-            axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif',
-            axisLabelPadding: 5
-        },
-        grid: {
-            hoverable: true,
-            clickable: false,
-            borderWidth: 1
-        },
-        legend: {
-            show: false,
-            labelBoxBorderColor: "none",
-            position: "right"
-        },
-        series: {
-            shadowSize: 1
-        }
-    };
+    console.log("timeUnit: " + timeUnit);
+    console.log("factorBy: " + factorBy);
+    
+    
     var plotData = [];
     $.ajax({
+        beforeSend: function () {
+            $('#' + chartId + "-loader").show();
+        },
+        complete: function () {
+            $('#' + chartId + "-loader").hide();
+        },
         url: url + "?start=" + start + "%end=" + end,
         data:
                 {
@@ -75,6 +50,13 @@ jlab.barChart.updateChart = function (chartId, url, start, end, factorBy) {
                     end: end
                 },
         dataType: "json",
+        error: function (jqXHR, textStatus, errorThrown) {
+            $('#' + chartId + "-loader").hide();
+            $("#" + chartId).append("Error occurred querying data");
+            console.log("Error occurred querying data from '" + url + "?start=" + start + "%end=" + end);
+            console.log("  textStatus: " + textStatus);
+            console.log("  errorThrown" + errorThrown);
+        },
         success: function (jsonData, textStatus, jqXHR) {
 
             // The repsonse should be formated 
@@ -86,6 +68,62 @@ jlab.barChart.updateChart = function (chartId, url, start, end, factorBy) {
             //              [[t_1, d_1], ..., [t_k,d_k]]_n
             //           ]
             // }
+
+            var lineWidth = 1;
+            var fill = true;
+            var show = true;
+            var fillColor = ["#AA4643", "#89A54E", "#4572A7", "#80699B"];
+            var options = {
+                xaxis: {
+                    mode: "time",
+                    timeformat: "%b %d<br />%Y",
+                    axisLabelUseCanvas: true,
+                    axisLabelFontSizePixels: 12,
+                    axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif',
+                    axisLabelPadding: 5
+                },
+                yaxis: {
+                    axisLabel: 'Value',
+                    axisLabelUseCanvas: true,
+                    axisLabelFontSizePixels: 12,
+                    axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif',
+                    axisLabelPadding: 5
+                },
+                grid: {
+                    hoverable: true,
+                    clickable: false,
+                    borderWidth: 1
+                },
+                legend: {
+                    show: false,
+                    labelBoxBorderColor: "none",
+                    position: "right"
+                },
+                series: {
+                    shadowSize: 1
+                }
+            };
+
+            var tickSize;
+            var ticks = [];
+            if (jsonData.data[0].length <= 5) {
+                tickSize = [7, "day"];
+                if (timeUnit === "day") {
+                    tickSize = [1, "day"];
+                } else if (timeUnit === "month") {
+                    tickSize = [1, "month"];
+                }
+
+                options.xaxis.tickSize = tickSize;
+
+                // Use the sample dates as the tick locations if the numbers are small
+                for (i = 0; i < jsonData.data[0].length; i++) {
+                    ticks[i] = jsonData.data[0][i][0];
+                }
+
+                options.xaxis.ticks = ticks;
+
+            }
 
             // Days / number of bars * (1-(%gap_between_datapoints/100))
             var numSeries = jsonData.data.length;
@@ -109,6 +147,7 @@ jlab.barChart.updateChart = function (chartId, url, start, end, factorBy) {
 
                 }
             }
+
 
             $.plot($("#"+chartId), plotData, options);
 

@@ -10,10 +10,8 @@ import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonReader;
 import org.jlab.rfd.model.ModAnodeDataSpan;
 import org.jlab.rfd.presentation.util.DataFormatter;
 import org.junit.After;
@@ -55,17 +53,21 @@ public class ModAnodeFormatterTest {
         Date s = sdf.parse("2017-03-25");
         Date e = sdf.parse("2017-03-29");
         
-        final String expJson = "{\"INJECTOR\":[[1490414400000,2],[1490500800000,2],[1490587200000,2],[1490673600000,2]],"
-                + "\"NORTH\":[[1490414400000,29],[1490500800000,29],[1490587200000,29],[1490673600000,29]],"
-                + "\"SOUTH\":[[1490414400000,25],[1490500800000,25],[1490587200000,25],[1490673600000,25]],"
-                + "\"TOTAL\":[[1490414400000,56],[1490500800000,56],[1490587200000,56],[1490673600000,56]]}";
+        final String expJson = "{"
+                + "\"labels\":[\"Injector\",\"North\",\"South\",\"Total\"],"
+                + "\"data\":["
+                + "[[1490414400000,2],[1490500800000,2],[1490587200000,2],[1490673600000,2]],"
+                + "[[1490414400000,29],[1490500800000,29],[1490587200000,29],[1490673600000,29]],"
+                + "[[1490414400000,25],[1490500800000,25],[1490587200000,25],[1490673600000,25]],"
+                + "[[1490414400000,56],[1490500800000,56],[1490587200000,56],[1490673600000,56]]"
+                + "]}";
         
         JsonObject expected = Json.createReader(new StringReader(expJson)).readObject();
 
         System.out.println(expected.toString());
 
         ModAnodeService mas = new ModAnodeService();
-        ModAnodeDataSpan maSpan = mas.getModAnodeDataSpan(s, e);
+        ModAnodeDataSpan maSpan = mas.getModAnodeDataSpan(s, e, "day");
         JsonObject json = DataFormatter.toJson(maSpan.getModAnodeCountByLinac());
 
         System.out.println(json.toString());

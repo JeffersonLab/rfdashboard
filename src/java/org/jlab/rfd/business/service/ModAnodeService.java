@@ -38,15 +38,14 @@ public class ModAnodeService {
 
     // Append the wrkspc argument to the end of this string
     public static final String CED_INVENTORY_URL = "http://ced.acc.jlab.org/inventory";
-    
+
     public HashSet<ModAnodeDataPoint> getModAnodeData(Date timestamp) throws IOException, ParseException {
         HashMap<String, CryomoduleType> cmTypes = new CryomoduleService().getCryoModuleTypes(timestamp);
         HashSet<ModAnodeDataPoint> data = new HashSet();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
         String wrkspc = sdf.format(timestamp);
-        //String cavityQuery = "?t=CryoCavity&p=ModAnode,Housed_by&out=json&ced=history&wrkspc=" + wrkspc;
-        String cavityQuery = "?t=CryoCavity&p=ModAnode,Housed_by&out=json&";
+        String cavityQuery = "?t=CryoCavity&p=ModAnode,Housed_by&out=json&ced=history&wrkspc=" + wrkspc;
 
         LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cavityQuery);
         URL url = new URL(CED_INVENTORY_URL + cavityQuery);
@@ -63,32 +62,43 @@ public class ModAnodeService {
             for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
                 BigDecimal mav = new BigDecimal(0);
                 String cavityName = element.getString("name");
-                cmType = cmTypes.get(cavityName.substring(0,4));
-                
+                cmType = cmTypes.get(cavityName.substring(0, 4));
+
                 JsonObject properties = element.getJsonObject("properties");
                 if (properties.containsKey("ModAnode")) {
                     mav = mav.add(new BigDecimal(properties.getString("ModAnode")));
                 }
-                data.add(new ModAnodeDataPoint(timestamp, cavityName, cmType,mav));
+                data.add(new ModAnodeDataPoint(timestamp, cavityName, cmType, mav));
             }
         }
         return (data);
     }
-    
-    public ModAnodeDataSpan getModAnodeDataSpan(Date start, Date end) throws ParseException, IOException {
+
+    public ModAnodeDataSpan getModAnodeDataSpan(Date start, Date end, String timeUnit) throws ParseException, IOException {
+
+        long timeInt;
+        switch (timeUnit) {
+            case "day":
+                timeInt = 60 * 60 * 24 * 1000L;
+                break;
+            case "week":
+            default:
+                timeInt = 60 * 60 * 24 * 7 * 1000L;
+        }
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
-        
+
         // Convert date objects to have no hh:mm:ss ... portion
         Date curr = sdf.parse(sdf.format(start));
         Date e = sdf.parse(sdf.format(end));
 
         ModAnodeDataSpan span = new ModAnodeDataSpan();
-        
-        while ( curr.before(e) ) {
+
+        while (curr.before(e)) {
             span.put(curr, this.getModAnodeData(curr));
-            curr = new Date(curr.getTime() + 60 * 60 * 24 * 1000L);            // Add one day
+            curr = new Date(curr.getTime() + timeInt);            // Add one day
         }
-        
+
         return span;
     }
 }

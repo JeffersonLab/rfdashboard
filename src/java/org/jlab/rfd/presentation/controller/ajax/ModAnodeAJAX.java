@@ -63,8 +63,8 @@ public class ModAnodeAJAX extends HttpServlet {
             if ( sString != null) {
                 start = sdf.parse(sString);
             } else {
-                // Default to seven days before end
-                start = sdf.parse(sdf.format(new Date(end.getTime() - 60*60*24*1000L*7)));
+                // Default to four weeks before end
+                start = sdf.parse(sdf.format(new Date(end.getTime() - 60*60*24*1000L*7*4)));
             }
         } catch (ParseException ex) {
             LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
@@ -80,11 +80,16 @@ public class ModAnodeAJAX extends HttpServlet {
         if ( factor == null) {
             factor = "linac";
         }
+
+        String timeUnit = request.getParameter("timeUnit");
+        if ( timeUnit == null) {
+            timeUnit = "week";
+        }
         
         ModAnodeService mas = new ModAnodeService();
         ModAnodeDataSpan span;
         try {
-            span = mas.getModAnodeDataSpan(start, end);
+            span = mas.getModAnodeDataSpan(start, end, timeUnit);
         } catch (ParseException ex) {
             throw new ServletException("Error in getting modAnode Data", ex);
         }

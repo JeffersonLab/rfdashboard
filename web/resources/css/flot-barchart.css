@@ -19,6 +19,9 @@ h1 {
     text-align: center; 
 }*/
 
+.ajax-loader {
+    text-align: center;
+}
 
 #flot-tooltip {
     font-size: 12px;
