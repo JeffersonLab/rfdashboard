@@ -21,12 +21,15 @@
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/sideBySideImproved/jquery.flot.orderBars.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/flot-barchart.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/utils.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/mod-anode.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/bypassed.js"></script>
+        <script>
+
+        </script>
     </jsp:attribute>
     <jsp:body>
         <h2 id="page-header-title"><c:out value="${title}"/></h2>
         <div id="control-form">
-            <form action="${pageContext.request.contextPath}/mod-anode" method="get">
+            <form action="${pageContext.request.contextPath}/bypassed" method="get">
                 <fieldset>
                     <div class="li-key">
                         <label class="required-field" for="start" title="Inclusive (Closed)">Start Date</label>
@@ -46,7 +49,7 @@
                 </fieldset>
             </form>
         </div>
-        <t:chart-widget placeholderId="mav-count-by-linac"></t:chart-widget>
+        <t:chart-widget placeholderId="bypassed-count-by-linac"></t:chart-widget>
         <script>
             var jlab = jlab || {};
             jlab.start = "${requestScope.start}";

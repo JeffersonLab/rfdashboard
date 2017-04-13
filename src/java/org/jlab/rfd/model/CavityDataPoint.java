@@ -5,6 +5,7 @@
  */
 package org.jlab.rfd.model;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -19,10 +20,14 @@ public class CavityDataPoint {
     
     private final Date timestamp;
     private final String cavityName;
+    private final String epicsName;
+    private final BigDecimal modAnodeVoltage;
     private final CryomoduleType cryomoduleType;
     private final LinacName linacName;
+    private final BigDecimal gset;
 
-    public CavityDataPoint(Date timestamp, String cavityName, CryomoduleType cryomoduleType) {
+    public CavityDataPoint(Date timestamp, String cavityName, CryomoduleType cryomoduleType, 
+            BigDecimal modAnodeVoltage, String epicsName, BigDecimal gset) {
         
         if ( ! cavityName.matches("\\dL\\d\\d-\\d") ) {
             LOGGER.log(Level.SEVERE, "Improper cavity name format - {0}", cavityName);
@@ -32,7 +37,10 @@ public class CavityDataPoint {
         this.timestamp = timestamp;
         this.cavityName = cavityName;
         this.cryomoduleType = cryomoduleType;
+        this.modAnodeVoltage = modAnodeVoltage;
         this.linacName = CebafNames.cedZoneToEnglishLinac(cavityName.substring(0, 4));
+        this.epicsName = epicsName;
+        this.gset = gset;
     }
     
     public Date getTimestamp() {
@@ -50,5 +58,16 @@ public class CavityDataPoint {
     public LinacName getLinacName() {
         return linacName;
     }
-        
+
+    public BigDecimal getGset() {
+        return gset;
+    }
+
+    public String getEpicsName() {
+        return epicsName;
+    }
+
+    public BigDecimal getModAnodeVoltage() {
+        return modAnodeVoltage;
+    }
 }

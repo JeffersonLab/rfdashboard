@@ -8,6 +8,7 @@ package org.jlab.rfd.presentation.util;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
@@ -20,7 +21,7 @@ import javax.json.JsonObject;
 import org.jlab.rfd.model.LinacName;
 
 /**
- * 
+ *
  * @author adamc
  */
 public class DataFormatter {
@@ -38,59 +39,95 @@ public class DataFormatter {
      * @throws java.text.ParseException
      * @throws java.io.IOException
      */
-    public static JsonObject toJson(TreeMap<Date, HashMap<LinacName, BigDecimal>> data) throws ParseException, IOException {
+//    public static JsonObject toJson(TreeMap<Date, HashMap<LinacName, BigDecimal>> data) throws ParseException, IOException {
+//
+//        // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
+//        HashMap<LinacName, BigDecimal> temp;
+//        JsonArrayBuilder iBuilder = Json.createArrayBuilder();
+//        JsonArrayBuilder nBuilder = Json.createArrayBuilder();
+//        JsonArrayBuilder sBuilder = Json.createArrayBuilder();
+//        JsonArrayBuilder tBuilder = Json.createArrayBuilder();
+//
+//        for (Date curr : (Set<Date>) data.keySet()) {
+//            temp = data.get(curr);
+//            iBuilder.add(Json.createArrayBuilder()
+//                    .add(curr.getTime())
+//                    .add(temp.get(LinacName.Injector)));
+//
+//            nBuilder.add(Json.createArrayBuilder()
+//                    .add(curr.getTime())
+//                    .add(temp.get(LinacName.North)));
+//
+//            sBuilder.add(Json.createArrayBuilder()
+//                    .add(curr.getTime())
+//                    .add(temp.get(LinacName.South)));
+//
+//            tBuilder.add(Json.createArrayBuilder()
+//                    .add(curr.getTime())
+//                    .add(temp.get(LinacName.Total)));
+//
+//            // Add one day
+//            curr = new Date(curr.getTime() + 60 * 60 * 24 * 1000L);
+//        }
+//
+//        JsonArray iSeries = iBuilder.build();
+//        JsonArray nSeries = nBuilder.build();
+//        JsonArray sSeries = sBuilder.build();
+//        JsonArray tSeries = tBuilder.build();
+//
+//        // Make sure to keep the order straight.
+//        JsonObject chartData = Json.createObjectBuilder()
+//                .add("labels", Json.createArrayBuilder()
+//                        .add("Injector")
+//                        .add("North")
+//                        .add("South")
+//                        .add("Total")
+//                        .build())
+//                .add("data", Json.createArrayBuilder()
+//                        .add(iSeries)
+//                        .add(nSeries)
+//                        .add(sSeries)
+//                        .add(tSeries)
+//                        .build())
+//                .build();
+//
+//        return chartData;
+//    }
+
+    public static JsonObject toJson(TreeMap<Date, HashMap<String, BigDecimal>> data) throws ParseException, IOException {
 
         // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
-        HashMap<LinacName, BigDecimal> temp;
-        JsonArrayBuilder iBuilder = Json.createArrayBuilder();
-        JsonArrayBuilder nBuilder = Json.createArrayBuilder();
-        JsonArrayBuilder sBuilder = Json.createArrayBuilder();
-        JsonArrayBuilder tBuilder = Json.createArrayBuilder();
+        HashMap<String, BigDecimal> temp;
+        TreeMap<String, JsonArrayBuilder> seriesBuilders = new TreeMap();
 
         for (Date curr : (Set<Date>) data.keySet()) {
             temp = data.get(curr);
-            iBuilder.add(Json.createArrayBuilder()
-                    .add(curr.getTime())
-                    .add(temp.get(LinacName.Injector)));
 
-            nBuilder.add(Json.createArrayBuilder()
-                    .add(curr.getTime())
-                    .add(temp.get(LinacName.North)));
+            for (String seriesName : data.get(curr).keySet()) {
+                if (!seriesBuilders.containsKey(seriesName)) {
+                    seriesBuilders.put(seriesName, Json.createArrayBuilder());
+                }
 
-            sBuilder.add(Json.createArrayBuilder()
-                    .add(curr.getTime())
-                    .add(temp.get(LinacName.South)));
-
-            tBuilder.add(Json.createArrayBuilder()
-                    .add(curr.getTime())
-                    .add(temp.get(LinacName.Total)));
-
-            // Add one day
-            curr = new Date(curr.getTime() + 60 * 60 * 24 * 1000L);
+                seriesBuilders.get(seriesName)
+                        .add(Json.createArrayBuilder()
+                                .add(curr.getTime())
+                                .add(temp.get(seriesName)));
+            }
         }
 
-        JsonArray iSeries = iBuilder.build();
-        JsonArray nSeries = nBuilder.build();
-        JsonArray sSeries = sBuilder.build();
-        JsonArray tSeries = tBuilder.build();
+        JsonArrayBuilder labelBuilder = Json.createArrayBuilder();
+        JsonArrayBuilder dataBuilder = Json.createArrayBuilder();
+        
+        for (String seriesName : seriesBuilders.keySet()) {
+            labelBuilder.add(seriesName);
+            dataBuilder.add(seriesBuilders.get(seriesName).build());
+        }
 
-        // Make sure to keep the order straight.
         JsonObject chartData = Json.createObjectBuilder()
-                .add("labels", Json.createArrayBuilder()
-                        .add("Injector")
-                        .add("North")
-                        .add("South")
-                        .add("Total")
-                        .build())
-                .add("data", Json.createArrayBuilder()
-                        .add(iSeries)
-                        .add(nSeries)
-                        .add(sSeries)
-                        .add(tSeries)
-                        .build())
+                .add("labels", labelBuilder.build())
+                .add("data", dataBuilder.build())
                 .build();
 
-        
         return chartData;
     }
 }

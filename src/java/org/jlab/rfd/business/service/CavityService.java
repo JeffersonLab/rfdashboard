@@ -14,38 +14,35 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import org.jlab.rfd.business.util.CebafNames;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import org.jlab.rfd.model.CavityDataPoint;
+import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.CryomoduleType;
-import org.jlab.rfd.model.LinacName;
-import org.jlab.rfd.model.ModAnodeDataPoint;
-import org.jlab.rfd.model.ModAnodeDataSpan;
 
 /**
  *
  * @author adamc
  */
-public class ModAnodeService {
+public class CavityService {
 
-    public static final Logger LOGGER = Logger.getLogger(ModAnodeService.class.getName());
-
+    private static final Logger LOGGER = Logger.getLogger(CavityService.class.getName());
+    
     // Append the wrkspc argument to the end of this string
     public static final String CED_INVENTORY_URL = "http://ced.acc.jlab.org/inventory";
 
-    public HashSet<ModAnodeDataPoint> getModAnodeData(Date timestamp) throws IOException, ParseException {
+    
+    public HashSet<CavityDataPoint> getCavityData(Date timestamp) throws IOException, ParseException {
         HashMap<String, CryomoduleType> cmTypes = new CryomoduleService().getCryoModuleTypes(timestamp);
-        HashSet<ModAnodeDataPoint> data = new HashSet();
+        HashSet<CavityDataPoint> data = new HashSet();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
         String wrkspc = sdf.format(timestamp);
-        String cavityQuery = "?t=CryoCavity&p=ModAnode,Housed_by&out=json&ced=history&wrkspc=" + wrkspc;
+        String cavityQuery = "?t=CryoCavity&p=EPICSName,ModAnode,Housed_by&out=json&ced=history&wrkspc=" + wrkspc;
 
         LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cavityQuery);
         URL url = new URL(CED_INVENTORY_URL + cavityQuery);
@@ -59,6 +56,25 @@ public class ModAnodeService {
             JsonObject inventory = json.getJsonObject("Inventory");
             JsonArray elements = inventory.getJsonArray("elements");
             CryomoduleType cmType;
+
+            // Construct a map of ced names to epics names
+            String epicsName;
+            HashMap<String, String> name2Epics = new HashMap();
+            for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
+                String cavityName = element.getString("name");
+                JsonObject properties = element.getJsonObject("properties");
+                if (properties.containsKey("EPICSName")) {
+                    epicsName = properties.getString("EPICSName");
+                } else {
+                    LOGGER.log(Level.WARNING, "Cryocavity '{0}' is missing EPICSName in ced history '{1}'.  Cannot process request.",
+                            new Object[]{cavityName, wrkspc});
+                    throw new IOException("Cryocavity '" + cavityName + "' missing EPICSName in ced history '" + wrkspc);
+                }
+                name2Epics.put(cavityName, epicsName);
+            }
+            GsetService gs = new GsetService();
+            HashMap<String, BigDecimal> gsets = gs.getCavityGsetData(timestamp, name2Epics);
+
             for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
                 BigDecimal mav = new BigDecimal(0);
                 String cavityName = element.getString("name");
@@ -68,13 +84,21 @@ public class ModAnodeService {
                 if (properties.containsKey("ModAnode")) {
                     mav = mav.add(new BigDecimal(properties.getString("ModAnode")));
                 }
-                data.add(new ModAnodeDataPoint(timestamp, cavityName, cmType, mav));
+                if (properties.containsKey("EPICSName")) {
+                    epicsName = properties.getString("EPICSName");
+                } else {
+                    LOGGER.log(Level.WARNING, "Cryocavity '{0}' is missing EPICSName in ced history '{1}'.  Cannot process request.",
+                            new Object[]{cavityName, wrkspc});
+                    throw new IOException("Cryocavity '" + cavityName + "' missing EPICSName in ced history '" + wrkspc);
+                }
+                data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName)));
             }
         }
+
         return (data);
     }
 
-    public ModAnodeDataSpan getModAnodeDataSpan(Date start, Date end, String timeUnit) throws ParseException, IOException {
+    public CavityDataSpan getCavityDataSpan(Date start, Date end, String timeUnit) throws ParseException, IOException {
 
         long timeInt;
         switch (timeUnit) {
@@ -92,10 +116,10 @@ public class ModAnodeService {
         Date curr = sdf.parse(sdf.format(start));
         Date e = sdf.parse(sdf.format(end));
 
-        ModAnodeDataSpan span = new ModAnodeDataSpan();
+        CavityDataSpan span = new CavityDataSpan();
 
         while (curr.before(e)) {
-            span.put(curr, this.getModAnodeData(curr));
+            span.put(curr, this.getCavityData(curr));
             curr = new Date(curr.getTime() + timeInt);            // Add one day
         }
 

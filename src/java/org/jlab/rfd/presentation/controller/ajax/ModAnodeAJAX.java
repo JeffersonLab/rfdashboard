@@ -21,9 +21,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.jlab.rfd.business.service.ModAnodeService;
-import org.jlab.rfd.model.LinacName;
-import org.jlab.rfd.model.ModAnodeDataSpan;
+import org.jlab.rfd.business.service.CavityService;
+import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.presentation.util.DataFormatter;
 
 /**
@@ -86,15 +85,17 @@ public class ModAnodeAJAX extends HttpServlet {
             timeUnit = "week";
         }
         
-        ModAnodeService mas = new ModAnodeService();
-        ModAnodeDataSpan span;
+//        ModAnodeService mas = new ModAnodeService();
+//        ModAnodeDataSpan span;
+        CavityService cs = new CavityService();
+        CavityDataSpan span;
         try {
-            span = mas.getModAnodeDataSpan(start, end, timeUnit);
+            span = cs.getCavityDataSpan(start, end, timeUnit);
         } catch (ParseException ex) {
             throw new ServletException("Error in getting modAnode Data", ex);
         }
         
-        TreeMap<Date, HashMap<LinacName, BigDecimal>> factoredData;
+        TreeMap<Date, HashMap<String, BigDecimal>> factoredData;
         if ( factor.equals("linac") ) {
             factoredData = span.getModAnodeCountByLinac();
         } else {

@@ -16,11 +16,11 @@ import java.util.TreeMap;
  *
  * @author adamc
  */
-public class ModAnodeDataSpan {
+public class CavityDataSpan {
 
-    private final TreeMap<Date, HashSet<ModAnodeDataPoint>> dataSpan;
+    private final TreeMap<Date, HashSet<CavityDataPoint>> dataSpan;
 
-    public ModAnodeDataSpan() {
+    public CavityDataSpan() {
         dataSpan = new TreeMap();
     }
 
@@ -36,7 +36,7 @@ public class ModAnodeDataSpan {
      * @param dataPoint
      * @return
      */
-    public Object add(ModAnodeDataPoint dataPoint) {
+    public Object add(CavityDataPoint dataPoint) {
         if (!dataSpan.containsKey(dataPoint.getTimestamp())) {
             dataSpan.put(dataPoint.getTimestamp(), new HashSet());
         }
@@ -51,7 +51,7 @@ public class ModAnodeDataSpan {
      * @param dataSet
      * @return
      */
-    public Object put(Date timestamp, HashSet<ModAnodeDataPoint> dataSet) {
+    public Object put(Date timestamp, HashSet<CavityDataPoint> dataSet) {
 
         return dataSpan.put(timestamp, dataSet);
     }
@@ -59,27 +59,29 @@ public class ModAnodeDataSpan {
     /**
      * This returns a TreeMap keyed on date with values being the count of cavities with non-zero modAnodeVoltage by linac
      * on that date.
+     * 
+     * Converts the enum linac names to strings so that it can easily be handled by formatter classes
      * @return
      */
-    public TreeMap<Date, HashMap<LinacName, BigDecimal>> getModAnodeCountByLinac() {
-        TreeMap<Date, HashMap<LinacName, BigDecimal>> data = new TreeMap();
+    public TreeMap<Date, HashMap<String, BigDecimal>> getModAnodeCountByLinac() {
+        TreeMap<Date, HashMap<String, BigDecimal>> data = new TreeMap();
         
-        HashMap<LinacName, BigDecimal> byLinac;
+        HashMap<String, BigDecimal> byLinac;
         int total;
         for ( Date date : (Set<Date>) dataSpan.keySet() ) {
             byLinac = new HashMap();
-            byLinac.put(LinacName.Injector, new BigDecimal(0));
-            byLinac.put(LinacName.North, new BigDecimal(0));
-            byLinac.put(LinacName.South, new BigDecimal(0));
+            byLinac.put(LinacName.Injector.toString(), new BigDecimal(0));
+            byLinac.put(LinacName.North.toString(), new BigDecimal(0));
+            byLinac.put(LinacName.South.toString(), new BigDecimal(0));
             total = 0;
             
-            for (ModAnodeDataPoint maDP : (HashSet<ModAnodeDataPoint>) dataSpan.get(date)) {
-                if (maDP.getModAnodeVoltage().doubleValue() > 0) {
-                    byLinac.put(maDP.getLinacName(), byLinac.get(maDP.getLinacName()).add(new BigDecimal(1)));
+            for (CavityDataPoint cDP : (HashSet<CavityDataPoint>) dataSpan.get(date)) {
+                if (cDP.getModAnodeVoltage().doubleValue() > 0) {
+                    byLinac.put(cDP.getLinacName().toString(), byLinac.get(cDP.getLinacName().toString()).add(new BigDecimal(1)));
                     total++;
                 }
             }
-            byLinac.put(LinacName.Total, new BigDecimal(total));
+            byLinac.put(LinacName.Total.toString(), new BigDecimal(total));
             data.put(date, byLinac);
         }
         return data;
