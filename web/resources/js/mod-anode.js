@@ -10,7 +10,28 @@ jlab.mavUrl = "/RFDashboard/ajax/mod-anode";
 
 jlab.mod_anode = jlab.mod_anode || {};
 jlab.mod_anode.loadCharts = function (url, start, end, timeUnit) {
-    jlab.barChart.updateChart('mav-count-by-linac', url, start, end, timeUnit);
+    var settings1 = {
+        chartId: 'mav-count-by-linac',
+        url: url,
+        start: start,
+        end: end,
+        timeUnit: timeUnit,
+        colors: jlab.colors.linacs,
+        yLabel: "# Cavities w/ M.A.V."
+    };
+    jlab.barChart.updateChart(settings1);
+
+    var settings2 = {
+        chartId: 'mav-count-by-cmtype',
+        url: url,
+        start: start,
+        end: end,
+        timeUnit: timeUnit,
+        factor: "cmtype",
+        colors: jlab.colors.cmtypes,
+        yLabel: "# Cavities w/ M.A.V."
+    };
+    jlab.barChart.updateChart(settings2);
 };
 
 $(function () {

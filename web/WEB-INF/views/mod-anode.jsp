@@ -47,6 +47,7 @@
             </form>
         </div>
         <t:chart-widget placeholderId="mav-count-by-linac"></t:chart-widget>
+        <t:chart-widget placeholderId="mav-count-by-cmtype"></t:chart-widget>
         <script>
             var jlab = jlab || {};
             jlab.start = "${requestScope.start}";

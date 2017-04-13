@@ -6,10 +6,13 @@
 package org.jlab.rfd.model;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
@@ -18,7 +21,7 @@ import java.util.TreeMap;
  */
 public class CavityDataSpan {
 
-    private final TreeMap<Date, HashSet<CavityDataPoint>> dataSpan;
+    private final TreeMap<Date, Set<CavityDataPoint>> dataSpan;
 
     public CavityDataSpan() {
         dataSpan = new TreeMap();
@@ -51,7 +54,7 @@ public class CavityDataSpan {
      * @param dataSet
      * @return
      */
-    public Object put(Date timestamp, HashSet<CavityDataPoint> dataSet) {
+    public Object put(Date timestamp, Set<CavityDataPoint> dataSet) {
 
         return dataSpan.put(timestamp, dataSet);
     }
@@ -63,27 +66,149 @@ public class CavityDataSpan {
      * Converts the enum linac names to strings so that it can easily be handled by formatter classes
      * @return
      */
-    public TreeMap<Date, HashMap<String, BigDecimal>> getModAnodeCountByLinac() {
-        TreeMap<Date, HashMap<String, BigDecimal>> data = new TreeMap();
+    public SortedMap<Date, SortedMap<String, BigDecimal>> getModAnodeCountByLinac() {
+        SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
         
-        HashMap<String, BigDecimal> byLinac;
+        SortedMap<String, BigDecimal> byLinac;
         int total;
+        int unknown;
         for ( Date date : (Set<Date>) dataSpan.keySet() ) {
-            byLinac = new HashMap();
+            byLinac = new TreeMap();
             byLinac.put(LinacName.Injector.toString(), new BigDecimal(0));
             byLinac.put(LinacName.North.toString(), new BigDecimal(0));
             byLinac.put(LinacName.South.toString(), new BigDecimal(0));
             total = 0;
+            unknown = 0;
             
-            for (CavityDataPoint cDP : (HashSet<CavityDataPoint>) dataSpan.get(date)) {
-                if (cDP.getModAnodeVoltage().doubleValue() > 0) {
+            for (CavityDataPoint cDP : (Set<CavityDataPoint>) dataSpan.get(date)) {
+                if (cDP.getModAnodeVoltage() == null) {
+                    unknown++;
+                } else if (cDP.getModAnodeVoltage().doubleValue() > 0) {
+                    byLinac.put(cDP.getLinacName().toString(), byLinac.get(cDP.getLinacName().toString()).add(new BigDecimal(1)));
+                    total++;
+                }
+
+            }
+            byLinac.put(LinacName.Total.toString(), new BigDecimal(total));
+            byLinac.put("Unknown", new BigDecimal(unknown));
+            data.put(date, byLinac);
+        }
+        return data;
+    }
+    
+        public SortedMap<Date, SortedMap<String, BigDecimal>> getModAnodeCountByCMType() {
+        SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
+        
+        SortedMap<String, BigDecimal> byCMType;
+        int total;
+        int unknown;
+        String CMType;
+
+        for ( Date date : (Set<Date>) dataSpan.keySet() ) {
+            byCMType = new TreeMap();
+            byCMType.put(CryomoduleType.C100.toString(), new BigDecimal(0));
+            byCMType.put(CryomoduleType.C50.toString(), new BigDecimal(0));
+            byCMType.put(CryomoduleType.C25.toString(), new BigDecimal(0));
+            total = 0;
+            unknown = 0;
+            
+            for (CavityDataPoint cDP : (Set<CavityDataPoint>) dataSpan.get(date)) {
+                
+                if (cDP.getModAnodeVoltage() == null) {
+                    unknown++;
+                } else if (cDP.getModAnodeVoltage().doubleValue() > 0) {
+                    if (cDP.getCryomoduleType().equals(CryomoduleType.C100)
+                            || cDP.getCryomoduleType().equals(CryomoduleType.C50)
+                            || cDP.getCryomoduleType().equals(CryomoduleType.C25)) {   
+                    CMType = cDP.getCryomoduleType().toString();
+                    byCMType.put(CMType, byCMType.get(CMType).add(new BigDecimal(1)));
+                    total++;
+                    }
+                }
+
+            }
+            byCMType.put(LinacName.Total.toString(), new BigDecimal(total));
+            byCMType.put("Unknown", new BigDecimal(unknown));
+            data.put(date, byCMType);
+        }
+        return data;
+    }
+
+    public SortedMap<Date, SortedMap<String, BigDecimal>> getBypassedCountByCMType() {
+
+        // We want C25, C50, C100, Total, Unknown.  Compare as strings unless both are C*.  Then compare the number.
+        SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
+
+        SortedMap<String, BigDecimal> byCMType;
+        int total;
+        int unknown;
+        String CMType;
+
+        for (Date date : (Set<Date>) dataSpan.keySet()) {
+            byCMType = new TreeMap(new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    if (o1.startsWith("C)") && o2.startsWith("C")) {
+                        int i1 = Integer.parseInt(o1.substring(1));
+                        int i2 = Integer.parseInt(o2.substring(1));
+                        return i1 - i2;
+                    }
+                    return o1.compareTo(o2);
+                }
+            });
+            byCMType.put(CryomoduleType.C25.toString(), new BigDecimal(0));
+            byCMType.put(CryomoduleType.C50.toString(), new BigDecimal(0));
+            byCMType.put(CryomoduleType.C100.toString(), new BigDecimal(0));
+            total = 0;
+            unknown = 0;
+
+            for (CavityDataPoint cDP : (Set<CavityDataPoint>) dataSpan.get(date)) {
+                if (cDP.getGset() == null) {
+                    unknown++;
+                } else if (cDP.getGset().doubleValue() == 0) {
+                    if (cDP.getCryomoduleType().equals(CryomoduleType.C100)
+                            || cDP.getCryomoduleType().equals(CryomoduleType.C50)
+                            || cDP.getCryomoduleType().equals(CryomoduleType.C25)) {
+                        CMType = cDP.getCryomoduleType().toString();
+                        byCMType.put(CMType, byCMType.get(CMType).add(new BigDecimal(1)));
+                        total++;
+                    }
+                }
+            }
+            byCMType.put(LinacName.Total.toString(), new BigDecimal(total));
+            byCMType.put("Unknown", new BigDecimal(unknown));
+            data.put(date, byCMType);
+        }
+        return data;
+    }
+
+    public SortedMap<Date, SortedMap<String, BigDecimal>> getBypassedCountByLinac() {
+        SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
+
+        SortedMap<String, BigDecimal> byLinac;
+        int total;
+        int unknown;
+        for ( Date date : (Set<Date>) dataSpan.keySet() ) {
+            byLinac = new TreeMap();
+            byLinac.put(LinacName.Injector.toString(), new BigDecimal(0));
+            byLinac.put(LinacName.North.toString(), new BigDecimal(0));
+            byLinac.put(LinacName.South.toString(), new BigDecimal(0));
+            total = 0;
+            unknown = 0;
+
+            for (CavityDataPoint cDP : (Set<CavityDataPoint>) dataSpan.get(date)) {
+                if (cDP.getGset() == null) {
+                    unknown++;
+                } else if (cDP.getGset().doubleValue() == 0) {
                     byLinac.put(cDP.getLinacName().toString(), byLinac.get(cDP.getLinacName().toString()).add(new BigDecimal(1)));
                     total++;
                 }
             }
             byLinac.put(LinacName.Total.toString(), new BigDecimal(total));
             data.put(date, byLinac);
+            byLinac.put("Unknown", new BigDecimal(unknown));
         }
         return data;
+       
     }
 }

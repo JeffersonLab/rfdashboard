@@ -25,15 +25,63 @@ jlab.barChart.addLegend = function (chartId, colors, labels) {
     $("#" +chartId + "-legend-panel").prepend(legendString);
 };
 
-jlab.barChart.updateChart = function (chartId, url, start, end, timeUnit, factorBy) {
+jlab.barChart.updateChart = function (settings) {
+
+    var exitFunc = function (msg) {
+        $("#" + chartId).prepend(msg);
+          $('#' + chartId + "-loader").hide();
+        throw msg;
+        console.log(msg);
+        exit(1);
+    };
+
+    // Only some of these are required
+    var chartId, url, start, end, timeUnit, colors, factor, yLabel;
+    if (typeof settings === "undefined") {
+        exitFunc("Error: Settings object required");
+    }
+    
+    // Required
+    if ( settings.chartId === "undefined") {
+        exitFunc("Error: chartId required.");
+    } else {
+        chartId = settings.chartId;
+    }
+    if ( settings.url === "undefined") {
+        exitFunc("Error: url required.");
+    } else {
+        url = settings.url;
+    }
+    if ( settings.factor === "undefined") {
+        exitFunc("Error: factor required.");
+    } else {
+        factor = settings.factor;
+    }
+    if ( ! $.isArray(settings.colors)) {
+        exitFunc("Error: Incorrect or unsupplied color scheme");
+    } else {
+        colors = settings.colors;
+    }
+
+    // Optional
+    if ( typeof settings.start !== 'undefined') {
+        start = settings.start;
+    }
+    if ( typeof settings.end !== 'undefined') {
+        end = settings.end;
+    }
+    if ( typeof yLabel === 'undefined') {
+        yLabel = "Value";
+    }
+
     console.log("In jlab.barChart.update.Chart");
     console.log("url: " + url);
     console.log("chartId: " + chartId);
     console.log("start: " + start);
     console.log("end: " + end);
     console.log("timeUnit: " + timeUnit);
-    console.log("factorBy: " + factorBy);
-    
+    console.log("colors: " + colors);
+    console.log("yLabel: " + yLabel);
     
     var plotData = [];
     $.ajax({
@@ -43,7 +91,7 @@ jlab.barChart.updateChart = function (chartId, url, start, end, timeUnit, factor
         complete: function () {
             $('#' + chartId + "-loader").hide();
         },
-        url: url + "?start=" + start + "%end=" + end,
+        url: url + "?start=" + start + "&end=" + end + "&factor=" + factor,
         data:
                 {
                     start: start,
@@ -72,7 +120,7 @@ jlab.barChart.updateChart = function (chartId, url, start, end, timeUnit, factor
             var lineWidth = 1;
             var fill = true;
             var show = true;
-            var fillColor = ["#AA4643", "#89A54E", "#4572A7", "#80699B"];
+//            var fillColor = ["#AA4643", "#89A54E", "#4572A7", "#80699B", "#2F4F4F"];
             var options = {
                 xaxis: {
                     mode: "time",
@@ -83,7 +131,7 @@ jlab.barChart.updateChart = function (chartId, url, start, end, timeUnit, factor
                     axisLabelPadding: 5
                 },
                 yaxis: {
-                    axisLabel: 'Value',
+                    axisLabel: yLabel,
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
                     axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif',
@@ -104,9 +152,10 @@ jlab.barChart.updateChart = function (chartId, url, start, end, timeUnit, factor
                 }
             };
 
-            var tickSize;
-            var ticks = [];
-            if (jsonData.data[0].length <= 5) {
+            if (jsonData.data[0].length <= 15) {
+
+                var tickSize;
+                var ticks = [];
                 tickSize = [7, "day"];
                 if (timeUnit === "day") {
                     tickSize = [1, "day"];
@@ -114,16 +163,19 @@ jlab.barChart.updateChart = function (chartId, url, start, end, timeUnit, factor
                     tickSize = [1, "month"];
                 }
 
-                options.xaxis.tickSize = tickSize;
-
                 // Use the sample dates as the tick locations if the numbers are small
                 for (i = 0; i < jsonData.data[0].length; i++) {
                     ticks[i] = jsonData.data[0][i][0];
                 }
 
+                console.log("  tickSize: " + tickSize);
+                console.log("  ticks:" + ticks);
+                options.xaxis.tickSize = tickSize;
                 options.xaxis.ticks = ticks;
 
             }
+
+
 
             // Days / number of bars * (1-(%gap_between_datapoints/100))
             var numSeries = jsonData.data.length;
@@ -133,15 +185,18 @@ jlab.barChart.updateChart = function (chartId, url, start, end, timeUnit, factor
                 plotData[i] = {
                     label: jsonData.labels[i],
                     data: jsonData.data[i],
-                    color: fillColor[i],
                     bars: {
                         order: i + 1,
                         show: show,
                         lineWidth: lineWidth,
                         fill: fill,
-                        fillColor: fillColor[i]
                     }
                 };
+                if (typeof (colors) !== "undefined") {
+                    plotData[i].color = colors[i];
+                    plotData[i].bars.fillColor = colors[i];
+                }
+
                 if (barWidth !== Number.MAX_SAFE_INTEGER) {
                     plotData[i].bars.barWidth = barWidth;
 
@@ -152,7 +207,7 @@ jlab.barChart.updateChart = function (chartId, url, start, end, timeUnit, factor
             $.plot($("#"+chartId), plotData, options);
 
             // Add a custom legend off to the side
-            jlab.barChart.addLegend(chartId, fillColor, jsonData.labels);
+            jlab.barChart.addLegend(chartId, colors, jsonData.labels);
 
             // These prev_* variables track whether or not the plothover event is for the same bar -- removes the "flicker" effect.
             var prev_point = null;

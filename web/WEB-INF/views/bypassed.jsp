@@ -8,7 +8,7 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<c:set var="title" value="Mod Anode Summary" />
+<c:set var="title" value="Bypassed Cavity Summary" />
 <t:page title="${title}"> 
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/flot-barchart.css"/>              
@@ -50,6 +50,7 @@
             </form>
         </div>
         <t:chart-widget placeholderId="bypassed-count-by-linac"></t:chart-widget>
+        <t:chart-widget placeholderId="bypassed-count-by-cmtype"></t:chart-widget>
         <script>
             var jlab = jlab || {};
             jlab.start = "${requestScope.start}";

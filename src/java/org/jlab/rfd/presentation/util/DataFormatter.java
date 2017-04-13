@@ -11,7 +11,9 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 import javax.json.Json;
@@ -32,73 +34,20 @@ public class DataFormatter {
      * This function is designed to format a "By Linac", time series data
      * structure as in JSON format.
      *
-     * @param data A TreeMap keyed on data, with the value being a HashMap keyed
+     * @param data A SortedMap keyed on data, with the value being a Map keyed
      * on LinacName, valued on some BigDecimal
      * @return A json object structured for direct consumption by Flot as a data
      * object {series1: [[1,2],...], series2:...}
      * @throws java.text.ParseException
      * @throws java.io.IOException
      */
-//    public static JsonObject toJson(TreeMap<Date, HashMap<LinacName, BigDecimal>> data) throws ParseException, IOException {
-//
-//        // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
-//        HashMap<LinacName, BigDecimal> temp;
-//        JsonArrayBuilder iBuilder = Json.createArrayBuilder();
-//        JsonArrayBuilder nBuilder = Json.createArrayBuilder();
-//        JsonArrayBuilder sBuilder = Json.createArrayBuilder();
-//        JsonArrayBuilder tBuilder = Json.createArrayBuilder();
-//
-//        for (Date curr : (Set<Date>) data.keySet()) {
-//            temp = data.get(curr);
-//            iBuilder.add(Json.createArrayBuilder()
-//                    .add(curr.getTime())
-//                    .add(temp.get(LinacName.Injector)));
-//
-//            nBuilder.add(Json.createArrayBuilder()
-//                    .add(curr.getTime())
-//                    .add(temp.get(LinacName.North)));
-//
-//            sBuilder.add(Json.createArrayBuilder()
-//                    .add(curr.getTime())
-//                    .add(temp.get(LinacName.South)));
-//
-//            tBuilder.add(Json.createArrayBuilder()
-//                    .add(curr.getTime())
-//                    .add(temp.get(LinacName.Total)));
-//
-//            // Add one day
-//            curr = new Date(curr.getTime() + 60 * 60 * 24 * 1000L);
-//        }
-//
-//        JsonArray iSeries = iBuilder.build();
-//        JsonArray nSeries = nBuilder.build();
-//        JsonArray sSeries = sBuilder.build();
-//        JsonArray tSeries = tBuilder.build();
-//
-//        // Make sure to keep the order straight.
-//        JsonObject chartData = Json.createObjectBuilder()
-//                .add("labels", Json.createArrayBuilder()
-//                        .add("Injector")
-//                        .add("North")
-//                        .add("South")
-//                        .add("Total")
-//                        .build())
-//                .add("data", Json.createArrayBuilder()
-//                        .add(iSeries)
-//                        .add(nSeries)
-//                        .add(sSeries)
-//                        .add(tSeries)
-//                        .build())
-//                .build();
-//
-//        return chartData;
-//    }
 
-    public static JsonObject toJson(TreeMap<Date, HashMap<String, BigDecimal>> data) throws ParseException, IOException {
+    public static JsonObject toJson(SortedMap<Date, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
 
         // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
-        HashMap<String, BigDecimal> temp;
-        TreeMap<String, JsonArrayBuilder> seriesBuilders = new TreeMap();
+        Map<String, BigDecimal> temp;
+        // The tree map keeps the series sorted in a reliable fashion.  Needed to coordinate the alignment of labels and data... well maybe not...
+        SortedMap<String, JsonArrayBuilder> seriesBuilders = new TreeMap<>();
 
         for (Date curr : (Set<Date>) data.keySet()) {
             temp = data.get(curr);

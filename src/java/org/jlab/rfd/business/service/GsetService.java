@@ -13,7 +13,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap; 
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
@@ -31,13 +33,13 @@ public class GsetService {
     public static final String MYSAMPLER_URL = "http://myawebtest.acc.jlab.org/mySampler/data";
     public static final String CED_INVENTORY_URL = "http://ced.acc.jlab.org/inventory";
 
-    public HashMap<String, BigDecimal> getCavityGsetData(Date timestamp, HashMap<String, String> name2Epics) throws IOException, ParseException {
+    public Map<String, BigDecimal> getCavityGsetData(Date timestamp, Map<String, String> name2Epics) throws IOException, ParseException {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
-        HashMap<String, BigDecimal> gsetData = new HashMap();
+        Map<String, BigDecimal> gsetData = new HashMap<>();
         
         // Create a reverse lookup map.  name2Epics should be a 1:1 map
-        HashMap<String, String> epics2Name = new HashMap();
+        Map<String, String> epics2Name = new HashMap<>();
         for( String name : (Set<String>) name2Epics.keySet()) {
             if (epics2Name.put(name2Epics.get(name), name) != null ) {
                 throw new IllegalArgumentException("Found cavity to gset map was not 1:1");
@@ -69,43 +71,18 @@ public class GsetService {
             
             for(JsonObject value: values.getValuesAs(JsonObject.class)) {
                 String epicsName = ((String) value.keySet().toArray()[0]).substring(0, 4);
-                BigDecimal gset = new BigDecimal(value.getString(epicsName + "GSET"));
+                BigDecimal gset = null;
+                if (! value.getString(epicsName + "GSET").startsWith("<") ) {
+                    gset = new BigDecimal(value.getString(epicsName + "GSET"));
+                }
+
+                LOGGER.log(Level.FINEST, "GSETService Processing value: timestamp{0}, epicsName: {1}, gset: {2}",
+                        new Object[] {sdf.format(timestamp), epicsName, gset});
+
                 gsetData.put(epics2Name.get(epicsName), gset);
-                LOGGER.log(Level.FINEST, "GSETService Processing value: epicsName: {0}, gset: {1}", new Object[] {epicsName, gset});
             }
         }
         
         return gsetData;
     }
-
-//    public HashMap<String, String> getCavityEpicsNames(Date timestamp) throws IOException {
-//
-//        HashMap <String, String> cavityEpicsNames = new HashMap();
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
-//        String wrkspc = sdf.format(timestamp);
-//        String cavityQuery = "?t=CryoCavity&p=EPICSName&out=json&ced=history&wrkspc=" + wrkspc;
-//
-//        LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cavityQuery);
-//        URL url = new URL(CED_INVENTORY_URL + cavityQuery);
-//        InputStream in = url.openStream();
-//        try (JsonReader reader = Json.createReader(in)) {
-//            JsonObject json = reader.readObject();
-//            String status = json.getString("stat");
-//            if (!"ok".equals(status)) {
-//                throw new IOException("unable to lookup Cavity Data from CED: response stat: " + status);
-//            }
-//            JsonObject inventory = json.getJsonObject("Inventory");
-//            JsonArray elements = inventory.getJsonArray("elements");
-//            for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
-//                String name = element.getString("name");
-//                JsonObject properties = element.getJsonObject("properties");
-//                if (properties.containsKey("EPICSName")) {
-//                    cavityEpicsNames.put(name, properties.getString("EPICSName"));
-//                } else {
-//                    throw new IOException("Element '" + name + "' is missing EPICSName properties.  Can't service request.");
-//                }
-//            }
-//        }
-//        return cavityEpicsNames;
-//    }
 }

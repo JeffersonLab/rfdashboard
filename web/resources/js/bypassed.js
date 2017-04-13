@@ -10,7 +10,31 @@ jlab.bypassedUrl = "/RFDashboard/ajax/bypassed";
 
 jlab.bypassed = jlab.bypassed || {};
 jlab.bypassed.loadCharts = function (url, start, end, timeUnit) {
-    jlab.barChart.updateChart('bypassed-count-by-linac', url, start, end, timeUnit);
+    
+        var settings1 = {
+        chartId: 'bypassed-count-by-linac',
+        url: url,
+        start: start,
+        end: end,
+        timeUnit: timeUnit,
+        colors: jlab.colors.linacs,
+        yLabel: "# Cavities Bypassed"
+    };
+    jlab.barChart.updateChart(settings1);
+
+    var settings2 = {
+        chartId: 'bypassed-count-by-cmtype',
+        url: url,
+        start: start,
+        end: end,
+        timeUnit: timeUnit,
+        factor: "cmtype",
+        colors: jlab.colors.cmtypes,
+        yLabel: "# Cavities Bypassed"
+    };
+    jlab.barChart.updateChart(settings2);
+    
+    //jlab.barChart.updateChart('bypassed-count-by-linac', url, start, end, timeUnit, jlab.colors.linacs, "# Cavities Bypassed");
 };
 
 $(function () {

@@ -13,8 +13,8 @@
 <%@attribute name="title"%>
 <%@attribute name="stylesheets" fragment="true"%>
 <%@attribute name="scripts" fragment="true"%>
-
-<%-- any content can be specified here e.g.: --%>
+<c:set var="currentPath" scope="request" value="${requestScope['javax.servlet.forward.servlet_path']}"/>
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -36,9 +36,9 @@
                 <h1><span id="page-header-logo"></span><span id="page-header-text"><c:out value="${initParam.appName}" /></span></h1>
                 <nav id="primary-nav">
                     <ul>
-                        <li${'/overview' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/overview">Overview</a></li>
-                        <li${'/mod-anode' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/mov-anode">Mod Anode</a></li>
-                        <li${'/bypassed' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/mov-anode">Bypassed</a></li>
+                        <li ${'/overview' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/overview">Overview</a></li>
+                        <li ${'/mod-anode' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/mod-anode">Mod Anode</a></li>
+                        <li ${'/bypassed' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/bypassed">Bypassed</a></li>
                     </ul>
                 </nav>
             </header>

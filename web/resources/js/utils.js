@@ -6,6 +6,12 @@
 
 var jlab = jlab || {};
 
+jlab.colors = jlab.colors || {};
+// Inj, North, South, Total, Unknown
+jlab.colors.linacs = ["#FF0000", "#006400", "#273BE7", "#333333", "#ECAF2F"];
+// C25, C50, C100, Total, Unknown
+jlab.colors.cmtypes = ["#FFCE00", "#0375B4", "#007849", "#333333", "#ECAF2F"];
+
 // This assumes that you are passing an array of flot data series (a 3d array in all).  It returns the smallest difference
 // between any two points in a single series.
 jlab.getMinDataWidth = function (data) {

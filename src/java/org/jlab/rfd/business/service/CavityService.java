@@ -11,9 +11,13 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
@@ -31,71 +35,84 @@ import org.jlab.rfd.model.CryomoduleType;
 public class CavityService {
 
     private static final Logger LOGGER = Logger.getLogger(CavityService.class.getName());
-    
     // Append the wrkspc argument to the end of this string
     public static final String CED_INVENTORY_URL = "http://ced.acc.jlab.org/inventory";
 
-    
-    public HashSet<CavityDataPoint> getCavityData(Date timestamp) throws IOException, ParseException {
-        HashMap<String, CryomoduleType> cmTypes = new CryomoduleService().getCryoModuleTypes(timestamp);
-        HashSet<CavityDataPoint> data = new HashSet();
+    // Caches getCavityData output.  The cached HashSets should be inserted with Collecitons.unmodifiableMap() to be safe.
+    private static final ConcurrentHashMap<String, Set<CavityDataPoint>> CAVITY_CACHE = new ConcurrentHashMap<>();
+
+    public Set<CavityDataPoint> getCavityData(Date timestamp) throws IOException, ParseException {
+        Map<String, CryomoduleType> cmTypes = new CryomoduleService().getCryoModuleTypes(timestamp);
+        Set<CavityDataPoint> data = new HashSet();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
         String wrkspc = sdf.format(timestamp);
         String cavityQuery = "?t=CryoCavity&p=EPICSName,ModAnode,Housed_by&out=json&ced=history&wrkspc=" + wrkspc;
 
-        LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cavityQuery);
-        URL url = new URL(CED_INVENTORY_URL + cavityQuery);
-        InputStream in = url.openStream();
-        try (JsonReader reader = Json.createReader(in)) {
-            JsonObject json = reader.readObject();
-            String status = json.getString("stat");
-            if (!"ok".equals(status)) {
-                throw new IOException("unable to lookup Cavity Data from CED: response stat: " + status);
-            }
-            JsonObject inventory = json.getJsonObject("Inventory");
-            JsonArray elements = inventory.getJsonArray("elements");
-            CryomoduleType cmType;
-
-            // Construct a map of ced names to epics names
-            String epicsName;
-            HashMap<String, String> name2Epics = new HashMap();
-            for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
-                String cavityName = element.getString("name");
-                JsonObject properties = element.getJsonObject("properties");
-                if (properties.containsKey("EPICSName")) {
-                    epicsName = properties.getString("EPICSName");
-                } else {
-                    LOGGER.log(Level.WARNING, "Cryocavity '{0}' is missing EPICSName in ced history '{1}'.  Cannot process request.",
-                            new Object[]{cavityName, wrkspc});
-                    throw new IOException("Cryocavity '" + cavityName + "' missing EPICSName in ced history '" + wrkspc);
+        // Chech the cache.  If not there, run the query, build the results, check that somebody else hasn't already inserted this
+        // into the cache, then add the query result to the cache.
+        if (CAVITY_CACHE.containsKey(cavityQuery)) {
+            LOGGER.log(Level.FINEST, "HIT --- CAVITY_CACHE - {0}", cavityQuery);
+            return CAVITY_CACHE.get(cavityQuery);
+        } else {
+            LOGGER.log(Level.FINEST, "MISS --- CAVITY_CACHE - {0}", cavityQuery);
+            
+            LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cavityQuery);
+            URL url = new URL(CED_INVENTORY_URL + cavityQuery);
+            InputStream in = url.openStream();
+            try (JsonReader reader = Json.createReader(in)) {
+                JsonObject json = reader.readObject();
+                String status = json.getString("stat");
+                if (!"ok".equals(status)) {
+                    throw new IOException("unable to lookup Cavity Data from CED: response stat: " + status);
                 }
-                name2Epics.put(cavityName, epicsName);
-            }
-            GsetService gs = new GsetService();
-            HashMap<String, BigDecimal> gsets = gs.getCavityGsetData(timestamp, name2Epics);
+                JsonObject inventory = json.getJsonObject("Inventory");
+                JsonArray elements = inventory.getJsonArray("elements");
+                CryomoduleType cmType;
 
-            for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
-                BigDecimal mav = new BigDecimal(0);
-                String cavityName = element.getString("name");
-                cmType = cmTypes.get(cavityName.substring(0, 4));
+                // Construct a map of ced names to epics names
+                String epicsName;
+                Map<String, String> name2Epics = new HashMap<>();
+                for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
+                    String cavityName = element.getString("name");
+                    JsonObject properties = element.getJsonObject("properties");
+                    if (properties.containsKey("EPICSName")) {
+                        epicsName = properties.getString("EPICSName");
+                    } else {
+                        LOGGER.log(Level.WARNING, "Cryocavity '{0}' is missing EPICSName in ced history '{1}'.  Cannot process request.",
+                                new Object[]{cavityName, wrkspc});
+                        throw new IOException("Cryocavity '" + cavityName + "' missing EPICSName in ced history '" + wrkspc);
+                    }
+                    name2Epics.put(cavityName, epicsName);
+                }
+                GsetService gs = new GsetService();
+                Map<String, BigDecimal> gsets = gs.getCavityGsetData(timestamp, name2Epics);
 
-                JsonObject properties = element.getJsonObject("properties");
-                if (properties.containsKey("ModAnode")) {
-                    mav = mav.add(new BigDecimal(properties.getString("ModAnode")));
+                for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
+                    BigDecimal mav = new BigDecimal(0);
+                    String cavityName = element.getString("name");
+                    cmType = cmTypes.get(cavityName.substring(0, 4));
+
+                    JsonObject properties = element.getJsonObject("properties");
+                    if (properties.containsKey("ModAnode")) {
+                        mav = mav.add(new BigDecimal(properties.getString("ModAnode")));
+                    }
+                    if (properties.containsKey("EPICSName")) {
+                        epicsName = properties.getString("EPICSName");
+                    } else {
+                        LOGGER.log(Level.WARNING, "Cryocavity '{0}' is missing EPICSName in ced history '{1}'.  Cannot process request.",
+                                new Object[]{cavityName, wrkspc});
+                        throw new IOException("Cryocavity '" + cavityName + "' missing EPICSName in ced history '" + wrkspc);
+                    }
+                    data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName)));
                 }
-                if (properties.containsKey("EPICSName")) {
-                    epicsName = properties.getString("EPICSName");
-                } else {
-                    LOGGER.log(Level.WARNING, "Cryocavity '{0}' is missing EPICSName in ced history '{1}'.  Cannot process request.",
-                            new Object[]{cavityName, wrkspc});
-                    throw new IOException("Cryocavity '" + cavityName + "' missing EPICSName in ced history '" + wrkspc);
-                }
-                data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName)));
             }
+
+            // In case somebody has already inserted it use putIfAbsent.
+            CAVITY_CACHE.putIfAbsent(cavityQuery, Collections.unmodifiableSet(data));
+            return CAVITY_CACHE.get(cavityQuery);
         }
 
-        return (data);
     }
 
     public CavityDataSpan getCavityDataSpan(Date start, Date end, String timeUnit) throws ParseException, IOException {
@@ -120,7 +137,7 @@ public class CavityService {
 
         while (curr.before(e)) {
             span.put(curr, this.getCavityData(curr));
-            curr = new Date(curr.getTime() + timeInt);            // Add one day
+            curr = new Date(curr.getTime() + timeInt);            // Increment by time interval
         }
 
         return span;

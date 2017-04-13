@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author adamc
  */
-@WebServlet(name = "Bypassed", urlPatterns = {"/Bypassed"})
+@WebServlet(name = "Bypassed", urlPatterns = {"/bypassed"})
 public class Bypassed extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(Bypassed.class.getName());

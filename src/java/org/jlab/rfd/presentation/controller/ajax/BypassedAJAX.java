@@ -11,10 +11,8 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.JsonObject;
@@ -31,9 +29,9 @@ import org.jlab.rfd.presentation.util.DataFormatter;
  *
  * @author adamc
  */
-@WebServlet(name = "ModAnodeAJAX", urlPatterns = {"/ajax/mod-anode"})
-public class ModAnodeAJAX extends HttpServlet {
-    public static final Logger LOGGER = Logger.getLogger(ModAnodeAJAX.class.getName());
+@WebServlet(name = "BypassedAJAX", urlPatterns = {"/ajax/bypassed"})
+public class BypassedAJAX extends HttpServlet {
+    public static final Logger LOGGER = Logger.getLogger(BypassedAJAX.class.getName());
     
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -92,16 +90,16 @@ public class ModAnodeAJAX extends HttpServlet {
         try {
             span = cs.getCavityDataSpan(start, end, timeUnit);
         } catch (ParseException ex) {
-            throw new ServletException("Error in getting modAnode Data", ex);
+            throw new ServletException("Error in Bypassed Data", ex);
         }
         
         SortedMap<Date, SortedMap<String, BigDecimal>> factoredData;
         if ( factor.equals("linac") ) {
-            factoredData = span.getModAnodeCountByLinac();
-        } else if ( factor.equals("cmtype") ){
-            factoredData = span.getModAnodeCountByCMType();
-        } else {
-            factoredData = span.getModAnodeCountByLinac();
+            factoredData = span.getBypassedCountByLinac();
+        } else if ( factor.equals("cmtype") ) {
+            factoredData = span.getBypassedCountByCMType();
+        }else {
+            factoredData = span.getBypassedCountByLinac();
         }
 
         PrintWriter pw = response.getWriter();
