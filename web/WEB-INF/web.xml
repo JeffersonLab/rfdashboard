@@ -16,6 +16,18 @@
         <param-name>cdnContextPath</param-name>
         <param-value>//cdn.acc.jlab.org</param-value>
     </context-param>
+    <context-param>
+        <param-name>resourceVersionNumber</param-name>
+        <param-value>1</param-value>
+    </context-param>
+    <context-param>
+        <param-name>releaseNumber</param-name>
+        <param-value>0.1</param-value>
+    </context-param>
+    <context-param>
+        <param-name>releaseDate</param-name>
+        <param-value>20 April 2017</param-value>
+    </context-param>
     <session-config>
         <session-timeout>
             30

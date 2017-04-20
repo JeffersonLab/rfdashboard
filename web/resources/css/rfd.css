@@ -17,6 +17,10 @@ body {
     border-radius: 8px 8px 8px 8px;
     background-color: white;
 }
+#version-info {
+    font-size: x-small;
+    text-align: right;
+}
 #content-liner {
     border: 1px solid black;
     margin: 8px;
