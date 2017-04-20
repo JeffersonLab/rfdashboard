@@ -39,6 +39,7 @@
                         <li ${'/overview' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/overview">Overview</a></li>
                         <li ${'/mod-anode' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/mod-anode">Mod Anode</a></li>
                         <li ${'/bypassed' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/bypassed">Bypassed</a></li>
+                        <li ${'/energy-reach' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/energy-reach">Energy Reach</a></li>
                     </ul>
                 </nav>
             </header>

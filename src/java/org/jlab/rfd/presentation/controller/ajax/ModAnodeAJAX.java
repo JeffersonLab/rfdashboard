@@ -11,10 +11,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.JsonObject;
@@ -107,7 +104,7 @@ public class ModAnodeAJAX extends HttpServlet {
         PrintWriter pw = response.getWriter();
         try {
             if (out.equals("json")) {
-                JsonObject json = DataFormatter.toJson(factoredData);
+                JsonObject json = DataFormatter.toJsonFromDateMap(factoredData);
                 response.setContentType("application/json");
                 pw.write(json.toString());
             } else {

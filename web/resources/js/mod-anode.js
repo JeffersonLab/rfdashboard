@@ -17,7 +17,14 @@ jlab.mod_anode.loadCharts = function (url, start, end, timeUnit) {
         end: end,
         timeUnit: timeUnit,
         colors: jlab.colors.linacs,
-        yLabel: "# Cavities w/ M.A.V."
+        yLabel: "# Cavities w/ M.A.V.",
+        title: "Cavities With Mod Anode Voltage By Linac",
+        timeMode: true,
+        ajaxData: {
+            start: start,
+            end: end,
+            factor: "linac"
+        }
     };
     jlab.barChart.updateChart(settings1);
 
@@ -27,9 +34,15 @@ jlab.mod_anode.loadCharts = function (url, start, end, timeUnit) {
         start: start,
         end: end,
         timeUnit: timeUnit,
-        factor: "cmtype",
         colors: jlab.colors.cmtypes,
-        yLabel: "# Cavities w/ M.A.V."
+        yLabel: "# Cavities w/ M.A.V.",
+        title: "Cavities With Mod Anode Voltage By Module Type",
+        timeMode: true,
+        ajaxData: {
+            start: start,
+            end: end,
+            factor: "cmtype"
+        }
     };
     jlab.barChart.updateChart(settings2);
 };

@@ -8,19 +8,15 @@ package org.jlab.rfd.presentation.util;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
-import org.jlab.rfd.model.LinacName;
 
 /**
  *
@@ -42,7 +38,7 @@ public class DataFormatter {
      * @throws java.io.IOException
      */
 
-    public static JsonObject toJson(SortedMap<Date, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
+    public static JsonObject toJsonFromDateMap(SortedMap<Date, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
 
         // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
         Map<String, BigDecimal> temp;
@@ -51,22 +47,19 @@ public class DataFormatter {
 
         for (Date curr : (Set<Date>) data.keySet()) {
             temp = data.get(curr);
-
             for (String seriesName : data.get(curr).keySet()) {
                 if (!seriesBuilders.containsKey(seriesName)) {
                     seriesBuilders.put(seriesName, Json.createArrayBuilder());
                 }
-
                 seriesBuilders.get(seriesName)
                         .add(Json.createArrayBuilder()
                                 .add(curr.getTime())
-                                .add(temp.get(seriesName)));
+                                .add((temp.get(seriesName) != null) ? temp.get(seriesName).toString() : "null"));
             }
         }
 
         JsonArrayBuilder labelBuilder = Json.createArrayBuilder();
         JsonArrayBuilder dataBuilder = Json.createArrayBuilder();
-        
         for (String seriesName : seriesBuilders.keySet()) {
             labelBuilder.add(seriesName);
             dataBuilder.add(seriesBuilders.get(seriesName).build());
@@ -79,4 +72,39 @@ public class DataFormatter {
 
         return chartData;
     }
+    
+    public static JsonObject toJsonFromIntMap(SortedMap<Integer, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
+
+        // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
+        Map<String, BigDecimal> temp;
+        // The tree map keeps the series sorted in a reliable fashion.  Needed to coordinate the alignment of labels and data... well maybe not...
+        SortedMap<String, JsonArrayBuilder> seriesBuilders = new TreeMap<>();
+
+        for (Integer curr : (Set<Integer>) data.keySet()) {
+            temp = data.get(curr);
+            for (String seriesName : data.get(curr).keySet()) {
+                if ( ! seriesBuilders.containsKey(seriesName) ) {
+                    seriesBuilders.put(seriesName, Json.createArrayBuilder());
+                }
+                seriesBuilders.get(seriesName)
+                        .add(Json.createArrayBuilder()
+                                .add(curr.toString())
+                                .add( (temp.get(seriesName) != null) ? temp.get(seriesName).toString() : "null"));
+            }
+        }
+
+        JsonArrayBuilder labelBuilder = Json.createArrayBuilder();
+        JsonArrayBuilder dataBuilder = Json.createArrayBuilder();
+        for (String seriesName : seriesBuilders.keySet()) {
+            labelBuilder.add(seriesName);
+            dataBuilder.add(seriesBuilders.get(seriesName).build());
+        }
+
+        JsonObject chartData = Json.createObjectBuilder()
+                .add("labels", labelBuilder.build())
+                .add("data", dataBuilder.build())
+                .build();
+
+        return chartData;
+    }    
 }

@@ -18,7 +18,14 @@ jlab.bypassed.loadCharts = function (url, start, end, timeUnit) {
         end: end,
         timeUnit: timeUnit,
         colors: jlab.colors.linacs,
-        yLabel: "# Cavities Bypassed"
+        yLabel: "# Cavities Bypassed",
+        title: "Bypassed Cavities By Linac",
+        timeMode: true,
+        ajaxData: {
+            "start": start,
+            "end": end,
+            "factor": "linac"
+        }
     };
     jlab.barChart.updateChart(settings1);
 
@@ -28,9 +35,15 @@ jlab.bypassed.loadCharts = function (url, start, end, timeUnit) {
         start: start,
         end: end,
         timeUnit: timeUnit,
-        factor: "cmtype",
         colors: jlab.colors.cmtypes,
-        yLabel: "# Cavities Bypassed"
+        yLabel: "# Cavities Bypassed",
+        timeMode: true,
+        title: "Bypassed Cavities By Module Type",
+        ajaxData: {
+            "start": start,
+            "end": end,
+            "factor": "cmtype"
+        }
     };
     jlab.barChart.updateChart(settings2);
     

@@ -27,6 +27,7 @@ jlab.barChart.addLegend = function (chartId, colors, labels) {
 
 jlab.barChart.updateChart = function (settings) {
 
+console.log("In jlab.barChart.updateChart");
     var exitFunc = function (msg) {
         $("#" + chartId).prepend(msg);
           $('#' + chartId + "-loader").hide();
@@ -36,7 +37,7 @@ jlab.barChart.updateChart = function (settings) {
     };
 
     // Only some of these are required
-    var chartId, url, start, end, timeUnit, colors, factor, yLabel;
+    var chartId, url, start, end, timeUnit, colors, yLabel, yMin, yMax, title, ajaxData;
     if (typeof settings === "undefined") {
         exitFunc("Error: Settings object required");
     }
@@ -52,15 +53,22 @@ jlab.barChart.updateChart = function (settings) {
     } else {
         url = settings.url;
     }
-    if ( settings.factor === "undefined") {
-        exitFunc("Error: factor required.");
+    if ( settings.ajaxData === "undefined" || typeof settings.ajaxData !== "object") {
+        exitFunc("Error: ajaxData object required");
     } else {
-        factor = settings.factor;
+        ajaxData = settings.ajaxData;
     }
     if ( ! $.isArray(settings.colors)) {
         exitFunc("Error: Incorrect or unsupplied color scheme");
     } else {
         colors = settings.colors;
+    }
+    if ( typeof settings.timeMode === "undefined") {
+        exitFunc("Error: timeMode required");
+    } else if (settings.timeMode === true) {
+        timeMode = "time";
+    } else {
+        timeMode = null;
     }
 
     // Optional
@@ -70,11 +78,22 @@ jlab.barChart.updateChart = function (settings) {
     if ( typeof settings.end !== 'undefined') {
         end = settings.end;
     }
-    if ( typeof yLabel === 'undefined') {
+    if ( typeof settings.yLabel === 'undefined') {
         yLabel = "Value";
+    } else {
+        yLabel = settings.yLabel;
+    }
+    if ( typeof settings.yMin !== 'undefined') {
+        yMin = settings.yMin;
+    }
+    if ( typeof settings.yMax !== 'undefined') {
+        yMax = settings.yMax;
+    }
+    if ( typeof settings.title !== "undefined") {
+        title = settings.title;
     }
 
-    console.log("In jlab.barChart.update.Chart");
+    console.log("settings object:", settings);
     console.log("url: " + url);
     console.log("chartId: " + chartId);
     console.log("start: " + start);
@@ -82,6 +101,7 @@ jlab.barChart.updateChart = function (settings) {
     console.log("timeUnit: " + timeUnit);
     console.log("colors: " + colors);
     console.log("yLabel: " + yLabel);
+    console.log("title: " + title);
     
     var plotData = [];
     $.ajax({
@@ -91,12 +111,8 @@ jlab.barChart.updateChart = function (settings) {
         complete: function () {
             $('#' + chartId + "-loader").hide();
         },
-        url: url + "?start=" + start + "&end=" + end + "&factor=" + factor,
-        data:
-                {
-                    start: start,
-                    end: end
-                },
+        url: url,
+        data: ajaxData,
         dataType: "json",
         error: function (jqXHR, textStatus, errorThrown) {
             $('#' + chartId + "-loader").hide();
@@ -106,7 +122,7 @@ jlab.barChart.updateChart = function (settings) {
             console.log("  errorThrown" + errorThrown);
         },
         success: function (jsonData, textStatus, jqXHR) {
-
+console.log(jsonData);
             // The repsonse should be formated 
             // {
             //    labels:["label_1",...,"label_n"],
@@ -123,7 +139,7 @@ jlab.barChart.updateChart = function (settings) {
 //            var fillColor = ["#AA4643", "#89A54E", "#4572A7", "#80699B", "#2F4F4F"];
             var options = {
                 xaxis: {
-                    mode: "time",
+                    mode: timeMode,
                     timeformat: "%b %d<br />%Y",
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
@@ -151,9 +167,14 @@ jlab.barChart.updateChart = function (settings) {
                     shadowSize: 1
                 }
             };
+            if ( typeof yMin !== "undefined" ) {
+                options.yaxis.min = yMin;
+            }
+            if ( typeof yMax !== "undefined" ) {
+                options.yaxis.max = yMax;
+            }
 
             if (jsonData.data[0].length <= 15) {
-
                 var tickSize;
                 var ticks = [];
                 tickSize = [7, "day"];
@@ -175,8 +196,6 @@ jlab.barChart.updateChart = function (settings) {
 
             }
 
-
-
             // Days / number of bars * (1-(%gap_between_datapoints/100))
             var numSeries = jsonData.data.length;
             var dataPointWidth = jlab.getMinDataWidth(jsonData.data);
@@ -189,7 +208,7 @@ jlab.barChart.updateChart = function (settings) {
                         order: i + 1,
                         show: show,
                         lineWidth: lineWidth,
-                        fill: fill,
+                        fill: fill
                     }
                 };
                 if (typeof (colors) !== "undefined") {
@@ -203,8 +222,11 @@ jlab.barChart.updateChart = function (settings) {
                 }
             }
 
-
+            $('#' + chartId + "-loader").hide();
             $.plot($("#"+chartId), plotData, options);
+            if (typeof title !== "undefined") {
+                jlab.chartWidget.addTitle(chartId, "<strong>" + title + "</strong>");
+            }
 
             // Add a custom legend off to the side
             jlab.barChart.addLegend(chartId, colors, jsonData.labels);

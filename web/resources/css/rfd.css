@@ -619,12 +619,16 @@ th.scrollbar-header {
     display: none;
 }
 /*Report Frame*/
+.chart-caption {
+    text-align: center;
+}
 .chart-legend-panel {
     display: table;
     width: 100%;
 }
 .chart-wrap {
     width: 100%;
+    text-align: center;
 }
 .chart-placeholder {
     width: 100%;
@@ -633,6 +637,9 @@ th.scrollbar-header {
 .legend-panel, .chart-panel {
     display: table-cell;
     vertical-align: top;
+}
+.chart-title {
+    display: inline-block;
 }
 .legend-panel {
     vertical-align: middle;

@@ -19,6 +19,7 @@
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.resize.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/axislabels/2.2.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/sideBySideImproved/jquery.flot.orderBars.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/chart-widget.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/flot-barchart.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/utils.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/bypassed.js"></script>
@@ -50,6 +51,7 @@
             </form>
         </div>
         <t:chart-widget placeholderId="bypassed-count-by-linac"></t:chart-widget>
+        <hr></hr><br></br>
         <t:chart-widget placeholderId="bypassed-count-by-cmtype"></t:chart-widget>
         <script>
             var jlab = jlab || {};

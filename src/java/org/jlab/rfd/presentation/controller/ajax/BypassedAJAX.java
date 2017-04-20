@@ -105,7 +105,7 @@ public class BypassedAJAX extends HttpServlet {
         PrintWriter pw = response.getWriter();
         try {
             if (out.equals("json")) {
-                JsonObject json = DataFormatter.toJson(factoredData);
+                JsonObject json = DataFormatter.toJsonFromDateMap(factoredData);
                 response.setContentType("application/json");
                 pw.write(json.toString());
             } else {
