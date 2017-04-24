@@ -20,6 +20,7 @@ body {
 #version-info {
     font-size: x-small;
     text-align: right;
+    padding-right: 8px;
 }
 #content-liner {
     border: 1px solid black;

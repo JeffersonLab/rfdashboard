@@ -29,7 +29,7 @@ jlab.energyReach.loadCharts = function (url, start, end, timeUnit) {
         "timeUnit": timeUnit,
         // Grad the North, South, and Total colors
         colors: ["#666666"],
-        yLabel: "C25 Trips/Hour",
+        yLabel: "Linac Energy (MeV)",
         yMin: 1000,
         yMax: 1190,
         timeMode: true,

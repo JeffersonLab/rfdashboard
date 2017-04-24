@@ -37,7 +37,10 @@ public class ModAnode extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
+        Date now = new Date();
+        long ts = now.getTime();
+        LOGGER.log(Level.FINEST, "Starting ModAnode processRequest method");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         Date end = new Date();
         Date start;
@@ -89,13 +92,15 @@ public class ModAnode extends HttpServlet {
                 request.setAttribute("timeUnit", timeUnit);
         }
 
-        LOGGER.log(Level.FINEST,
-                "Start: {0} - End: {1}", new Object[]{request.getAttribute("start"),
-                     request.getAttribute("end")
-                }
-        );
+//        LOGGER.log(Level.FINEST,
+//                "Start: {0} - End: {1}", new Object[]{request.getAttribute("start"),
+//                     request.getAttribute("end")
+//                }
+//        );
         request.getRequestDispatcher(
                 "/WEB-INF/views/mod-anode.jsp").forward(request, response);
+        
+        System.out.print("ModAnode processRequest duration: " + ((new Date().getTime() - ts) / 1000.0) + "s");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

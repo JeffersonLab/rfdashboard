@@ -34,7 +34,7 @@ public class GsetService {
 
     public Map<String, BigDecimal> getCavityGsetData(Date timestamp, Map<String, String> name2Epics) throws IOException, ParseException {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Map<String, BigDecimal> gsetData = new HashMap<>();
         
         // Create a reverse lookup map.  name2Epics should be a 1:1 map
@@ -60,13 +60,13 @@ public class GsetService {
         InputStream in = url.openStream();
         try (JsonReader reader = Json.createReader(in)) {
             JsonObject json = reader.readObject();
-            LOGGER.log(Level.FINEST, "Received mySampler response: {0}", json.toString());
+            //LOGGER.log(Level.FINEST, "Received mySampler response: {0}", json.toString());
             if (json.containsKey("error")) {
                 LOGGER.log(Level.WARNING, "Error querying mySample web service.  Response: {0}", json.toString());
                 throw new IOException("Error querying mySampler web service: " + json.getString("error"));
             }
             JsonArray values = json.getJsonArray("data").getJsonObject(0).getJsonArray("values");
-            LOGGER.log(Level.FINEST, "Recevied GSET data: {0}", values.toString());
+            //LOGGER.log(Level.FINEST, "Recevied GSET data: {0}", values.toString());
             
             for(JsonObject value: values.getValuesAs(JsonObject.class)) {
                 String epicsName = ((String) value.keySet().toArray()[0]).substring(0, 4);
@@ -75,8 +75,8 @@ public class GsetService {
                     gset = new BigDecimal(value.getString(epicsName + "GSET"));
                 }
 
-                LOGGER.log(Level.FINEST, "GSETService Processing value: timestamp{0}, epicsName: {1}, gset: {2}",
-                        new Object[] {sdf.format(timestamp), epicsName, gset});
+                //LOGGER.log(Level.FINEST, "GSETService Processing value: timestamp{0}, epicsName: {1}, gset: {2}",
+                //        new Object[] {sdf.format(timestamp), epicsName, gset});
 
                 gsetData.put(epics2Name.get(epicsName), gset);
             }

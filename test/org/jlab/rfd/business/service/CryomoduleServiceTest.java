@@ -60,7 +60,7 @@ public class CryomoduleServiceTest {
             expTypes.put(keyValue[0], CryomoduleType.valueOf(keyValue[1]));
         }
         
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date date = sdf.parse("2017-03-29");
         CryomoduleService cs = new CryomoduleService();
         HashMap<String, CryomoduleType> cmTypes = cs.getCryoModuleTypes(date);

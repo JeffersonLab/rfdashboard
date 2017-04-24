@@ -5,6 +5,10 @@
 	 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
 	 version="3.1">
     <context-param>
+        <param-name>NotificationBar</param-name>
+        <param-value>Notice: This is a test system.</param-value>
+    </context-param>
+    <context-param>
         <param-name>appName</param-name>
         <param-value>RF Dashboard</param-value>
     </context-param>
@@ -28,6 +32,16 @@
         <param-name>releaseDate</param-name>
         <param-value>20 April 2017</param-value>
     </context-param>
+        <filter>
+        <filter-name>UrlRewriteFilter</filter-name>
+        <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>UrlRewriteFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
     <session-config>
         <session-timeout>
             30

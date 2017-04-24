@@ -10,7 +10,7 @@
 <c:set var="title" value="Overview" />
 <t:page title="${title}"> 
     <jsp:attribute name="stylesheets">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/flot-barchart.css"/>              
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/flot-barchart.css"/>              
     </jsp:attribute>
     <jsp:attribute name="scripts">
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.js"></script>
@@ -18,9 +18,9 @@
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.resize.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/axislabels/2.2.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/sideBySideImproved/jquery.flot.orderBars.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/flot-barchart.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/utils.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/mod-anode.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/flot-barchart.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/mod-anode.js"></script>
     </jsp:attribute>
     <jsp:body>
         <h2 id="page-header-title"><c:out value="${title}"/></h2>

@@ -30,12 +30,12 @@ public class CryomoduleService {
     private static final String CED_INVENTORY_URL = "http://ced.acc.jlab.org/inventory";
 
     public HashMap<String, CryomoduleType> getCryoModuleTypes(Date timestamp) throws ParseException, IOException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         String wrkspc = sdf.format(timestamp);
         String cmQuery = "?t=Cryomodule&p=ModuleType&out=json&ced=history&wrkspc=" + wrkspc;
 
-        LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cmQuery);
+        //LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cmQuery);
         URL url = new URL(CED_INVENTORY_URL + cmQuery);
         InputStream in = url.openStream();
 

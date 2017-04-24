@@ -42,22 +42,29 @@ public class CavityService {
     private static final ConcurrentHashMap<String, Set<CavityDataPoint>> CAVITY_CACHE = new ConcurrentHashMap<>();
 
     public Set<CavityDataPoint> getCavityData(Date timestamp) throws IOException, ParseException {
-        Map<String, CryomoduleType> cmTypes = new CryomoduleService().getCryoModuleTypes(timestamp);
-        Set<CavityDataPoint> data = new HashSet();
+        long ts = new Date().getTime();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String wrkspc = sdf.format(timestamp);
         String cavityQuery = "?t=CryoCavity&p=EPICSName,ModAnode,Housed_by&out=json&ced=history&wrkspc=" + wrkspc;
 
         // Chech the cache.  If not there, run the query, build the results, check that somebody else hasn't already inserted this
         // into the cache, then add the query result to the cache.
+        long ts1 = new Date().getTime();
         if (CAVITY_CACHE.containsKey(cavityQuery)) {
-            LOGGER.log(Level.FINEST, "HIT --- CAVITY_CACHE - {0}", cavityQuery);
-            return CAVITY_CACHE.get(cavityQuery);
+            System.out.print(".        CavityService cache.containsKey check duration: " + ((new Date().getTime() - ts1) / 1000.0) + "s");
+
+            long ts2 = new Date().getTime();
+            Set<CavityDataPoint> out = CAVITY_CACHE.get(cavityQuery);
+            System.out.print(".        CavityService cache retreival check: " + ((new Date().getTime() - ts2) / 1000.0) + "s");
+            return out;
         } else {
-            LOGGER.log(Level.FINEST, "MISS --- CAVITY_CACHE - {0}", cavityQuery);
+            System.out.print(".        CavityService cache.containsKey check duration: " + ((new Date().getTime() - ts1) / 1000.0) + "s");
+
+            Map<String, CryomoduleType> cmTypes = new CryomoduleService().getCryoModuleTypes(timestamp);
+            Set<CavityDataPoint> data = new HashSet();
             
-            LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cavityQuery);
+            //LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cavityQuery);
             URL url = new URL(CED_INVENTORY_URL + cavityQuery);
             InputStream in = url.openStream();
             try (JsonReader reader = Json.createReader(in)) {
@@ -110,13 +117,15 @@ public class CavityService {
 
             // In case somebody has already inserted it use putIfAbsent.
             CAVITY_CACHE.putIfAbsent(cavityQuery, Collections.unmodifiableSet(data));
+            
+            System.out.print(".      CavityService getCavityData duration: " + ((new Date().getTime() - ts) / 1000.0) + "s");
             return CAVITY_CACHE.get(cavityQuery);
         }
 
     }
 
     public CavityDataSpan getCavityDataSpan(Date start, Date end, String timeUnit) throws ParseException, IOException {
-
+        long ts = new Date().getTime();
         long timeInt;
         switch (timeUnit) {
             case "day":
@@ -127,7 +136,7 @@ public class CavityService {
                 timeInt = 60 * 60 * 24 * 7 * 1000L;
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         // Convert date objects to have no hh:mm:ss ... portion
         Date curr = sdf.parse(sdf.format(start));
@@ -140,6 +149,7 @@ public class CavityService {
             curr = new Date(curr.getTime() + timeInt);            // Increment by time interval
         }
 
+        System.out.print("    CavityService getCavityDataSpan duration: " + ((new Date().getTime() - ts) / 1000.0) + "s");
         return span;
     }
 }

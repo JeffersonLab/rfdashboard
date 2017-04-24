@@ -44,10 +44,10 @@ public class ModAnodeAJAX extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        long ts = new Date().getTime();
+        //LOGGER.log(Level.FINEST, "Received followig request parameters: {0}", request.getParameterMap().toString());
         
-        LOGGER.log(Level.FINEST, "Received followig request parameters: {0}", request.getParameterMap().toString());
-        
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date start, end;
         try {
             String eString = request.getParameter("end");
@@ -83,7 +83,8 @@ public class ModAnodeAJAX extends HttpServlet {
         if ( timeUnit == null) {
             timeUnit = "week";
         }
-        
+
+        long ts2 = new Date().getTime();        
         CavityService cs = new CavityService();
         CavityDataSpan span;
         try {
@@ -91,7 +92,10 @@ public class ModAnodeAJAX extends HttpServlet {
         } catch (ParseException ex) {
             throw new ServletException("Error in getting modAnode Data", ex);
         }
-        
+        System.out.print(".  ModAnodeAJAX cavity service duration: " + ((new Date().getTime() - ts2) / 1000.0) + "s");
+
+
+        long ts1 = new Date().getTime();
         SortedMap<Date, SortedMap<String, BigDecimal>> factoredData;
         if ( factor.equals("linac") ) {
             factoredData = span.getModAnodeCountByLinac();
@@ -100,6 +104,7 @@ public class ModAnodeAJAX extends HttpServlet {
         } else {
             factoredData = span.getModAnodeCountByLinac();
         }
+        System.out.print(".  ModAnodeAJAX span.get* duration: " + ((new Date().getTime() - ts1) / 1000.0) + "s");
 
         PrintWriter pw = response.getWriter();
         try {
@@ -114,6 +119,7 @@ public class ModAnodeAJAX extends HttpServlet {
         } catch (ParseException ex) {
             throw new ServletException("Error formatting data", ex);
         }
+        System.out.print(".ModAnodeAJAX doGet duration: " + ((new Date().getTime() - ts) / 1000.0) + "s");
 
     }
 

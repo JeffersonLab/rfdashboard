@@ -48,7 +48,7 @@ public class BypassedAJAX extends HttpServlet {
         
         LOGGER.log(Level.FINEST, "Received followig request parameters: {0}", request.getParameterMap().toString());
         
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date start, end;
         try {
             String eString = request.getParameter("end");

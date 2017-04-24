@@ -43,7 +43,7 @@ public class DateUtilTest {
 
     @Test
     public void getDifferenceInDays_basicUsage() throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         
         // Regular date range
         assertTrue(DateUtil.getDifferenceInDays(sdf.parse("2017-01-01"), sdf.parse("2017-02-01")) == 31);
