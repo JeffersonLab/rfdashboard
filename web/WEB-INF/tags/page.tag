@@ -39,8 +39,8 @@
                     <ul>
                         <li ${'/overview' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/overview">Overview</a></li>
                         <li ${'/mod-anode' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/mod-anode?start=${pageStart}&end=${pageEnd}">Mod Anode</a></li>
-                        <li ${'/bypassed' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/bypassed?start=${pageStart}&end=${pageEnd}"">Bypassed</a></li>
-                        <li ${'/energy-reach' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/energy-reach?start=${pageStart}&end=${pageEnd}"">Energy Reach</a></li>
+                        <li ${'/bypassed' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/bypassed?start=${pageStart}&end=${pageEnd}">Bypassed</a></li>
+                        <li ${'/energy-reach' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/energy-reach?start=${pageStart}&end=${pageEnd}">Energy Reach</a></li>
                     </ul>
                 </nav>
             </header>
@@ -52,6 +52,7 @@
             </div>
         </div>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery/1.10.2.min.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery-migrate-1.4.1.min.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-ui/1.10.3/jquery-ui.min.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/timepicker/jquery-ui-timepicker-1.5.0.min.js"></script>
         <jsp:invoke fragment="scripts"/>

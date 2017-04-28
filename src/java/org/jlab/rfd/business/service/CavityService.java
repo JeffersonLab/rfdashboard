@@ -42,7 +42,6 @@ public class CavityService {
     private static final ConcurrentHashMap<String, Set<CavityDataPoint>> CAVITY_CACHE = new ConcurrentHashMap<>();
 
     public Set<CavityDataPoint> getCavityData(Date timestamp) throws IOException, ParseException {
-        long ts = new Date().getTime();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String wrkspc = sdf.format(timestamp);
@@ -50,16 +49,10 @@ public class CavityService {
 
         // Chech the cache.  If not there, run the query, build the results, check that somebody else hasn't already inserted this
         // into the cache, then add the query result to the cache.
-        long ts1 = new Date().getTime();
         if (CAVITY_CACHE.containsKey(cavityQuery)) {
-            System.out.print(".        CavityService cache.containsKey check duration: " + ((new Date().getTime() - ts1) / 1000.0) + "s");
-
-            long ts2 = new Date().getTime();
             Set<CavityDataPoint> out = CAVITY_CACHE.get(cavityQuery);
-            System.out.print(".        CavityService cache retreival check: " + ((new Date().getTime() - ts2) / 1000.0) + "s");
             return out;
         } else {
-            System.out.print(".        CavityService cache.containsKey check duration: " + ((new Date().getTime() - ts1) / 1000.0) + "s");
 
             Map<String, CryomoduleType> cmTypes = new CryomoduleService().getCryoModuleTypes(timestamp);
             Set<CavityDataPoint> data = new HashSet();
@@ -116,16 +109,13 @@ public class CavityService {
             }
 
             // In case somebody has already inserted it use putIfAbsent.
-            CAVITY_CACHE.putIfAbsent(cavityQuery, Collections.unmodifiableSet(data));
-            
-            System.out.print(".      CavityService getCavityData duration: " + ((new Date().getTime() - ts) / 1000.0) + "s");
+            CAVITY_CACHE.putIfAbsent(cavityQuery, Collections.unmodifiableSet(data));            
             return CAVITY_CACHE.get(cavityQuery);
         }
 
     }
 
     public CavityDataSpan getCavityDataSpan(Date start, Date end, String timeUnit) throws ParseException, IOException {
-        long ts = new Date().getTime();
         long timeInt;
         switch (timeUnit) {
             case "day":
@@ -149,7 +139,6 @@ public class CavityService {
             curr = new Date(curr.getTime() + timeInt);            // Increment by time interval
         }
 
-        System.out.print("    CavityService getCavityDataSpan duration: " + ((new Date().getTime() - ts) / 1000.0) + "s");
         return span;
     }
 }

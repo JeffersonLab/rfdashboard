@@ -38,7 +38,7 @@ public class DataFormatter {
      * @throws java.io.IOException
      */
 
-    public static JsonObject toJsonFromDateMap(SortedMap<Date, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
+    public static JsonObject toFlotFromDateMap(SortedMap<Date, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
 
         // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
         Map<String, BigDecimal> temp;
@@ -73,7 +73,7 @@ public class DataFormatter {
         return chartData;
     }
     
-    public static JsonObject toJsonFromIntMap(SortedMap<Integer, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
+    public static JsonObject toFlotFromIntMap(SortedMap<Integer, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
 
         // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
         Map<String, BigDecimal> temp;

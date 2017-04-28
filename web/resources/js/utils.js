@@ -46,3 +46,27 @@ jlab.showTooltip = function (x, y, contents, z) {
         'border-color': z
     }).appendTo("body").show();
 };
+
+// date: a yyyy-mm-dd formated string
+// numDays: number of days to add
+jlab.addDays = function(date, numDays) {
+    var dateParts = date.split('-');
+    var y = parseInt(dateParts[0], 10);
+    var m = parseInt(dateParts[1], 10);
+    var d = parseInt(dateParts[2], 10);
+    
+    var nDate = new Date(y, m-1, d + numDays);
+    var ny = nDate.getFullYear();
+    var nm = nDate.getMonth() + 1;
+    if (nm < 10) {
+        nm = "0" + nm;
+    }
+
+    var nd = nDate.getDate();
+    if (nd < 10) {
+        nd = "0" + nd;
+    }
+    
+    // javascript Date month is an enum (zero-indexed)
+    return ny + "-" + nm + "-" + nd;
+};

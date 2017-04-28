@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -80,9 +79,20 @@ public class BypassedAJAX extends HttpServlet {
             factor = "linac";
         }
 
-        String timeUnit = request.getParameter("timeUnit");
-        if ( timeUnit == null) {
+        String timeUnit;        
+        if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
+            // Default to week
+            LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
             timeUnit = "week";
+        } else {
+            switch (request.getParameter("timeUnit")) {
+                case "day":
+                    timeUnit = "day";
+                    break;
+                case "week":
+                default:
+                    timeUnit = "week";
+            }
         }
         
         CavityService cs = new CavityService();
@@ -105,7 +115,7 @@ public class BypassedAJAX extends HttpServlet {
         PrintWriter pw = response.getWriter();
         try {
             if (out.equals("json")) {
-                JsonObject json = DataFormatter.toJsonFromDateMap(factoredData);
+                JsonObject json = DataFormatter.toFlotFromDateMap(factoredData);
                 response.setContentType("application/json");
                 pw.write(json.toString());
             } else {

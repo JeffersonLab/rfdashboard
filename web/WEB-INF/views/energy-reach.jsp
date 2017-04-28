@@ -12,6 +12,7 @@
 <t:page title="${title}" pageStart="${requestScope.start}" pageEnd="${requestScope.end}"> 
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/flot-barchart.css"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter.css"/>
     </jsp:attribute>
     <jsp:attribute name="scripts">
         <script type="text/javascript" src="${initParam.cdnContextPath}/everpolate/everpolate.browserified.min.js"></script>
@@ -22,8 +23,12 @@
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/sideBySideImproved/jquery.flot.orderBars.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/flot-barchart.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cavity.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/chart-widget.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/energy-reach.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tablesorter.min.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tablesorter.pager.js"></script>
+
     </jsp:attribute>
     <jsp:body>
         <h2 id="page-header-title"><c:out value="${title}"/></h2>
@@ -44,17 +49,37 @@
                     <div class="li-value">
                         <input type="text" class="date-field nowable-field" id="end" name="end" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
                     </div>
+                    <div class="li-key">
+                        <label class="required-field" for="diffStart" title="Inclusive (Closed)">Delta Start</label>
+                        <div class="date-note">(Inclusive)</div>
+                    </div>
+                    <div class="li-value">
+                        <input type="text" class="date-field" id="diffStart" name="diffStart" placeholder="YYYY-MM-DD" value="${requestScope.diffStart}"/>
+                    </div>
+                    <div class="li-key">
+                        <label class="required-field" for="diffEnd" title="Exclusive (Open)">Delta End</label>
+                        <div class="date-note">(Exclusive)</div>
+                    </div>
+                    <div class="li-value">
+                        <input type="text" class="date-field nowable-field" id="diffEnd" name="diffEnd" placeholder="YYYY-MM-DD" value="${requestScope.diffEnd}"/>
+                    </div>
                     <input type="submit" value="Submit" />
                 </fieldset>
             </form>
         </div>
         <t:chart-widget placeholderId="energy-reach"></t:chart-widget>
-        <hr></hr><br></br>
+            <hr></hr><br></br>
         <t:chart-widget placeholderId="lem-scan"></t:chart-widget>
-        <script>
-            var jlab = jlab || {};
-            jlab.start = "${requestScope.start}";
-            jlab.end = "${requestScope.end}";
+            <hr></hr><br></br>
+        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" tableId="diff-table"></t:tablesorter>
+            <script>
+                var jlab = jlab || {};
+                jlab.start = "${requestScope.start}";
+                jlab.end = "${requestScope.end}";
+                jlab.diffStart = "${requestScope.diffStart}";
+                jlab.diffEnd = "${requestScope.diffEnd}";
+                jlab.timeUnit = "${requestScope.timeUnit}";
+                jlab.tableDate = "${requestScope.tableDate}";
         </script>
     </jsp:body>
 </t:page>

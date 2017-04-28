@@ -98,7 +98,7 @@ public class LemScanAjax extends HttpServlet {
             PrintWriter pw = response.getWriter();
             try {
                 if (out.equals("json")) {
-                    JsonObject json = DataFormatter.toJsonFromIntMap(tripRates);
+                    JsonObject json = DataFormatter.toFlotFromIntMap(tripRates);
                     response.setContentType("application/json");
                     pw.write(json.toString());
                 } else {
@@ -152,7 +152,7 @@ public class LemScanAjax extends HttpServlet {
             PrintWriter pw = response.getWriter();
             try {
                 if (out.equals("json")) {
-                    JsonObject json = DataFormatter.toJsonFromDateMap(reach);
+                    JsonObject json = DataFormatter.toFlotFromDateMap(reach);
                     response.setContentType("application/json");
                     pw.write(json.toString());
                 } else {

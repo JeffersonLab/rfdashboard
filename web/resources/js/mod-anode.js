@@ -18,12 +18,13 @@ jlab.mod_anode.loadCharts = function (url, start, end, timeUnit) {
         timeUnit: timeUnit,
         colors: jlab.colors.linacs,
         yLabel: "# Cavities w/ M.A.V.",
-        title: "Cavities With Mod Anode Voltage By Linac",
+        title: "Cavities With Mod Anode Voltage<br>(By Linac)",
         timeMode: true,
         ajaxData: {
             start: start,
             end: end,
-            factor: "linac"
+            factor: "linac",
+            "timeUnit": timeUnit
         }
     };
     jlab.barChart.updateChart(settings1);
@@ -36,21 +37,62 @@ jlab.mod_anode.loadCharts = function (url, start, end, timeUnit) {
         timeUnit: timeUnit,
         colors: jlab.colors.cmtypes,
         yLabel: "# Cavities w/ M.A.V.",
-        title: "Cavities With Mod Anode Voltage By Module Type",
+        title: "Cavities With Mod Anode Voltage<br>(By Module Type)",
         timeMode: true,
         ajaxData: {
             start: start,
             end: end,
-            factor: "cmtype"
+            factor: "cmtype",
+            "timeUnit": timeUnit
         }
     };
     jlab.barChart.updateChart(settings2);
 };
 
+/* 
+ * Create a cavity data table.
+ * tableId - the tablesorter tag tableId
+ * date - the date for which to query data
+ * */
+jlab.mod_anode.createTable = function (tableId, date) {
+
+    jlab.cavity.getCavityData({
+        start: date,
+        end: jlab.addDays(date, 1),
+        timeUnit: "day",
+        success: function (jsonData, textStatus, jqXHR) {
+            console.log(jsonData);
+            var data = jsonData.data;
+            var tableString = "<table class=\"tablesorter\">";
+            tableString += "<thead><tr><th>Name</th><th>Module Type</th><th>Mod Anode Voltage (kV)</th><th>GSET</th></tr></thead>";
+            tableString += "<tbody>";
+            for (var i = 0; i < data.length; i++) {
+                var cavities = data[i].cavities;
+                for (var j = 0; j < cavities.length; j++) {
+                    if (cavities[j].modAnodeVoltage_kv > 0) {
+                        tableString += "<tr><td>" + cavities[j].name + "</td><td>" + cavities[j].moduleType + "</td><td>" +
+                                cavities[j].modAnodeVoltage_kv + "</td><td>" + cavities[j].gset + "</tr>";
+                    }
+                }
+            }
+            tableString += "</tbody></table>";
+            $("#" + tableId + "-table").append(tableString);
+            // Setup the sortable cavity table
+            $(".tablesorter")
+                    .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
+                    .tablesorterPager({container: $("#" + tableId + "-pager")});
+        }
+    });
+};
+
+
 $(function () {
-    console.log("mavUrl: " + jlab.mavUrl + " - start: " + jlab.start + " - end: " + jlab.end + " - timeUnit - " + jlab.timeUnit);
+
+    jlab.mod_anode.createTable("mav-table", jlab.tableDate);
+
     jlab.mod_anode.loadCharts(jlab.mavUrl, jlab.start, jlab.end, jlab.timeUnit);
 
+    // Setup the date picker(s)
     $(".date-field").datepicker({
         dateFormat: "yy-mm-dd"
     });

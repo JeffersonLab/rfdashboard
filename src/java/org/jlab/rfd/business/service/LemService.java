@@ -60,7 +60,7 @@ public class LemService {
         }
         sql = sql + " FROM LEM_SCAN WHERE START_TIME BETWEEN TO_DATE(?, 'YYYY/MM/DD HH24:MI:SS')"
                 + " AND TO_DATE(?, 'YYYY/MM/DD HH24:MI:SS') ORDER BY START_TIME, LINAC ASC";
-        LOGGER.log(Level.FINEST, "SQL query is {0}", sql);
+        //LOGGER.log(Level.FINEST, "SQL query is {0}", sql);
         
         ArrayList<LemRecord> data = new ArrayList<>();
         try {

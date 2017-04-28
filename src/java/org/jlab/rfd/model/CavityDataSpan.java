@@ -6,12 +6,17 @@
 package org.jlab.rfd.model;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 /**
  *
@@ -57,6 +62,33 @@ public class CavityDataSpan {
         return dataSpan.put(timestamp, dataSet);
     }
 
+    public JsonObject toJson() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        JsonArrayBuilder data = Json.createArrayBuilder();
+        for ( Date d : dataSpan.keySet() ) {
+            JsonObjectBuilder sample = Json.createObjectBuilder();
+            sample.add("date", sdf.format(d));
+            
+            JsonArrayBuilder cavities = Json.createArrayBuilder();
+            for ( CavityDataPoint dp : dataSpan.get(d) ) {
+                String gset = (dp.getGset() != null) ? dp.getGset().toPlainString() : "";
+                String mav = (dp.getModAnodeVoltage() != null) ? dp.getModAnodeVoltage().toPlainString() : "";
+                cavities.add(Json.createObjectBuilder()
+                        .add("name", dp.getCavityName())
+                        .add("linac", dp.getLinacName().toString())
+                        .add("modAnodeVoltage_kv", mav)
+                        .add("gset", gset)
+                        .add("moduleType", dp.getCryomoduleType().toString())
+                        .add("epicsName", dp.getEpicsName()).build());
+            }
+            sample.add("cavities", cavities.build());
+            data.add(sample.build());
+        }
+        
+        JsonObject out = Json.createObjectBuilder().add("data", data.build()).build();
+        return out;
+    }
+    
     /**
      * This returns a TreeMap keyed on date with values being the count of cavities with non-zero modAnodeVoltage by linac
      * on that date.

@@ -27,13 +27,11 @@ jlab.barChart.addLegend = function (chartId, colors, labels) {
 
 jlab.barChart.updateChart = function (settings) {
 
-console.log("In jlab.barChart.updateChart");
     var exitFunc = function (msg) {
         $("#" + chartId).prepend(msg);
           $('#' + chartId + "-loader").hide();
-        throw msg;
         console.log(msg);
-        exit(1);
+        throw msg;
     };
 
     // Only some of these are required
@@ -93,16 +91,6 @@ console.log("In jlab.barChart.updateChart");
         title = settings.title;
     }
 
-    console.log("settings object:", settings);
-    console.log("url: " + url);
-    console.log("chartId: " + chartId);
-    console.log("start: " + start);
-    console.log("end: " + end);
-    console.log("timeUnit: " + timeUnit);
-    console.log("colors: " + colors);
-    console.log("yLabel: " + yLabel);
-    console.log("title: " + title);
-    
     var plotData = [];
     $.ajax({
         beforeSend: function () {
@@ -122,7 +110,6 @@ console.log("In jlab.barChart.updateChart");
             console.log("  errorThrown" + errorThrown);
         },
         success: function (jsonData, textStatus, jqXHR) {
-console.log(jsonData);
             // The repsonse should be formated 
             // {
             //    labels:["label_1",...,"label_n"],
@@ -136,7 +123,6 @@ console.log(jsonData);
             var lineWidth = 1;
             var fill = true;
             var show = true;
-//            var fillColor = ["#AA4643", "#89A54E", "#4572A7", "#80699B", "#2F4F4F"];
             var options = {
                 xaxis: {
                     mode: timeMode,
@@ -188,12 +174,8 @@ console.log(jsonData);
                 for (i = 0; i < jsonData.data[0].length; i++) {
                     ticks[i] = jsonData.data[0][i][0];
                 }
-
-                console.log("  tickSize: " + tickSize);
-                console.log("  ticks:" + ticks);
                 options.xaxis.tickSize = tickSize;
                 options.xaxis.ticks = ticks;
-
             }
 
             // Days / number of bars * (1-(%gap_between_datapoints/100))

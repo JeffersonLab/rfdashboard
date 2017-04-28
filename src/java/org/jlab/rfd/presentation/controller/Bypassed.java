@@ -7,6 +7,9 @@ package org.jlab.rfd.presentation.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,12 +45,14 @@ public class Bypassed extends HttpServlet {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         Date end = new Date();
-        Date start;
+        Date start, tableDate;
+        boolean redirectNeeded = false;
 
         LOGGER.log(Level.FINEST, "Bypassed controler with received parameters: {0}", request.getParameterMap());
 
         if (request.getParameter("end") == null || request.getParameter("end").equals("")) {
             LOGGER.log(Level.FINEST, "No end parameter supplied.  Defaulting to now.");
+            redirectNeeded = true;
             request.setAttribute("end", sdf.format(end));
         } else {
             try {
@@ -57,6 +62,7 @@ public class Bypassed extends HttpServlet {
                 end = new Date();  // In case something bad happend during try.
                 LOGGER.log(Level.WARNING, "Error parsing end parameter '{0}'.  Defaulting to now", request.getParameter("end"));
                 request.setAttribute("end", sdf.format(end));
+                redirectNeeded = true;
             }
         }
 
@@ -64,6 +70,7 @@ public class Bypassed extends HttpServlet {
             // Default to end - four weeks
             start = new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7 * 4);
             request.setAttribute("start", sdf.format(start));
+            redirectNeeded = true;
         } else {
             try {
                 request.setAttribute("start", sdf.format(sdf.parse(request.getParameter("start"))));
@@ -71,6 +78,23 @@ public class Bypassed extends HttpServlet {
                 LOGGER.log(Level.WARNING, "Error parsing start parameter '{0}'.  Defaulting to -7d", request.getParameter("start"));
                 start = new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7);
                 request.setAttribute("start", sdf.format(start));
+                redirectNeeded = true;
+            }
+        }
+
+        if (request.getParameter("tableDate") == null || request.getParameter("tableDate").equals("")) {
+            // Default to end - four weeks
+            tableDate = end;
+            request.setAttribute("tableDate", sdf.format(tableDate));
+            redirectNeeded = true;
+        } else {
+            try {
+                request.setAttribute("tableDate", sdf.format(sdf.parse(request.getParameter("tableDate"))));
+            } catch (ParseException e) {
+                LOGGER.log(Level.WARNING, "Error parsing tableDate parameter '{0}'.  Defaulting to end", request.getParameter("tableDate"));
+                tableDate = end;
+                request.setAttribute("tableDate", sdf.format(tableDate));
+                redirectNeeded = true;
             }
         }
 
@@ -78,6 +102,7 @@ public class Bypassed extends HttpServlet {
             // Default to week
             LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
             request.setAttribute("timeUnit", "week");
+            redirectNeeded = true;
         } else {
             String timeUnit;
             switch (request.getParameter("timeUnit")) {
@@ -96,7 +121,22 @@ public class Bypassed extends HttpServlet {
                     request.getAttribute("end")
                 }
         );
-        request.getRequestDispatcher(
-                "/WEB-INF/views/bypassed.jsp").forward(request, response);
+
+        if (redirectNeeded) {
+            String redirectUrl;
+            try {
+                redirectUrl = request.getContextPath()
+                        + "/bypassed?start=" + URLEncoder.encode((String) request.getAttribute("start"), "UTF-8")
+                        + "&end=" + URLEncoder.encode((String) request.getAttribute("end"), "UTF-8")
+                        + "&tableDate=" + URLEncoder.encode((String) request.getAttribute("tableDate"), "UTF-8")
+                        + "&timeUnit=" + URLEncoder.encode((String) request.getAttribute("timeUnit"), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException("JVM doesn't support UTF-8");
+            }
+            response.sendRedirect(response.encodeRedirectURL(redirectUrl));
+            return;
+        }
+
+            request.getRequestDispatcher ("/WEB-INF/views/bypassed.jsp").forward(request, response);
     }
 }
