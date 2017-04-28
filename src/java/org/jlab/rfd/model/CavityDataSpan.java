@@ -71,15 +71,26 @@ public class CavityDataSpan {
             
             JsonArrayBuilder cavities = Json.createArrayBuilder();
             for ( CavityDataPoint dp : dataSpan.get(d) ) {
-                String gset = (dp.getGset() != null) ? dp.getGset().toPlainString() : "";
-                String mav = (dp.getModAnodeVoltage() != null) ? dp.getModAnodeVoltage().toPlainString() : "";
-                cavities.add(Json.createObjectBuilder()
-                        .add("name", dp.getCavityName())
-                        .add("linac", dp.getLinacName().toString())
-                        .add("modAnodeVoltage_kv", mav)
-                        .add("gset", gset)
-                        .add("moduleType", dp.getCryomoduleType().toString())
-                        .add("epicsName", dp.getEpicsName()).build());
+                if (dp.getGset() != null) {
+                    JsonObjectBuilder cavBuilder = Json.createObjectBuilder();
+                    cavBuilder.add("name", dp.getCavityName()).add("linac", dp.getLinacName().toString());
+                    // The json builder throws an exception on Null or Double.NaN.  This seemed like the smartest way to handle it.
+                    if (dp.getModAnodeVoltage() != null) {
+                        cavBuilder.add("modAnodeVoltage_kv", dp.getModAnodeVoltage().doubleValue());
+                    } else {
+                        cavBuilder.add("modAnodeVoltage_kv", "");
+                    }
+                    if (dp.getGset() != null) {
+                        cavBuilder.add("gset", dp.getGset().doubleValue());
+                    } else {
+                        cavBuilder.add("gset", "");
+                    }
+                    
+                    // Add the last couple of properties, build the builder, and add it to the cavities object
+                    cavities.add(cavBuilder
+                            .add("moduleType", dp.getCryomoduleType().toString())
+                            .add("epicsName", dp.getEpicsName()).build());
+                }
             }
             sample.add("cavities", cavities.build());
             data.add(sample.build());

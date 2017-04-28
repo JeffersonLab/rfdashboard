@@ -10,43 +10,72 @@ jlab.cavity = jlab.cavity || {};
 
 jlab.cavity.getCavityData = function(settings) {
     
-     var start, end, timeUnit, success;
+    var exitFunc = function (msg) {
+        console.log(msg);
+        throw msg;
+    };
+
+     var start, end, timeUnit, success, dates;
+     var asRange = true;
     if (typeof settings === "undefined" || typeof settings !== "object") {
         exitFunc("Error: Settings object required");
     }
     
-    // Required
-    if ( typeof settings.start === "undefined" ) {
-        exitFunc("Error: settings.start required");
-    } else {
-        start = settings.start;
-    }
-    if ( typeof settings.end === "undefined" ) {
-        exitFunc("Error: settings.end required");
-    } else {
-        end = settings.end;
-    }
-    if ( typeof settings.timeUnit === "undefined" ) {
-        exitFunc("Error: settings.timeUnit required");
-    } else {
-        timeUnit = settings.timeUnit;
-    }
+    // Required alwyas
     if ( typeof settings.success !== "function" ) {
         exitFunc("Error: settings.success function required");
     } else {
         success = settings.success;
     }
     
+    // Different parameters are required based on value of asRange
+    if ( typeof settings.asRange !== "undefined" && settings.asRange === false ) {
+        asRange = false;
+        // must supply a date array with asRange == false
+        if (typeof settings.dates !== "object") {
+            exitFunc("Error: settings.dates required when asRange is false");
+        } else {
+            dates = settings.dates;
+        }
+    } else {
+        if (typeof settings.start === "undefined") {
+            exitFunc("Error: settings.start required");
+        } else {
+            start = settings.start;
+        }
+        if (typeof settings.end === "undefined") {
+            exitFunc("Error: settings.end required");
+        } else {
+            end = settings.end;
+        }
+        if (typeof settings.timeUnit === "undefined") {
+            exitFunc("Error: settings.timeUnit required");
+        } else {
+            timeUnit = settings.timeUnit;
+        }
+
+    }
+    
+    var ajaxData;
+    if ( asRange ) {
+        ajaxData = {
+            "start": start,
+            "end": end,
+            "timeUnit": timeUnit
+        };
+    } else {
+        ajaxData = {
+            "date": dates
+        };
+    }
+    
     var out = {
         error: null
     };
     var ajaxSettings = {
+        traditional: true,
         url: "/RFDashboard/ajax/cavity",
-        "data": {
-            "start": start,
-            "end": end,
-            "timeUnit": timeUnit
-        },
+        "data": ajaxData,
         dataType: "json",
         error: function (jqXHR, textStatus, errorThrown) {
             out.error = {
@@ -57,6 +86,7 @@ jlab.cavity.getCavityData = function(settings) {
         },
         "success": success
     };
+    console.log(ajaxSettings);
     $.ajax(ajaxSettings);
     console.log("launched ajax request");
 };

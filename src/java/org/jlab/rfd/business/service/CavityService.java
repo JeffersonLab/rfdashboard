@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -141,4 +142,17 @@ public class CavityService {
 
         return span;
     }
+    
+        public CavityDataSpan getCavityDataSpan(List<Date> dates) throws ParseException, IOException {
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        CavityDataSpan span = new CavityDataSpan();
+        for(Date d : dates) {
+            // Convert date objects to have no hh:mm:ss ... portion
+            d = sdf.parse(sdf.format(d));
+            span.put(d, this.getCavityData(d));
+        }
+        return span;
+    }
+
 }

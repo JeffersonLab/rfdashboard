@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -46,6 +48,28 @@ public class CavityAjax extends HttpServlet {
         
         long ts = new Date().getTime();
         //LOGGER.log(Level.FINEST, "Received followig request parameters: {0}", request.getParameterMap().toString());
+        
+        // Support requesting a selection of dates as an alternative to a full range.  This should override the start/end request.
+        List<Date> dates = null;
+        if ( request.getParameter("date") != null) {
+            dates = new ArrayList<>();
+            for (String date : request.getParameterValues("date")) {
+                if (date != null) {
+                    try {
+                        dates.add(sdf.parse(date));
+                    } catch (ParseException ex) {
+                        LOGGER.log(Level.WARNING, "Error parsing dates parameter '" + date + "'", ex);
+                    }
+                }
+            }
+            if (dates.isEmpty()) {
+                hasError = true;
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                LOGGER.log(Level.SEVERE, "Error.  No valid date requested");
+                pw.write("{error: 'Error. No valid date requested'}");
+                return;
+            }
+        }
         
         Date start, end;
         try {
@@ -91,15 +115,26 @@ public class CavityAjax extends HttpServlet {
             return;
         }
         
-        CavityService cs = new CavityService();        
+        CavityService cs = new CavityService();
         CavityDataSpan span;
-        try {
-            span = cs.getCavityDataSpan(start, end, timeUnit);
-        } catch (ParseException ex) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            LOGGER.log(Level.SEVERE, "Error querying cavity data service", ex);
-            pw.write("{error: 'Error querying cavity data service'}");
-            return;
+        if (dates == null) {
+            try {
+                span = cs.getCavityDataSpan(start, end, timeUnit);
+            } catch (ParseException ex) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                LOGGER.log(Level.SEVERE, "Error querying cavity data service", ex);
+                pw.write("{error: 'Error querying cavity data service'}");
+                return;
+            }
+        } else {
+            try {
+                span = cs.getCavityDataSpan(dates);
+            } catch (ParseException ex) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                LOGGER.log(Level.SEVERE, "Error querying cavity data service", ex);
+                pw.write("{error: 'Error querying cavity data service'}");
+                return;
+            }
         }
         
         response.setContentType("application/json");

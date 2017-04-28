@@ -51,7 +51,7 @@
                         <label class="required-field" for="tableDate" title="Table Date">Table Date</label>
                     </div>
                     <div class="li-value">
-                        <input type="text" class="date-field nowable-field" id="tableDate" name="tableDate" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
+                        <input type="text" class="date-field nowable-field" id="tableDate" name="tableDate" placeholder="YYYY-MM-DD" value="${requestScope.tableDate}"/>
                     </div>
                     <div class="li-key">
                         <label class="required-field" for="timeUnit" title="Time Interval">Time Units</label>

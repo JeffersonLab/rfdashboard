@@ -220,8 +220,9 @@ jlab.energyReach.updateLemScanChart = function (settings) {
     });
 };
 
-// This returns an HTML table containing the energy reach (energy at which the machine has 8 trips/hr or linac has 4 trips/hr)
-// data is the JSON object returned by the ajax request to /ajax/lem-scan?type=day-scan
+// This returns an array of energy reaches for the machine and linac defined as the energy where each linac or the whole machine
+// experience 8 C25 trips/hour.  Data is the JSON object returned by the ajax request to /ajax/lem-scan?type=day-scan&...
+// results rounded to one decimal place.
 jlab.energyReach.getEnergyReach = function (jsonData, chartId) {
     var tripData = {
         north: {energy: [], tripRate: []},
@@ -245,9 +246,21 @@ jlab.energyReach.getEnergyReach = function (jsonData, chartId) {
 
     // Everpolate should already exist - needs everpolate library to be included in the calling jsp
     var reaches = [];
-    reaches[0] = everpolate.linear([8], tripData.north.tripRate, tripData.north.energy)[0].toFixed(1);
-    reaches[1] = everpolate.linear([8], tripData.south.tripRate, tripData.south.energy)[0].toFixed(1);
+    if (tripData.north.tripRate.length > 2) {
+        reaches[0] = everpolate.linear([8], tripData.north.tripRate, tripData.north.energy)[0].toFixed(1);
+    } else {
+        reaches[0] = "N/A";
+    }
+    if (tripData.south.tripRate.length > 2) {
+        reaches[1] = everpolate.linear([8], tripData.south.tripRate, tripData.south.energy)[0].toFixed(1);
+    } else {
+        reaches[1] = "N/A";
+    }
+    if (tripData.total.tripRate.length > 2) {
     reaches[2] = everpolate.linear([8], tripData.total.tripRate, tripData.total.energy)[0].toFixed(1);
+    } else {
+        reaches[2] = "N/A";
+    }
 
     return reaches;
 };
@@ -267,27 +280,31 @@ jlab.energyReach.addLegend = function (chartId, colors, labels, reaches) {
 };
 
 /* 
- * Create a bypassed cavity data table.
+ * Create a table showing changes on cavity-by-cavity basis between start and end dates
  * tableId - the tablesorter tag tableId
  * date - the date for which to query data
  * */
 jlab.energyReach.createTable = function (tableId, start, end) {
 
     jlab.cavity.getCavityData({
-        "start": start,
-        "end": end,
-        timeUnit: "day",
+        asRange: false,
+        dates: [start, end],
         success: function (jsonData, textStatus, jqXHR) {
             var data = jsonData.data;
             var tableString = "<table class=\"tablesorter\">";
-            tableString += "<thead><tr><th>Name</th><th>Module Type</th><th>Delta MAV (kV)</th><th>Delta GSET</th><th>Module Changed</th><th>Found Match</th></tr></thead>";
+            tableString += "<thead><tr><th>Name</th><th>Module Type</th>" + 
+                    "<th>Old MAV</th><th>New MAV</th><th>Delta MAV (kV)</th>" + 
+                    "<th>Old GSET</th><th>New GSET</th><th>Delta GSET</th>" +
+                    "<th>Module Changed</th><th>Found Match</th></tr></thead>";
             tableString += "<tbody>";
-            if (data[0].cavities === null || data[data.length - 1].cavities === null) {
+            if (data[0].cavities === null || data[1].cavities === null) {
                 console.log("Error processing cavity service data. start:" + start + "  end: " + end);
                 throw "Data service returned null data";
             }
-            var cavEnd = data[0].cavities;
-            var cavStart = data[data.length - 1].cavities;
+            
+            console.log(data);
+            var cavStart = data[0].cavities;
+            var cavEnd = data[1].cavities;
 
             for (var i = 0; i < cavEnd.length; i++) {
                 var foundMatch = false;
@@ -295,6 +312,7 @@ jlab.energyReach.createTable = function (tableId, start, end) {
                     if (cavEnd[i].name === cavStart[j].name) {
                         foundMatch = true;
                         var name, cmType, dGset, dMav, moduleChange;
+                        var oldGset, oldMav, newGset, newMav;
                         name = cavEnd[i].name;
                         if ( cavEnd[i].moduleType === cavStart[j].moduleType ) {
                             moduleChange = false;
@@ -303,23 +321,57 @@ jlab.energyReach.createTable = function (tableId, start, end) {
                             moduleChange = true;
                             cmType = cavStart[j].moduleType + "/" + cavEnd[i].moduleType;
                         }
-                        if ( cavEnd[i].gset !== "" && cavStart[j].gset !== "" ) {
-                            dGset = cavEnd[i].gset - cavStart[j].gset;
+                        
+                        // Process gsets - the cavity data service hands back one of three things
+                        // a number (data existed, all is well)
+                        // an empty string (data was not returned from the gset service)
+                        // nothing (somthing went really wrong. this isn't expected, but still good to check)
+                        if (typeof cavStart[j].gset !== "undefined") {
+                            oldGset = cavStart[j].gset;
+                        } else {
+                            oldGset = "";
+                        }
+                        if (typeof cavEnd[i].gset !== "undefined") {
+                            newGset = cavEnd[i].gset;
+                        } else {
+                            newGset = "";
+                        }
+                        if ( newGset !== "" && oldGset !== ""  && newGset !== null && oldGset !== null) {
+                            dGset = newGset - oldGset;
                         } else {
                             dGset = "N/A";
                         }
-                        if ( cavEnd[i].modAnodeVoltage_kv !== "" && cavStart[j].modAnodeVoltage_kv !== "" ) {
-                            dMav = cavEnd[i].modAnodeVoltage_kv - cavStart[j].modAnodeVoltage_kv;                        
+                        
+                        // Process MAVs
+                        if (typeof cavStart[j].modAnodeVoltage_kv !== "undefined") {
+                            oldMav = cavStart[j].modAnodeVoltage_kv;
+                        } else {
+                            oldMav = "";
+                        }
+                        if (typeof cavEnd[i].modAnodeVoltage_kv !== "undefined") {
+                            newMav = cavEnd[i].modAnodeVoltage_kv;
+                        } else {
+                            newMav = "";
+                        }
+                        if ( newMav !== "" && oldMav !== "" && newMav !== null && oldMav !== null) {
+                            dMav = newMav - oldMav;
                         } else {
                             dMav = "N/A";
                         }
+                        
+                        //console.log([name, cmType, oldMav, newMav, dMav, oldGset, newGset, dGset, moduleChange]);
+                        // Add a row to the table for this cavity
                         tableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
-                                dMav.toFixed(2) + "</td><td>" + dGset.toFixed(2) + "</td><td>" + moduleChange + "</td><td>" + true + "</td></tr>";
+                                oldMav.toFixed(2)  + "</td><td>" + newMav.toFixed(2)  + "</td><td>" + dMav.toFixed(2) + "</td><td>" +
+                                oldGset.toFixed(2)  + "</td><td>" + newGset.toFixed(2) +"</td><td>" + dGset.toFixed(2) + "</td><td>" +
+                                moduleChange + "</td><td>" + true + "</td></tr>";
                     }
                 }
                 if ( ! foundMatch ) {
-                        tableString += "<tr><td>" + cavEnd[i].name + "</td><td>" + cavEnd[i].moduleType + "</td><td>" +
-                                dMav + "</td><td>" + cavEnd[i].modAnodeVoltage_kv + "</td><td>" + "N/A" + "</td><td>" + false + "</td></tr>";                    
+                    tableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
+                            oldMav + "</td><td>" + newMav + "</td><td>" + dMav + "</td><td>" +
+                            oldGset.toFixed(2) + "</td><td>" + newGset.toFixed(2) + "</td><td>" + dGset.toFixed(2) + "</td><td>" +
+                            "N/A" + "</td><td>" + true + "</td></tr>";
                 }
             }
             tableString += "</tbody></table>";
