@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jlab.rfd.business.service.CavityService;
 import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.presentation.util.DataFormatter;
+import org.jlab.rfd.presentation.util.ParamChecker;
 
 /**
  *
@@ -68,7 +69,7 @@ public class BypassedAJAX extends HttpServlet {
             LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
             throw new ServletException("Error parseing start/end", ex);
         }
-
+        
         String out = request.getParameter("out");
         if (out == null) {
             out = "json";
@@ -93,6 +94,16 @@ public class BypassedAJAX extends HttpServlet {
                 default:
                     timeUnit = "week";
             }
+        }        
+        
+        PrintWriter pw = response.getWriter();
+        if ( ! start.before(end) ) {
+            pw.write("{error: 'start cannot be after end'}");
+            return;
+        }
+        if ( end.after(new Date()) ) {
+            pw.write("{error: 'end cannot be a future date'}");
+            return;
         }
         
         CavityService cs = new CavityService();
@@ -112,7 +123,6 @@ public class BypassedAJAX extends HttpServlet {
             factoredData = span.getBypassedCountByLinac();
         }
 
-        PrintWriter pw = response.getWriter();
         try {
             if (out.equals("json")) {
                 JsonObject json = DataFormatter.toFlotFromDateMap(factoredData);

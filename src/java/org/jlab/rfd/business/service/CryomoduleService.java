@@ -12,7 +12,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -21,7 +20,7 @@ import javax.json.JsonReader;
 import org.jlab.rfd.model.CryomoduleType;
 
 /**
- *
+ * Returns null if timestamp is for future date
  * @author adamc
  */
 public class CryomoduleService {
@@ -31,6 +30,9 @@ public class CryomoduleService {
 
     public HashMap<String, CryomoduleType> getCryoModuleTypes(Date timestamp) throws ParseException, IOException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        if ( timestamp.after(new Date()) ) {
+            return null;
+        }
 
         String wrkspc = sdf.format(timestamp);
         String cmQuery = "?t=Cryomodule&p=ModuleType&out=json&ced=history&wrkspc=" + wrkspc;
@@ -39,7 +41,7 @@ public class CryomoduleService {
         URL url = new URL(CED_INVENTORY_URL + cmQuery);
         InputStream in = url.openStream();
 
-        HashMap<String, CryomoduleType> cmTypes = new HashMap();
+        HashMap<String, CryomoduleType> cmTypes = new HashMap<>();
         try (JsonReader reader = Json.createReader(in)) {
             JsonObject json = reader.readObject();
             String status = json.getString("stat");

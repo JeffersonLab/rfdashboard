@@ -149,6 +149,10 @@ a:hover {
 .key-value-list .li-key {
     font-weight: bold;
 }
+/* Page controls */
+input.date-field {
+    width: 7em;
+}
 /*Data Tables*/
 .data-table {
     background-color: white;

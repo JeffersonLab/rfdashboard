@@ -25,9 +25,10 @@ public class CavityDataPoint {
     private final CryomoduleType cryomoduleType;
     private final LinacName linacName;
     private final BigDecimal gset;
+    private final BigDecimal odvh;
 
     public CavityDataPoint(Date timestamp, String cavityName, CryomoduleType cryomoduleType, 
-            BigDecimal modAnodeVoltage, String epicsName, BigDecimal gset) {
+            BigDecimal modAnodeVoltage, String epicsName, BigDecimal gset, BigDecimal odvh) {
         
         if ( ! cavityName.matches("\\dL\\d\\d-\\d") ) {
             LOGGER.log(Level.SEVERE, "Improper cavity name format - {0}", cavityName);
@@ -41,6 +42,11 @@ public class CavityDataPoint {
         this.linacName = CebafNames.cedZoneToEnglishLinac(cavityName.substring(0, 4));
         this.epicsName = epicsName;
         this.gset = gset;
+        this.odvh = odvh;
+    }
+
+    public BigDecimal getOdvh() {
+        return odvh;
     }
     
     public Date getTimestamp() {

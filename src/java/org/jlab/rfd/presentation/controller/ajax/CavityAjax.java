@@ -95,6 +95,15 @@ public class CavityAjax extends HttpServlet {
             return;
         }
 
+        if ( ! start.before(end) ) {
+            pw.write("{error: 'start cannot be after end'}");
+            return;
+         }
+        if ( end.after(new Date()) ) {
+            pw.write("{error: 'end cannot be a future date'}");
+            return;
+        }
+        
         String out = request.getParameter("out");
         if (out == null) {
             out = "json";

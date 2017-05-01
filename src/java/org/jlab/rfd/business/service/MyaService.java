@@ -26,15 +26,22 @@ import javax.json.JsonReader;
  *
  * @author adamc
  */
-public class GsetService {
+public class MyaService {
 
-    private static final Logger LOGGER = Logger.getLogger(GsetService.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MyaService.class.getName());
     public static final String MYSAMPLER_URL = "http://myawebtest.acc.jlab.org/mySampler/data";
-    public static final String CED_INVENTORY_URL = "http://ced.acc.jlab.org/inventory";
 
-    public Map<String, BigDecimal> getCavityGsetData(Date timestamp, Map<String, String> name2Epics) throws IOException, ParseException {
+
+    /*
+    * returns null if timestamp is for future date
+    * This assumes that PVs are of the structure <EPICSName><postfix>.  E.g. R123GMES or R2A8ODVH
+    */
+    public Map<String, BigDecimal> getCavityMyaData(Date timestamp, Map<String, String> name2Epics, String postfix) throws IOException, ParseException {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        if ( timestamp.after(new Date()) ) {
+            return null;
+        }
         Map<String, BigDecimal> gsetData = new HashMap<>();
         
         // Create a reverse lookup map.  name2Epics should be a 1:1 map
@@ -49,9 +56,9 @@ public class GsetService {
         String channels = "";        
         for (String epicsName:  name2Epics.values() ) {
             if ( channels.isEmpty() ) {
-                channels = epicsName + "GSET";
+                channels = epicsName + postfix;
             } else {
-                channels = channels + "+" + epicsName + "GSET";
+                channels = channels + "+" + epicsName + postfix;
             }
         }
         
@@ -62,7 +69,7 @@ public class GsetService {
             JsonObject json = reader.readObject();
             //LOGGER.log(Level.FINEST, "Received mySampler response: {0}", json.toString());
             if (json.containsKey("error")) {
-                LOGGER.log(Level.WARNING, "Error querying mySample web service.  Response: {0}", json.toString());
+                LOGGER.log(Level.WARNING, "Error querying mySampler web service.  Response: {0}", json.toString());
                 throw new IOException("Error querying mySampler web service: " + json.getString("error"));
             }
             JsonArray values = json.getJsonArray("data").getJsonObject(0).getJsonArray("values");
@@ -71,8 +78,8 @@ public class GsetService {
             for(JsonObject value: values.getValuesAs(JsonObject.class)) {
                 String epicsName = ((String) value.keySet().toArray()[0]).substring(0, 4);
                 BigDecimal gset = null;
-                if (! value.getString(epicsName + "GSET").startsWith("<") ) {
-                    gset = new BigDecimal(value.getString(epicsName + "GSET"));
+                if (! value.getString(epicsName + postfix).startsWith("<") ) {
+                    gset = new BigDecimal(value.getString(epicsName + postfix));
                 }
 
                 //LOGGER.log(Level.FINEST, "GSETService Processing value: timestamp{0}, epicsName: {1}, gset: {2}",
@@ -84,4 +91,5 @@ public class GsetService {
         
         return gsetData;
     }
+
 }

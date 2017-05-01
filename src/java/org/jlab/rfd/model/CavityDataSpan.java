@@ -27,7 +27,7 @@ public class CavityDataSpan {
     private final TreeMap<Date, Set<CavityDataPoint>> dataSpan;
 
     public CavityDataSpan() {
-        dataSpan = new TreeMap();
+        dataSpan = new TreeMap<>();
     }
 
     public int size() {
@@ -44,7 +44,7 @@ public class CavityDataSpan {
      */
     public Object add(CavityDataPoint dataPoint) {
         if (!dataSpan.containsKey(dataPoint.getTimestamp())) {
-            dataSpan.put(dataPoint.getTimestamp(), new HashSet());
+            dataSpan.put(dataPoint.getTimestamp(), new HashSet<>());
         }
         return dataSpan.get(dataPoint.getTimestamp()).add(dataPoint);
     }
@@ -85,6 +85,11 @@ public class CavityDataSpan {
                     } else {
                         cavBuilder.add("gset", "");
                     }
+                    if (dp.getOdvh() != null) {
+                        cavBuilder.add("odvh", dp.getOdvh().doubleValue());
+                    } else {
+                        cavBuilder.add("odvh", "");
+                    }
                     
                     // Add the last couple of properties, build the builder, and add it to the cavities object
                     cavities.add(cavBuilder
@@ -114,7 +119,7 @@ public class CavityDataSpan {
         int total;
         int unknown;
         for ( Date date : (Set<Date>) dataSpan.keySet() ) {
-            byLinac = new TreeMap();
+            byLinac = new TreeMap<>();
             byLinac.put(LinacName.Injector.toString(), new BigDecimal(0));
             byLinac.put(LinacName.North.toString(), new BigDecimal(0));
             byLinac.put(LinacName.South.toString(), new BigDecimal(0));
@@ -146,7 +151,7 @@ public class CavityDataSpan {
         String CMType;
 
         for ( Date date : (Set<Date>) dataSpan.keySet() ) {
-            byCMType = new TreeMap();
+            byCMType = new TreeMap<>();
             byCMType.put(CryomoduleType.C100.toString(), new BigDecimal(0));
             byCMType.put(CryomoduleType.C50.toString(), new BigDecimal(0));
             byCMType.put(CryomoduleType.C25.toString(), new BigDecimal(0));
@@ -186,7 +191,7 @@ public class CavityDataSpan {
         String CMType;
 
         for (Date date : (Set<Date>) dataSpan.keySet()) {
-            byCMType = new TreeMap(new Comparator<String>() {
+            byCMType = new TreeMap<>(new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
                     if (o1.startsWith("C)") && o2.startsWith("C")) {
@@ -230,7 +235,7 @@ public class CavityDataSpan {
         int total;
         int unknown;
         for ( Date date : (Set<Date>) dataSpan.keySet() ) {
-            byLinac = new TreeMap();
+            byLinac = new TreeMap<>();
             byLinac.put(LinacName.Injector.toString(), new BigDecimal(0));
             byLinac.put(LinacName.North.toString(), new BigDecimal(0));
             byLinac.put(LinacName.South.toString(), new BigDecimal(0));

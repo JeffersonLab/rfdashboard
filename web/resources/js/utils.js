@@ -70,3 +70,20 @@ jlab.addDays = function(date, numDays) {
     // javascript Date month is an enum (zero-indexed)
     return ny + "-" + nm + "-" + nd;
 };
+
+// Turn javascript time (in milliseconds) to our standard yyyy-MM-dd format truncating the hh:mm:ss portions
+jlab.millisToDate = function(time) {
+    var date = new Date(time);
+    
+    // check if the number has at least two digits.  Add a zero in front if not.
+    var pad = function(num) {
+        return (num/10 < 1 ? '0' : '') + "" + num;
+    };
+    
+    // All of our server-side dates are handled as UTC and are truncated to the day.  Using methods like getDate()
+    // return the date in local time which would be off by a day when we do the -4/5 hours for EDT/EST.
+    var out = date.getUTCFullYear() + "-" + pad(date.getUTCMonth()+1) + "-" + pad(date.getUTCDate());
+    console.log(out);
+    console.log(date.toISOString());
+    return out;
+};

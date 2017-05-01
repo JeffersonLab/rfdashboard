@@ -30,7 +30,7 @@ import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.CryomoduleType;
 
 /**
- *
+ * Returns null if timestamp is later than today
  * @author adamc
  */
 public class CavityService {
@@ -45,6 +45,11 @@ public class CavityService {
     public Set<CavityDataPoint> getCavityData(Date timestamp) throws IOException, ParseException {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        
+        if ( timestamp.after(new Date()) ) {
+            return null;
+        }
+
         String wrkspc = sdf.format(timestamp);
         String cavityQuery = "?t=CryoCavity&p=EPICSName,ModAnode,Housed_by&out=json&ced=history&wrkspc=" + wrkspc;
 
@@ -56,7 +61,7 @@ public class CavityService {
         } else {
 
             Map<String, CryomoduleType> cmTypes = new CryomoduleService().getCryoModuleTypes(timestamp);
-            Set<CavityDataPoint> data = new HashSet();
+            Set<CavityDataPoint> data = new HashSet<>();
             
             //LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cavityQuery);
             URL url = new URL(CED_INVENTORY_URL + cavityQuery);
@@ -86,8 +91,15 @@ public class CavityService {
                     }
                     name2Epics.put(cavityName, epicsName);
                 }
-                GsetService gs = new GsetService();
-                Map<String, BigDecimal> gsets = gs.getCavityGsetData(timestamp, name2Epics);
+                MyaService ms = new MyaService();
+                
+                // These could return null if timestamp is a future date.  Shouldn't happen as we check end before, but let''s check
+                // and throw an exception if it does happen.
+                Map<String, BigDecimal> gsets = ms.getCavityMyaData(timestamp, name2Epics, "GSET");
+                Map<String, BigDecimal> odvhs = ms.getCavityMyaData(timestamp, name2Epics, "ODVH");
+                if ( gsets == null || odvhs == null ) {
+                    throw new RuntimeException("MyaService returned null.  Likely requesting data from future date.");
+                }
 
                 for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
                     BigDecimal mav = new BigDecimal(0);
@@ -105,7 +117,8 @@ public class CavityService {
                                 new Object[]{cavityName, wrkspc});
                         throw new IOException("Cryocavity '" + cavityName + "' missing EPICSName in ced history '" + wrkspc);
                     }
-                    data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName)));
+                    data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
+                            odvhs.get(cavityName)));
                 }
             }
 
@@ -116,6 +129,10 @@ public class CavityService {
 
     }
 
+    
+    /*
+    * If end is for future date, set it for now.  Data isn't valid for future dates, but some of our data services (CED, MYA) give results anyway.
+    */
     public CavityDataSpan getCavityDataSpan(Date start, Date end, String timeUnit) throws ParseException, IOException {
         long timeInt;
         switch (timeUnit) {
@@ -126,12 +143,15 @@ public class CavityService {
             default:
                 timeInt = 60 * 60 * 24 * 7 * 1000L;
         }
-
+        
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
         // Convert date objects to have no hh:mm:ss ... portion
         Date curr = sdf.parse(sdf.format(start));
         Date e = sdf.parse(sdf.format(end));
+
+        if ( end.after(new Date()) ) {
+            e = sdf.parse(sdf.format(new Date()));
+        }
 
         CavityDataSpan span = new CavityDataSpan();
 
@@ -154,5 +174,4 @@ public class CavityService {
         }
         return span;
     }
-
 }

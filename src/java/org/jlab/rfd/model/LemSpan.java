@@ -26,7 +26,7 @@ public class LemSpan {
     private final TreeMap<Date, SortedMap<LinacName, LemRecord>> dataSpan;
 
     public LemSpan() {
-        dataSpan = new TreeMap();
+        dataSpan = new TreeMap<>();
     }
 
     public int size() {

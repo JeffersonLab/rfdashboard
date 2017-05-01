@@ -50,15 +50,15 @@
                         <input type="text" class="date-field nowable-field" id="end" name="end" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
                     </div>
                     <div class="li-key">
-                        <label class="required-field" for="diffStart" title="Inclusive (Closed)">Delta Start</label>
-                        <div class="date-note">(Inclusive)</div>
+                        <label class="required-field" for="diffStart" title="">Delta Start</label>
+<!--                        <div class="date-note">(Inclusive)</div>-->
                     </div>
                     <div class="li-value">
                         <input type="text" class="date-field" id="diffStart" name="diffStart" placeholder="YYYY-MM-DD" value="${requestScope.diffStart}"/>
                     </div>
                     <div class="li-key">
-                        <label class="required-field" for="diffEnd" title="Exclusive (Open)">Delta End</label>
-                        <div class="date-note">(Exclusive)</div>
+                        <label class="required-field" for="diffEnd" title="">Delta End</label>
+<!--                        <div class="date-note">(Exclusive)</div>-->
                     </div>
                     <div class="li-value">
                         <input type="text" class="date-field nowable-field" id="diffEnd" name="diffEnd" placeholder="YYYY-MM-DD" value="${requestScope.diffEnd}"/>
@@ -68,7 +68,7 @@
             </form>
         </div>
         <t:chart-widget placeholderId="energy-reach"></t:chart-widget>
-            <hr></hr><br></br>
+        <br></br><hr style="border: none; height: 3px; background-color: #330000"></hr><br></br>
         <t:chart-widget placeholderId="lem-scan"></t:chart-widget>
             <hr></hr><br></br>
         <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" tableId="diff-table"></t:tablesorter>
@@ -79,7 +79,6 @@
                 jlab.diffStart = "${requestScope.diffStart}";
                 jlab.diffEnd = "${requestScope.diffEnd}";
                 jlab.timeUnit = "${requestScope.timeUnit}";
-                jlab.tableDate = "${requestScope.tableDate}";
         </script>
     </jsp:body>
 </t:page>

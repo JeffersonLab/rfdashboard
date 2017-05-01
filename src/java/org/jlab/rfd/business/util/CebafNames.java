@@ -15,7 +15,7 @@ import org.jlab.rfd.model.LinacName;
 public class CebafNames {
 
     // Create lookup tables as needed to convert between the different cavity/zone/linac naming conventions. 
-    private static final HashMap<Integer, LinacName> LINAC_NUMBER_TO_NAME = new HashMap();
+    private static final HashMap<Integer, LinacName> LINAC_NUMBER_TO_NAME = new HashMap<>();
     static {
         LINAC_NUMBER_TO_NAME.put(0, LinacName.Injector);
         LINAC_NUMBER_TO_NAME.put(1, LinacName.North);

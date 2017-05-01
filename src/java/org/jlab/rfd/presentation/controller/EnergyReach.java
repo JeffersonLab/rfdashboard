@@ -18,8 +18,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.jlab.rfd.business.service.LemService;
-import org.jlab.rfd.model.LemRecord;
+import org.jlab.rfd.presentation.util.ParamChecker;
 
 /**
  *
@@ -44,13 +43,13 @@ public class EnergyReach extends HttpServlet {
             throws ServletException, IOException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-        Date end = new Date();
-        Date start;
+        Date end, start;
         boolean redirectNeeded = false;
 
         LOGGER.log(Level.FINEST, "EnergyReach controler with received parameters: {0}", request.getParameterMap());        
         if (request.getParameter("end") == null || request.getParameter("end").equals("")) {
             LOGGER.log(Level.FINEST, "No end parameter supplied.  Defaulting to today.");
+            end = new Date();
             request.setAttribute("end", sdf.format(end));
             redirectNeeded = true;
         } else {
@@ -72,7 +71,8 @@ public class EnergyReach extends HttpServlet {
             redirectNeeded = true;
         } else {
             try {
-                request.setAttribute("start", sdf.format(sdf.parse(request.getParameter("start"))));
+                start = sdf.parse(request.getParameter("start"));
+                request.setAttribute("start", sdf.format(start));
             } catch (ParseException e) {
                 LOGGER.log(Level.WARNING, "Error parsing start parameter '{0}'.  Defaulting to -7d", request.getParameter("start"));
                 start = new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7);
@@ -100,32 +100,45 @@ public class EnergyReach extends HttpServlet {
             }
             request.setAttribute("timeUnit", timeUnit);
         }
-
+        
+        Date diffStart, diffEnd;
         if (request.getParameter("diffStart") == null || request.getParameter("diffStart").equals("")) {
+            diffStart = start;
             request.setAttribute("diffStart", request.getAttribute("start"));
             redirectNeeded = true;
         } else {
             try {
-                request.setAttribute("diffStart", sdf.format(sdf.parse(request.getParameter("diffStart"))));
+                diffStart = sdf.parse(request.getParameter("diffStart"));
+                request.setAttribute("diffStart", sdf.format(diffStart));
             } catch (ParseException e) {
                 LOGGER.log(Level.WARNING, "Error parsing diffStart parameter '{0}'.  Defaulting to value of start", request.getParameter("diffStart"));
+                diffStart = start;
                 request.setAttribute("diffStart", request.getAttribute("start"));
                 redirectNeeded = true;
             }
         }
 
         if (request.getParameter("diffEnd") == null || request.getParameter("diffEnd").equals("")) {
+            diffEnd = end;
             request.setAttribute("diffEnd", request.getAttribute("end"));
             redirectNeeded = true;
         } else {
             try {
-                request.setAttribute("diffEnd", sdf.format(sdf.parse(request.getParameter("diffEnd"))));
+                diffEnd = sdf.parse(request.getParameter("diffEnd"));
+                request.setAttribute("diffEnd", sdf.format(diffEnd));
             } catch (ParseException e) {
                 LOGGER.log(Level.WARNING, "Error parsing diffEnd parameter '{0}'.  Defaulting to value of end", request.getParameter("diffEnd"));
+                diffEnd = end;
                 request.setAttribute("diffEnd", request.getAttribute("end"));
                 redirectNeeded = true;
             }
         }
+        // Throws a RuntimeException if invalid
+        if ( diffStart != null && diffEnd != null) {
+            ParamChecker.validateStartEnd(diffStart, diffEnd);
+        }
+
+
         
         LOGGER.log(Level.FINEST, "Start: {0} - End: {1}", new Object[]{request.getAttribute("start"), request.getAttribute("end")});
 

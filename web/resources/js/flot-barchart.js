@@ -35,7 +35,7 @@ jlab.barChart.updateChart = function (settings) {
     };
 
     // Only some of these are required
-    var chartId, url, start, end, timeUnit, colors, yLabel, yMin, yMax, title, ajaxData;
+    var chartId, url, start, end, timeUnit, colors, yLabel, xMin, xMax, yMin, yMax, title, ajaxData, clickable;
     if (typeof settings === "undefined") {
         exitFunc("Error: Settings object required");
     }
@@ -70,6 +70,11 @@ jlab.barChart.updateChart = function (settings) {
     }
 
     // Optional
+    if ( typeof settings.clickable === true ) {
+        clickable = true;
+    } else {
+        clickable = false;
+    }
     if ( typeof settings.start !== 'undefined') {
         start = settings.start;
     }
@@ -86,6 +91,12 @@ jlab.barChart.updateChart = function (settings) {
     }
     if ( typeof settings.yMax !== 'undefined') {
         yMax = settings.yMax;
+    }
+    if ( typeof settings.xMin !== 'undefined') {
+        xMin = settings.xMin;
+    }
+    if ( typeof settings.xMax !== 'undefined') {
+        xMax = settings.xMax;
     }
     if ( typeof settings.title !== "undefined") {
         title = settings.title;
@@ -141,7 +152,7 @@ jlab.barChart.updateChart = function (settings) {
                 },
                 grid: {
                     hoverable: true,
-                    clickable: false,
+                    clickable: true,
                     borderWidth: 1
                 },
                 legend: {
@@ -158,6 +169,12 @@ jlab.barChart.updateChart = function (settings) {
             }
             if ( typeof yMax !== "undefined" ) {
                 options.yaxis.max = yMax;
+            }
+            if ( typeof xMin !== "undefined" ) {
+                options.xaxis.min = xMin;
+            }
+            if ( typeof xMax !== "undefined" ) {
+                options.xaxis.max = xMax;
             }
 
             if (jsonData.data[0].length <= 15) {

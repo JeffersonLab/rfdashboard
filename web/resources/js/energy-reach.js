@@ -9,12 +9,12 @@ var jlab = jlab || {};
 jlab.energyReachUrl = "/RFDashboard/ajax/lem-scan";
 
 jlab.energyReach = jlab.energyReach || {};
-jlab.energyReach.loadCharts = function (url, start, end, timeUnit) {
+jlab.energyReach.loadCharts = function (url, start, end, diffEnd, timeUnit) {
 
     var settings1 = {
         chartId: 'lem-scan',
         url: url,
-        date: end,
+        date: diffEnd,
         // Grad the North, South, and Total colors
         colors: jlab.colors.linacs.slice(1, 4),
         yLabel: "C25 Trips/Hour"
@@ -30,10 +30,13 @@ jlab.energyReach.loadCharts = function (url, start, end, timeUnit) {
         // Grad the North, South, and Total colors
         colors: ["#666666"],
         yLabel: "Linac Energy (MeV)",
+        xMin: new Date(start).getTime(),
+        xMax: new Date(end).getTime(),
         yMin: 1000,
         yMax: 1190,
         timeMode: true,
         title: "Linac Energy Reach",
+        clickable: true,
         ajaxData: {
             "start": start,
             "end": end,
@@ -41,6 +44,17 @@ jlab.energyReach.loadCharts = function (url, start, end, timeUnit) {
         }
     };
     jlab.barChart.updateChart(settings2);
+    $('#energy-reach').bind("plotclick", function (event, pos, item) {
+        if (item) {
+            var timestamp = item.series.data[item.dataIndex][0];
+            var dateString = jlab.millisToDate(timestamp);
+            var url = "/RFDashboard/energy-reach?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
+                    jlab.addDays(dateString, -1) + "&diffEnd=" + dateString;
+            console.log("Linking to " + url);
+            window.location.href = url;
+        }
+    });
+
 };
 
 jlab.energyReach.updateLemScanChart = function (settings) {
@@ -215,7 +229,6 @@ jlab.energyReach.updateLemScanChart = function (settings) {
                     prev_label = null;
                 }
             });
-
         }
     });
 };
@@ -295,6 +308,7 @@ jlab.energyReach.createTable = function (tableId, start, end) {
             tableString += "<thead><tr><th>Name</th><th>Module Type</th>" + 
                     "<th>Old MAV</th><th>New MAV</th><th>Delta MAV (kV)</th>" + 
                     "<th>Old GSET</th><th>New GSET</th><th>Delta GSET</th>" +
+                    "<th>Old ODHV</th><th>New ODHV</th><th>Delta ODHV</th>" +
                     "<th>Module Changed</th><th>Found Match</th></tr></thead>";
             tableString += "<tbody>";
             if (data[0].cavities === null || data[1].cavities === null) {
@@ -309,10 +323,12 @@ jlab.energyReach.createTable = function (tableId, start, end) {
             for (var i = 0; i < cavEnd.length; i++) {
                 var foundMatch = false;
                 for (var j = 0; j < cavStart.length; j++) {
+                    
                     if (cavEnd[i].name === cavStart[j].name) {
                         foundMatch = true;
-                        var name, cmType, dGset, dMav, moduleChange;
-                        var oldGset, oldMav, newGset, newMav;
+                        
+                        var name, cmType, dGset, dMav, dOdvh, moduleChange;
+                        var oldGset, oldMav, newGset, newMav, oldOdvh, newOdvh;
                         name = cavEnd[i].name;
                         if ( cavEnd[i].moduleType === cavStart[j].moduleType ) {
                             moduleChange = false;
@@ -359,11 +375,29 @@ jlab.energyReach.createTable = function (tableId, start, end) {
                             dMav = "N/A";
                         }
                         
+                        // Process Ops Drive Highs
+                        if (typeof cavStart[j].odvh !== "undefined") {
+                            oldOdvh = cavStart[j].odvh;
+                        } else {
+                            oldOdvh = "";
+                        }
+                        if (typeof cavEnd[i].odvh !== "undefined") {
+                            newOdvh = cavEnd[i].odvh;
+                        } else {
+                            newOdvh = "";
+                        }
+                        if ( newOdvh !== "" && oldOdvh !== "" && newOdvh !== null && oldOdvh !== null) {
+                            dOdvh = newOdvh - oldOdvh;
+                        } else {
+                            dOdvh = "N/A";
+                        }
+                        
                         //console.log([name, cmType, oldMav, newMav, dMav, oldGset, newGset, dGset, moduleChange]);
                         // Add a row to the table for this cavity
                         tableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
                                 oldMav.toFixed(2)  + "</td><td>" + newMav.toFixed(2)  + "</td><td>" + dMav.toFixed(2) + "</td><td>" +
                                 oldGset.toFixed(2)  + "</td><td>" + newGset.toFixed(2) +"</td><td>" + dGset.toFixed(2) + "</td><td>" +
+                                oldOdvh.toFixed(2)  + "</td><td>" + newOdvh.toFixed(2) +"</td><td>" + dOdvh.toFixed(2) + "</td><td>" +
                                 moduleChange + "</td><td>" + true + "</td></tr>";
                     }
                 }
@@ -389,7 +423,7 @@ jlab.energyReach.createTable = function (tableId, start, end) {
 
 $(function () {
     jlab.energyReach.createTable("diff-table", jlab.diffStart, jlab.diffEnd);
-    jlab.energyReach.loadCharts(jlab.energyReachUrl, jlab.start, jlab.end, jlab.timeUnit);
+    jlab.energyReach.loadCharts(jlab.energyReachUrl, jlab.start, jlab.end, jlab.diffEnd, jlab.timeUnit);
 
     $(".date-field").datepicker({
         dateFormat: "yy-mm-dd"

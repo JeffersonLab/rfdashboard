@@ -18,6 +18,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.jlab.rfd.presentation.util.ParamChecker;
 
 /**
  *
@@ -30,18 +31,17 @@ public class ModAnode extends HttpServlet {
     
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Date now = new Date();
         LOGGER.log(Level.FINEST, "Starting ModAnode processRequest method");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-        Date end = new Date();
-        Date start, tableDate;
+        Date end, start, tableDate;
         boolean redirectNeeded = false;
 
         LOGGER.log(Level.FINEST, "ModAode controler with received parameters: {0}", request.getParameterMap());
 
         if (request.getParameter("end") == null || request.getParameter("end").equals("")) {
             LOGGER.log(Level.FINEST, "No end parameter supplied.  Defaulting to now.");
+            end = new Date();
             request.setAttribute("end", sdf.format(end));
             redirectNeeded = true;
         } else {
@@ -63,7 +63,8 @@ public class ModAnode extends HttpServlet {
             redirectNeeded = true;
         } else {
             try {
-                request.setAttribute("start", sdf.format(sdf.parse(request.getParameter("start"))));
+                start = sdf.parse(request.getParameter("start"));
+                request.setAttribute("start", sdf.format(start));
             } catch (ParseException e) {
                 LOGGER.log(Level.WARNING, "Error parsing start parameter '{0}'.  Defaulting to -7d", request.getParameter("start"));
                 start = new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7);
@@ -71,7 +72,11 @@ public class ModAnode extends HttpServlet {
                 redirectNeeded = true;
             }
         }
-
+        // Throws a RuntimeException if invalid
+        if ( start != null && end != null) {
+            ParamChecker.validateStartEnd(start, end);
+        }
+        
         if (request.getParameter("tableDate") == null || request.getParameter("tableDate").equals("")) {
             // Default to end - four weeks
             tableDate = end;
@@ -79,7 +84,8 @@ public class ModAnode extends HttpServlet {
             redirectNeeded = true;
         } else {
             try {
-                request.setAttribute("tableDate", sdf.format(sdf.parse(request.getParameter("tableDate"))));
+                tableDate = sdf.parse(request.getParameter("tableDate"));
+                request.setAttribute("tableDate", sdf.format(tableDate));
             } catch (ParseException e) {
                 LOGGER.log(Level.WARNING, "Error parsing tableDate parameter '{0}'.  Defaulting to end", request.getParameter("tableDate"));
                 tableDate = end;
@@ -87,7 +93,8 @@ public class ModAnode extends HttpServlet {
                 redirectNeeded = true;
             }
         }
-
+        ParamChecker.validateDate(tableDate);
+        
         if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
             // Default to week
             LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
