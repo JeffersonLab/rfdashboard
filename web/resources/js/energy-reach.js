@@ -192,6 +192,7 @@ jlab.energyReach.updateLemScanChart = function (settings) {
             var plot = $.plot($("#" + chartId), plotData, options);
             jlab.chartWidget.addTitle(chartId, "<strong>C25 Trip Rates</strong><br/><div style='font-size:smaller'>" + date + "</div>");
 
+            // Add the horizontal lines for 4 and 8 trips/hr with annotations
             var p8 = plot.pointOffset({x: 1010, y: 8});
             var p4 = plot.pointOffset({x: 1010, y: 4});
             $("#" + chartId).append("<div style='position:absolute;left:" + p8.left + "px;top:" + (p8.top - 17) + "px; color:#666;font-size:smaller'>8 trips/hr</div>");
@@ -293,24 +294,32 @@ jlab.energyReach.addLegend = function (chartId, colors, labels, reaches) {
 };
 
 /* 
- * Create a table showing changes on cavity-by-cavity basis between start and end dates
- * tableId - the tablesorter tag tableId
+ * Create a two tables showing advanced/basic changes on cavity-by-cavity basis between start and end dates.
+ * Only one cavity is shown at a time.  Which one is displayed is changed by the on-screen button toggle.
+ * basicTableId - the tablesorter tag tableId for the basic table 
+ * advTableId - the tablesorter tag tableId for the advanced
  * date - the date for which to query data
  * */
-jlab.energyReach.createTable = function (tableId, start, end) {
+jlab.energyReach.createTable = function (basicTableId, advTableId, start, end) {
 
     jlab.cavity.getCavityData({
         asRange: false,
         dates: [start, end],
         success: function (jsonData, textStatus, jqXHR) {
             var data = jsonData.data;
-            var tableString = "<table class=\"tablesorter\">";
-            tableString += "<thead><tr><th>Name</th><th>Module Type</th>" + 
+            var advTableString = "<table id=\"" + advTableId + "\" class=\"tablesorter\">";
+            var basicTableString = "<table id=\"" + basicTableId + "\" class=\"tablesorter\">";
+            advTableString += "<thead><tr><th>Name</th><th>Module Type</th>" + 
                     "<th>Old MAV</th><th>New MAV</th><th>Delta MAV (kV)</th>" + 
                     "<th>Old GSET</th><th>New GSET</th><th>Delta GSET</th>" +
                     "<th>Old ODHV</th><th>New ODHV</th><th>Delta ODHV</th>" +
                     "<th>Module Changed</th><th>Found Match</th></tr></thead>";
-            tableString += "<tbody>";
+            advTableString += "<tbody>";
+            basicTableString += "<thead><tr><th>Name</th><th>Module Type</th>" + 
+                    "<th>Old GSET</th><th>New GSET</th><th>Delta GSET</th>" +
+                    "<th>Old ODHV</th><th>New ODHV</th><th>Delta ODHV</th>" +
+                    "</tr></thead>";
+            basicTableString += "<tbody>";
             if (data[0].cavities === null || data[1].cavities === null) {
                 console.log("Error processing cavity service data. start:" + start + "  end: " + end);
                 throw "Data service returned null data";
@@ -394,38 +403,59 @@ jlab.energyReach.createTable = function (tableId, start, end) {
                         
                         //console.log([name, cmType, oldMav, newMav, dMav, oldGset, newGset, dGset, moduleChange]);
                         // Add a row to the table for this cavity
-                        tableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
+                        advTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
                                 oldMav.toFixed(2)  + "</td><td>" + newMav.toFixed(2)  + "</td><td>" + dMav.toFixed(2) + "</td><td>" +
                                 oldGset.toFixed(2)  + "</td><td>" + newGset.toFixed(2) +"</td><td>" + dGset.toFixed(2) + "</td><td>" +
                                 oldOdvh.toFixed(2)  + "</td><td>" + newOdvh.toFixed(2) +"</td><td>" + dOdvh.toFixed(2) + "</td><td>" +
                                 moduleChange + "</td><td>" + true + "</td></tr>";
+                        basicTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
+                                oldGset.toFixed(2)  + "</td><td>" + newGset.toFixed(2) +"</td><td>" + dGset.toFixed(2) + "</td><td>" +
+                                oldOdvh.toFixed(2)  + "</td><td>" + newOdvh.toFixed(2) +"</td><td>" + dOdvh.toFixed(2) + "</td>" +
+                                "</tr>";
                     }
                 }
                 if ( ! foundMatch ) {
-                    tableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
-                            oldMav + "</td><td>" + newMav + "</td><td>" + dMav + "</td><td>" +
+                    advTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
+                            oldMav.toFixed(2)  + "</td><td>" + newMav.toFixed(2)  + "</td><td>" + dMav.toFixed(2) + "</td><td>" +
                             oldGset.toFixed(2) + "</td><td>" + newGset.toFixed(2) + "</td><td>" + dGset.toFixed(2) + "</td><td>" +
+                            oldOdvh.toFixed(2)  + "</td><td>" + newOdvh.toFixed(2) +"</td><td>" + dOdvh.toFixed(2) + "</td><td>" +
                             "N/A" + "</td><td>" + true + "</td></tr>";
+                    basicTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
+                            oldGset.toFixed(2) + "</td><td>" + newGset.toFixed(2) + "</td><td>" + dGset.toFixed(2) + "</td>" +
+                            oldOdvh.toFixed(2)  + "</td><td>" + newOdvh.toFixed(2) +"</td><td>" + dOdvh.toFixed(2) + "</td>" +
+                            "</tr>";
                 }
             }
-            tableString += "</tbody></table>";
-            $("#" + tableId + "-table").append(tableString);
-            // Setup the sortable cavity table
-            $(".tablesorter")
+            advTableString += "</tbody></table>";
+            basicTableString += "</tbody></table>";
+            $("#" + advTableId + "-table").append(advTableString);
+            $("#" + basicTableId + "-table").append(basicTableString);
+            // Setup the sortable cavity tables
+            $("#" + advTableId)
                     .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
-                    .tablesorterPager({container: $("#" + tableId + "-pager")});
+                    .tablesorterPager({container: $("#" + advTableId + "-pager")});
+            $("#" + basicTableId)
+                    .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
+                    .tablesorterPager({container: $("#" + basicTableId + "-pager")});
         }
     });
 };
 
 
-
-
 $(function () {
-    jlab.energyReach.createTable("diff-table", jlab.diffStart, jlab.diffEnd);
+    // The "diff-table-*" names need to be be manually kept in sync with the IDs given in the JSP.  This shouldn't need to
+    // often, but if it does, we should put them in variables, etc.
+    jlab.energyReach.createTable("diff-table-basic", "diff-table-advanced", jlab.diffStart, jlab.diffEnd);
     jlab.energyReach.loadCharts(jlab.energyReachUrl, jlab.start, jlab.end, jlab.diffEnd, jlab.timeUnit);
 
     $(".date-field").datepicker({
         dateFormat: "yy-mm-dd"
+    });
+    
+    // This enables the "Basic/Advanced" menu button to toggle between the two tables.  diff-table-advanced starts out with
+    // display: none.
+    $("#menu-toggle").click(function() {
+        $('#diff-table-basic-wrap').toggle();
+        $('#diff-table-advanced-wrap').toggle();
     });
 });

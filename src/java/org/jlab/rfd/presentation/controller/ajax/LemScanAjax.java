@@ -93,7 +93,7 @@ public class LemScanAjax extends HttpServlet {
             }
 
             // The Lem service in start include and end exclusive.  Decrement end by one day to show the last day of data
-            System.out.print("Start: " + start + "End: " + end);
+            LOGGER.log(Level.FINEST, "Start: {0}, End: {1}", new Object[]{start, end});
             SortedMap<Integer, SortedMap<String, BigDecimal>> tripRates = span.getTripRateCurve(start);
             PrintWriter pw = response.getWriter();
             try {

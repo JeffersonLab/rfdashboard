@@ -29,6 +29,15 @@ jlab.bypassed.loadCharts = function (url, start, end, timeUnit) {
         }
     };
     jlab.barChart.updateChart(settings1);
+    $('#bypassed-count-by-linac').bind("plotclick", function (event, pos, item) {
+        if (item) {
+            var timestamp = item.series.data[item.dataIndex][0];
+            var dateString = jlab.millisToDate(timestamp);
+            var url = "/RFDashboard/bypassed?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString;
+            console.log("Linking to " + url);
+            window.location.href = url;
+        }
+    });
 
     var settings2 = {
         chartId: 'bypassed-count-by-cmtype',
@@ -48,8 +57,15 @@ jlab.bypassed.loadCharts = function (url, start, end, timeUnit) {
         }
     };
     jlab.barChart.updateChart(settings2);
-    
-    //jlab.barChart.updateChart('bypassed-count-by-linac', url, start, end, timeUnit, jlab.colors.linacs, "# Cavities Bypassed");
+    $('#bypassed-count-by-cmtype').bind("plotclick", function (event, pos, item) {
+        if (item) {
+            var timestamp = item.series.data[item.dataIndex][0];
+            var dateString = jlab.millisToDate(timestamp);
+            var url = "/RFDashboard/bypassed?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString;
+            console.log("Linking to " + url);
+            window.location.href = url;
+        }
+    });
 };
 
 /* 
@@ -60,8 +76,8 @@ jlab.bypassed.loadCharts = function (url, start, end, timeUnit) {
 jlab.bypassed.createTable = function (tableId, date) {
 
     jlab.cavity.getCavityData({
-        start: date,
-        end: jlab.addDays(date, 1),
+        start: jlab.addDays(date, -1),
+        end: date,
         timeUnit: "day",
         success: function (jsonData, textStatus, jqXHR) {
             console.log(jsonData);

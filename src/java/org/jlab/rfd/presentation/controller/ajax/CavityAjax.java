@@ -66,6 +66,7 @@ public class CavityAjax extends HttpServlet {
                 hasError = true;
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 LOGGER.log(Level.SEVERE, "Error.  No valid date requested");
+                response.setContentType("application/json");
                 pw.write("{error: 'Error. No valid date requested'}");
                 return;
             }
@@ -91,16 +92,21 @@ public class CavityAjax extends HttpServlet {
             hasError = true;
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
+            response.setContentType("application/json");
             pw.write("{error: 'Error parsing start/end parameters'}");
             return;
         }
 
         if ( ! start.before(end) ) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json");
             pw.write("{error: 'start cannot be after end'}");
             return;
          }
         if ( end.after(new Date()) ) {
-            pw.write("{error: 'end cannot be a future date'}");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json");
+            pw.write("{\"error\":\"end cannot be a future date\"}");
             return;
         }
         
@@ -110,7 +116,8 @@ public class CavityAjax extends HttpServlet {
         } else if ( ! out.equals("json") ) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             LOGGER.log(Level.SEVERE, "Unsupported out value supplied {0}", out);
-            pw.write("{error: 'Unsupported out value \"" + out + "\" supplied'}");
+            response.setContentType("application/json");
+            pw.write("{error:\"Unsupported out value '" + out + "' supplied\"}");
             return;
         }
 
@@ -120,6 +127,7 @@ public class CavityAjax extends HttpServlet {
         } else if ( ! timeUnit.equals("day") && ! timeUnit.equals("week")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             LOGGER.log(Level.SEVERE, "Unsupported timeUnit value supplied {0}", timeUnit);
+            response.setContentType("application/json");
             pw.write("{error: 'Unsupported timeUnit value \"" + timeUnit + "\" supplied'}");
             return;
         }
@@ -132,6 +140,7 @@ public class CavityAjax extends HttpServlet {
             } catch (ParseException ex) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 LOGGER.log(Level.SEVERE, "Error querying cavity data service", ex);
+                response.setContentType("application/json");
                 pw.write("{error: 'Error querying cavity data service'}");
                 return;
             }
@@ -141,6 +150,7 @@ public class CavityAjax extends HttpServlet {
             } catch (ParseException ex) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 LOGGER.log(Level.SEVERE, "Error querying cavity data service", ex);
+                response.setContentType("application/json");
                 pw.write("{error: 'Error querying cavity data service'}");
                 return;
             }

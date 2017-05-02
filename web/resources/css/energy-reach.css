@@ -8,8 +8,6 @@ and open the template in the editor.
     Author     : adamc
 */
 
-table, th, td {
-    font-size:  xx-small;
-    border: 1px solid black;
-    border-collapse: collapse;
+#diff-table-advanced-wrap {
+    display: none;
 }

@@ -28,6 +28,15 @@ jlab.mod_anode.loadCharts = function (url, start, end, timeUnit) {
         }
     };
     jlab.barChart.updateChart(settings1);
+    $('#mav-count-by-linac').bind("plotclick", function (event, pos, item) {
+        if (item) {
+            var timestamp = item.series.data[item.dataIndex][0];
+            var dateString = jlab.millisToDate(timestamp);
+            var url = "/RFDashboard/mod-anode?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString;
+            console.log("Linking to " + url);
+            window.location.href = url;
+        }
+    });
 
     var settings2 = {
         chartId: 'mav-count-by-cmtype',
@@ -47,6 +56,15 @@ jlab.mod_anode.loadCharts = function (url, start, end, timeUnit) {
         }
     };
     jlab.barChart.updateChart(settings2);
+    $('#mav-count-by-cmtype').bind("plotclick", function (event, pos, item) {
+        if (item) {
+            var timestamp = item.series.data[item.dataIndex][0];
+            var dateString = jlab.millisToDate(timestamp);
+            var url = "/RFDashboard/mod-anode?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString;
+            console.log("Linking to " + url);
+            window.location.href = url;
+        }
+    });
 };
 
 /* 
@@ -57,8 +75,8 @@ jlab.mod_anode.loadCharts = function (url, start, end, timeUnit) {
 jlab.mod_anode.createTable = function (tableId, date) {
 
     jlab.cavity.getCavityData({
-        start: date,
-        end: jlab.addDays(date, 1),
+        start: jlab.addDays(date, -1),
+        end: date,
         timeUnit: "day",
         success: function (jsonData, textStatus, jqXHR) {
             console.log(jsonData);
@@ -89,7 +107,6 @@ jlab.mod_anode.createTable = function (tableId, date) {
 $(function () {
 
     jlab.mod_anode.createTable("mav-table", jlab.tableDate);
-
     jlab.mod_anode.loadCharts(jlab.mavUrl, jlab.start, jlab.end, jlab.timeUnit);
 
     // Setup the date picker(s)

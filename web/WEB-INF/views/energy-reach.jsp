@@ -13,6 +13,7 @@
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/flot-barchart.css"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter.css"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/energy-reach.css"/>
     </jsp:attribute>
     <jsp:attribute name="scripts">
         <script type="text/javascript" src="${initParam.cdnContextPath}/everpolate/everpolate.browserified.min.js"></script>
@@ -25,9 +26,9 @@
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cavity.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/chart-widget.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/energy-reach.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tablesorter.min.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tablesorter.pager.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/energy-reach.js"></script>
 
     </jsp:attribute>
     <jsp:body>
@@ -51,14 +52,12 @@
                     </div>
                     <div class="li-key">
                         <label class="required-field" for="diffStart" title="">Delta Start</label>
-<!--                        <div class="date-note">(Inclusive)</div>-->
                     </div>
                     <div class="li-value">
                         <input type="text" class="date-field" id="diffStart" name="diffStart" placeholder="YYYY-MM-DD" value="${requestScope.diffStart}"/>
                     </div>
                     <div class="li-key">
                         <label class="required-field" for="diffEnd" title="">Delta End</label>
-<!--                        <div class="date-note">(Exclusive)</div>-->
                     </div>
                     <div class="li-value">
                         <input type="text" class="date-field nowable-field" id="diffEnd" name="diffEnd" placeholder="YYYY-MM-DD" value="${requestScope.diffEnd}"/>
@@ -68,10 +67,12 @@
             </form>
         </div>
         <t:chart-widget placeholderId="energy-reach"></t:chart-widget>
-        <br></br><hr style="border: none; height: 3px; background-color: #330000"></hr><br></br>
+            <br></br><hr style="border: none; height: 3px; background-color: #330000"></hr><br></br>
         <t:chart-widget placeholderId="lem-scan"></t:chart-widget>
             <hr></hr><br></br>
-        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" tableId="diff-table"></t:tablesorter>
+        <button id="menu-toggle">Basic/Advanced</button>
+        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" tableId="diff-table-basic"></t:tablesorter>
+        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" tableId="diff-table-advanced"></t:tablesorter>
             <script>
                 var jlab = jlab || {};
                 jlab.start = "${requestScope.start}";

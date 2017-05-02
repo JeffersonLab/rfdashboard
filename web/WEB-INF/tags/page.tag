@@ -37,10 +37,10 @@
                 <h1><span id="page-header-logo"></span><span id="page-header-text"><c:out value="${initParam.appName}" /></span></h1>
                 <nav id="primary-nav">
                     <ul>
-                        <li ${'/overview' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/overview">Overview</a></li>
+                        <li ${'/energy-reach' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/energy-reach?start=${pageStart}&end=${pageEnd}">Energy Reach</a></li>
                         <li ${'/mod-anode' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/mod-anode?start=${pageStart}&end=${pageEnd}">Mod Anode</a></li>
                         <li ${'/bypassed' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/bypassed?start=${pageStart}&end=${pageEnd}">Bypassed</a></li>
-                        <li ${'/energy-reach' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/energy-reach?start=${pageStart}&end=${pageEnd}">Energy Reach</a></li>
+                        <li ${'/links' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/links">Links</a></li>
                     </ul>
                 </nav>
             </header>
