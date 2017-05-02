@@ -6,7 +6,7 @@
 	 version="3.1">
     <context-param>
         <param-name>NotificationBar</param-name>
-        <param-value>Notice: This is a test system.</param-value>
+        <param-value></param-value>
     </context-param>
     <context-param>
         <param-name>appName</param-name>
@@ -22,15 +22,15 @@
     </context-param>
     <context-param>
         <param-name>resourceVersionNumber</param-name>
-        <param-value>1</param-value>
+        <param-value>2</param-value>
     </context-param>
     <context-param>
         <param-name>releaseNumber</param-name>
-        <param-value>0.1</param-value>
+        <param-value>1.0</param-value>
     </context-param>
     <context-param>
         <param-name>releaseDate</param-name>
-        <param-value>20 April 2017</param-value>
+        <param-value>2 Mayl 2017</param-value>
     </context-param>
         <filter>
         <filter-name>UrlRewriteFilter</filter-name>
