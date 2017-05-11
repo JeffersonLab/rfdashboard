@@ -6,6 +6,11 @@
 
 var jlab = jlab || {};
 
+jlab.contextPath = '/RFDashboard';
+jlab.isRequest = function() { return jlab.ajaxInProgress; };
+jlab.requestStart = function() { jlab.ajaxInProgress = true; };
+jlab.requestEnd = function() { jlab.ajaxInProgress = false; };
+
 jlab.colors = jlab.colors || {};
 // Inj, North, South, Total, Unknown
 jlab.colors.linacs = ["#FF0000", "#006400", "#273BE7", "#333333", "#ECAF2F"];

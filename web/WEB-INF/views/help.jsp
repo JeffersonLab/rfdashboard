@@ -11,8 +11,74 @@
 <c:set var="title" value="Help"/>
 <t:page title="${title}">
     <jsp:attribute name="stylesheets">
+        <style type="text/css">
+            #subject {
+                width: 375px;
+            }
+            #body {
+                width: 375px;
+                height: 200px;
+            }
+            #send-feedback-button {
+                float: right;
+            }
+            #feedback-fieldset {
+                width: 500px;
+            }
+        </style>
     </jsp:attribute>
     <jsp:attribute name="scripts">
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
+        <script type="text/javascript">
+            var jlab = jlab || {};
+            jlab.feedback = jlab.feedback || {};
+
+            jlab.feedback.sendEmail = function() {
+                if (jlab.isRequest()) {
+                    window.console && console.log("Ajax already in progress");
+                    return;
+                }
+
+                jlab.requestStart();
+
+                var subject = $("#subject").val(),
+                        body = $("#body").val();
+
+                var request = jQuery.ajax({
+                    url: jlab.contextPath + "/ajax/feedback",
+                    type: "POST",
+                    data: {
+                        subject: subject,
+                        body: body
+                    },
+                    dataType: "html"
+                });
+
+                request.done(function(data) {
+                    if ($(".status", data).html() !== "Success") {
+                        alert('Unable to send email: ' + $(".reason", data).html());
+                    } else {
+                        $("#subject").val('');
+                        $("#body").val('');
+                        alert('Email sent');
+                    }
+
+                });
+
+                request.error(function(xhr, textStatus) {
+                    window.console && console.log('Unable to send email: Text Status: ' + textStatus + ', Ready State: ' + xhr.readyState + ', HTTP Status Code: ' + xhr.status);
+                    alert('Unable to send email');
+                });
+
+                request.always(function() {
+                    jlab.requestEnd();
+                });
+            };
+
+            $(document).on("click", "#send-feedback-button", function() {
+                jlab.feedback.sendEmail();
+            });
+        </script>        
     </jsp:attribute>        
     <jsp:body>
         <section>
@@ -43,14 +109,6 @@
                     <fieldset id="feedback-fieldset">
                         <form method="post" action="ajax/feedback">
                             <ul class="key-value-list">
-                                <li>
-                                    <div class="li-key"><label class="required-field" for="name">Name</label></div>
-                                    <div class="li-value"><input type="text" id="name" name="name"/></div>
-                                </li>
-                                <li>
-                                    <div class="li-key"><label class="required-field" for="email">Email</label></div>
-                                    <div class="li-value"><input type="text" id="email" name="email"/></div>
-                                </li>
                                 <li>
                                     <div class="li-key"><label class="required-field" for="subject">Subject</label></div>
                                     <div class="li-value"><input type="text" id="subject" name="subject"/></div>

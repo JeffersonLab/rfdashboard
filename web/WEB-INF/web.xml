@@ -9,6 +9,10 @@
         <param-value></param-value>
     </context-param>
     <context-param>
+        <param-name>FeedbackUsers</param-name>
+        <param-value>adamc</param-value>
+    </context-param>
+    <context-param>
         <param-name>appName</param-name>
         <param-value>RF Dashboard</param-value>
     </context-param>
@@ -30,7 +34,7 @@
     </context-param>
     <context-param>
         <param-name>releaseDate</param-name>
-        <param-value>2 Mayl 2017</param-value>
+        <param-value>2 May 2017</param-value>
     </context-param>
         <filter>
         <filter-name>UrlRewriteFilter</filter-name>
