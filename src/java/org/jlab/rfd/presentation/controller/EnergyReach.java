@@ -81,6 +81,12 @@ public class EnergyReach extends HttpServlet {
             }
         }
 
+                // Throws a RuntimeException if invalid
+        if ( start != null && end != null) {
+            ParamChecker.validateStartEnd(start, end);
+        }
+
+        
         if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
             // Default to week
             LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");

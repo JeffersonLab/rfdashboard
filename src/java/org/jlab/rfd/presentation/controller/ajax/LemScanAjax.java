@@ -48,13 +48,13 @@ public class LemScanAjax extends HttpServlet {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date start, end;
-
+        
         String type = request.getParameter("type");
         if (type == null) {
             LOGGER.log(Level.WARNING, "type parameter is required.  Supported options are day-scan, reach-scan");
-            
-            
-        // day-scan type request
+            throw new ServletException("Error: type parameter is required.  Supported options are day-scan, reach-scan");
+
+            // day-scan type request
         } else if (type.equals("day-scan")) {
             // We only want one day of lem scans, but the getLemSpan method wants start and end with end being exclusive.
             // Set end to start + 1day

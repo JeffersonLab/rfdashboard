@@ -7,9 +7,58 @@
 var jlab = jlab || {};
 
 jlab.contextPath = '/RFDashboard';
-jlab.isRequest = function() { return jlab.ajaxInProgress; };
-jlab.requestStart = function() { jlab.ajaxInProgress = true; };
-jlab.requestEnd = function() { jlab.ajaxInProgress = false; };
+jlab.isRequest = function () {
+    return jlab.ajaxInProgress;
+};
+jlab.requestStart = function () {
+    jlab.ajaxInProgress = true;
+};
+jlab.requestEnd = function () {
+    jlab.ajaxInProgress = false;
+};
+
+//// "Unminified" version of tryAutoLogin from smoothness
+//jlab.tryAutoLogin = function () {
+//    var e = false;
+//    var auth = jQuery.ajax({
+//        url: "/spnego/ace-auth",
+//        type: "GET",
+//        dataType: "json",
+//        done: function (t) {
+//            null !== t.username && "" !== t.username && "null" !== t.username && (e = false, window.location.reload());
+//        },
+//        error: function (e, t) {
+//            window.console && console.log("Unable to auto-login: Text Status: " + t + ", Ready State: " + e.readyState + ", HTTP Status Code: " + e.status);
+//        },
+//        always: function () {
+//            e || jlab.tryAutoLoginCue();
+//        }
+//    });
+//};
+//
+//// "Unminified" version of tryAutoLoginCue from smoothness
+//jlab.tryAutoLoginCue = function () {
+//    var e = false;
+//    var t = jQuery.ajax({
+//        url: "/spnego/cue-auth",
+//        type: "GET",
+//        dataType: "json",
+//        done: function (t) {
+//            null !== t.username && "" !== t.username && "null" !== t.username && (e = !0, window.location.reload());
+//        },
+//        error: function (e, t) {
+//            window.console && console.log("Unable to auto-login: Text Status: " + t + ", Ready State: " + e.readyState + ", HTTP Status Code: " + e.status);
+//        },
+//        always: function () {
+//            e || document.getElementById("login-link").click();
+//        }
+//    });
+//};
+//
+//// "Unminified" version from smoothness
+//$(document).on("click", "#auto-login", function () {
+//    return jlab.tryAutoLogin(), false;
+//});
 
 jlab.colors = jlab.colors || {};
 // Inj, North, South, Total, Unknown
@@ -24,7 +73,7 @@ jlab.getMinDataWidth = function (data) {
     var maxLength = 0;
 
     for (var i = 0; i < data.length; i++) {
-        if ( data[i].length > maxLength ) {
+        if (data[i].length > maxLength) {
             maxLength = data[i].length;
         }
         for (var j = 1; j < data[i].length; j++) {
@@ -34,9 +83,9 @@ jlab.getMinDataWidth = function (data) {
             }
         }
     }
-    
+
     // If only one datapoint is in the list, assume a width of 1 day
-    if ( maxLength === 1 ) {
+    if (maxLength === 1) {
         min = 60 * 60 * 24 * 1000;
     }
     return min;
@@ -54,13 +103,13 @@ jlab.showTooltip = function (x, y, contents, z) {
 
 // date: a yyyy-mm-dd formated string
 // numDays: number of days to add
-jlab.addDays = function(date, numDays) {
+jlab.addDays = function (date, numDays) {
     var dateParts = date.split('-');
     var y = parseInt(dateParts[0], 10);
     var m = parseInt(dateParts[1], 10);
     var d = parseInt(dateParts[2], 10);
-    
-    var nDate = new Date(y, m-1, d + numDays);
+
+    var nDate = new Date(y, m - 1, d + numDays);
     var ny = nDate.getFullYear();
     var nm = nDate.getMonth() + 1;
     if (nm < 10) {
@@ -71,23 +120,23 @@ jlab.addDays = function(date, numDays) {
     if (nd < 10) {
         nd = "0" + nd;
     }
-    
+
     // javascript Date month is an enum (zero-indexed)
     return ny + "-" + nm + "-" + nd;
 };
 
 // Turn javascript time (in milliseconds) to our standard yyyy-MM-dd format truncating the hh:mm:ss portions
-jlab.millisToDate = function(time) {
+jlab.millisToDate = function (time) {
     var date = new Date(time);
-    
+
     // check if the number has at least two digits.  Add a zero in front if not.
-    var pad = function(num) {
-        return (num/10 < 1 ? '0' : '') + "" + num;
+    var pad = function (num) {
+        return (num / 10 < 1 ? '0' : '') + "" + num;
     };
-    
+
     // All of our server-side dates are handled as UTC and are truncated to the day.  Using methods like getDate()
     // return the date in local time which would be off by a day when we do the -4/5 hours for EDT/EST.
-    var out = date.getUTCFullYear() + "-" + pad(date.getUTCMonth()+1) + "-" + pad(date.getUTCDate());
+    var out = date.getUTCFullYear() + "-" + pad(date.getUTCMonth() + 1) + "-" + pad(date.getUTCDate());
     console.log(out);
     console.log(date.toISOString());
     return out;

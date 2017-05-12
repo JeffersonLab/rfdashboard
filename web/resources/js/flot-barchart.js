@@ -121,6 +121,8 @@ jlab.barChart.updateChart = function (settings) {
             console.log("  errorThrown" + errorThrown);
         },
         success: function (jsonData, textStatus, jqXHR) {
+     
+            
             // The repsonse should be formated 
             // {
             //    labels:["label_1",...,"label_n"],
@@ -130,6 +132,14 @@ jlab.barChart.updateChart = function (settings) {
             //              [[t_1, d_1], ..., [t_k,d_k]]_n
             //           ]
             // }
+
+            // Make sure we requested a time period with some data
+            if (typeof jsonData.data[0] === "undefined") {
+                $('#' + chartId + "-loader").hide();
+                $("#" + chartId).append("No energy reach data available for<br>" + start + " - " + end);
+                return;
+            }
+
 
             var lineWidth = 1;
             var fill = true;
@@ -177,7 +187,7 @@ jlab.barChart.updateChart = function (settings) {
                 options.xaxis.max = xMax;
             }
 
-            if (jsonData.data[0].length <= 15) {
+            if (jsonData.data[0].length <= 3) {
                 var tickSize;
                 var ticks = [];
                 tickSize = [7, "day"];

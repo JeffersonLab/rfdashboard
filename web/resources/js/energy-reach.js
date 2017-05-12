@@ -35,7 +35,7 @@ jlab.energyReach.loadCharts = function (url, start, end, diffEnd, timeUnit) {
         yMin: 1000,
         yMax: 1190,
         timeMode: true,
-        title: "Linac Energy Reach",
+        title: "Linac Energy Reach <br>" + start + " to " + end,
         clickable: true,
         ajaxData: {
             "start": start,
