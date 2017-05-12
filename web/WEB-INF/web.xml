@@ -26,7 +26,7 @@
     </context-param>
     <context-param>
         <param-name>resourceVersionNumber</param-name>
-        <param-value>3</param-value>
+        <param-value>4</param-value>
     </context-param>
     <context-param>
         <param-name>releaseNumber</param-name>
