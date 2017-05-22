@@ -29,7 +29,7 @@ import javax.json.JsonReader;
 public class MyaService {
 
     private static final Logger LOGGER = Logger.getLogger(MyaService.class.getName());
-    public static final String MYSAMPLER_URL = "http://myawebtest.acc.jlab.org/mySampler/data";
+    public static final String MYSAMPLER_URL = "http://myaweb.acc.jlab.org/mySampler/data";
 
 
     /*
