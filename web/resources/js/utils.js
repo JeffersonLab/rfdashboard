@@ -167,3 +167,14 @@ jlab.getArgNames = function (func) {
 
     return args;
 };
+
+jlab.verifyArgs = function(funcName) {
+    var argNames = jlab.getArgNames(funcName);
+    for(var i = 0; i < arguments.length; i++) {
+        if ( typeof arguments[i] === 'undefined' ) {
+            var msg = "Error: missing " + argNames[i] + " is required";
+            window.console && console.log(msg);
+            throw msg;
+        }
+    }
+};
