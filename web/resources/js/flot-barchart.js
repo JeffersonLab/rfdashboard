@@ -29,8 +29,8 @@ jlab.barChart.updateChart = function (settings) {
 
     var exitFunc = function (msg) {
         $("#" + chartId).prepend(msg);
-          $('#' + chartId + "-loader").hide();
-        console.log(msg);
+        $('#' + chartId + "-loader").hide();
+        window.console && console.log(msg);
         throw msg;
     };
 
