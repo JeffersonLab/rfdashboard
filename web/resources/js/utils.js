@@ -141,3 +141,29 @@ jlab.millisToDate = function (time) {
     console.log(date.toISOString());
     return out;
 };
+
+
+// This does a decent job of parsing out argument names of a function.
+// It gets tripped up by things like defualt values using '()' (e.g. a  = 1 / (5*7)),
+// but I don't tend to do those things.
+jlab.getArgNames = function (func) {
+
+    // Big chain of functions...
+    var args = func.toString()
+            // Remove inline comments.
+            .replace(/\/\*.*\*\//, '')
+            // Match everything inside the function argument parens.
+            .match(/function\s.*?\(([^)]*)\)/)[1]
+            // Split to array on commas
+            .split(',')
+            // Remove unnecessary whitespace
+            .map(function (arg) {
+                return arg.trim();
+            })
+            // Ensure no undefined values are added
+            .filter(function (arg) {
+                return arg;
+            });
+
+    return args;
+};
