@@ -17,10 +17,7 @@ jlab.errorBarChart = jlab.errorBarChart || {};
 //     - labels: an array of HTML strings that label the series
 //     - timeUnit: a string defining alternatively the distance between data points or the time span for which statistics are calculated.
 //     - title: title of the chart
-
-
-
-
+//     - tooltip: true or false to enable/disable tooltips.  Useful for setting up more complicated behavior
 
 jlab.errorBarChart.drawChart = function (chartId, data, flotOptions, settings) {
     var exitFunc = function (msg) {
@@ -86,7 +83,6 @@ jlab.errorBarChart.drawChart = function (chartId, data, flotOptions, settings) {
     }
 
     var plotData = [];
-
     for (i = 0; i < data.length; i++) {
         plotData[i] = {
             points: {
@@ -109,49 +105,51 @@ jlab.errorBarChart.drawChart = function (chartId, data, flotOptions, settings) {
     // Add a custom legend off to the side
     jlab.barChart.addLegend(chartId, settings.colors, settings.labels);
     // These prev_* variables track whether or not the plothover event is for the same bar -- removes the "flicker" effect.
-    var prev_point = null;
-    var prev_label = null;
-    var timeUnit = settings.timeUnit;
-    $('#' + chartId).bind("plothover", function (event, pos, item) {
-        if (item) {
-            if ((prev_point !== item.dataIndex) || (prev_label !== item.series.label)) {
-                prev_point = item.dataIndex;
-                prev_label = item.series.label;
-                $('#flot-tooltip').remove();
-                // The item.datapoint is x coordinate of the bar, not of the original data point.  item.series.data contains
-                // the original data, and item.dataIndex this item's index in the data.
-                var timestamp = item.series.data[item.dataIndex][0];
-                var start = new Date(timestamp);
-                start = jlab.triCharMonthNames[start.getMonth()] + " " + start.getDate();
-                var end, dateRange;
+    if (settings.tooltips !== false) {
+        var prev_point = null;
+        var prev_label = null;
+        var timeUnit = settings.timeUnit;
+        $('#' + chartId).bind("plothover", function (event, pos, item) {
+            if (item) {
+                if ((prev_point !== item.dataIndex) || (prev_label !== item.series.label)) {
+                    prev_point = item.dataIndex;
+                    prev_label = item.series.label;
+                    $('#flot-tooltip').remove();
+                    // The item.datapoint is x coordinate of the bar, not of the original data point.  item.series.data contains
+                    // the original data, and item.dataIndex this item's index in the data.
+                    var timestamp = item.series.data[item.dataIndex][0];
+                    var start = new Date(timestamp);
+                    start = jlab.triCharMonthNames[start.getMonth()] + " " + start.getDate();
+                    var end, dateRange;
 
-                if (timeUnit === "week") {
-                    end = new Date(timestamp);
-                    end.setDate(end.getDate() + 7);
-                    end = jlab.triCharMonthNames[end.getMonth()] + " " + end.getDate();
-                    dateRange = start + " - " + end;
-                } else if (timeUnit === "day") {
-                    end = new Date(timestamp);
-                    end.setDate(end.getDate() + 1);
-                    end = jlab.triCharMonthNames[end.getMonth()] + " " + end.getDate();
-                    dateRange = start + " - " + end;
-                } else {
-                    dateRange = "Begining " + start;
+                    if (timeUnit === "week") {
+                        end = new Date(timestamp);
+                        end.setDate(end.getDate() + 7);
+                        end = jlab.triCharMonthNames[end.getMonth()] + " " + end.getDate();
+                        dateRange = start + " - " + end;
+                    } else if (timeUnit === "day") {
+                        end = new Date(timestamp);
+                        end.setDate(end.getDate() + 1);
+                        end = jlab.triCharMonthNames[end.getMonth()] + " " + end.getDate();
+                        dateRange = start + " - " + end;
+                    } else {
+                        dateRange = "Begining " + start;
+                    }
+
+                    var mean = item.datapoint[1];
+                    var sigma = item.datapoint[2];
+                    var borderColor = item.series.color;
+                    var content = "<b>Series:</b> " + item.series.label
+                            + "<br /><b>Date:</b> " + dateRange
+                            + "<br /><b>Mean:</b> " + mean
+                            + "<br/><b>Sigma:</b> " + sigma;
+                    jlab.showTooltip(item.pageX + 20, item.pageY - 20, content, borderColor);
                 }
-
-                var mean = item.datapoint[1];
-                var sigma = item.datapoint[2];
-                var borderColor = item.series.color;
-                var content = "<b>Series:</b> " + item.series.label
-                        + "<br /><b>Date:</b> " + dateRange
-                        + "<br /><b>Mean:</b> " + mean
-                        + "<br/><b>Sigma:</b> " + sigma;
-                jlab.showTooltip(item.pageX + 20, item.pageY - 20, content, borderColor);
+            } else {
+                $('#flot-tooltip').remove();
+                prev_point = null;
+                prev_label = null;
             }
-        } else {
-            $('#flot-tooltip').remove();
-            prev_point = null;
-            prev_label = null;
-        }
-    });
+        });
+    }
 };

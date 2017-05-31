@@ -29,80 +29,128 @@ jlab.cryo.updateCryoPressureChart = function (chartId, linac, start, end, timeUn
     }
 
     var dayDiff = jlab.daysBetweenDates(start, end);
-    var numSteps = Math.floor(dayDiff / numDays);
+    var numSteps = Math.floor(dayDiff / numDays) + 1;  // +1 to add back in the starting point
 
     var i = 0;
-    var promise = $.ajax({
+    // Get the cryo pressure data
+    var cryoPromise = $.ajax({
         url: "http://myaweb.acc.jlab.org/myStatsSampler/data",
         data: {
             b: start,
             n: numSteps,
             s: 1,
-            sUnit: timeUnit,  // supports second, day, week as of 2017-05-30
+            sUnit: timeUnit, // supports second, day, week as of 2017-05-30
             l: "CPI4107B,CPI5107B"
-//            l: pv
         },
         dataType: "jsonp",
         jsonp: "jsonp",
         beforeSend: jlab.showChartLoading(chartId)
     });
-    
-    // The myStatsSampler service can respond in the following ways:
-    //  - Return some non-OK HTTP status / server error without data (promise.fail - expected failure behavior)
-    //  - Return some non-OK HTTP status and something totally unexpected (promise.fail - unexpected failure behavior)
-    //  - Return some OK HTTP status, but each bin's object can contain an error parameter or data (promise.done - successful myStatsSampler
-    //    run, but zero or more bins had errors)
-    //    
-    // Expecting {data: [ {start: 'yyyy-MM-dd[ HH:mm:ss]', output: [{name: "PVName", min: "##.###',...}, ..., {name: ...}]}
-    //                          {start: ..., output: [...]}
-    //                }
-    // OR
-    // {data: [], error: "<message>"}
-    promise.done(function (json) {
+
+    // Get the Energy Reach data
+    var lemPromise = $.ajax({
+        url: "/RFDashboard/ajax/lem-scan",
+        data: {
+            "start": start,
+            "end": end,
+            "type": "reach-scan"
+        }
+    });
+
+    $.when(cryoPromise, lemPromise).then(function (cryoAjax, lemAjax) {
+        // First the success/done handler
+        // The myStatsSampler service can respond in the following ways:
+        //  - Return some non-OK HTTP status / server error without data (promise.fail - expected failure behavior)
+        //  - Return some non-OK HTTP status and something totally unexpected (promise.fail - unexpected failure behavior)
+        //  - Return some OK HTTP status, but each bin's object can contain an error parameter or data (promise.done - successful myStatsSampler
+        //    run, but zero or more bins had errors)
+        //    
+        // Expecting {data: [ {start: 'yyyy-MM-dd[ HH:mm:ss]', output: [{name: "PVName", min: "##.###',...}, ..., {name: ...}]}
+        //                          {start: ..., output: [...]}
+        //                }
+        // OR
+        // {data: [], error: "<message>"}
+        var cryoData = cryoAjax[0];
+        var lemData = lemAjax[0].data[0]; // This now contains a single flot formated data series [ [x,y], [x,y], ...]
         var flotData;
 
-        var labels = ["<b>North</b> (CPI4107B)", "<b>South</b> (CPI5107B)"];
-        var colors = jlab.colors.linacs.slice(1,3);
+        var labels = ["<b>North</b> (CPI4107B)", "<b>South</b> (CPI5107B)", "<b>Energy Reach</b>"];
+        var labelMap = new Map();
+        labelMap.set("CPI4107B", "<b>North</b> (CPI4107B)");
+        labelMap.set("CPI5107B", "<b>South</b> (CPI5107B)");
+        var colors = jlab.colors.linacs.slice(1, 4);  // North, South, Total (Total is used for Energy Reach)
+        var colorMap = new Map();
+        colorMap.set("CPI4107B", colors[0]);
+        colorMap.set("CPI5107B", colors[1]);
 
-        if ( ! Array.isArray(json.data) ) {
+        if (!Array.isArray(cryoData.data)) {
             jlab.hideChartLoading(chartId, "Unexpected error querying data service.");
         } else {
-            flotData = new Array(json.data[0].output.length);
+            flotData = new Array(cryoData.data[0].output.length + 1); // Two linacs, plus energy reach data
             var d, mean, sigma;
-            for (var i = 0; i < json.data.length; i++) {
-                d = new Date(json.data[i].start); // treated as UTC, but thats how all of the dates are being displayed.
-                for (var j = 0; j < json.data[i].output.length; j++) {
-                    if ( typeof flotData[j] !== "object" ) {
+            for (var i = 0; i < cryoData.data.length; i++) {
+                d = new Date(cryoData.data[i].start); // treated as UTC, but thats how all of the dates are being displayed.
+                for (var j = 0; j < cryoData.data[i].output.length; j++) {
+                    if (typeof flotData[j] !== "object") {
                         flotData[j] = {
                             data: new Array(),
-                            label: labels[j],
-                            color: colors[j]
+                            label: labelMap.get(cryoData.data[i].output[j].name),
+                            color: colorMap.get(cryoData.data[i].output[j].name)
                         };
                     }
-                    mean = json.data[i].output[j].mean;
-                    sigma = json.data[i].output[j].sigma;
-                    flotData[j].data.push( [d.getTime(), mean, sigma]);
+                    mean = cryoData.data[i].output[j].mean;
+                    sigma = cryoData.data[i].output[j].sigma;
+                    flotData[j].data.push([d.getTime(), mean, sigma]);
                 }
             }
+            flotData[2] = {
+                data: lemData,
+                label: "Energy Reach",
+                color: colors[2], // the "Total" color
+                yaxis: 2,
+                // We want this to display as a line, not a series of error bars
+                points: {show: false, errorbars: "n"},
+                // This causes a weird bug where panning the graph to the left so that the right-most point of the line
+                // is no longer visible results in the entire canvas above the line being filled with the fillColor.  Weird ...
+//                lines: {show: true, fill: true, fillColor: colors[2]}
+                lines: {show: true}
+            };
+            jlab.hideChartLoading(chartId);
+            var settings = {
+                tooltips: false,
+                timeUnit: timeUnit,
+                colors: colors,
+                labels: labels,
+                title: "Linac Cryogen Pressure</strong><br/>(" + start + " to " + end + " by " + timeUnit + ")<strong>"
+            };
+            var flotOptions = {
+                xaxes: [{mode: "time"}],
+                yaxes: [
+                    {axisLabel: "Pressure"},
+                    {
+                        axisLabel: "Energy Reach (MeV)",
+                        min: 1000,
+                        max: 1190,
+                        position: "right",
+                        alignTicksWithAxis: false,
+                        zoomRange: false,
+                        panRange: false
+                    }
+                ]
+            };
+            // Expects an array of flot data arrays.  E.g.,
+            // [ [millis, mean, sigma], [millis, mean, sigma], ...],
+            //   [millis, mean, sigma], [millis, mean, sigma], ...],
+            //   ...
+            // ]
+
+            jlab.errorBarChart.drawChart(chartId, flotData, flotOptions, settings);
+            jlab.cryo.addCryoReachToolTip(chartId, timeUnit);
+
         }
-        jlab.hideChartLoading(chartId);
-        var settings = {
-            timeUnit: timeUnit,
-            colors: colors,
-            labels: labels,
-            title: "Linac Cryogen Pressure</strong><br/>(" + start + " to " + end + " by " + timeUnit + ")<strong>"
-        };
-        var flotOptions = {yaxis: {axisLabel: "Pressure"}};
-        // Expects an array of flot data arrays.  E.g.,
-        // [ [millis, mean, sigma], [millis, mean, sigma], ...],
-        //   [millis, mean, sigma], [millis, mean, sigma], ...],
-        //   ...
-        // ]
-     
-        jlab.errorBarChart.drawChart(chartId, flotData, flotOptions, settings);
-    });
-    
-    promise.fail(function (jqXHR) {
+    }, function (jqXHR) {
+        // Then add the error hanlder
+        // 
         // Unless something went really wrong, the responseText should be a json object and should have an error parameter
         var json;
         var message;
@@ -124,13 +172,73 @@ jlab.cryo.updateCryoPressureChart = function (chartId, linac, start, end, timeUn
     });
 };
 
-$(function() {
-    
+jlab.cryo.addCryoReachToolTip = function (chartId, timeUnit) {
+    var prev_point = null;
+    var prev_label = null;
+    $('#' + chartId).bind("plothover", function (event, pos, item) {
+        if (item) {
+            if ((prev_point !== item.dataIndex) || (prev_label !== item.series.label)) {
+                prev_point = item.dataIndex;
+                prev_label = item.series.label;
+                $('#flot-tooltip').remove();
+                
+                var content, borderColor;
+                if (item.series.label === "Energy Reach") {
+                    var timestamp = item.series.data[item.dataIndex][0];
+                    var start = new Date(timestamp);
+                    start = jlab.triCharMonthNames[start.getMonth()] + " " + start.getDate();
+                    var reach = item.datapoint[1];
+                    borderColor = item.series.color;
+                    content = "<b>Series:</b> " + item.series.label
+                            + "<br /><b>Date:</b> " + start
+                            + "<br /><b>Reach (MeV):</b> " + reach;
+                } else {
+                    // The item.datapoint is x coordinate of the bar, not of the original data point.  item.series.data contains
+                    // the original data, and item.dataIndex this item's index in the data.
+                    var timestamp = item.series.data[item.dataIndex][0];
+                    var start = new Date(timestamp);
+                    start = jlab.triCharMonthNames[start.getMonth()] + " " + start.getDate();
+                    var end, dateRange;
+
+                    if (timeUnit === "week") {
+                        end = new Date(timestamp);
+                        end.setDate(end.getDate() + 7);
+                        end = jlab.triCharMonthNames[end.getMonth()] + " " + end.getDate();
+                        dateRange = start + " - " + end;
+                    } else if (timeUnit === "day") {
+                        end = new Date(timestamp);
+                        end.setDate(end.getDate() + 1);
+                        end = jlab.triCharMonthNames[end.getMonth()] + " " + end.getDate();
+                        dateRange = start + " - " + end;
+                    } else {
+                        dateRange = "Begining " + start;
+                    }
+
+                    var mean = item.datapoint[1];
+                    var sigma = item.datapoint[2];
+                    borderColor = item.series.color;
+                    content = "<b>Series:</b> " + item.series.label
+                            + "<br /><b>Date:</b> " + dateRange
+                            + "<br /><b>Mean:</b> " + mean
+                            + "<br/><b>Sigma:</b> " + sigma;
+                }
+                jlab.showTooltip(item.pageX + 20, item.pageY - 20, content, borderColor);
+            }
+        } else {
+            $('#flot-tooltip').remove();
+            prev_point = null;
+            prev_label = null;
+        }
+    });
+};
+
+$(function () {
+
     $(".date-field").datepicker({
         dateFormat: "yy-mm-dd"
     });
 
     jlab.cryo.updateCryoPressureChart('cryo-pressure-north', 'north', jlab.start, jlab.end, jlab.timeUnit);
-    
+
 
 });
