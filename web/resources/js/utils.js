@@ -125,7 +125,7 @@ jlab.addDays = function (date, numDays) {
     return ny + "-" + nm + "-" + nd;
 };
 
-// Turn javascript time (in milliseconds) to our standard yyyy-MM-dd format truncating the hh:mm:ss portions
+// Turn javascript time (in milliseconds) to our standard yyyy-MM-dd format string truncating the hh:mm:ss portions
 jlab.millisToDate = function (time) {
     var date = new Date(time);
 
@@ -142,6 +142,15 @@ jlab.millisToDate = function (time) {
     return out;
 };
 
+// This calculates the number days between two yyyy-MM-dd formated date strings.  Converts them both to UTC as it
+// ignores DST changes and days are always 24*60*60*1000 milliseconds long.
+jlab.daysBetweenDates = function(d1, d2) {
+    var d1 = new Date(d1);  // d1 is ISO 8061 compliant.  Without time info this becomes UTC.
+    var d2 = new Date(d2);
+    
+    var millisPerDay = 24 * 60 * 60 *1000;
+    return (d2 - d1) / millisPerDay;
+};
 
 // This does a decent job of parsing out argument names of a function.
 // It gets tripped up by things like defualt values using '()' (e.g. a  = 1 / (5*7)),
@@ -168,13 +177,18 @@ jlab.getArgNames = function (func) {
     return args;
 };
 
-jlab.verifyArgs = function(funcName) {
-    var argNames = jlab.getArgNames(funcName);
-    for(var i = 0; i < arguments.length; i++) {
-        if ( typeof arguments[i] === 'undefined' ) {
-            var msg = "Error: missing " + argNames[i] + " is required";
-            window.console && console.log(msg);
-            throw msg;
-        }
+
+// Show a loading icon for the given chartId.
+// To be used with the chart-widget tag
+jlab.showChartLoading = function (chartId) {
+    $('#' + chartId + '-loader').show();
+};
+
+// Hide a loading icon for the given HTML element and optionally display message.
+// To be used with the chart-widget tag
+jlab.hideChartLoading = function (chartId, msg) {
+    if (typeof msg !== "undefined" && msg !== "") {
+        $("#" + chartId).prepend(msg);
     }
+    $('#' + chartId + "-loader").hide();
 };
