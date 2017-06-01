@@ -25,7 +25,7 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
     var i = 0;
     // Get the cryo pressure data
     var cryoPromise = $.ajax({
-        url: "http://myaweb.acc.jlab.org/myStatsSampler/data",
+        url: "https://myaweb.acc.jlab.org/myStatsSampler/data",
         data: {
             b: start,
             n: numSteps,
