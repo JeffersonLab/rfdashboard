@@ -86,24 +86,6 @@ public class Cryo extends HttpServlet {
             ParamChecker.validateStartEnd(start, end);
         }
 
-        if (request.getParameter("tableDate") == null || request.getParameter("tableDate").equals("")) {
-            // Default to end - four weeks
-            tableDate = end;
-            request.setAttribute("tableDate", sdf.format(tableDate));
-            redirectNeeded = true;
-        } else {
-            try {
-                tableDate = sdf.parse(request.getParameter("tableDate"));
-                request.setAttribute("tableDate", sdf.format(tableDate));
-            } catch (ParseException e) {
-                LOGGER.log(Level.WARNING, "Error parsing tableDate parameter '{0}'.  Defaulting to end", request.getParameter("tableDate"));
-                tableDate = end;
-                request.setAttribute("tableDate", sdf.format(tableDate));
-                redirectNeeded = true;
-            }
-        }
-        ParamChecker.validateDate(tableDate);
-
         if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
             // Default to week
             LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
@@ -122,11 +104,44 @@ public class Cryo extends HttpServlet {
             request.setAttribute("timeUnit", timeUnit);
         }
 
-        LOGGER.log(Level.FINEST,
-                "Start: {0} - End: {1}", new Object[]{request.getAttribute("start"),
-                    request.getAttribute("end")
-                }
-        );
+        Date diffStart, diffEnd;
+        if (request.getParameter("diffStart") == null || request.getParameter("diffStart").equals("")) {
+            diffStart = start;
+            request.setAttribute("diffStart", request.getAttribute("start"));
+            redirectNeeded = true;
+        } else {
+            try {
+                diffStart = sdf.parse(request.getParameter("diffStart"));
+                request.setAttribute("diffStart", sdf.format(diffStart));
+            } catch (ParseException e) {
+                LOGGER.log(Level.WARNING, "Error parsing diffStart parameter '{0}'.  Defaulting to value of start", request.getParameter("diffStart"));
+                diffStart = start;
+                request.setAttribute("diffStart", request.getAttribute("start"));
+                redirectNeeded = true;
+            }
+        }
+
+        if (request.getParameter("diffEnd") == null || request.getParameter("diffEnd").equals("")) {
+            diffEnd = end;
+            request.setAttribute("diffEnd", request.getAttribute("end"));
+            redirectNeeded = true;
+        } else {
+            try {
+                diffEnd = sdf.parse(request.getParameter("diffEnd"));
+                request.setAttribute("diffEnd", sdf.format(diffEnd));
+            } catch (ParseException e) {
+                LOGGER.log(Level.WARNING, "Error parsing diffEnd parameter '{0}'.  Defaulting to value of end", request.getParameter("diffEnd"));
+                diffEnd = end;
+                request.setAttribute("diffEnd", request.getAttribute("end"));
+                redirectNeeded = true;
+            }
+        }
+        // Throws a RuntimeException if invalid
+        if ( diffStart != null && diffEnd != null) {
+            ParamChecker.validateStartEnd(diffStart, diffEnd);
+        }
+        
+        LOGGER.log(Level.FINEST, "Start: {0} - End: {1}", new Object[]{request.getAttribute("start"), request.getAttribute("end")});
 
         if (redirectNeeded) {
             String redirectUrl;
@@ -134,7 +149,8 @@ public class Cryo extends HttpServlet {
                 redirectUrl = request.getContextPath()
                         + "/cryo?start=" + URLEncoder.encode((String) request.getAttribute("start"), "UTF-8")
                         + "&end=" + URLEncoder.encode((String) request.getAttribute("end"), "UTF-8")
-                        + "&tableDate=" + URLEncoder.encode((String) request.getAttribute("tableDate"), "UTF-8")
+                        + "&diffStart=" + URLEncoder.encode((String) request.getAttribute("diffStart"), "UTF-8")
+                        + "&diffEnd=" + URLEncoder.encode((String) request.getAttribute("diffEnd"), "UTF-8")
                         + "&timeUnit=" + URLEncoder.encode((String) request.getAttribute("timeUnit"), "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException("JVM doesn't support UTF-8");
