@@ -73,6 +73,7 @@
         <button id="menu-toggle">Basic/Advanced</button>
         <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" tableId="diff-table-basic"></t:tablesorter>
         <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" tableId="diff-table-advanced"></t:tablesorter>
+        <t:tablesorter tableTitle="Cavity Set Point Totals (${requestScope.diffStart} to ${requestScope.diffEnd})" tableId="summary-table"></t:tablesorter>
             <script>
                 var jlab = jlab || {};
                 jlab.start = "${requestScope.start}";

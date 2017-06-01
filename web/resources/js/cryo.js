@@ -246,6 +246,7 @@ $(function () {
     });
 
     jlab.cavity.createBasicAdvTable("diff-table-basic", "diff-table-advanced", jlab.diffStart, jlab.diffEnd);
+    jlab.cavity.createTotalsTable("summary-table", jlab.diffStart, jlab.diffEnd);
     jlab.cryo.updateCryoPressureChart('cryo-linac-pressure', jlab.start, jlab.end, jlab.timeUnit);
 
     // This enables the "Basic/Advanced" menu button to toggle between the two tables.  diff-table-advanced starts out with
