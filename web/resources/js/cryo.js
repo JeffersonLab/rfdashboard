@@ -5,16 +5,7 @@ jlab.cryo = {};
 // server for the data, the client performs an ajax JSONP request against the myaweb server.  This was done as the myaweb
 // myStats request can take a while and will probably be changed to use some sort of websocket or async job processing
 // method.  Also, querying the data currently requieres multiple multiple requests which are done sequentially here.
-jlab.cryo.updateCryoPressureChart = function (chartId, linac, start, end, timeUnit) {
-    var pv;
-    switch (linac.toLowerCase()) {
-        case 'south':
-            pv = 'CPI5107B';
-            break;
-        case 'north':
-            pv = 'CPI4107B';
-    }
-
+jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
     var numDays;
     switch (timeUnit) {
         case 'day':
@@ -147,6 +138,22 @@ jlab.cryo.updateCryoPressureChart = function (chartId, linac, start, end, timeUn
             jlab.errorBarChart.drawChart(chartId, flotData, flotOptions, settings);
             jlab.cryo.addCryoReachToolTip(chartId, timeUnit);
 
+            $('#' + chartId).bind("plotclick", function (event, pos, item) {
+                if (item) {
+                    var url;
+                    var timestamp = item.series.data[item.dataIndex][0];
+                    var dateString = jlab.millisToDate(timestamp);
+                    if (item.series.label === "Energy Reach") {
+                        url = "/RFDashboard/cryo?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
+                                jlab.addDays(dateString, -1) + "&diffEnd=" + dateString;
+                    } else {
+                        url = "/RFDashboard/cryo?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
+                                dateString + "&diffEnd=" + jlab.addDays(dateString, numDays);
+                    }
+                    console.log("Linking to " + url);
+                    window.location.href = url;
+                }
+            });
         }
     }, function (jqXHR) {
         // Then add the error hanlder
@@ -238,7 +245,13 @@ $(function () {
         dateFormat: "yy-mm-dd"
     });
 
-    jlab.cryo.updateCryoPressureChart('cryo-pressure-north', 'north', jlab.start, jlab.end, jlab.timeUnit);
+    jlab.cavity.createBasicAdvTable("diff-table-basic", "diff-table-advanced", jlab.diffStart, jlab.diffEnd);
+    jlab.cryo.updateCryoPressureChart('cryo-linac-pressure', jlab.start, jlab.end, jlab.timeUnit);
 
-
+    // This enables the "Basic/Advanced" menu button to toggle between the two tables.  diff-table-advanced starts out with
+    // display: none.
+    $("#menu-toggle").click(function() {
+        $('#diff-table-basic-wrap').toggle();
+        $('#diff-table-advanced-wrap').toggle();
+    });
 });
