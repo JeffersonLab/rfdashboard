@@ -11,3 +11,11 @@ and open the template in the editor.
 #diff-table-advanced-wrap {
     display: none;
 }
+
+#cryo-linac-pressure {
+    height: 300px;
+}
+
+.legend-panel {
+    padding-left: 20px;
+}
