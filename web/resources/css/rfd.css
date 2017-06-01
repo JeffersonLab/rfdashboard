@@ -129,6 +129,10 @@ a:hover {
     list-style-type: none;
     display: table-row;
 }
+.input-elem {
+    display: inline-block;
+    vertical-align: top;
+}
 .li-key,
 .li-value {
     display: table-cell;
@@ -150,6 +154,9 @@ a:hover {
     font-weight: bold;
 }
 /* Page controls */
+input.controls-submit {
+    display: block;
+}
 input.date-field {
     width: 7em;
 }
