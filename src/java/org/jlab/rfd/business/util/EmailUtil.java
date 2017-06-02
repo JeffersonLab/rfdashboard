@@ -35,7 +35,7 @@ public class EmailUtil {
         try {
             mailSession = (Session) new InitialContext().lookup("mail/jlab");
         } catch (NamingException e) {
-            LOGGER.log(Level.WARNING, "JDBC resource lookup failed", e);
+            LOGGER.log(Level.WARNING, "Mail resource lookup failed", e);
             throw new ExceptionInInitializerError(e);
         }
     }
