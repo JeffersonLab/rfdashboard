@@ -117,7 +117,11 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
             var flotOptions = {
                 xaxes: [{mode: "time"}],
                 yaxes: [
-                    {axisLabel: "Pressure"},
+                    {
+                        axisLabel: "He Pressure (Atm)",
+                        min: 0.03,
+                        max: 0.05
+                    },
                     {
                         axisLabel: "Energy Reach (MeV)",
                         min: 1000,
@@ -145,10 +149,10 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
                     var dateString = jlab.millisToDate(timestamp);
                     if (item.series.label === "Energy Reach") {
                         url = "/RFDashboard/cryo?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
-                                jlab.addDays(dateString, -1) + "&diffEnd=" + dateString;
+                                jlab.addDays(dateString, -1) + "&diffEnd=" + dateString + "&timeUnit=" + jlab.timeUnit;
                     } else {
                         url = "/RFDashboard/cryo?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
-                                dateString + "&diffEnd=" + jlab.addDays(dateString, numDays);
+                                dateString + "&diffEnd=" + jlab.addDays(dateString, numDays) + "&timeUnit=" + jlab.timeUnit;
                     }
                     console.log("Linking to " + url);
                     window.location.href = url;
