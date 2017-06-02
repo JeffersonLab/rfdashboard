@@ -10,7 +10,7 @@
     </context-param>
     <context-param>
         <param-name>FeedbackUsers</param-name>
-        <param-value>adamc</param-value>
+        <param-value>adamc,baggett</param-value>
     </context-param>
     <context-param>
         <param-name>appName</param-name>
