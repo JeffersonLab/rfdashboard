@@ -26,6 +26,7 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
     // Get the cryo pressure data
     var cryoPromise = $.ajax({
         url: "https://myaweb.acc.jlab.org/myStatsSampler/data",
+        timeout: 60000,  //in millis
         data: {
             b: start,
             n: numSteps,
@@ -63,6 +64,11 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
         // {data: [], error: "<message>"}
         var cryoData = cryoAjax[0];
         var lemData = lemAjax[0].data[0]; // This now contains a single flot formated data series [ [x,y], [x,y], ...]
+        var hasLemData = false;
+        // It is possible that there is no LEM data returned without an error state - there just wasn't any scan data for that date
+        if ( $.isArray(lemAjax) && $.isArray(lemData) && lemData.length > 0 ) {
+            hasLemData = true;
+        }
         var flotData;
 
         var labels = ["<b>North</b> (CPI4107B)", "<b>South</b> (CPI5107B)", "<b>Energy Reach</b>"];
@@ -77,7 +83,15 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
         if (!Array.isArray(cryoData.data)) {
             jlab.hideChartLoading(chartId, "Unexpected error querying data service.");
         } else {
-            flotData = new Array(cryoData.data[0].output.length + 1); // Two linacs, plus energy reach data
+            if ( hasLemData ) {
+                flotData = new Array(cryoData.data[0].output.length + 1); // Two linacs, plus energy reach data
+            } else {
+                // Don't include lem data in the flotData, labels, or colors.  The maps don't matter since nothing will call the key if
+                // the lem data isn't included elsewhere.
+                flotData = new Array(cryoData.data[0].output.length);
+                labels = labels.slice(0,2);
+                colors = colors.slice(0,2);
+            }
             var d, mean, sigma;
             for (var i = 0; i < cryoData.data.length; i++) {
                 d = new Date(cryoData.data[i].start); // treated as UTC, but thats how all of the dates are being displayed.
@@ -94,18 +108,20 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
                     flotData[j].data.push([d.getTime(), mean, sigma]);
                 }
             }
-            flotData[2] = {
-                data: lemData,
-                label: "Energy Reach",
-                color: colors[2], // the "Total" color
-                yaxis: 2,
-                // We want this to display as a line, not a series of error bars
-                points: {show: false, errorbars: "n"},
-                // This causes a weird bug where panning the graph to the left so that the right-most point of the line
-                // is no longer visible results in the entire canvas above the line being filled with the fillColor.  Weird ...
+            if ( hasLemData) {
+                flotData[2] = {
+                    data: lemData,
+                    label: "Energy Reach",
+                    color: colors[2], // the "Total" color
+                    yaxis: 2,
+                    // We want this to display as a line, not a series of error bars
+                    points: {show: false, errorbars: "n"},
+                    // This causes a weird bug where panning the graph to the left so that the right-most point of the line
+                    // is no longer visible results in the entire canvas above the line being filled with the fillColor.  Weird ...
 //                lines: {show: true, fill: true, fillColor: colors[2]}
-                lines: {show: true}
-            };
+                    lines: {show: true}
+                };
+            }
             jlab.hideChartLoading(chartId);
             var settings = {
                 tooltips: false,
@@ -121,24 +137,25 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
                         axisLabel: "He Pressure (Atm)",
                         min: 0.03,
                         max: 0.05
-                    },
-                    {
-                        axisLabel: "Energy Reach (MeV)",
-                        min: 1000,
-                        max: 1190,
-                        position: "right",
-                        alignTicksWithAxis: false,
-                        zoomRange: false,
-                        panRange: false
                     }
                 ]
             };
+            if (hasLemData) {
+                flotOptions.yaxes.push({
+                    axisLabel: "Energy Reach (MeV)",
+                    min: 1000,
+                    max: 1190,
+                    position: "right",
+                    alignTicksWithAxis: false,
+                    zoomRange: false,
+                    panRange: false
+                });
+            }
             // Expects an array of flot data arrays.  E.g.,
             // [ [millis, mean, sigma], [millis, mean, sigma], ...],
             //   [millis, mean, sigma], [millis, mean, sigma], ...],
             //   ...
             // ]
-
             jlab.errorBarChart.drawChart(chartId, flotData, flotOptions, settings);
             jlab.cryo.addCryoReachToolTip(chartId, timeUnit);
 
@@ -154,18 +171,32 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
                         url = "/RFDashboard/cryo?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
                                 dateString + "&diffEnd=" + jlab.addDays(dateString, numDays) + "&timeUnit=" + jlab.timeUnit;
                     }
-                    console.log("Linking to " + url);
                     window.location.href = url;
                 }
             });
+            if ( ! hasLemData ) {
+                $("#" + chartId + "-chart-wrap").append("<small>* No LEM data available for " + jlab.start + " to " + jlab.end + "</small>");
+            }
         }
-    }, function (jqXHR) {
-        // Then add the error hanlder
-        // 
-        // Unless something went really wrong, the responseText should be a json object and should have an error parameter
-        var json;
-        var message;
-        var reqDates = start + '-' + end;
+    }, function( jqXHR, textStatus, errorThrown ) {
+        // Wrap the error handler in another layer so we can add the chartId to the function call (default fail callbacks only get the
+        // first three.
+        jlab.cryo.pressureChartFail(jqXHR, textStatus, errorThrown, chartId);
+    });
+};
+
+jlab.cryo.pressureChartFail = function (jqXHR, textStatus, errorThrown, chartId) {
+    // Then add the error hanlder
+    // 
+    // Unless something went really wrong, the responseText should be a json object and should have an error parameter
+    var json;
+    var message;
+    var reqDates = start + '-' + end;
+    if (textStatus === 0) {
+        message = "Error in HTTP request.  Received HTTP status '0'";
+    } else if ( typeof jqXHR === "undefined" ) {
+        message = "Error in request.  jqXHR undefined.";
+    } else {
         try {
             if (typeof jqXHR.responseText === 'undefined' || jqXHR.responseText === '') {
                 json = {};
@@ -176,11 +207,10 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
             message = reqDates + ' response is not JSON: ' + jqXHR.responseText;
             json = {};
         }
-
         message = json.error || message || 'Server did not handle request for ' + reqDates;
-        window.console && console.log(message);
-        jlab.hideChartLoading(chartId, "Error querying data service");
-    });
+    }
+    window.console && console.log(message);
+    jlab.hideChartLoading(chartId, "Error querying data service");
 };
 
 jlab.cryo.addCryoReachToolTip = function (chartId, timeUnit) {
@@ -230,8 +260,8 @@ jlab.cryo.addCryoReachToolTip = function (chartId, timeUnit) {
                     borderColor = item.series.color;
                     content = "<b>Series:</b> " + item.series.label
                             + "<br /><b>Date:</b> " + dateRange
-                            + "<br /><b>Mean:</b> " + mean
-                            + "<br/><b>Sigma:</b> " + sigma;
+                            + "<br /><b>Mean:</b> " + mean + " Atm"
+                            + "<br/><b>Sigma:</b> " + sigma + " Atm";
                 }
                 jlab.showTooltip(item.pageX + 20, item.pageY - 20, content, borderColor);
             }
