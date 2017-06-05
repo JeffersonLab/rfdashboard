@@ -108,7 +108,7 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
                     flotData[j].data.push([d.getTime(), mean, sigma]);
                 }
             }
-            if ( hasLemData) {
+            if (hasLemData) {
                 flotData[2] = {
                     data: lemData,
                     label: "Energy Reach",
@@ -132,14 +132,12 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
             };
             var flotOptions = {
                 xaxes: [{mode: "time"}],
-                yaxes: [
-                    {
-                        axisLabel: "He Pressure (Atm)",
-                        min: 0.03,
-                        max: 0.05
-                    }
-                ]
+                yaxes: [{axisLabel: "He Pressure (Atm)"}]
             };
+            if ( jlab.cryo.hasDataInRange(flotData, 0.03, 0.05) ) {
+                flotOptions.yaxes[0].min = 0.03;
+                flotOptions.yaxes[0].max = 0.05;
+            }
             if (hasLemData) {
                 flotOptions.yaxes.push({
                     axisLabel: "Energy Reach (MeV)",
@@ -183,6 +181,19 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
         // first three.
         jlab.cryo.pressureChartFail(jqXHR, textStatus, errorThrown, chartId);
     });
+};
+
+// Check if any series in the flotData array has a y-value in the specified range.
+// flotData looks like [{data: [[x1,y1], [x2,y2] ... ], ...}, {data: [[x1,y1], ...], ...}, ... ]
+jlab.cryo.hasDataInRange = function(flotData, min, max) {
+    for ( var i = 0; i < flotData.length; i++) {
+        for ( var j = 0; j < flotData[i].data.length; j++ ) {
+            if ( flotData[i].data[j][1] >= min && flotData[i].data[j][1] <= max) {
+                return true;
+            }
+        }
+    }
+    return false;
 };
 
 jlab.cryo.pressureChartFail = function (jqXHR, textStatus, errorThrown, chartId) {
