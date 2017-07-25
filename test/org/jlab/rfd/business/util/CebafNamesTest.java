@@ -53,4 +53,15 @@ public class CebafNamesTest {
     public void cedZoneToEnglishLinac_BadInput() {
         CebafNames.cedZoneToEnglishLinac("1L27-1");
     }
+
+    /**
+     * Test of epicsCavityToCedCavity method, of class CebafNames.
+     */
+    @Test
+    public void EpicsCavityToCedCavity_BasicUsage() {
+        System.out.println("epicsCavityToCedCavity");
+        assertEquals("1L02-1", CebafNames.epicsCavityToCedCavity("R121"));
+        assertEquals("1L10-3", CebafNames.epicsCavityToCedCavity("R1A3"));
+        assertEquals("1L26-8", CebafNames.epicsCavityToCedCavity("R1Q8"));
+    }
 }
