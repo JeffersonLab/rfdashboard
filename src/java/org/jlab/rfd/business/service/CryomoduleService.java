@@ -20,7 +20,7 @@ import javax.json.JsonReader;
 import org.jlab.rfd.model.CryomoduleType;
 
 /**
- * Returns null if timestamp is for future date
+ * Service used to query the CED about Cryomodule information.
  * @author adamc
  */
 public class CryomoduleService {
@@ -28,6 +28,19 @@ public class CryomoduleService {
     private static final Logger LOGGER = Logger.getLogger(CryomoduleService.class.getName());
     private static final String CED_INVENTORY_URL = "http://ced.acc.jlab.org/inventory";
 
+    /**
+     * This queries the history CED for a listing of ModuleType for all
+     * CryoModules in the CED. Then, using string manipulations based on our
+     * standard naming conventions (e.g., cavity 1L22-1 is in module 1L22),
+     * creates a Map of cavity CED name to CryoModule Module Type (e.g., C25 or
+     * C100). All queries are limited to date precision (no hours, minutes,
+     * etc.). Returns null if timestamp is for future date.
+     *
+     * @param timestamp The date for which we query the CED history workspace
+     * @return A map of Cavity EPICS name to it parent CryoModule ModuleType on the requested date
+     * @throws java.text.ParseException
+     * @throws java.io.IOException
+     */
     public HashMap<String, CryomoduleType> getCryoModuleTypes(Date timestamp) throws ParseException, IOException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         if ( timestamp.after(new Date()) ) {
