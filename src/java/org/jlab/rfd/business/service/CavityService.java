@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -28,6 +30,7 @@ import javax.json.JsonReader;
 import org.jlab.rfd.model.CavityDataPoint;
 import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.CryomoduleType;
+import org.jlab.rfd.model.ModAnodeHarvester.CavityGsetData;
 
 /**
  * Returns null if timestamp is later than today
@@ -42,7 +45,7 @@ public class CavityService {
     // Caches getCavityData output.  The cached HashSets should be inserted with Collecitons.unmodifiableMap() to be safe.
     private static final ConcurrentHashMap<String, Set<CavityDataPoint>> CAVITY_CACHE = new ConcurrentHashMap<>();
 
-    public Set<CavityDataPoint> getCavityData(Date timestamp) throws IOException, ParseException {
+    public Set<CavityDataPoint> getCavityData(Date timestamp) throws IOException, ParseException, SQLException {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         
@@ -101,6 +104,10 @@ public class CavityService {
                     throw new RuntimeException("MyaService returned null.  Likely requesting data from future date.");
                 }
 
+                // Get the ModAnodeHarvesterData
+                ModAnodeHarvesterService mahs = new ModAnodeHarvesterService();
+                Map<String, CavityGsetData> cgds = mahs.getCavityGsetData(timestamp);
+                
                 for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
                     BigDecimal mav = new BigDecimal(0);
                     String cavityName = element.getString("name");
@@ -117,8 +124,15 @@ public class CavityService {
                                 new Object[]{cavityName, wrkspc});
                         throw new IOException("Cryocavity '" + cavityName + "' missing EPICSName in ced history '" + wrkspc);
                     }
+                    
+                    // If we got back ModAnodeHarvester data for this timestamp, make sure that we have data for every cavity.
+                    // We either need a whole data set or throw an error.  Except that we expect this behavior for injector cavities
+                    // since ModAnodeHarvester only runs against the North and South Linacs... ugh ...
+                    if ( cgds != null && Pattern.matches("^R0*", epicsName) && cgds.get(epicsName) == null) {
+                        throw new RuntimeException("ModAnodeHarvester data missing for " + epicsName + " on '" + timestamp);
+                    }
                     data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
-                            odvhs.get(cavityName)));
+                            odvhs.get(cavityName), cgds.get(epicsName)));
                 }
             }
 
@@ -133,7 +147,7 @@ public class CavityService {
     /*
     * If end is for future date, set it for now.  Data isn't valid for future dates, but some of our data services (CED, MYA) give results anyway.
     */
-    public CavityDataSpan getCavityDataSpan(Date start, Date end, String timeUnit) throws ParseException, IOException {
+    public CavityDataSpan getCavityDataSpan(Date start, Date end, String timeUnit) throws ParseException, IOException, SQLException {
         long timeInt;
         switch (timeUnit) {
             case "day":
@@ -163,7 +177,7 @@ public class CavityService {
         return span;
     }
     
-        public CavityDataSpan getCavityDataSpan(List<Date> dates) throws ParseException, IOException {
+        public CavityDataSpan getCavityDataSpan(List<Date> dates) throws ParseException, IOException, SQLException {
         
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         CavityDataSpan span = new CavityDataSpan();
