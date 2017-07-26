@@ -7,6 +7,7 @@ package org.jlab.rfd.presentation.controller.ajax;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -137,7 +138,7 @@ public class CavityAjax extends HttpServlet {
         if (dates == null) {
             try {
                 span = cs.getCavityDataSpan(start, end, timeUnit);
-            } catch (ParseException ex) {
+            } catch (ParseException | SQLException ex) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 LOGGER.log(Level.SEVERE, "Error querying cavity data service", ex);
                 response.setContentType("application/json");
@@ -147,7 +148,7 @@ public class CavityAjax extends HttpServlet {
         } else {
             try {
                 span = cs.getCavityDataSpan(dates);
-            } catch (ParseException ex) {
+            } catch (ParseException | SQLException ex) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 LOGGER.log(Level.SEVERE, "Error querying cavity data service", ex);
                 response.setContentType("application/json");

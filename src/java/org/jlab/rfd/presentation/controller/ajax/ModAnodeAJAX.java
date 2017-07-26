@@ -8,6 +8,7 @@ package org.jlab.rfd.presentation.controller.ajax;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -99,17 +100,21 @@ public class ModAnodeAJAX extends HttpServlet {
         CavityDataSpan span;
         try {
             span = cs.getCavityDataSpan(start, end, timeUnit);
-        } catch (ParseException ex) {
+        } catch (ParseException | SQLException ex) {
             throw new ServletException("Error in getting modAnode Data", ex);
         }
 
         SortedMap<Date, SortedMap<String, BigDecimal>> factoredData;
-        if ( factor.equals("linac") ) {
-            factoredData = span.getModAnodeCountByLinac();
-        } else if ( factor.equals("cmtype") ){
-            factoredData = span.getModAnodeCountByCMType();
-        } else {
-            factoredData = span.getModAnodeCountByLinac();
+        switch (factor) {
+            case "linac":
+                factoredData = span.getModAnodeCountByLinac();
+                break;
+            case "cmtype":
+                factoredData = span.getModAnodeCountByCMType();
+                break;
+            default:
+                factoredData = span.getModAnodeCountByLinac();
+                break;
         }
 
         PrintWriter pw = response.getWriter();

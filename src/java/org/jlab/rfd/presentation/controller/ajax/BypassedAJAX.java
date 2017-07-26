@@ -8,6 +8,7 @@ package org.jlab.rfd.presentation.controller.ajax;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -110,17 +111,21 @@ public class BypassedAJAX extends HttpServlet {
         CavityDataSpan span;
         try {
             span = cs.getCavityDataSpan(start, end, timeUnit);
-        } catch (ParseException ex) {
+        } catch (ParseException | SQLException ex ) {
             throw new ServletException("Error in Bypassed Data", ex);
         }
         
         SortedMap<Date, SortedMap<String, BigDecimal>> factoredData;
-        if ( factor.equals("linac") ) {
-            factoredData = span.getBypassedCountByLinac();
-        } else if ( factor.equals("cmtype") ) {
-            factoredData = span.getBypassedCountByCMType();
-        }else {
-            factoredData = span.getBypassedCountByLinac();
+        switch (factor) {
+            case "linac":
+                factoredData = span.getBypassedCountByLinac();
+                break;
+            case "cmtype":
+                factoredData = span.getBypassedCountByCMType();
+                break;
+            default:
+                factoredData = span.getBypassedCountByLinac();
+                break;
         }
 
         try {
