@@ -66,61 +66,23 @@ public class ModAnodeHarvesterService {
 //
 //        }
 //    }
-
     public Map<String, CavityGsetData> getCavityGsetData(Date timestamp) throws SQLException, ParseException, IOException {
 
-//        Date start;
-//        try {
-//            start = DATE_FORMATER.parse(DATE_FORMATER.format(timestamp));
-//        } catch (ParseException ex) {
-//            LOGGER.log(Level.WARNING, "Error parse dates timestamp = {0}", timestamp);
-//            throw ex;
-//        }
-//
-//        Calendar cal = Calendar.getInstance();
-//        cal.setTime(start);
-//        cal.add(Calendar.DATE, 1);
-//        cal.add(Calendar.SECOND, -1);
-//        Date end = cal.getTime();
-//
-//        Connection conn = null;
-//        PreparedStatement pstmt = null;
-//        ResultSet rs = null;
-//
-//        String scanSql = "SELECT SCAN_ID, START_TIME, EPICS_DATE"
-//                + " FROM MOD_ANODE_HARVESTER_SCAN"
-//                + " WHERE START_TIME BETWEEN TO_DATE(?, 'YYYY/MM/DD HH24:MI:SS') AND"
-//                + " TO_DATE(?, 'YYYY/MM/DD HH24:MI:SS') AND ROWNUM <= 1 ORDER BY START_TIME ASC";
         ScanRecord sr = getFirstScanRecord(timestamp);
         Map<String, CavityGsetData> data = null;
-        
-        if ( sr != null ) {
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-                
-        String gsetSql = "SELECT CAVITY_EPICS, ENERGY_MEV, GSET_MVPM, GSET_NO_MAV_MVPM, MOD_ANODE_KV"
-                + " FROM MOD_ANODE_HARVESTER_GSET"
-                + " WHERE SCAN_ID = ?";
 
-        Map<String, GsetRecord> records1090 = new HashMap<>();
-        Map<String, GsetRecord> records1050 = new HashMap<>();
-        try {
-//            conn = SqlUtil.getConnection();
-//            pstmt = conn.prepareStatement(scanSql);
-//            pstmt.setString(1, ORA_DATE_FORMATER.format(start));
-//            pstmt.setString(2, ORA_DATE_FORMATER.format(end));
-//            rs = pstmt.executeQuery();
-//            if (!rs.next()) {
-//                LOGGER.log(Level.INFO, "No results returned for day: {0}", DATE_FORMATER.format(start));
-//            } else {
-//                long scanId = rs.getLong("SCAN_ID");
-//                Date ts = DATE_FORMATER.parse(rs.getString("START_TIME"));
-//                Date ed = DATE_FORMATER.parse(rs.getString("EPICS_DATE"));
-//                System.out.println("scanId:" + scanId + "  timestamp:" + ts + "  ed:" + ed);
-//                pstmt.close();
-//                rs.close();
+        if (sr != null) {
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+            ResultSet rs = null;
 
+            String gsetSql = "SELECT CAVITY_EPICS, ENERGY_MEV, GSET_MVPM, GSET_NO_MAV_MVPM, MOD_ANODE_KV"
+                    + " FROM MOD_ANODE_HARVESTER_GSET"
+                    + " WHERE SCAN_ID = ?";
+
+            Map<String, GsetRecord> records1090 = new HashMap<>();
+            Map<String, GsetRecord> records1050 = new HashMap<>();
+            try {
                 conn = SqlUtil.getConnection();
                 data = new HashMap<>();
 
@@ -168,9 +130,9 @@ public class ModAnodeHarvesterService {
                         data.put(epicsName, cgd);
                     }
                 }
-        } finally {
-            SqlUtil.close(rs, pstmt, conn);
-        }
+            } finally {
+                SqlUtil.close(rs, pstmt, conn);
+            }
         }
         return data;
     }
@@ -197,7 +159,7 @@ public class ModAnodeHarvesterService {
             pstmt.setString(1, ORA_DATE_FORMATER.format(start));
             pstmt.setString(2, ORA_DATE_FORMATER.format(end));
             rs = pstmt.executeQuery();
-            if ( rs.next() ) {
+            if (rs.next()) {
                 long scanId = rs.getLong("SCAN_ID");
                 Date ts = DATE_FORMATER.parse(rs.getString("START_TIME"));
                 Date ed = DATE_FORMATER.parse(rs.getString("EPICS_DATE"));
