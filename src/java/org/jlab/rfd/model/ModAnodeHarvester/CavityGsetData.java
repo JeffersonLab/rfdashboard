@@ -9,16 +9,20 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import java.util.logging.Logger;
 
 /**
  * This class represents the data associated with a single cavity from a single ModAnodeHarvester scan.
  * @author adamc
  */
 public class CavityGsetData {
+    private static final Logger LOGGER = Logger.getLogger(CavityGsetData.class.getName());
 
+    private final String epicsName;
     private final Date epicsDate;
     private final BigDecimal gset1050;
     private final BigDecimal gset1090;
@@ -28,18 +32,24 @@ public class CavityGsetData {
     private final BigDecimal mav1090;
 
     public CavityGsetData(GsetRecord r1050, GsetRecord r1090) {
+        String errString = "Error querying data";
         if ( r1050 == null || r1090 == null ) {
-            throw new RuntimeException("Received null GsetRecord");
+            LOGGER.log(Level.SEVERE,"Received null GsetRecord");
+            throw new RuntimeException(errString);
         }
         if ( ! r1050.getEpicsDate().equals(r1090.getEpicsDate()) ) {
-            throw new RuntimeException("GsetRecords do not use the same EPICS date");
+            LOGGER.log(Level.SEVERE, "GsetRecords do not use the same EPICS date");
+            throw new RuntimeException(errString);
         }
         if ( ! r1050.getTimestamp().equals(r1090.getTimestamp()) ) {
-            throw new RuntimeException("GsetRecords do not have the same timestamp");
+            LOGGER.log(Level.SEVERE, "GsetRecords do not have the same timestamp");
+            throw new RuntimeException(errString);
         }
         if ( ! r1050.getEpicsName().equals(r1090.getEpicsName()) ) {
-            throw new RuntimeException("GsetRecords do not have the same EPICS Name");
+            LOGGER.log(Level.SEVERE, "GsetRecords do not have the same EPICS Name");
+            throw new RuntimeException(errString);
         }
+        this.epicsName = r1050.getEpicsName();
         this.epicsDate = r1050.getEpicsDate();
         this.gset1050 = r1050.getGset();
         this.gset1090 = r1090.getGset();
@@ -55,8 +65,8 @@ public class CavityGsetData {
         DecimalFormat gDF = new DecimalFormat("#.#####");
         DecimalFormat mDF = new DecimalFormat("#.###");
         JsonObjectBuilder job = Json.createObjectBuilder();
-        job.add("epicsDate", sdf.format(epicsDate))
-                // Round these to something sensible, 5 decimals
+        job.add("epicsName", epicsName)
+                .add("epicsDate", sdf.format(epicsDate))
                 .add("mav1050_kv", mDF.format(mav1050.doubleValue()))
                 .add("mav1090_kv", mDF.format(mav1090))
                 .add("gset1050", gDF.format(gset1050))
@@ -64,6 +74,10 @@ public class CavityGsetData {
                 .add("gsetNoMav1050", gDF.format(gsetNoMav1050))
                 .add("gsetNoMav1090", gDF.format(gsetNoMav1090));
         return job.build();
+    }
+
+    public String getEpicsName() {
+        return epicsName;
     }
     
     public Date getEpicsDate() {
