@@ -36,6 +36,16 @@ public class DateUtil {
         return date;
     }
 
+    // This returns 11:59:59 of the given day
+    public static Date getEndOfDay(Date d1) throws ParseException {
+        Date curr = truncateToDays(d1);
+        Date next = getNextDay(curr);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(next);
+        cal.add(Calendar.SECOND, -1);
+        return cal.getTime();
+    }
+    
     // Returns a date object that represents 12AM of the very next day
     public static Date getNextDay(Date d1) throws ParseException {
         Date curr = truncateToDays(d1);
