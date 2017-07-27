@@ -77,7 +77,10 @@ public class BypassedAJAX extends HttpServlet {
         }
 
         TimeUnit timeUnit = RequestParamUtil.processTimeUnit(request, TimeUnit.WEEK);
-        
+        if (timeUnit == null) {
+            throw new ServletException("Unsupported timeUnit requested");
+        }
+
         
         CavityService cs = new CavityService();
         CavityDataSpan span;
