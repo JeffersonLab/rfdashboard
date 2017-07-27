@@ -45,6 +45,13 @@ public class ModAnodeHarvesterService {
     // This will be shown to the user on error.  Better to make it generic and have a log statement just before.
     private final String ERR_STRING = "Error querying data.";
 
+    /**
+     * This queries the ModAnodeHarvester database tables for linac scan data associated with the first scan of that day.
+     * @param timestamp The date of interested
+     * @return A map of linac name to linac data for the day requested  or null if no scan data exists for that day
+     * @throws ParseException
+     * @throws SQLException 
+     */
     public Map<LinacName, LinacData> getLinacData(Date timestamp) throws ParseException, SQLException {
 
         ScanRecord sr =getFirstScanRecord(timestamp);
@@ -117,6 +124,14 @@ public class ModAnodeHarvesterService {
         return data;
     }
     
+    /**
+     * This method queries the ModAnodeHarvester tables for the Cavity GSET data associated with first scan of the given day.
+     * @param timestamp The date of interest
+     * @return A map of cavity name to cavity data for the requested day or null if no scan data exists for that day
+     * @throws SQLException
+     * @throws ParseException
+     * @throws IOException 
+     */
     public Map<String, CavityGsetData> getCavityGsetData(Date timestamp) throws SQLException, ParseException, IOException {
 
         ScanRecord sr = getFirstScanRecord(timestamp);
@@ -189,8 +204,15 @@ public class ModAnodeHarvesterService {
         return data;
     }
 
-    // Give this a connection to the rfgradteam_owner database schema and a date.
+    // 
     // Returns the first record from that day or returns null.
+    /**
+     * This queries the ModAnodeHarvester tables for information on the first scan of the given day
+     * @param date The date of interested
+     * @return A ScanRecord object representing the fisrt scan of the day or null if no scan data exists for that day.
+     * @throws ParseException
+     * @throws SQLException 
+     */
     private static ScanRecord getFirstScanRecord(Date date) throws ParseException, SQLException {
 
         Date start = DateUtil.truncateToDays(date);
