@@ -113,6 +113,7 @@ public class RequestParamUtil {
                     break;
                 case WEEK:
                     cal.add(Calendar.WEEK_OF_YEAR, -1 * numBetween);
+                    break;
                 default:
                     // Compiler should catch the invalid TimeUnit, but just in case modifications are made later
                     LOGGER.log(Level.SEVERE, "Received unrecognized time unit");
