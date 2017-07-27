@@ -44,7 +44,7 @@ public class RequestParamUtil {
             return def;
         }
         if (!Arrays.asList(valid).contains(out)) {
-            LOGGER.log(Level.WARNING, "Unsupported out format requested - {0}", out);
+            LOGGER.log(Level.SEVERE, "Unsupported out format requested - {0}", out);
             return null;
         }
 
@@ -69,6 +69,7 @@ public class RequestParamUtil {
         try {
             timeUnit = TimeUnit.valueOf(unit.toUpperCase());
         } catch (IllegalArgumentException e) {
+            LOGGER.log(Level.SEVERE, "Unsupported timeUnit requested - {0}", unit);
             return null;
         }
 
