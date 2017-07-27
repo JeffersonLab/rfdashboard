@@ -67,6 +67,9 @@ public class BypassedAJAX extends HttpServlet {
 
         String[] valid = {"json"};
         String out = RequestParamUtil.processOut(request, valid, "json");
+        if (out == null) {
+            throw new ServletException("Unsupported out format requested");
+        }
 
         String factor = request.getParameter("factor");
         if ( factor == null) {
@@ -97,11 +100,7 @@ public class BypassedAJAX extends HttpServlet {
                 break;
         }
 
-        try {
-            if (out == null ) {
-                throw new ServletException("Unsupported out format requested");
-            }
-                
+        try {                
             if (out.equals("json")) {
                 PrintWriter pw = response.getWriter();
                 JsonObject json = DataFormatter.toFlotFromDateMap(factoredData);
