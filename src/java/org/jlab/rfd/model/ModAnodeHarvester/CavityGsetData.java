@@ -6,7 +6,12 @@
 package org.jlab.rfd.model.ModAnodeHarvester;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 /**
  * This class represents the data associated with a single cavity from a single ModAnodeHarvester scan.
@@ -44,6 +49,23 @@ public class CavityGsetData {
         this.mav1090 = r1090.getModAnodeVoltage();
     }
 
+    // Turn this into a JSON object that can be easily output
+    public JsonObject toJson () {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        DecimalFormat gDF = new DecimalFormat("#.#####");
+        DecimalFormat mDF = new DecimalFormat("#.###");
+        JsonObjectBuilder job = Json.createObjectBuilder();
+        job.add("epicsDate", sdf.format(epicsDate))
+                // Round these to something sensible, 5 decimals
+                .add("mav1050_kv", mDF.format(mav1050.doubleValue()))
+                .add("mav1090_kv", mDF.format(mav1090))
+                .add("gset1050", gDF.format(gset1050))
+                .add("gset1090", gDF.format(gset1090))
+                .add("gsetNoMav1050", gDF.format(gsetNoMav1050))
+                .add("gsetNoMav1090", gDF.format(gsetNoMav1090));
+        return job.build();
+    }
+    
     public Date getEpicsDate() {
         return epicsDate;
     }
