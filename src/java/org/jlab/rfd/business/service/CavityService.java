@@ -31,6 +31,7 @@ import org.jlab.rfd.model.CavityDataPoint;
 import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.CryomoduleType;
 import org.jlab.rfd.model.ModAnodeHarvester.CavityGsetData;
+import org.jlab.rfd.model.TimeUnit;
 
 /**
  * Returns null if timestamp is later than today
@@ -147,13 +148,13 @@ public class CavityService {
     /*
     * If end is for future date, set it for now.  Data isn't valid for future dates, but some of our data services (CED, MYA) give results anyway.
     */
-    public CavityDataSpan getCavityDataSpan(Date start, Date end, String timeUnit) throws ParseException, IOException, SQLException {
+    public CavityDataSpan getCavityDataSpan(Date start, Date end, TimeUnit timeUnit) throws ParseException, IOException, SQLException {
         long timeInt;
         switch (timeUnit) {
-            case "day":
+            case DAY:
                 timeInt = 60 * 60 * 24 * 1000L;
                 break;
-            case "week":
+            case WEEK:
             default:
                 timeInt = 60 * 60 * 24 * 7 * 1000L;
         }
