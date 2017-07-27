@@ -21,8 +21,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.business.util.SqlUtil;
+import org.jlab.rfd.model.LinacName;
 import org.jlab.rfd.model.ModAnodeHarvester.CavityGsetData;
 import org.jlab.rfd.model.ModAnodeHarvester.GsetRecord;
+import org.jlab.rfd.model.ModAnodeHarvester.LinacData;
+import org.jlab.rfd.model.ModAnodeHarvester.LinacRecord;
 import org.jlab.rfd.model.ModAnodeHarvester.ScanRecord;
 
 /**
@@ -42,30 +45,78 @@ public class ModAnodeHarvesterService {
     // This will be shown to the user on error.  Better to make it generic and have a log statement just before.
     private final String ERR_STRING = "Error querying data.";
 
-//    public Map<LinacName, LinacData> getLinacData(Date timestamp) throws ParseException {
-//        Date start = DateUtil.truncateToDays(timestamp);
-//        Date end = DateUtil.getEndOfDay(start);
-//
-//        Connection conn = null;
-//        PreparedStatement pstmt = null;
-//        ResultSet rs = null;
-//
-//        String scanSql = "SELECT SCAN_ID, START_TIME, EPICS_DATE"
-//                + " FROM MOD_ANODE_HARVESTER_SCAN"
-//                + " WHERE START_TIME BETWEEN TO_DATE(?, 'YYYY/MM/DD HH24:MI:SS') AND"
-//                + " TO_DATE(?, 'YYYY/MM/DD HH24:MI:SS') AND ROWNUM <= 1 ORDER BY START_TIME ASC";
-//
-//        String linacSql = "SELECT LINAC, ENERGY_MEV, TRIPS_PER_HOUR, TRIP_PER_HOUR_NO_MAV"
-//                + "FROM MOD_ANODE_HARVESTER_LINAC_SCAN"
-//                + "WHERE SCAN_ID = ?";
-//
-//        try {
-//            conn = SqlUtil.getConnection();
-//            pstmt = conn.prepareStatement(scanSql);
-//            rs = pstmt.executeQuery();
-//
-//        }
-//    }
+    public Map<LinacName, LinacData> getLinacData(Date timestamp) throws ParseException, SQLException {
+
+        ScanRecord sr =getFirstScanRecord(timestamp);
+        Map<LinacName, LinacData> data = null;
+        
+        if ( sr != null ) {
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+            ResultSet rs = null;
+
+            String linacSql = "SELECT LINAC, ENERGY_MEV, TRIPS_PER_HOUR, TRIP_PER_HOUR_NO_MAV"
+                    + "FROM MOD_ANODE_HARVESTER_LINAC_SCAN"
+                    + "WHERE SCAN_ID = ?";
+
+            try {
+                conn = SqlUtil.getConnection();
+                pstmt = conn.prepareStatement(linacSql);
+                pstmt.setLong(1, sr.getScanId());
+                rs = pstmt.executeQuery();
+
+                Map<LinacName, LinacRecord> records1050 = new HashMap<>();
+                Map<LinacName, LinacRecord> records1090 = new HashMap<>();
+                while( rs.next() ) {
+                    LinacName linac = LinacName.valueOf(rs.getString("LINAC"));
+                    BigDecimal energy = new BigDecimal(rs.getDouble("ENERGY_MEV"));
+                    BigDecimal trips = new  BigDecimal(rs.getDouble("TRIPS_PER_HOUR"));
+                    BigDecimal tripsNoMav = new  BigDecimal(rs.getDouble("TRIPS_PER_HOUR_NO_MAV"));
+                    LinacRecord record = new LinacRecord(sr.getTimestamp(), sr.getEpicsDate(), linac, energy, trips, tripsNoMav);
+                    switch (record.getEnergy().intValue()) {
+                        case 1050:
+                            records1050.put(record.getLinacName(), record);
+                            break;
+                        case 1090:
+                            records1090.put(record.getLinacName(), record);
+                            break;
+                        default:
+                            LOGGER.log(Level.SEVERE, "Received record with unexpected energy ''{0}''", record.getEnergy().toString());
+                            throw new RuntimeException(ERR_STRING);
+                    }
+                }
+
+                data = new HashMap<>();
+                
+                // Combine the two records for each cavity into one LinacData object and add it to the map.
+                if (records1050.size() != records1090.size()) {
+                    LOGGER.log(Level.SEVERE, "Database query did not return identical linac sets at different energies");
+                    throw new RuntimeException(ERR_STRING);
+                }
+                for (LinacName linacName : records1050.keySet()) {
+                    if (!records1090.containsKey(linacName)) {
+                        LOGGER.log(Level.SEVERE, "ModAnodeHarvester database has disimilar linac sets at different energy levels");
+                        throw new RuntimeException(ERR_STRING);
+                    }
+                    if (linacName == null) {
+                        LOGGER.log(Level.SEVERE, "Received Gset record with null EPICS_NAME");
+                        throw new RuntimeException(ERR_STRING);
+                    }
+                    LinacData linacData = new LinacData(records1050.get(linacName), records1090.get(linacName));
+                    if (linacData == null) {
+                        throw new RuntimeException(ERR_STRING);
+                    } else {
+                        data.put(linacName, linacData);
+                    }
+                }
+            } finally {
+                SqlUtil.close(conn, pstmt, rs);
+            }
+        }
+        
+        return data;
+    }
+    
     public Map<String, CavityGsetData> getCavityGsetData(Date timestamp) throws SQLException, ParseException, IOException {
 
         ScanRecord sr = getFirstScanRecord(timestamp);
@@ -84,7 +135,6 @@ public class ModAnodeHarvesterService {
             Map<String, GsetRecord> records1050 = new HashMap<>();
             try {
                 conn = SqlUtil.getConnection();
-                data = new HashMap<>();
 
                 pstmt = conn.prepareStatement(gsetSql);
                 pstmt.setLong(1, sr.getScanId());
@@ -108,6 +158,8 @@ public class ModAnodeHarvesterService {
                             throw new RuntimeException(ERR_STRING);
                     }
                 }
+
+                data = new HashMap<>();
 
                 // Combine the two records for each cavity into one CavityGsetData object and add it to the map.
                 if (records1050.size() != records1090.size()) {
