@@ -91,6 +91,8 @@ public class CavityAjax extends HttpServlet {
         if (dates == null) {
             try {
                 startEnd = RequestParamUtil.processStartEnd(request, TimeUnit.WEEK, 4);
+                start = startEnd.get("start");
+                end = startEnd.get("end");
             } catch (ParseException ex) {
                 hasError = true;
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -99,10 +101,6 @@ public class CavityAjax extends HttpServlet {
                 pw.write("{error: 'Error parsing start/end parameters'}");
                 return;
             }
-            start = startEnd.get("start");
-            end = startEnd.get("end");
-            
-            System.out.println("Start: " + start.toString() + "   --  End: " + end.toString());
         }
         
         String[] valid = {"json"};
