@@ -24,11 +24,23 @@ public class DateUtil {
 
     private static final SimpleDateFormat YMD_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
 
-    // Converts dates to day only.
+    // Converts Date objects to day precision.
     public static Date truncateToDays(Date d1) throws ParseException {
         Date date;
         try {
             date = YMD_DATE_FORMATTER.parse(YMD_DATE_FORMATTER.format(d1));
+        } catch (ParseException ex) {
+            LOGGER.log(Level.SEVERE, "Error parse date {0}", d1);
+            throw ex;
+        }
+        return date;
+    }
+
+    // Converts strings to Date objects with day precision.
+    public static Date truncateToDays(String d1) throws ParseException {
+        Date date;
+        try {
+            date = YMD_DATE_FORMATTER.parse(d1);
         } catch (ParseException ex) {
             LOGGER.log(Level.SEVERE, "Error parse date {0}", d1);
             throw ex;
