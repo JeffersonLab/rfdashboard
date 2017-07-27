@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -21,7 +22,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jlab.rfd.business.service.CavityService;
+import org.jlab.rfd.business.util.RequestParamUtil;
 import org.jlab.rfd.model.CavityDataSpan;
+import org.jlab.rfd.model.TimeUnit;
 
 /**
  *
@@ -49,6 +52,15 @@ public class CavityAjax extends HttpServlet {
         
         long ts = new Date().getTime();
         //LOGGER.log(Level.FINEST, "Received followig request parameters: {0}", request.getParameterMap().toString());
+
+        TimeUnit timeUnit = RequestParamUtil.processTimeUnit(request, TimeUnit.WEEK);
+        if (timeUnit == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            LOGGER.log(Level.SEVERE, "Unsupported timeUnit value supplied {0}", timeUnit);
+            response.setContentType("application/json");
+            pw.write("{error: 'Unsupported timeUnit value \"" + timeUnit + "\" supplied'}");
+            return;
+        }
         
         // Support requesting a selection of dates as an alternative to a full range.  This should override the start/end request.
         List<Date> dates = null;
@@ -73,64 +85,34 @@ public class CavityAjax extends HttpServlet {
             }
         }
         
-        Date start, end;
-        try {
-            String eString = request.getParameter("end");
-            String sString = request.getParameter("start");
-            if ( eString != null) {
-                end = sdf.parse((eString));
-            } else {
-                // Default to "now"
-                end = sdf.parse(sdf.format(new Date()));
+        Map<String, Date> startEnd;
+        Date start = null;
+        Date end = null;
+        if (dates == null) {
+            try {
+                startEnd = RequestParamUtil.processStartEnd(request, TimeUnit.WEEK, 4);
+            } catch (ParseException ex) {
+                hasError = true;
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
+                response.setContentType("application/json");
+                pw.write("{error: 'Error parsing start/end parameters'}");
+                return;
             }
-            if ( sString != null) {
-                start = sdf.parse(sString);
-            } else {
-                // Default to four weeks before end
-                start = sdf.parse(sdf.format(new Date(end.getTime() - 60*60*24*1000L*7*4)));
-            }
-        } catch (ParseException ex) {
-            hasError = true;
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
-            response.setContentType("application/json");
-            pw.write("{error: 'Error parsing start/end parameters'}");
-            return;
-        }
-
-        if ( ! start.before(end) ) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.setContentType("application/json");
-            pw.write("{error: 'start cannot be after end'}");
-            return;
-         }
-        if ( end.after(new Date()) ) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.setContentType("application/json");
-            pw.write("{\"error\":\"end cannot be a future date\"}");
-            return;
+            start = startEnd.get("start");
+            end = startEnd.get("end");
+            
+            System.out.println("Start: " + start.toString() + "   --  End: " + end.toString());
         }
         
-        String out = request.getParameter("out");
-        if (out == null) {
-            out = "json";
-        } else if ( ! out.equals("json") ) {
+        String[] valid = {"json"};
+        String out = RequestParamUtil.processOut(request, valid, "json");
+        if (out == null ) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             LOGGER.log(Level.SEVERE, "Unsupported out value supplied {0}", out);
             response.setContentType("application/json");
             pw.write("{error:\"Unsupported out value '" + out + "' supplied\"}");
-            return;
-        }
-
-        String timeUnit = request.getParameter("timeUnit");
-        if ( timeUnit == null) {
-            timeUnit = "week";
-        } else if ( ! timeUnit.equals("day") && ! timeUnit.equals("week")) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            LOGGER.log(Level.SEVERE, "Unsupported timeUnit value supplied {0}", timeUnit);
-            response.setContentType("application/json");
-            pw.write("{error: 'Unsupported timeUnit value \"" + timeUnit + "\" supplied'}");
-            return;
+            return;            
         }
         
         CavityService cs = new CavityService();
