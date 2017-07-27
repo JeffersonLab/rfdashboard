@@ -37,7 +37,7 @@ public class DateUtil {
     }
 
     // Converts strings to Date objects with day precision.
-    public static Date truncateToDays(String d1) throws ParseException {
+    public static Date parseDateString(String d1) throws ParseException {
         Date date;
         try {
             date = YMD_DATE_FORMATTER.parse(d1);
