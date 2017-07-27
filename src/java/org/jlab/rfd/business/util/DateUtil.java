@@ -37,7 +37,7 @@ public class DateUtil {
     }
 
     // Returns a date object that represents 12AM of the very next day
-    public static Date nextDay(Date d1) throws ParseException {
+    public static Date getNextDay(Date d1) throws ParseException {
         Date curr = truncateToDays(d1);
         Calendar cal = Calendar.getInstance();
         cal.setTime(curr);
