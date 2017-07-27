@@ -43,7 +43,8 @@ public class RequestParamUtil {
         if (out == null) {
             return def;
         }
-        if (Arrays.asList(valid).contains(out)) {
+        if (!Arrays.asList(valid).contains(out)) {
+            LOGGER.log(Level.WARNING, "Unsupported out format requested - {0}", out);
             return null;
         }
 
