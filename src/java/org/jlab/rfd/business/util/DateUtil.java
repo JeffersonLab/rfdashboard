@@ -9,6 +9,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Note: This truncates the difference in the Date objects to the Day field
@@ -17,22 +19,32 @@ import java.util.Date;
  * @author adamc
  */
 public class DateUtil {
+
+    private static final Logger LOGGER = Logger.getLogger(DateUtil.class.getName());
+
     private static final SimpleDateFormat YMD_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
-    
+
     // Converts dates to day only.
-    public static Date truncateToDays(Date d1) throws ParseException{
-        return YMD_DATE_FORMATTER.parse(YMD_DATE_FORMATTER.format(d1));
+    public static Date truncateToDays(Date d1) throws ParseException {
+        Date date;
+        try {
+            date = YMD_DATE_FORMATTER.parse(YMD_DATE_FORMATTER.format(d1));
+        } catch (ParseException ex) {
+            LOGGER.log(Level.SEVERE, "Error parse date {0}", d1);
+            throw ex;
+        }
+        return date;
     }
-    
+
     // Returns a date object that represents 12AM of the very next day
     public static Date nextDay(Date d1) throws ParseException {
-       Date curr = truncateToDays(d1);
-       Calendar cal = Calendar.getInstance();
-       cal.setTime(curr);
-       cal.add(Calendar.DATE, 1);
-       return cal.getTime();
+        Date curr = truncateToDays(d1);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(curr);
+        cal.add(Calendar.DATE, 1);
+        return cal.getTime();
     }
-    
+
     // Returns the number of whole days between to points in time
     public static long getDifferenceInDays(Date d1, Date d2) {
 
@@ -47,9 +59,9 @@ public class DateUtil {
         Calendar c2 = Calendar.getInstance();
         c1.setTime(d1);
         // Unlikely we're working with enough days for the lossy conversion to matter (> ~ 2 billion)
-        c1.add(Calendar.DATE, (int)diffDays);
+        c1.add(Calendar.DATE, (int) diffDays);
         c2.setTime(d2);
-        
+
         // This increments diffDays only when the difference between the calendars is one or more days.  Less than one day is
         // incremented then decremented.
         while (c1.before(c2)) {
