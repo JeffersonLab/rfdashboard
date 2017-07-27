@@ -78,56 +78,7 @@ public class ModAnodeAJAX extends HttpServlet {
         if ( timeUnit == null ) {
             throw new ServletException("Unsupported timeUnit requested");
         }
-        
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//        Date start, end;
-//        try {
-//            String eString = request.getParameter("end");
-//            String sString = request.getParameter("start");
-//            if ( eString != null) {
-//                end = sdf.parse((eString));
-//            } else {
-//                // Default to "now"
-//                end = sdf.parse(sdf.format(new Date()));
-//            }
-//            if ( sString != null) {
-//                start = sdf.parse(sString);
-//            } else {
-//                // Default to four weeks before end
-//                start = sdf.parse(sdf.format(new Date(end.getTime() - 60*60*24*1000L*7*4)));
-//            }
-//        } catch (ParseException ex) {
-//            LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
-//            throw new ServletException("Error parseing start/end", ex);
-//        }
-//
-//        String out = request.getParameter("out");
-//        if (out == null) {
-//            out = "flot";
-//        }
-//
-//        String factor = request.getParameter("factor");
-//        if ( factor == null) {
-//            factor = "linac";
-//        }
-//
-//        String timeUnit;        
-//        if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
-//            // Default to week
-//            LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
-//            timeUnit = "week";
-//        } else {
-//            switch (request.getParameter("timeUnit")) {
-//                case "day":
-//                    timeUnit = "day";
-//                    break;
-//                case "week":
-//                default:
-//                    timeUnit = "week";
-//            }
-//        }
-
-        
+                
         CavityService cs = new CavityService();
         CavityDataSpan span;
         try {
