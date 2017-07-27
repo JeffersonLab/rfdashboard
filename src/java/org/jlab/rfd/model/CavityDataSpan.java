@@ -91,6 +91,13 @@ public class CavityDataSpan {
                         cavBuilder.add("odvh", "");
                     }
                     
+                    // Some of these will have ModAnodeHarvester data, but definitely not Injector cavities
+                    if (dp.getModAnodeHarvesterGsetData() != null ) {
+                        cavBuilder.add("modAnodeHarvester", dp.getModAnodeHarvesterGsetData().toJson());
+                    } else {
+                        cavBuilder.add("modAnodeHarvester", "");
+                    }
+                    
                     // Add the last couple of properties, build the builder, and add it to the cavities object
                     cavities.add(cavBuilder
                             .add("moduleType", dp.getCryomoduleType().toString())
