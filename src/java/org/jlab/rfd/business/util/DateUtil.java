@@ -5,6 +5,8 @@
  */
 package org.jlab.rfd.business.util;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -15,7 +17,12 @@ import java.util.Date;
  * @author adamc
  */
 public class DateUtil {
-
+    private static final SimpleDateFormat YMD_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
+    
+    public static Date truncateToDays(Date d1) throws ParseException{
+        return YMD_DATE_FORMATTER.parse(YMD_DATE_FORMATTER.format(d1));
+    }
+    
     public static long getDifferenceInDays(Date d1, Date d2) {
 
         // Calculate the naive difference in days without consider DST, leap seconds, etc.
