@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,7 +23,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jlab.rfd.business.service.CavityService;
+import org.jlab.rfd.business.util.RequestParamUtil;
 import org.jlab.rfd.model.CavityDataSpan;
+import org.jlab.rfd.model.TimeUnit;
 import org.jlab.rfd.presentation.util.DataFormatter;
 
 /**
@@ -47,31 +50,23 @@ public class ModAnodeAJAX extends HttpServlet {
             throws ServletException, IOException {
         //LOGGER.log(Level.FINEST, "Received followig request parameters: {0}", request.getParameterMap().toString());
         
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date start, end;
+        Map<String, Date> startEnd;
+        Date start;
+        Date end;
+
         try {
-            String eString = request.getParameter("end");
-            String sString = request.getParameter("start");
-            if ( eString != null) {
-                end = sdf.parse((eString));
-            } else {
-                // Default to "now"
-                end = sdf.parse(sdf.format(new Date()));
-            }
-            if ( sString != null) {
-                start = sdf.parse(sString);
-            } else {
-                // Default to four weeks before end
-                start = sdf.parse(sdf.format(new Date(end.getTime() - 60*60*24*1000L*7*4)));
-            }
+            startEnd = RequestParamUtil.processStartEnd(request, TimeUnit.WEEK, 4);
+            start = startEnd.get("start");
+            end = startEnd.get("end");
         } catch (ParseException ex) {
             LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
             throw new ServletException("Error parseing start/end", ex);
         }
 
-        String out = request.getParameter("out");
+        String[] valid = {"flot"};
+        String out = RequestParamUtil.processOut(request, valid, "flot");
         if (out == null) {
-            out = "flot";
+            throw new ServletException("Unsupported out format requested");
         }
 
         String factor = request.getParameter("factor");
@@ -79,21 +74,58 @@ public class ModAnodeAJAX extends HttpServlet {
             factor = "linac";
         }
 
-        String timeUnit;        
-        if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
-            // Default to week
-            LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
-            timeUnit = "week";
-        } else {
-            switch (request.getParameter("timeUnit")) {
-                case "day":
-                    timeUnit = "day";
-                    break;
-                case "week":
-                default:
-                    timeUnit = "week";
-            }
+        TimeUnit timeUnit = RequestParamUtil.processTimeUnit(request, TimeUnit.WEEK);
+        if ( timeUnit == null ) {
+            throw new ServletException("Unsupported timeUnit requested");
         }
+        
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//        Date start, end;
+//        try {
+//            String eString = request.getParameter("end");
+//            String sString = request.getParameter("start");
+//            if ( eString != null) {
+//                end = sdf.parse((eString));
+//            } else {
+//                // Default to "now"
+//                end = sdf.parse(sdf.format(new Date()));
+//            }
+//            if ( sString != null) {
+//                start = sdf.parse(sString);
+//            } else {
+//                // Default to four weeks before end
+//                start = sdf.parse(sdf.format(new Date(end.getTime() - 60*60*24*1000L*7*4)));
+//            }
+//        } catch (ParseException ex) {
+//            LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
+//            throw new ServletException("Error parseing start/end", ex);
+//        }
+//
+//        String out = request.getParameter("out");
+//        if (out == null) {
+//            out = "flot";
+//        }
+//
+//        String factor = request.getParameter("factor");
+//        if ( factor == null) {
+//            factor = "linac";
+//        }
+//
+//        String timeUnit;        
+//        if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
+//            // Default to week
+//            LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
+//            timeUnit = "week";
+//        } else {
+//            switch (request.getParameter("timeUnit")) {
+//                case "day":
+//                    timeUnit = "day";
+//                    break;
+//                case "week":
+//                default:
+//                    timeUnit = "week";
+//            }
+//        }
 
         
         CavityService cs = new CavityService();
@@ -123,9 +155,6 @@ public class ModAnodeAJAX extends HttpServlet {
                 JsonObject json = DataFormatter.toFlotFromDateMap(factoredData);
                 response.setContentType("application/json");
                 pw.write(json.toString());
-            } else {
-                LOGGER.log(Level.WARNING, "Unsupported out format requested - {0}", out);
-                throw new ServletException("Unsupported out format requested");
             }
         } catch (ParseException ex) {
             throw new ServletException("Error formatting data", ex);
