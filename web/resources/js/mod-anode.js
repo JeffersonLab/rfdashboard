@@ -79,7 +79,6 @@ jlab.mod_anode.createTable = function (tableId, date) {
         end: date,
         timeUnit: "day",
         success: function (jsonData, textStatus, jqXHR) {
-            console.log(jsonData);
             var data = jsonData.data;
             var tableString = "<table id=" + tableId + " class=\"tablesorter\">";
             tableString += "<thead><tr><th>Name</th><th>Module Type</th><th>Mod Anode Voltage (kV)</th><th>GSET</th></tr></thead>";
@@ -116,7 +115,6 @@ jlab.mod_anode.createModAnodeHarvesterTable = function (tableId, date) {
         end: date,
         timeUnit: "day",
         success: function (jsonData, textStatus, jqXHR) {
-            console.log(jsonData);
             var data = jsonData.data;
             var tableString = "<table id=" + tableId + " class=\"tablesorter\">";
             tableString += "<thead><tr><th>Name</th><th>Module Type</th><th>Mod Anode Voltage (kV)</th>"
@@ -144,7 +142,6 @@ jlab.mod_anode.createModAnodeHarvesterTable = function (tableId, date) {
                 }
             }
             tableString += "</tbody></table>";
-            console.log(tableString);
             $("#" + tableId + "-table").append(tableString);
             // Setup the sortable cavity table
             $("#" + tableId)
