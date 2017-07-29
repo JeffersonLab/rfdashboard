@@ -5,19 +5,16 @@
  */
 package org.jlab.rfd.model.ModAnodeHarvester;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import org.jlab.rfd.model.LinacName;
 
 /**
  *
@@ -25,7 +22,7 @@ import org.jlab.rfd.model.LinacName;
  */
 
 public class LinacDataSpan {
-    private final SortedMap<Date, Map<LinacName, LinacDataPoint>> dataSpan;
+    private final SortedMap<Date, Set<LinacDataPoint>> dataSpan;
     
     
     /**
@@ -40,14 +37,14 @@ public class LinacDataSpan {
      * @param ldp
      * @return 
      */
-    public LinacDataPoint add(LinacDataPoint ldp) {
+    public boolean add(LinacDataPoint ldp) {
         if ( ! dataSpan.containsKey(ldp.getTimestamp()) ) {
-            dataSpan.put(ldp.getTimestamp(), new HashMap<>());
+            dataSpan.put(ldp.getTimestamp(), new HashSet<>());
         }
-        return dataSpan.get(ldp.getTimestamp()).put(ldp.getLinacName(), ldp);
+        return dataSpan.get(ldp.getTimestamp()).add(ldp);
     }
     
-    public Map<LinacName, LinacDataPoint> put(Date timestamp, Map<LinacName, LinacDataPoint> data) {
+    public Set<LinacDataPoint> put(Date timestamp, Set<LinacDataPoint> data) {
         return dataSpan.put(timestamp, data);
     }
     
@@ -77,19 +74,20 @@ public class LinacDataSpan {
             point.add("date", sdf.format(d));
 
             JsonObjectBuilder linacs = Json.createObjectBuilder();
-            for ( LinacName linacName : dataSpan.get(d).keySet() ) {
-                LinacDataPoint ldp = dataSpan.get(d).get(linacName);
+            for ( LinacDataPoint ldp : dataSpan.get(d) ) {
 
-                linacs.add(linacName.toString(), Json.createObjectBuilder()
-                        .add("mav", Json.createObjectBuilder()
-                                .add("1050", ldp.getTrips1050())
-                                .add("1090", ldp.getTrips1050())
-                                .build())
-                        .add("no_mav", Json.createObjectBuilder()
-                                .add("1050", ldp.getTripsNoMav1050())
-                                .add("1090", ldp.getTripsNoMav1090())
-                                .build())
-                        .build());
+                if (ldp != null) {
+                    linacs.add(ldp.getLinacName().toString(), Json.createObjectBuilder()
+                            .add("mav", Json.createObjectBuilder()
+                                    .add("1050", ldp.getTrips1050())
+                                    .add("1090", ldp.getTrips1050())
+                                    .build())
+                            .add("no_mav", Json.createObjectBuilder()
+                                    .add("1050", ldp.getTripsNoMav1050())
+                                    .add("1090", ldp.getTripsNoMav1090())
+                                    .build())
+                            .build());
+                }
             }
             data.add(point.add("linacs", linacs.build()).build());
         }

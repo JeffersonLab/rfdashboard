@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -106,10 +107,10 @@ public class ModAnodeHarvesterService {
      * @throws ParseException
      * @throws SQLException 
      */
-    public Map<LinacName, LinacDataPoint> getLinacData(Date timestamp) throws ParseException, SQLException {
+    public Set<LinacDataPoint> getLinacData(Date timestamp) throws ParseException, SQLException {
 
         ScanRecord sr = getFirstScanRecord(timestamp);
-        Map<LinacName, LinacDataPoint> data = null;
+        Set<LinacDataPoint> data = null;
                 
         if ( sr != null ) {
             Connection conn = null;
@@ -148,7 +149,7 @@ public class ModAnodeHarvesterService {
                     }
                 }
 
-                data = new HashMap<>();
+                data = new HashSet<>();
                 
                 // Combine the two records for each cavity into one LinacDataPoint object and add it to the map.
                 if (records1050.size() != records1090.size()) {
@@ -168,7 +169,7 @@ public class ModAnodeHarvesterService {
                     if (linacData == null) {
                         throw new RuntimeException(ERR_STRING);
                     } else {
-                        data.put(linacName, linacData);
+                        data.add(linacData);
                     }
                 }
             } finally {
