@@ -1,3 +1,9 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package org.jlab.rfd.model.ModAnodeHarvester;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -8,20 +14,30 @@ import java.util.TreeMap;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import org.jlab.rfd.model.LinacName;
-import org.jlab.rfd.model.ModAnodeHarvester.LinacDataPoint;
 
-
+/**
+ *
+ * @author adamc
+ */
 
 public class LinacDataSpan {
     private final SortedMap<Date, Map<LinacName, LinacDataPoint>> dataSpan;
     
+    
+    /**
+     * 
+     */
     public LinacDataSpan () {
         dataSpan = new TreeMap<>();
     }
     
+    /**
+     * 
+     * @param ldp
+     * @return 
+     */
     public LinacDataPoint add(LinacDataPoint ldp) {
         if ( ! dataSpan.containsKey(ldp.getTimestamp()) ) {
             dataSpan.put(ldp.getTimestamp(), new HashMap<>());
