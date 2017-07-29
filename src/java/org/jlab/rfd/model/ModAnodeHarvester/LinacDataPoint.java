@@ -80,15 +80,19 @@ public class LinacDataPoint {
         return linacName;
     }
 
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
     public Date getEpicsDate() {
         return epicsDate;
     }
 
-    public BigDecimal getGset1050() {
+    public BigDecimal getTrips1050() {
         return trips1050;
     }
 
-    public BigDecimal getGset1090() {
+    public BigDecimal getTrips1090() {
         return trips1090;
     }
 
