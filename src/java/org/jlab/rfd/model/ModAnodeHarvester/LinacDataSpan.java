@@ -16,7 +16,11 @@ import org.jlab.rfd.model.ModAnodeHarvester.LinacDataPoint;
 
 
 public class LinacDataSpan {
-    private final SortedMap<Date, Map<LinacName, LinacDataPoint>> dataSpan = new TreeMap<>();
+    private final SortedMap<Date, Map<LinacName, LinacDataPoint>> dataSpan;
+    
+    public LinacDataSpan () {
+        dataSpan = new TreeMap<>();
+    }
     
     public LinacDataPoint add(LinacDataPoint ldp) {
         if ( ! dataSpan.containsKey(ldp.getTimestamp()) ) {
