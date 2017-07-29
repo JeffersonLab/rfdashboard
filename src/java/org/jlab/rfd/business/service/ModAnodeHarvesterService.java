@@ -81,21 +81,24 @@ public class ModAnodeHarvesterService {
         Calendar cal = Calendar.getInstance();
         cal.setTime(curr);
 
-        LinacDataSpan span = new LinacDataSpan();
+        Set<Date> dates = new HashSet<>();
         while ( curr.before(e) ) {
-            span.put(curr, this.getLinacData(curr));
+            dates.add(curr);
             cal.add(Calendar.DAY_OF_MONTH, numDays);
             curr = DateUtil.truncateToDays(cal.getTime());
         }
-
-        return span;
+        
+        return this.getLinacDataSpan(dates);
     }
     
     
     public LinacDataSpan getLinacDataSpan(Set<Date> dates) throws ParseException, SQLException {
         LinacDataSpan span = new LinacDataSpan();
         for (Date d: dates) {
-            span.put(d, this.getLinacData(d));
+            Set<LinacDataPoint> ldps = this.getLinacData(d);
+            if ( ldps != null ) {
+                span.put(d, ldps);
+            }
         }
         return span;
     }
