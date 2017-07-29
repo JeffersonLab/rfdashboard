@@ -7,15 +7,18 @@ package org.jlab.rfd.business.service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jlab.rfd.business.util.DateUtil;
@@ -23,9 +26,11 @@ import org.jlab.rfd.business.util.SqlUtil;
 import org.jlab.rfd.model.LinacName;
 import org.jlab.rfd.model.ModAnodeHarvester.CavityGsetData;
 import org.jlab.rfd.model.ModAnodeHarvester.GsetRecord;
-import org.jlab.rfd.model.ModAnodeHarvester.LinacData;
+import org.jlab.rfd.model.ModAnodeHarvester.LinacDataPoint;
+import org.jlab.rfd.model.ModAnodeHarvester.LinacDataSpan;
 import org.jlab.rfd.model.ModAnodeHarvester.LinacRecord;
 import org.jlab.rfd.model.ModAnodeHarvester.ScanRecord;
+import org.jlab.rfd.model.TimeUnit;
 
 /**
  * This service class exists to return the results of ModAnodeHarvester.pl,
@@ -44,6 +49,56 @@ public class ModAnodeHarvesterService {
     // This will be shown to the user on error.  Better to make it generic and have a log statement just before.
     private final String ERR_STRING = "Error querying data.";
 
+    
+    /**
+     * 
+     * @param start
+     * @param end
+     * @param timeUnit
+     * @return 
+     * @throws java.text.ParseException 
+     * @throws java.sql.SQLException 
+     */
+    public LinacDataSpan getLinacDataSpan(Date start, Date end, TimeUnit timeUnit) throws ParseException, SQLException {
+        int numDays;
+        switch (timeUnit) {
+            case DAY:
+                numDays = 1;
+                break;
+            case WEEK:
+            default:
+                numDays = 7;
+        }
+        Date curr = DateUtil.truncateToDays(start);
+        Date e;
+        if ( end.after(new Date()) ) {
+            e = DateUtil.truncateToDays(new Date());
+        } else {
+            e = DateUtil.truncateToDays(end);
+        }
+        
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(curr);
+
+        LinacDataSpan span = new LinacDataSpan();
+        while ( curr.before(e) ) {
+            span.put(curr, this.getLinacData(curr));
+            cal.add(Calendar.DAY_OF_MONTH, numDays);
+            curr = DateUtil.truncateToDays(cal.getTime());
+        }
+
+        return span;
+    }
+    
+    
+    public LinacDataSpan getLinacDataSpan(Set<Date> dates) throws ParseException, SQLException {
+        LinacDataSpan span = new LinacDataSpan();
+        for (Date d: dates) {
+            span.put(d, this.getLinacData(d));
+        }
+        return span;
+    }
+    
     /**
      * This queries the ModAnodeHarvester database tables for linac scan data associated with the first scan of that day.
      * @param timestamp The date of interested
@@ -51,19 +106,19 @@ public class ModAnodeHarvesterService {
      * @throws ParseException
      * @throws SQLException 
      */
-    public Map<LinacName, LinacData> getLinacData(Date timestamp) throws ParseException, SQLException {
+    public Map<LinacName, LinacDataPoint> getLinacData(Date timestamp) throws ParseException, SQLException {
 
-        ScanRecord sr =getFirstScanRecord(timestamp);
-        Map<LinacName, LinacData> data = null;
-        
+        ScanRecord sr = getFirstScanRecord(timestamp);
+        Map<LinacName, LinacDataPoint> data = null;
+                
         if ( sr != null ) {
             Connection conn = null;
             PreparedStatement pstmt = null;
             ResultSet rs = null;
 
-            String linacSql = "SELECT LINAC, ENERGY_MEV, TRIPS_PER_HOUR, TRIP_PER_HOUR_NO_MAV"
-                    + "FROM MOD_ANODE_HARVESTER_LINAC_SCAN"
-                    + "WHERE SCAN_ID = ?";
+            String linacSql = "SELECT LINAC, ENERGY_MEV, TRIPS_PER_HOUR, TRIPS_PER_HOUR_NO_MAV"
+                    + " FROM MOD_ANODE_HARVESTER_LINAC_SCAN"
+                    + " WHERE SCAN_ID = ?";
 
             try {
                 conn = SqlUtil.getConnection();
@@ -76,8 +131,9 @@ public class ModAnodeHarvesterService {
                 while( rs.next() ) {
                     LinacName linac = LinacName.valueOf(rs.getString("LINAC"));
                     BigDecimal energy = new BigDecimal(rs.getDouble("ENERGY_MEV"));
-                    BigDecimal trips = new  BigDecimal(rs.getDouble("TRIPS_PER_HOUR"));
-                    BigDecimal tripsNoMav = new  BigDecimal(rs.getDouble("TRIPS_PER_HOUR_NO_MAV"));
+                    BigDecimal trips = new  BigDecimal(rs.getDouble("TRIPS_PER_HOUR")).setScale(6, RoundingMode.HALF_UP);
+                    BigDecimal tripsNoMav = new  BigDecimal(rs.getDouble("TRIPS_PER_HOUR_NO_MAV")).setScale(6, RoundingMode.HALF_UP);
+
                     LinacRecord record = new LinacRecord(sr.getTimestamp(), sr.getEpicsDate(), linac, energy, trips, tripsNoMav);
                     switch (record.getEnergy().intValue()) {
                         case 1050:
@@ -94,7 +150,7 @@ public class ModAnodeHarvesterService {
 
                 data = new HashMap<>();
                 
-                // Combine the two records for each cavity into one LinacData object and add it to the map.
+                // Combine the two records for each cavity into one LinacDataPoint object and add it to the map.
                 if (records1050.size() != records1090.size()) {
                     LOGGER.log(Level.SEVERE, "Database query did not return identical linac sets at different energies");
                     throw new RuntimeException(ERR_STRING);
@@ -108,7 +164,7 @@ public class ModAnodeHarvesterService {
                         LOGGER.log(Level.SEVERE, "Received Gset record with null EPICS_NAME");
                         throw new RuntimeException(ERR_STRING);
                     }
-                    LinacData linacData = new LinacData(records1050.get(linacName), records1090.get(linacName));
+                    LinacDataPoint linacData = new LinacDataPoint(records1050.get(linacName), records1090.get(linacName));
                     if (linacData == null) {
                         throw new RuntimeException(ERR_STRING);
                     } else {
@@ -238,7 +294,6 @@ public class ModAnodeHarvesterService {
                 Date ed = DATE_FORMATER.parse(rs.getString("EPICS_DATE"));
                 pstmt.close();
                 rs.close();
-
                 sr = new ScanRecord(scanId, ts, ed);
             }
         } finally {
