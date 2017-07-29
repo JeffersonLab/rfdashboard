@@ -5,6 +5,7 @@
  */
 package org.jlab.rfd.model.ModAnodeHarvester;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.TreeMap;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import org.jlab.rfd.model.LinacName;
 
@@ -45,6 +47,9 @@ public class LinacDataSpan {
         return dataSpan.get(ldp.getTimestamp()).put(ldp.getLinacName(), ldp);
     }
     
+    public Map<LinacName, LinacDataPoint> put(Date timestamp, Map<LinacName, LinacDataPoint> data) {
+        return dataSpan.put(timestamp, data);
+    }
     
     /**
      * This returns a JSON array in the following format
@@ -74,6 +79,7 @@ public class LinacDataSpan {
             JsonObjectBuilder linacs = Json.createObjectBuilder();
             for ( LinacName linacName : dataSpan.get(d).keySet() ) {
                 LinacDataPoint ldp = dataSpan.get(d).get(linacName);
+
                 linacs.add(linacName.toString(), Json.createObjectBuilder()
                         .add("mav", Json.createObjectBuilder()
                                 .add("1050", ldp.getTrips1050())
@@ -82,10 +88,10 @@ public class LinacDataSpan {
                         .add("no_mav", Json.createObjectBuilder()
                                 .add("1050", ldp.getTripsNoMav1050())
                                 .add("1090", ldp.getTripsNoMav1090())
-                                .build()));
+                                .build())
+                        .build());
             }
-            point.add("linacs", linacs.build()).build();
-            data.add(point);
+            data.add(point.add("linacs", linacs.build()).build());
         }
         return data.build();
     }
