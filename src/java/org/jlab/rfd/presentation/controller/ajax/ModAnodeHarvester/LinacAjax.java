@@ -7,6 +7,7 @@ package org.jlab.rfd.presentation.controller.ajax.ModAnodeHarvester;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,6 +17,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -138,7 +141,8 @@ public class LinacAjax extends HttpServlet {
         }
         
         response.setContentType("application/json");
-        pw.write(span.toJson().toString());
+        JsonObject json = Json.createObjectBuilder().add("data", span.toJson()).build();
+        pw.write(json.toString());
     }
 
     /**
