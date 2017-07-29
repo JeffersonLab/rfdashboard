@@ -129,11 +129,16 @@ public class CavityService {
                     // If we got back ModAnodeHarvester data for this timestamp, make sure that we have data for every cavity.
                     // We either need a whole data set or throw an error.  Except that we expect this behavior for injector cavities
                     // since ModAnodeHarvester only runs against the North and South Linacs... ugh ...
-                    if ( cgds != null && Pattern.matches("^R0*", epicsName) && cgds.get(epicsName) == null) {
+                    if ( cgds != null && ( ! Pattern.matches("^R0*", epicsName) ) && cgds.get(epicsName) == null) {
                         throw new RuntimeException("ModAnodeHarvester data missing for " + epicsName + " on '" + timestamp);
                     }
-                    data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
-                            odvhs.get(cavityName), cgds.get(epicsName)));
+                    if ( cgds == null ) {
+                        data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
+                                odvhs.get(cavityName), null));                        
+                    } else {
+                        data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
+                                odvhs.get(cavityName), cgds.get(epicsName)));
+                    }
                 }
             }
 
