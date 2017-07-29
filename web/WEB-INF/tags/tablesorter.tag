@@ -12,7 +12,6 @@
 
 <%-- Content --%>
 <div ${tableId ne null ? "id=".concat(tableId).concat("-wrap") : ""} class="tablesorter-wrap">
-    <%-- This is where the actual table should be placed using something like jquery.prepend --%>
     <div ${tableId ne null ? "id=".concat(tableId).concat("-header") : ""}  class="tablesorter-header">
         <div ${tableId ne null ? "id=".concat(tableId).concat("-title") : ""}  class="tablesorter-title"><strong>${tableTitle}</strong></div>
         <div ${tableId ne null ? "id=".concat(tableId).concat("-pager") : ""}  class="pager">
@@ -31,5 +30,8 @@
             </form>
         </div>
     </div>
-    <div ${tableId ne null ? "id=".concat(tableId).concat("-table") : ""}  class="tablesorter-table"></div>
+    <div ${tableId ne null ? "id=".concat(tableId).concat("-table") : ""}  class="tablesorter-table">
+        <%-- The HTML table should have id=<tableId>.  I.e., the value of the attribute passed to this widget --%>
+        <%-- This is where the actual table should be placed using something like jquery.prepend --%>
+    </div>
 </div>

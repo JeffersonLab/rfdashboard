@@ -71,6 +71,8 @@
         <t:chart-widget placeholderId="mav-count-by-cmtype"></t:chart-widget>
         <hr></hr><br></br>
         <t:tablesorter tableTitle="Cavities with Non-Zero Mod Anode Voltage (${requestScope.tableDate})" tableId="mav-table"></t:tablesorter>
+        <hr></hr><br></br>
+        <t:tablesorter tableTitle="LEMSim Estimated Mod Anode Voltage Affects (${requestScope.tableDate})" tableId="mav-mah-table"></t:tablesorter>
         <script>
             var jlab = jlab || {};
             jlab.start = "${requestScope.start}";

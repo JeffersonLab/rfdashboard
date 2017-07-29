@@ -81,7 +81,7 @@ jlab.mod_anode.createTable = function (tableId, date) {
         success: function (jsonData, textStatus, jqXHR) {
             console.log(jsonData);
             var data = jsonData.data;
-            var tableString = "<table class=\"tablesorter\">";
+            var tableString = "<table id=" + tableId + " class=\"tablesorter\">";
             tableString += "<thead><tr><th>Name</th><th>Module Type</th><th>Mod Anode Voltage (kV)</th><th>GSET</th></tr></thead>";
             tableString += "<tbody>";
             for (var i = 0; i < data.length; i++) {
@@ -96,7 +96,58 @@ jlab.mod_anode.createTable = function (tableId, date) {
             tableString += "</tbody></table>";
             $("#" + tableId + "-table").append(tableString);
             // Setup the sortable cavity table
-            $(".tablesorter")
+            $("#" + tableId)
+                    .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
+                    .tablesorterPager({container: $("#" + tableId + "-pager")});
+        }
+    });
+};
+
+
+/* 
+ * Create a per-cavity ModAnodeharvester/LEMSim GSET data table.
+ * tableId - the tablesorter tag tableId
+ * date - the scan timestamp date for which to query data
+ * */
+jlab.mod_anode.createModAnodeHarvesterTable = function (tableId, date) {
+
+    jlab.cavity.getCavityData({
+        start: jlab.addDays(date, -1),
+        end: date,
+        timeUnit: "day",
+        success: function (jsonData, textStatus, jqXHR) {
+            console.log(jsonData);
+            var data = jsonData.data;
+            var tableString = "<table id=" + tableId + " class=\"tablesorter\">";
+            tableString += "<thead><tr><th>Name</th><th>Module Type</th><th>Mod Anode Voltage (kV)</th>"
+                    + "<th>GSET<br>(1050 MeV)</th><th>GSET No M.A.V.<br>(1050 MeV)</th><th>Delta GSET<br>(1050 MeV)</th>"
+                    + "<th>GSET<br>(1090 MeV)</th><th>GSET No M.A.V.<br>(1090 MeV)</th><th>Delta GSET<br>(1090 MeV)</th>"
+                    + "</tr></thead>";
+            tableString += "<tbody>";
+            for (var i = 0; i < data.length; i++) {
+                var cavities = data[i].cavities;
+                for (var j = 0; j < cavities.length; j++) {
+                    if (cavities[j].hasOwnProperty("modAnodeHarvester")) {
+                        if (cavities[j].modAnodeHarvester.modAnodeVoltage_kv > 0) {
+                            var gset1050 = Number.parseFloat(cavities[j].modAnodeHarvester.gset1050).toFixed(3);
+                            var gsetNoMav1050 = Number.parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1050).toFixed(3);
+                            var gset1090 = Number.parseFloat(cavities[j].modAnodeHarvester.gset1090).toFixed(3);
+                            var gsetNoMav1090 = Number.parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1090).toFixed(3);
+                            
+                            tableString += "<tr><td>" + cavities[j].name + "</td><td>" + cavities[j].moduleType + "</td><td>"
+                                    + cavities[j].modAnodeHarvester.modAnodeVoltage_kv + "</td><td>"
+                                    + gset1050 + "</td><td>" + gsetNoMav1050 + "</td><td>" + (gsetNoMav1050 - gset1050).toFixed(3) + "</td><td>"
+                                    + gset1090 + "</td><td>" + gsetNoMav1090 + "</td><td>" + (gsetNoMav1090 - gset1090).toFixed(3) + "</td>"
+                                    + "</tr>";
+                        }
+                    }
+                }
+            }
+            tableString += "</tbody></table>";
+            console.log(tableString);
+            $("#" + tableId + "-table").append(tableString);
+            // Setup the sortable cavity table
+            $("#" + tableId)
                     .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
                     .tablesorterPager({container: $("#" + tableId + "-pager")});
         }
@@ -107,6 +158,7 @@ jlab.mod_anode.createTable = function (tableId, date) {
 $(function () {
 
     jlab.mod_anode.createTable("mav-table", jlab.tableDate);
+    jlab.mod_anode.createModAnodeHarvesterTable("mav-mah-table", jlab.tableDate);
     jlab.mod_anode.loadCharts(jlab.mavUrl, jlab.start, jlab.end, jlab.timeUnit);
 
     // Setup the date picker(s)
