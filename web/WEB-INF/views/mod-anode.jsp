@@ -11,6 +11,7 @@
 <c:set var="title" value="Mod Anode Summary" />
 <t:page title="${title}" pageStart="${requestScope.start}" pageEnd="${requestScope.end}"> 
     <jsp:attribute name="stylesheets">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/mod-anode.css"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/flot-barchart.css"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter.css"/>
     </jsp:attribute>
@@ -66,13 +67,15 @@
                 </fieldset>
             </form>
         </div>
+        <t:chart-widget placeholderId="mav-mah-trip-impact"></t:chart-widget>
+        <hr></hr><br></br>
+        <t:tablesorter tableTitle="LEMSim Estimated Mod Anode Voltage Affects (${requestScope.tableDate})" tableId="mav-mah-table"></t:tablesorter>
+        <hr></hr><br></br>
         <t:chart-widget placeholderId="mav-count-by-linac"></t:chart-widget>
         <hr></hr><br></br>
         <t:chart-widget placeholderId="mav-count-by-cmtype"></t:chart-widget>
         <hr></hr><br></br>
         <t:tablesorter tableTitle="Cavities with Non-Zero Mod Anode Voltage (${requestScope.tableDate})" tableId="mav-table"></t:tablesorter>
-        <hr></hr><br></br>
-        <t:tablesorter tableTitle="LEMSim Estimated Mod Anode Voltage Affects (${requestScope.tableDate})" tableId="mav-mah-table"></t:tablesorter>
         <script>
             var jlab = jlab || {};
             jlab.start = "${requestScope.start}";
