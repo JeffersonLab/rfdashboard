@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
@@ -28,6 +29,7 @@ import org.jlab.rfd.business.service.ModAnodeHarvesterService;
 import org.jlab.rfd.business.util.RequestParamUtil;
 import org.jlab.rfd.model.ModAnodeHarvester.LinacDataSpan;
 import org.jlab.rfd.model.TimeUnit;
+import org.jlab.rfd.presentation.util.DataFormatter;
 
 /**
  *
@@ -106,7 +108,7 @@ public class LinacAjax extends HttpServlet {
             }
         }
         
-        String[] valid = {"json"};
+        String[] valid = {"json", "flot"};
         String out = RequestParamUtil.processOut(request, valid, "json");
         if (out == null ) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -140,9 +142,22 @@ public class LinacAjax extends HttpServlet {
             }
         }
         
-        response.setContentType("application/json");
-        JsonObject json = Json.createObjectBuilder().add("data", span.toJson()).build();
-        pw.write(json.toString());
+        switch (out) {
+            case "json":
+                response.setContentType("application/json");
+                JsonObject json = Json.createObjectBuilder().add("data", span.toJson()).build();
+                pw.write(json.toString());
+                break;
+            case "flot":
+                response.setContentType("application/json");
+                SortedMap<Date, SortedMap<String, BigDecimal>> factoredData = span.getTripRates();
+                try {
+                    JsonObject flot = DataFormatter.toFlotFromDateMap(factoredData);
+                    pw.write(flot.toString());
+                } catch (ParseException ex) {
+                    throw new ServletException("Error formatting data", ex);
+                }
+        }
     }
 
     /**
