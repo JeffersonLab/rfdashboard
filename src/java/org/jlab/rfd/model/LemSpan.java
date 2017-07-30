@@ -106,6 +106,11 @@ public class LemSpan {
         return data;
     }
     
+    /**
+     * This outputs the energy reach data of a LemSpan object into a time series-like format.  The outer SortedMap is keyed
+     * on the date of the data, the inner SortedMap is keyed on a series name.  This object currently has only one series - "Reach."
+     * @return 
+     */
     public SortedMap<Date, SortedMap<String, BigDecimal>> getEnergyReach() {
         SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
         List<BigDecimal> north;
