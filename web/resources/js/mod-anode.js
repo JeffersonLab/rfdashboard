@@ -6,13 +6,15 @@
 
 var jlab = jlab || {};
 
-jlab.mavUrl = "/RFDashboard/ajax/mod-anode";
 
 jlab.mod_anode = jlab.mod_anode || {};
-jlab.mod_anode.loadCharts = function (url, start, end, timeUnit) {
+jlab.mod_anode.loadCharts = function (start, end, timeUnit) {
+    mavUrl = "/RFDashboard/ajax/mod-anode";
+    linacUrl = "/RFDashboard/ajax/linac";
+
     var settings1 = {
         chartId: 'mav-count-by-linac',
-        url: url,
+        url: mavUrl,
         start: start,
         end: end,
         timeUnit: timeUnit,
@@ -40,7 +42,7 @@ jlab.mod_anode.loadCharts = function (url, start, end, timeUnit) {
 
     var settings2 = {
         chartId: 'mav-count-by-cmtype',
-        url: url,
+        url: mavUrl,
         start: start,
         end: end,
         timeUnit: timeUnit,
@@ -60,11 +62,40 @@ jlab.mod_anode.loadCharts = function (url, start, end, timeUnit) {
         if (item) {
             var timestamp = item.series.data[item.dataIndex][0];
             var dateString = jlab.millisToDate(timestamp);
-            var url = "/RFDashboard/mod-anode?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString;
+            var url = mavUrl + "?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString;
             console.log("Linking to " + url);
             window.location.href = url;
         }
     });
+    
+        var settings3 = {
+        chartId: 'mav-mah-trip-impact',
+        url: linacUrl,
+        start: start,
+        end: end,
+        timeUnit: timeUnit,
+        colors: jlab.colors.modAnodeHarvester,
+        yLabel: "C25 Trips / Hour",
+        title: "LEMSim Estimated Trip Impact of Mod Anode Voltage",
+        timeMode: true,
+        ajaxData: {
+            start: start,
+            end: end,
+            out: "flot",
+            "timeUnit": timeUnit
+        }
+    };
+    jlab.barChart.updateChart(settings3);
+    $('#mav-mah-trip-impact').bind("plotclick", function (event, pos, item) {
+        if (item) {
+            var timestamp = item.series.data[item.dataIndex][0];
+            var dateString = jlab.millisToDate(timestamp);
+            var url = mavUrl + "?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString;
+            console.log("Linking to " + url);
+            window.location.href = url;
+        }
+    });
+
 };
 
 /* 
@@ -156,7 +187,7 @@ $(function () {
 
     jlab.mod_anode.createTable("mav-table", jlab.tableDate);
     jlab.mod_anode.createModAnodeHarvesterTable("mav-mah-table", jlab.tableDate);
-    jlab.mod_anode.loadCharts(jlab.mavUrl, jlab.start, jlab.end, jlab.timeUnit);
+    jlab.mod_anode.loadCharts(jlab.start, jlab.end, jlab.timeUnit);
 
     // Setup the date picker(s)
     $(".date-field").datepicker({
