@@ -5,6 +5,7 @@
  */
 package org.jlab.rfd.model.ModAnodeHarvester;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -92,5 +93,33 @@ public class LinacDataSpan {
             data.add(point.add("linacs", linacs.build()).build());
         }
         return data.build();
+    }
+    
+    /**
+     * This outputs the Linac trip rates as a time series like data structure.  The outer Map is sorted
+     * on date, the inner is sorted on series label.
+     * @return 
+     */
+    public SortedMap<Date, SortedMap<String, BigDecimal>> getTripRates() {
+        SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
+        for ( Date d : dataSpan.keySet() ) {
+            TreeMap<String, BigDecimal> tmp = new TreeMap<>();
+            BigDecimal tnm1050 = BigDecimal.ZERO;
+            BigDecimal t1050 = BigDecimal.ZERO;
+            BigDecimal tnm1090 = BigDecimal.ZERO;
+            BigDecimal t1090 = BigDecimal.ZERO;
+            for ( LinacDataPoint ldp : dataSpan.get(d) ) {
+                tnm1050 = tnm1050.add(ldp.getTripsNoMav1050());
+                tnm1090 = tnm1090.add(ldp.getTripsNoMav1090());
+                t1050 = t1050.add(ldp.getTrips1050());
+                t1090 = t1090.add(ldp.getTrips1090());
+            }
+            tmp.put("Total 1050 MeV No M.A.V.", tnm1050);
+            tmp.put("Total 1090 MeV No M.A.V.", tnm1090);
+            tmp.put("Total 1050 MeV", t1050);
+            tmp.put("Total 1090 MeV", t1090);
+            data.put(d, tmp);
+        }
+        return data;
     }
 }
