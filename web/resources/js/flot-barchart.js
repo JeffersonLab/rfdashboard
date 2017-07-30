@@ -136,7 +136,7 @@ jlab.barChart.updateChart = function (settings) {
             // Make sure we requested a time period with some data
             if (typeof jsonData.data[0] === "undefined") {
                 $('#' + chartId + "-loader").hide();
-                $("#" + chartId).append("No energy reach data available for<br>" + start + " - " + end);
+                $("#" + chartId).append("No data available for<br>" + start + " - " + end);
                 return;
             }
 
