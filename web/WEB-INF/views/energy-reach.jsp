@@ -32,7 +32,36 @@
 
     </jsp:attribute>
     <jsp:body>
-        <h2 id="page-header-title"><c:out value="${title}"/></h2>
+        <div class="page-title-bar">
+            <h2 id="page-header-title"><c:out value="${title}"/></h2>
+            (<a href="#" id="page-details-opener">Details</a>)
+        </div>
+        <div id="page-details-dialog" title="Details">
+            <h3> Energy Reach </h3>
+            Energy reach is defined here as the linac energy with an expected total of eight C25 TrueArc trips per hour.
+            Energy reach values are calculated by running the Linac Energy Manager (LEM) tool at linac energies ranging from 1000 MeV to 1190 MeV
+            in 5 MeV steps, saving the trip rate at each step and interpolating the energy that produces eight C25 TrueArc trips per hour.
+            <h3>Page Controls</h3>
+            Start Date - The start date to be displayed in the energy reach chart
+            End Date - The end date to be displayed in the energy reach chart
+            Delta Start - Start date to use in the "Cavity Set Point Delta" tables.
+            Delta End - End date to use in the "Cavity Set Point Delta" tables.  Also specifies the C25 trip rate chart date.
+            Note: Dates assume 12 AM at the start of the specified day.
+            <br><br>
+            Delta Start/End dates can also be controlled by clicking on bars in the energy reach chart.
+            <h3> Charts and Tables </h3>
+            The "Linac Energy Reach" chart displays CEBAF energy reach over time.  Clicking on individual bars or manually selecting
+            "Delta Start" and "Delta End" dates will update the rest of this page to display detailed information from those dates or date.
+            Energy reach data is available for dates starting Dec 16, 2016.
+            <br><br>
+            The "C25 Trip Rates" chart displays C25 trips/hour vs. energy curves for the North and South Linacs as well as combined.
+            <br><br>
+            The "Cavity Set Point Deltas" table shows changes cavity-specific set-point changes from "Delta Start" to "Delta End."
+            These are the archived EPICS settings from midnight on the stated dates  This
+            table can be sorted by clicking on the column hears.  Complex sorting can be achieved by "Shift+Click"ing the headers.
+            Data from this table is gathered from the MYA Archiver and the CED.  There are both "Basic" and "Advanced" versions
+            of this table that can be toggled using the "Basic/Advanced" button.
+        </div>
         <div id="control-form">
             <form action="${pageContext.request.contextPath}/energy-reach" method="get">
                 <fieldset>

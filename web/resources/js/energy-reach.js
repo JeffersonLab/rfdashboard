@@ -310,4 +310,23 @@ $(function () {
         $('#diff-table-basic-wrap').toggle();
         $('#diff-table-advanced-wrap').toggle();
     });
+    
+    $("#page-details-dialog").dialog({
+       autoOpen: false,
+       modal: true,
+       midWidth: jlab.sizes.pageDetailsMinWidth,
+       maxWidth: jlab.sizes.pageDetailsMaxWidth,
+       width: jlab.sizes.pageDetailsWidth,
+       show: {
+           effect: "blind",
+           duration: 500
+       },
+       hide: {
+           effect: "blind",
+           duration: 500
+       }
+    });
+    $("#page-details-opener").click(function() {
+       $("#page-details-dialog").dialog("open");
+    });
 });
