@@ -300,4 +300,10 @@ $(function () {
         $('#diff-table-basic-wrap').toggle();
         $('#diff-table-advanced-wrap').toggle();
     });
+    
+    $("#page-details-dialog").dialog(jlab.dialogProperties);
+    $("#page-details-opener").click(function () {
+        $("#page-details-dialog").dialog("open");
+    });
+
 });
