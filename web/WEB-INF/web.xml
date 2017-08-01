@@ -34,7 +34,7 @@
     </context-param>
     <context-param>
         <param-name>releaseDate</param-name>
-        <param-value>TBD</param-value>
+        <param-value>1 Aug 2017</param-value>
     </context-param>
         <filter>
         <filter-name>UrlRewriteFilter</filter-name>
