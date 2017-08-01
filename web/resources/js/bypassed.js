@@ -10,8 +10,8 @@ jlab.bypassedUrl = "/RFDashboard/ajax/bypassed";
 
 jlab.bypassed = jlab.bypassed || {};
 jlab.bypassed.loadCharts = function (url, start, end, timeUnit) {
-    
-        var settings1 = {
+
+    var settings1 = {
         chartId: 'bypassed-count-by-linac',
         url: url,
         start: start,
@@ -105,11 +105,17 @@ jlab.bypassed.createTable = function (tableId, date) {
 };
 
 
-$(function () {    
+$(function () {
     jlab.bypassed.createTable("bypassed-table", jlab.tableDate);
     jlab.bypassed.loadCharts(jlab.bypassedUrl, jlab.start, jlab.end, jlab.timeUnit);
 
     $(".date-field").datepicker({
         dateFormat: "yy-mm-dd"
     });
+
+    $("#page-details-dialog").dialog(jlab.dialogProperties);
+    $("#page-details-opener").click(function() {
+       $("#page-details-dialog").dialog("open");
+    });
+
 });

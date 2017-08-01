@@ -42,10 +42,20 @@
             Energy reach values are calculated by running the Linac Energy Manager (LEM) tool at linac energies ranging from 1000 MeV to 1190 MeV
             in 5 MeV steps, saving the trip rate at each step and interpolating the energy that produces eight C25 TrueArc trips per hour.
             <h3>Page Controls</h3>
-            Start Date - The start date to be displayed in the energy reach chart
-            End Date - The end date to be displayed in the energy reach chart
-            Delta Start - Start date to use in the "Cavity Set Point Delta" tables.
-            Delta End - End date to use in the "Cavity Set Point Delta" tables.  Also specifies the C25 trip rate chart date.
+            <ul>
+                <li>
+                    Start Date - The start date to be displayed in the energy reach chart
+                </li>
+                <li>
+                    End Date - The end date to be displayed in the energy reach chart
+                </li>
+                <li>
+                    Delta Start - Start date to use in the "Cavity Set Point Delta" tables.
+                </li>
+                <li>
+                    Delta End - End date to use in the "Cavity Set Point Delta" tables.  Also specifies the C25 trip rate chart date.
+                </li>
+            </ul>
             Note: Dates assume 12 AM at the start of the specified day.
             <br><br>
             Delta Start/End dates can also be controlled by clicking on bars in the energy reach chart.

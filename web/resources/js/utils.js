@@ -68,6 +68,23 @@ jlab.colors.cmtypes = ["#FFCE00", "#0375B4", "#007849", "#333333", "#ECAF2F"];
 // Total 1050, Total 1050 No M.A.V, Total 1090, Total 1090 No M.A.V
 jlab.colors.modAnodeHarvester = ["#5e3c99", "#b2abd2", "#e66101", "#fdb863"];
 
+// Default JQuery dialog properties
+jlab.dialogProperties = {
+    autoOpen: false,
+    modal: true,
+    midWidth: 300,
+    maxWidth: 1400,
+    width: 800,
+    show: {
+        effect: "blind",
+        duration: 500
+    },
+    hide: {
+        effect: "blind",
+        duration: 500
+    }
+};
+
 jlab.sizes = jlab.sizes || {};
 jlab.sizes.pageDetailsMinWidth = 300;
 jlab.sizes.pageDetailsMaxWidth = 1400;

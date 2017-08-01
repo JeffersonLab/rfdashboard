@@ -32,7 +32,41 @@
         </script>
     </jsp:attribute>
     <jsp:body>
-        <h2 id="page-header-title"><c:out value="${title}"/></h2>
+        <div class="page-title-bar">
+            <h2 id="page-header-title"><c:out value="${title}"/></h2>
+            (<a href="#" id="page-details-opener">Details</a>)
+        </div>
+        <div id="page-details-dialog" title="Details">
+            <h3> Bypassed Cavities </h3>
+            Bypassed cavities are here defined as those cavities with an EPICS GSET value of zero.  This data is pulled from the
+            archiver with supporting data from the CED.
+            <h3>Page Controls</h3>
+            <ul>
+                <li>
+                    Start Date - The start date to be displayed in all of the mod anode charts
+                </li>
+                <li>
+                    End Date - The end date to be displayed in all of the mod anode charts
+                </li>
+                <li>
+                    Table Date - The date to use in all mod anode voltage related tables.
+                </li>
+                <li>
+                    TimeUnit - The time interval between chart data points.  Day shows every day, Week shows every seventh day
+                </li>
+            </ul>
+            Note: Dates assume 12 AM at the start of the specified day.
+            <br><br>
+            Table dates can also be controlled by clicking on bars in the energy reach chart.
+            <h3> Charts and Tables </h3>
+            The "Bypassed Cavities" charts display the number of bypassed cavities broken down by cryomodule type and linac.
+            Clicking on the bars of this chart will update the Table Date accordingly.
+            <br><br>
+            The "Bypassed Cavities" table lists per-cavity information for the cavities that were bypassed at 12 AM on the specified
+            table date.  This table supports multiple column sorts by "Shift-Click"ing on the column headers.
+            <br><br>
+        </div>
+
         <div id="control-form">
             <form action="${pageContext.request.contextPath}/bypassed" method="get">
                 <fieldset>
