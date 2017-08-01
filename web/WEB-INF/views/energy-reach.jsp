@@ -41,6 +41,8 @@
             Energy reach is defined here as the linac energy with an expected total of eight C25 TrueArc trips per hour.
             Energy reach values are calculated by running the Linac Energy Manager (LEM) tool at linac energies ranging from 1000 MeV to 1190 MeV
             in 5 MeV steps, saving the trip rate at each step and interpolating the energy that produces eight C25 TrueArc trips per hour.
+            LEM requires that an operation EPICS control system be up and responding.  This may result in a lack of data being produced or display during
+            accelerator downs.
             <h3>Page Controls</h3>
             <ul>
                 <li>
