@@ -66,7 +66,7 @@ jlab.colors.linacs = ["#FF0000", "#006400", "#273BE7", "#333333", "#ECAF2F"];
 // C25, C50, C100, Total, Unknown
 jlab.colors.cmtypes = ["#FFCE00", "#0375B4", "#007849", "#333333", "#ECAF2F"];
 // Total 1050, Total 1050 No M.A.V, Total 1090, Total 1090 No M.A.V
-jlab.colors.modAnodeHarvester = ["#B22222", "#483D8B", "#FF0000", "#0000FF"];
+jlab.colors.modAnodeHarvester = ["#5e3c99", "#b2abd2", "#e66101", "#fdb863"];
 
 // This assumes that you are passing an array of flot data series (a 3d array in all).  It returns the smallest difference
 // between any two points in a single series.
