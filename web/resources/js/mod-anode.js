@@ -9,12 +9,13 @@ var jlab = jlab || {};
 
 jlab.mod_anode = jlab.mod_anode || {};
 jlab.mod_anode.loadCharts = function (start, end, timeUnit) {
-    mavUrl = "/RFDashboard/ajax/mod-anode";
-    linacUrl = "/RFDashboard/ajax/linac";
+    mavUrl = "/RFDashboard/mod-anode";
+    mavAjaxUrl = "/RFDashboard/ajax/mod-anode";
+    linacAjaxUrl = "/RFDashboard/ajax/linac";
 
     var settings1 = {
         chartId: 'mav-count-by-linac',
-        url: mavUrl,
+        url: mavAjaxUrl,
         start: start,
         end: end,
         timeUnit: timeUnit,
@@ -34,7 +35,7 @@ jlab.mod_anode.loadCharts = function (start, end, timeUnit) {
         if (item) {
             var timestamp = item.series.data[item.dataIndex][0];
             var dateString = jlab.millisToDate(timestamp);
-            var url = "/RFDashboard/mod-anode?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString;
+            var url = mavUrl + "?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString + "&timeUnit=" + timeUnit;
             console.log("Linking to " + url);
             window.location.href = url;
         }
@@ -42,7 +43,7 @@ jlab.mod_anode.loadCharts = function (start, end, timeUnit) {
 
     var settings2 = {
         chartId: 'mav-count-by-cmtype',
-        url: mavUrl,
+        url: mavAjaxUrl,
         start: start,
         end: end,
         timeUnit: timeUnit,
@@ -62,7 +63,7 @@ jlab.mod_anode.loadCharts = function (start, end, timeUnit) {
         if (item) {
             var timestamp = item.series.data[item.dataIndex][0];
             var dateString = jlab.millisToDate(timestamp);
-            var url = mavUrl + "?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString;
+            var url = mavUrl + "?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString + "&timeUnit=" + timeUnit;
             console.log("Linking to " + url);
             window.location.href = url;
         }
@@ -70,7 +71,7 @@ jlab.mod_anode.loadCharts = function (start, end, timeUnit) {
     
         var settings3 = {
         chartId: 'mav-mah-trip-impact',
-        url: linacUrl,
+        url: linacAjaxUrl,
         start: start,
         end: end,
         timeUnit: timeUnit,
@@ -90,7 +91,7 @@ jlab.mod_anode.loadCharts = function (start, end, timeUnit) {
         if (item) {
             var timestamp = item.series.data[item.dataIndex][0];
             var dateString = jlab.millisToDate(timestamp);
-            var url = mavUrl + "?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString;
+            var url = mavUrl + "?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString + "&timeUnit=" + timeUnit;
             console.log("Linking to " + url);
             window.location.href = url;
         }
