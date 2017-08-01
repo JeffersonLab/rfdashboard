@@ -37,7 +37,7 @@
             <h3>Tools</h3>
             <ul>
                 <li>
-                    <a href="http://opsweb.acc.jlab.org/rfgrad/report.php">RF Gradient Status Report</a>
+                    <a href="https://accweb.acc.jlab.org/dtm/reports/fsd-summary">FSD Trip Summary</a>
                 </li>
             </ul>
         </section>
