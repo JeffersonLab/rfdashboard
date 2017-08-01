@@ -31,10 +31,15 @@ import org.jlab.rfd.model.LinacName;
 public class LemService {
     private static final Logger LOGGER = Logger.getLogger(LemService.class.getName());
     
-    /*
-    * Note: This side steps much of the concerns about leap seconds, DST, etc. by truncating supplied Date objects to their
-    * day values.
-    */
+/**
+ * This generates a LemSpan object based on the start and end dates supplied.  Dates are truncated to day precision.
+ * @param start The start date used in the database query
+ * @param end The end date used in the database query
+ * @return Returns the LemSpan object representing the LEM scan data for the requested time period
+ * @throws ParseException
+ * @throws SQLException
+ * @throws IOException 
+ */
     public LemSpan getLemSpan(Date start, Date end) throws ParseException, SQLException, IOException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat oraDF = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
