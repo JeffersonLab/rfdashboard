@@ -71,7 +71,7 @@
             "Shift-Click"ing on the column headers.
             <br><br>
             The "Cavities with Mod Anode Voltage" charts show how the count of cavities with mod anode voltage split amongst 
-            two categories, linac and cryomodule type.  This data pulled from the CED and the Archiver.  Click on the bars of this
+            two categories, linac and cryomodule type.  This data pulled from the CED and the Archiver.  Clicking on the bars of this
             chart will update the Table Date accordingly.
             <br><br>
             The "Cavities with Non-Zero Mod Anode Voltage" display per-cavity Mod Anode Voltage and EPCIS setpoint for GSET at
