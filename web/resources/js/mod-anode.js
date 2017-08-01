@@ -149,7 +149,7 @@ jlab.mod_anode.createModAnodeHarvesterTable = function (tableId, date) {
         success: function (jsonData, textStatus, jqXHR) {
             var data = jsonData.data;
             var tableString = "<table id=" + tableId + " class=\"tablesorter\">";
-            tableString += "<thead><tr><th>Name</th><th>Module Type</th><th>Mod Anode Voltage (kV)</th>"
+            tableString += "<thead><tr><th>Name</th><th>Module<br>Type</th><th>EPICS Date</th><th>Mod Anode<br>Voltage (kV)</th>"
                     + "<th>GSET<br>(1050 MeV)</th><th>GSET No M.A.V.<br>(1050 MeV)</th><th>Delta GSET<br>(1050 MeV)</th>"
                     + "<th>GSET<br>(1090 MeV)</th><th>GSET No M.A.V.<br>(1090 MeV)</th><th>Delta GSET<br>(1090 MeV)</th>"
                     + "</tr></thead>";
@@ -165,6 +165,7 @@ jlab.mod_anode.createModAnodeHarvesterTable = function (tableId, date) {
                             var gsetNoMav1090 = Number.parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1090).toFixed(3);
                             
                             tableString += "<tr><td>" + cavities[j].name + "</td><td>" + cavities[j].moduleType + "</td><td>"
+                                    + cavities[j].modAnodeHarvester.epicsDate + "</td><td>"
                                     + cavities[j].modAnodeHarvester.modAnodeVoltage_kv + "</td><td>"
                                     + gset1050 + "</td><td>" + gsetNoMav1050 + "</td><td>" + (gsetNoMav1050 - gset1050).toFixed(3) + "</td><td>"
                                     + gset1090 + "</td><td>" + gsetNoMav1090 + "</td><td>" + (gsetNoMav1090 - gset1090).toFixed(3) + "</td>"
@@ -194,4 +195,24 @@ $(function () {
     $(".date-field").datepicker({
         dateFormat: "yy-mm-dd"
     });
+
+    $("#page-details-dialog").dialog({
+        autoOpen: false,
+        modal: true,
+        midWidth: jlab.sizes.pageDetailsMinWidth,
+        maxWidth: jlab.sizes.pageDetailsMaxWidth,
+        width: jlab.sizes.pageDetailsWidth,
+        show: {
+            effect: "blind",
+            duration: 500
+        },
+        hide: {
+            effect: "blind",
+            duration: 500
+        }
+    });
+    $("#page-details-opener").click(function () {
+        $("#page-details-dialog").dialog("open");
+    });
+
 });
