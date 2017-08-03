@@ -76,8 +76,8 @@ jlab.bypassed.loadCharts = function (url, start, end, timeUnit) {
 jlab.bypassed.createTable = function (tableId, date) {
 
     jlab.cavity.getCavityData({
-        start: jlab.addDays(date, -1),
-        end: date,
+        asRange: false,
+        dates: [date],
         timeUnit: "day",
         success: function (jsonData, textStatus, jqXHR) {
             console.log(jsonData);
