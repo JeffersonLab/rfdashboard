@@ -86,7 +86,7 @@
                     </div>
                     <div class="li-key">
                         <label class="required-field" for="end" title="Exclusive (Open)">End Date</label>
-                        <div class="date-note">(Exclusive)</div>
+                        <div class="date-note">(Inclusive)</div>
                     </div>
                     <div class="li-value">
                         <input type="text" class="date-field nowable-field" id="end" name="end" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
