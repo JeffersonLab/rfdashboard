@@ -17,7 +17,7 @@
         <param-value>RF Dashboard</param-value>
     </context-param>
     <context-param>
-        <param-name>appShortName</param-name>
+        <param-name>appShortName</param-name>   
         <param-value>RFD</param-value>
     </context-param>
     <context-param>
@@ -26,11 +26,11 @@
     </context-param>
     <context-param>
         <param-name>resourceVersionNumber</param-name>
-        <param-value>8</param-value>
+        <param-value>9</param-value>
     </context-param>
     <context-param>
         <param-name>releaseNumber</param-name>
-        <param-value>1.3.1</param-value>
+        <param-value>1.3.2</param-value>
     </context-param>
     <context-param>
         <param-name>releaseDate</param-name>
