@@ -12,6 +12,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -154,20 +155,22 @@ public class CavityService {
     * If end is for future date, set it for now.  Data isn't valid for future dates, but some of our data services (CED, MYA) give results anyway.
     */
     public CavityDataSpan getCavityDataSpan(Date start, Date end, TimeUnit timeUnit) throws ParseException, IOException, SQLException {
-        long timeInt;
+        int timeInt;
         switch (timeUnit) {
             case DAY:
-                timeInt = 60 * 60 * 24 * 1000L;
+                timeInt = Calendar.DATE;
                 break;
             case WEEK:
             default:
-                timeInt = 60 * 60 * 24 * 7 * 1000L;
+                timeInt = Calendar.WEEK_OF_YEAR;
         }
         
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         // Convert date objects to have no hh:mm:ss ... portion
         Date curr = sdf.parse(sdf.format(start));
         Date e = sdf.parse(sdf.format(end));
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(curr);
 
         if ( end.after(new Date()) ) {
             e = sdf.parse(sdf.format(new Date()));
@@ -175,9 +178,10 @@ public class CavityService {
 
         CavityDataSpan span = new CavityDataSpan();
 
-        while (curr.before(e)) {
+        while ( ! curr.after(e)) {
             span.put(curr, this.getCavityData(curr));
-            curr = new Date(curr.getTime() + timeInt);            // Increment by time interval
+            cal.add(timeInt, 1);
+            curr = cal.getTime();
         }
 
         return span;
