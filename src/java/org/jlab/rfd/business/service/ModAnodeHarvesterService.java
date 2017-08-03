@@ -82,7 +82,7 @@ public class ModAnodeHarvesterService {
         cal.setTime(curr);
 
         Set<Date> dates = new HashSet<>();
-        while ( curr.before(e) ) {
+        while ( ! curr.after(e) ) {
             dates.add(curr);
             cal.add(Calendar.DAY_OF_MONTH, numDays);
             curr = DateUtil.truncateToDays(cal.getTime());
