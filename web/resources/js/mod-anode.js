@@ -107,8 +107,8 @@ jlab.mod_anode.loadCharts = function (start, end, timeUnit) {
 jlab.mod_anode.createTable = function (tableId, date) {
 
     jlab.cavity.getCavityData({
-        start: jlab.addDays(date, -1),
-        end: date,
+        asRange: false,
+        dates: [date],
         timeUnit: "day",
         success: function (jsonData, textStatus, jqXHR) {
             var data = jsonData.data;
@@ -143,8 +143,8 @@ jlab.mod_anode.createTable = function (tableId, date) {
 jlab.mod_anode.createModAnodeHarvesterTable = function (tableId, date) {
 
     jlab.cavity.getCavityData({
-        start: jlab.addDays(date, -1),
-        end: date,
+        asRange: false,
+        dates: [date],
         timeUnit: "day",
         success: function (jsonData, textStatus, jqXHR) {
             var data = jsonData.data;
