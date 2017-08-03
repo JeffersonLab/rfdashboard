@@ -127,7 +127,8 @@ public class RequestParamUtil {
             LOGGER.log(Level.SEVERE, "start is not before end");
             throw new IllegalArgumentException(errMsg);
         }
-        if (!start.before(new Date())) {
+        
+        if ( end.after(new Date()) ) {
             LOGGER.log(Level.SEVERE, "end is a future date");
             throw new IllegalArgumentException(errMsg);
         }
