@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.rfd.business.util;
+package org.jlab.rfd.presentation.util;
 
 import java.text.ParseException;
 import java.util.Arrays;
@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
+import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.model.TimeUnit;
 
 /**

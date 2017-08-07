@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jlab.rfd.business.service.ModAnodeHarvesterService;
-import org.jlab.rfd.business.util.RequestParamUtil;
+import org.jlab.rfd.presentation.util.RequestParamUtil;
 import org.jlab.rfd.model.ModAnodeHarvester.LinacDataSpan;
 import org.jlab.rfd.model.TimeUnit;
 import org.jlab.rfd.presentation.util.DataFormatter;
