@@ -142,24 +142,20 @@ public class RequestParamUtil {
     }
 
     /**
-     * Method for getting the values of the date request parameter.  If a parsing error occurs, it is logged and the value is not
-     * included in the output List.
+     * Method for getting the values of the date request parameter.
      * @param request
      * @return A List of Date objects representing the value of request "date" parameters to day precision.  Null if no date 
-     * parameters were requested, an empty list if date parameters were requested, but all were improperly formatted.
+     * parameters were requested.
+     * @throws java.text.ParseException
      */
-    public static List<Date> processDate(HttpServletRequest request) {
+    public static List<Date> processDate(HttpServletRequest request) throws ParseException {
         List<Date> dates = null;
         
         if ( request.getParameter("date") != null ) {
             dates = new ArrayList<>();
             for (String date : request.getParameterValues("date") ) {
                 if ( date != null ) {
-                    try {
                         dates.add(DateUtil.parseDateStringYMD(date));
-                    } catch (ParseException ex) {
-                        LOGGER.log(Level.WARNING, "Error parsing date parameter '" + date + "'", ex);
-                    }
                 }
             }
         }
