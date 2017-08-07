@@ -48,7 +48,6 @@ public class CavityAjax extends HttpServlet {
             throws ServletException, IOException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         PrintWriter pw = response.getWriter();
-        boolean hasError = false;
         
         long ts = new Date().getTime();
         //LOGGER.log(Level.FINEST, "Received followig request parameters: {0}", request.getParameterMap().toString());
@@ -63,28 +62,24 @@ public class CavityAjax extends HttpServlet {
         }
         
         // Support requesting a selection of dates as an alternative to a full range.  This should override the start/end request.
-        List<Date> dates = null;
-        if ( request.getParameter("date") != null) {
-            dates = new ArrayList<>();
-            for (String date : request.getParameterValues("date")) {
-                if (date != null) {
-                    try {
-                        dates.add(sdf.parse(date));
-                    } catch (ParseException ex) {
-                        LOGGER.log(Level.WARNING, "Error parsing dates parameter '" + date + "'", ex);
-                    }
-                }
-            }
-            if (dates.isEmpty()) {
-                hasError = true;
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                LOGGER.log(Level.SEVERE, "Error.  No valid date requested");
-                response.setContentType("application/json");
-                pw.write("{error: 'Error. No valid date requested'}");
-                return;
-            }
+        List<Date> dates;
+        try {
+            dates = RequestParamUtil.processDate(request);
+        } catch ( ParseException ex ) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
+            response.setContentType("application/json");
+            pw.write("{error: 'Error parsing start/end parameters'}");
+            return;
         }
-        
+        if ( dates != null && dates.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            LOGGER.log(Level.SEVERE, "Error.  No valid date requested");
+            response.setContentType("application/json");
+            pw.write("{error: 'Error. No valid date requested'}");
+            return;
+        }
+              
         Map<String, Date> startEnd;
         Date start = null;
         Date end = null;
@@ -94,7 +89,6 @@ public class CavityAjax extends HttpServlet {
                 start = startEnd.get("start");
                 end = startEnd.get("end");
             } catch (ParseException ex) {
-                hasError = true;
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
                 response.setContentType("application/json");
