@@ -24,7 +24,12 @@ public class DateUtil {
 
     private static final SimpleDateFormat YMD_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
 
-    // Converts Date objects to day precision.
+    /**
+     * Converts a Date object to day precision.
+     * @param d1
+     * @return A Date object corresponding to the start of the day in the specified Date
+     * @throws ParseException 
+     */
     public static Date truncateToDays(Date d1) throws ParseException {
         Date date;
         try {
@@ -36,7 +41,12 @@ public class DateUtil {
         return date;
     }
 
-    // Converts strings to Date objects with day precision.
+    /**
+     * Converts strings to Date objects with day precision.  Expects a date format of yyyy-MM-dd.
+     * @param d1 The date string to be converted
+     * @return
+     * @throws ParseException
+     */
     public static Date parseDateStringYMD(String d1) throws ParseException {
         Date date;
         try {
@@ -48,7 +58,12 @@ public class DateUtil {
         return date;
     }
 
-    // This returns 11:59:59 of the given day
+    /**
+     * Get the last second of the day (11:59:59)
+     * @param d1 The specified date
+     * @return A Date object corresponding to the start of the last full second of the day in the given date.
+     * @throws ParseException 
+     */
     public static Date getEndOfDay(Date d1) throws ParseException {
         Date curr = truncateToDays(d1);
         Date next = getNextDay(curr);
@@ -58,7 +73,12 @@ public class DateUtil {
         return cal.getTime();
     }
     
-    // Returns a date object that represents 12AM of the very next day
+    /**
+     * Get a Date object that matches the start of the day after the supplied date
+     * @param d1 The specified date
+     * @return Returns a date object that represents 12AM of the very next day
+     * @throws ParseException 
+     */
     public static Date getNextDay(Date d1) throws ParseException {
         Date curr = truncateToDays(d1);
         Calendar cal = Calendar.getInstance();
@@ -67,7 +87,12 @@ public class DateUtil {
         return cal.getTime();
     }
 
-    // Returns the number of whole days between to points in time
+    /**
+     * Calculate the number of whole days between to points in time.
+     * @param d1 The first date
+     * @param d2 The second date
+     * @return The number of whole days between the two points in time
+     */
     public static long getDifferenceInDays(Date d1, Date d2) {
 
         // Calculate the naive difference in days without consider DST, leap seconds, etc..  This gets you close without having
