@@ -6,10 +6,12 @@
 package org.jlab.rfd.presentation.util;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -98,14 +100,14 @@ public class RequestParamUtil {
         String sString = request.getParameter("start");
 
         if (eString != null) {
-            end = DateUtil.parseDateString(eString);
+            end = DateUtil.parseDateStringYMD(eString);
         } else {
             // Default to "now"
             end = DateUtil.truncateToDays(new Date());
         }
 
         if (sString != null) {
-            start = DateUtil.parseDateString(sString);
+            start = DateUtil.parseDateStringYMD(sString);
         } else {
             Calendar cal = Calendar.getInstance();
             cal.setTime(end);
@@ -124,7 +126,7 @@ public class RequestParamUtil {
             start = cal.getTime();
         }
 
-        if (!start.before(end)) {
+        if ( start.after(end) ) {
             LOGGER.log(Level.SEVERE, "start is not before end");
             throw new IllegalArgumentException(errMsg);
         }
@@ -139,4 +141,20 @@ public class RequestParamUtil {
         return output;
     }
 
+    
+    public static List<Date> processDate(HttpServletRequest request) {
+        List<Date> dates = null;
+        
+        if ( request.getParameter("date") != null ) {
+            dates = new ArrayList<>();
+            for (String date : request.getParameterValues("date") ) {
+                if ( date != null ) {
+//                    try {
+//                        dates.add()
+//                    }
+                }
+            }
+        }
+        return dates;
+    }
 }
