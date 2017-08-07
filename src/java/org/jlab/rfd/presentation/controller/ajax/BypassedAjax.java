@@ -10,7 +10,6 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.SortedMap;
@@ -27,7 +26,6 @@ import org.jlab.rfd.presentation.util.RequestParamUtil;
 import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.TimeUnit;
 import org.jlab.rfd.presentation.util.DataFormatter;
-import org.jlab.rfd.presentation.util.ParamChecker;
 
 /**
  *
