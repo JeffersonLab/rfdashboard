@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,7 +24,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jlab.rfd.business.service.LemService;
 import org.jlab.rfd.model.LemSpan;
+import org.jlab.rfd.model.TimeUnit;
 import org.jlab.rfd.presentation.util.DataFormatter;
+import org.jlab.rfd.presentation.util.RequestParamUtil;
 
 /**
  *
@@ -113,29 +116,22 @@ public class LemScanAjax extends HttpServlet {
         // reach-scan type request
         } else if (type.equals("reach-scan")) {
             Date last;
+            Map<String, Date> startEnd;
+            
             try {
-                String eString = request.getParameter("end");
-                String sString = request.getParameter("start");
-                if (eString != null) {
-                    end = sdf.parse((eString));
-                } else {
-                    // Default to "now"
-                    end = sdf.parse(sdf.format(new Date()));
-                }
-                if (sString != null) {
-                    start = sdf.parse(sString);
-                } else {
-                    // Default to four weeks before end
-                    start = sdf.parse(sdf.format(new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7 * 4)));
-                }
+                startEnd = RequestParamUtil.processStartEnd(request, TimeUnit.DAY, 7);
+                start = startEnd.get("start");
+                end = startEnd.get("end");
             } catch (ParseException ex) {
-                LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
+                LOGGER.log(Level.SEVERE, "Error parsing start/end parameters", ex);
                 throw new ServletException("Error parseing start/end", ex);
             }
 
-            String out = request.getParameter("out");
+            String[] valid = {"flot"};
+            String out = RequestParamUtil.processOut(request, valid, "flot");
             if (out == null) {
-                out = "json";
+                LOGGER.log(Level.SEVERE, "Error parsing out parameter");
+                throw new ServletException("Error parsing out parameter");
             }
 
             LemService ls = new LemService();
@@ -151,7 +147,7 @@ public class LemScanAjax extends HttpServlet {
             SortedMap<Date, SortedMap<String, BigDecimal>> reach = span.getEnergyReach();
             PrintWriter pw = response.getWriter();
             try {
-                if (out.equals("json")) {
+                if (out.equals("flot")) {
                     JsonObject json = DataFormatter.toFlotFromDateMap(reach);
                     response.setContentType("application/json");
                     pw.write(json.toString());
