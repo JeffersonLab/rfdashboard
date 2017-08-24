@@ -64,6 +64,7 @@
                         <li ${'/energy-reach' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/energy-reach?start=${pageStart}&end=${pageEnd}">Energy Reach</a></li>
                         <li ${'/mod-anode' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/mod-anode?start=${pageStart}&end=${pageEnd}">Mod Anode</a></li>
                         <li ${'/bypassed' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/bypassed?start=${pageStart}&end=${pageEnd}">Bypassed</a></li>
+                        <li ${'/cavity' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/cavity?start=${pageStart}&end=${pageEnd}">Cavity</a></li>
                         <li ${'/cryo' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/cryo?start=${pageStart}&end=${pageEnd}">Cryo</a></li>
                         <li ${'/links' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/links">Links</a></li>
                         <li ${'/help' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/help">Help</a></li>
