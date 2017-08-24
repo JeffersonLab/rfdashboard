@@ -90,6 +90,48 @@ public class CavityDataSpan {
                     } else {
                         cavBuilder.add("odvh", "");
                     }
+                    if ( dp.getQ0() != null ) {
+                        cavBuilder.add("q0", dp.getQ0());
+                    } else {
+                        cavBuilder.add("q0", "");
+                    }
+
+                    if ( dp.getqExternal() != null ) {
+                        cavBuilder.add("qExternal", dp.getqExternal());
+                    } else {
+                        cavBuilder.add("qExternal", "");
+                    }
+                    if ( dp.getMaxGset() != null ) {
+                        cavBuilder.add("maxGset", dp.getMaxGset().doubleValue());
+                    } else {
+                        cavBuilder.add("maxGset", "");
+                    }
+                    if ( dp.getOpsGsetMax() != null ) {
+                        cavBuilder.add("opsGsetMax", dp.getOpsGsetMax().doubleValue());
+                    } else {
+                        cavBuilder.add("opsGsetMax", "");
+                    }
+                    if ( dp.getTripOffset() != null ) {
+                        cavBuilder.add("tripOffset", dp.getTripOffset().doubleValue());
+                    } else {
+                        cavBuilder.add("tripOffset", "");
+                    }
+                    if ( dp.getTripSlope() != null ) {
+                        cavBuilder.add("tripSlope", dp.getTripSlope().doubleValue());
+                    } else {
+                        cavBuilder.add("tripSlope", "");
+                    }
+                    if ( dp.getLength() != null ) {
+                        cavBuilder.add("length", dp.getLength().doubleValue());
+                    } else {
+                        cavBuilder.add("length", "");
+                    }
+
+
+
+
+
+
                     
                     // Some of these will have ModAnodeHarvester data, but definitely not Injector cavities
                     if (dp.getModAnodeHarvesterGsetData() != null ) {

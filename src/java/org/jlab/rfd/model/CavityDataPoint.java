@@ -34,10 +34,18 @@ public class CavityDataPoint {
     private final BigDecimal gset;
     private final CavityGsetData modAnodeHarvesterGsetData;
     private final BigDecimal odvh;
-
+    private final String q0;
+    private final String qExternal;
+    private final BigDecimal maxGset;
+    private final BigDecimal opsGsetMax;
+    private final BigDecimal tripOffset;
+    private final BigDecimal tripSlope;
+    private final BigDecimal length;
+    
     public CavityDataPoint(Date timestamp, String cavityName, CryomoduleType cryomoduleType,
             BigDecimal modAnodeVoltage, String epicsName, BigDecimal gset, BigDecimal odvh,
-            CavityGsetData modAnodeHarvesterGsetData) {
+            String q0, String qExternal, BigDecimal maxGset, BigDecimal opsGsetMax, BigDecimal tripOffset, BigDecimal tripSlope,
+            BigDecimal length, CavityGsetData modAnodeHarvesterGsetData) {
 
         if (!cavityName.matches("\\dL\\d\\d-\\d")) {
             LOGGER.log(Level.SEVERE, "Improper cavity name format - {0}", cavityName);
@@ -52,8 +60,43 @@ public class CavityDataPoint {
         this.epicsName = epicsName;
         this.gset = gset;
         this.odvh = odvh;
+        this.q0 = q0;
+        this.qExternal = qExternal;
+        this.maxGset = maxGset;
+        this.opsGsetMax = opsGsetMax;
+        this.tripOffset = tripOffset;
+        this.tripSlope = tripSlope;
+        this.length = length;
         this.modAnodeHarvesterGsetData = modAnodeHarvesterGsetData;
 
+    }
+
+    public String getQ0() {
+        return q0;
+    }
+
+    public String getqExternal() {
+        return qExternal;
+    }
+
+    public BigDecimal getMaxGset() {
+        return maxGset;
+    }
+
+    public BigDecimal getOpsGsetMax() {
+        return opsGsetMax;
+    }
+
+    public BigDecimal getTripOffset() {
+        return tripOffset;
+    }
+
+    public BigDecimal getTripSlope() {
+        return tripSlope;
+    }
+
+    public BigDecimal getLength() {
+        return length;
     }
 
     public BigDecimal getOdvh() {

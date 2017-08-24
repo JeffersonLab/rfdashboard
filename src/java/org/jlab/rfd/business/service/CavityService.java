@@ -56,7 +56,8 @@ public class CavityService {
         }
 
         String wrkspc = sdf.format(timestamp);
-        String cavityQuery = "?t=CryoCavity&p=EPICSName,ModAnode,Housed_by&out=json&ced=history&wrkspc=" + wrkspc;
+        String cavityQuery = "?t=CryoCavity&p=PhaseRMS,Q0,Qexternal,MaxGSET,OpsGsetMax,TripOffset,TripSlope,Length,"
+                + "Bypassed,TunerBad,EPICSName,ModAnode,Housed_by&out=json&ced=history&wrkspc=" + wrkspc;
 
         // Chech the cache.  If not there, run the query, build the results, check that somebody else hasn't already inserted this
         // into the cache, then add the query result to the cache.
@@ -111,13 +112,40 @@ public class CavityService {
                 Map<String, CavityGsetData> cgds = mahs.getCavityGsetData(timestamp);
                 
                 for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
-                    BigDecimal mav = new BigDecimal(0);
+                    // Optional in CED - objects initialized to null are not required to be displayed on dashboard
+                    BigDecimal mav = new BigDecimal(0);  // No ModAnode property indicates a zero modulating anode voltage is applied
+                                                                              // CED units: kilovolts  
+                    boolean tunerBad = false; // CED note: false unless set
+                    BigDecimal tripOffset = null;   // CED units: trips per shift
+                    BigDecimal tripSlope = null;   // CED units: trips per shift
+                    BigDecimal opsGsetMax = null;  // CED units: MeV/m
+                    
+                    // Required in CED
+                    String q0;
+                    String qExternal;
+                    BigDecimal maxGset; // CED units: MeV/m
+                    BigDecimal length; // CED units: meters
+                    
                     String cavityName = element.getString("name");
                     cmType = cmTypes.get(cavityName.substring(0, 4));
 
                     JsonObject properties = element.getJsonObject("properties");
+                    
+                    // Check for the existence of CED optional parameters
+                    if (properties.containsKey("TunerBad")) {
+                        tunerBad = true;
+                    }
+                    if (properties.containsKey("TripOffset")) {
+                        tripOffset = new BigDecimal(properties.getString("TripOffset"));
+                    }
+                    if (properties.containsKey("TripSlope")) {
+                        tripSlope = new BigDecimal(properties.getString("TripSlope"));
+                    }
                     if (properties.containsKey("ModAnode")) {
                         mav = mav.add(new BigDecimal(properties.getString("ModAnode")));
+                    }
+                    if (properties.containsKey("OpsGsetMax")) {
+                        opsGsetMax = new BigDecimal(properties.getString("OpsGsetMax"));
                     }
                     if (properties.containsKey("EPICSName")) {
                         epicsName = properties.getString("EPICSName");
@@ -126,7 +154,18 @@ public class CavityService {
                                 new Object[]{cavityName, wrkspc});
                         throw new IOException("Cryocavity '" + cavityName + "' missing EPICSName in ced history '" + wrkspc);
                     }
+
+                    // Get all of the CED required parameters.  These should always be returned since they are "required" fields
+                    q0 = properties.getString("Q0");
+                    qExternal = properties.getString("Qexternal");
+                    maxGset = new BigDecimal(properties.getString("MaxGSET"));
+                    length = new BigDecimal(properties.getString("Length"));
                     
+                    // opsGsetMax is CED optional with the convention that it is the same as GsetMax if unset
+                    if ( opsGsetMax == null ) {
+                        opsGsetMax = maxGset;
+                    }
+
                     // If we got back ModAnodeHarvester data for this timestamp, make sure that we have data for every cavity.
                     // We either need a whole data set or throw an error.  Except that we expect this behavior for injector cavities
                     // since ModAnodeHarvester only runs against the North and South Linacs... ugh ...
@@ -135,10 +174,13 @@ public class CavityService {
                     }
                     if ( cgds == null ) {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
-                                odvhs.get(cavityName), null));                        
+                                odvhs.get(cavityName), q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, 
+                                length, null));
+                        
                     } else {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
-                                odvhs.get(cavityName), cgds.get(epicsName)));
+                                odvhs.get(cavityName), q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
+                                length, cgds.get(epicsName)));
                     }
                 }
             }
