@@ -177,9 +177,9 @@ jlab.cavity.createTotalsTable = function(tableId, start, end) {
             for (var prop in startTotals) {
                 if (startTotals.hasOwnProperty(prop)) {
                     tableString += "<tr><td>" + prop + "</td><td>" +
-                            startTotals[prop][0].toFixed(2) + "</td><td>" + endTotals[prop][0].toFixed(2) + "</td><td>" + diffTotals[prop][0].toFixed(2) + "</td><td>" +
-                            startTotals[prop][1].toFixed(2) + "</td><td>" + endTotals[prop][1].toFixed(2) + "</td><td>" + diffTotals[prop][1].toFixed(2) + "</td>" +
-                            "</tr>";
+                            startTotals[prop][0].toFixed(2) + "</td><td>" + endTotals[prop][0].toFixed(2) + "</td><td>" + 
+                            diffTotals[prop][0].toFixed(2) + "</td><td>" + startTotals[prop][1].toFixed(2) + "</td><td>" + 
+                            endTotals[prop][1].toFixed(2) + "</td><td>" + diffTotals[prop][1].toFixed(2) + "</td></tr>";
                 }
             }
             
@@ -213,7 +213,7 @@ jlab.cavity.createBasicAdvTable = function (basicTableId, advTableId, start, end
                     "<th>Old MAV</th><th>New MAV</th><th>Delta MAV (kV)</th>" + 
                     "<th>Old GSET</th><th>New GSET</th><th>Delta GSET</th>" +
                     "<th>Old ODHV</th><th>New ODHV</th><th>Delta ODHV</th>" +
-                    "<th>Module Changed</th><th>Found Match</th></tr></thead>";
+                    "</tr></thead>";
             advTableString += "<tbody>";
             basicTableString += "<thead><tr><th>Name</th><th>Module Type</th>" + 
                     "<th>Old GSET</th><th>New GSET</th><th>Delta GSET</th>" +
@@ -252,13 +252,13 @@ jlab.cavity.createBasicAdvTable = function (basicTableId, advTableId, start, end
                         // a number (data existed, all is well)
                         // an empty string (data was not returned from the gset service)
                         // nothing (somthing went really wrong. this isn't expected, but still good to check)
-                        if (typeof cavStart[j].gset !== "undefined") {
-                            oldGset = cavStart[j].gset;
+                        if (typeof cavStart[j].gset !== "undefined" && cavStart[j].gset !== "") {
+                            oldGset = cavStart[j].gset.toFixed(2);
                         } else {
                             oldGset = "";
                         }
-                        if (typeof cavEnd[i].gset !== "undefined") {
-                            newGset = cavEnd[i].gset;
+                        if (typeof cavEnd[i].gset !== "undefined" && cavEnd[j].gset !== "") {
+                            newGset = cavEnd[i].gset.toFixed(2);
                         } else {
                             newGset = "";
                         }
@@ -269,13 +269,13 @@ jlab.cavity.createBasicAdvTable = function (basicTableId, advTableId, start, end
                         }
                         
                         // Process MAVs
-                        if (typeof cavStart[j].modAnodeVoltage_kv !== "undefined") {
-                            oldMav = cavStart[j].modAnodeVoltage_kv;
+                        if (typeof cavStart[j].modAnodeVoltage_kv !== "undefined" && cavStart[j].modAnodeVoltage_kv !== "") {
+                            oldMav = cavStart[j].modAnodeVoltage_kv.toFixed(2);
                         } else {
                             oldMav = "";
                         }
-                        if (typeof cavEnd[i].modAnodeVoltage_kv !== "undefined") {
-                            newMav = cavEnd[i].modAnodeVoltage_kv;
+                        if (typeof cavEnd[i].modAnodeVoltage_kv !== "undefined" && cavEnd[j].modAnodeVoltage_kv !== "") {
+                            newMav = cavEnd[i].modAnodeVoltage_kv.toFixed(2);
                         } else {
                             newMav = "";
                         }
@@ -286,13 +286,13 @@ jlab.cavity.createBasicAdvTable = function (basicTableId, advTableId, start, end
                         }
                         
                         // Process Ops Drive Highs
-                        if (typeof cavStart[j].odvh !== "undefined") {
-                            oldOdvh = cavStart[j].odvh;
+                        if (typeof cavStart[j].odvh !== "undefined" && cavStart[j].odvh !== "") {
+                            oldOdvh = cavStart[j].odvh.toFixed(2);
                         } else {
                             oldOdvh = "";
                         }
-                        if (typeof cavEnd[i].odvh !== "undefined") {
-                            newOdvh = cavEnd[i].odvh;
+                        if (typeof cavEnd[i].odvh !== "undefined" && cavEnd[j].odvh !== "") {
+                            newOdvh = cavEnd[i].odvh.toFixed(2);
                         } else {
                             newOdvh = "";
                         }
@@ -302,28 +302,27 @@ jlab.cavity.createBasicAdvTable = function (basicTableId, advTableId, start, end
                             dOdvh = "N/A";
                         }
                         
-                        //console.log([name, cmType, oldMav, newMav, dMav, oldGset, newGset, dGset, moduleChange]);
+                        console.log(start);
+                        console.log([name, cmType, oldOdvh, newOdvh, oldMav, newMav, dMav, oldGset, newGset, dGset, moduleChange]);
                         // Add a row to the table for this cavity
                         advTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
-                                oldMav.toFixed(2)  + "</td><td>" + newMav.toFixed(2)  + "</td><td>" + dMav.toFixed(2) + "</td><td>" +
-                                oldGset.toFixed(2)  + "</td><td>" + newGset.toFixed(2) +"</td><td>" + dGset.toFixed(2) + "</td><td>" +
-                                oldOdvh.toFixed(2)  + "</td><td>" + newOdvh.toFixed(2) +"</td><td>" + dOdvh.toFixed(2) + "</td><td>" +
-                                moduleChange + "</td><td>" + true + "</td></tr>";
+                                oldMav  + "</td><td>" + newMav  + "</td><td>" + dMav + "</td><td>" +
+                                oldGset  + "</td><td>" + newGset +"</td><td>" + dGset + "</td><td>" +
+                                oldOdvh  + "</td><td>" + newOdvh +"</td><td>" + dOdvh + "</td></tr>";
                         basicTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
-                                oldGset.toFixed(2)  + "</td><td>" + newGset.toFixed(2) +"</td><td>" + dGset.toFixed(2) + "</td><td>" +
-                                oldOdvh.toFixed(2)  + "</td><td>" + newOdvh.toFixed(2) +"</td><td>" + dOdvh.toFixed(2) + "</td>" +
+                                oldGset  + "</td><td>" + newGset +"</td><td>" + dGset + "</td><td>" +
+                                oldOdvh  + "</td><td>" + newOdvh +"</td><td>" + dOdvh + "</td>" +
                                 "</tr>";
                     }
                 }
                 if ( ! foundMatch ) {
                     advTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
-                            oldMav.toFixed(2)  + "</td><td>" + newMav.toFixed(2)  + "</td><td>" + dMav.toFixed(2) + "</td><td>" +
-                            oldGset.toFixed(2) + "</td><td>" + newGset.toFixed(2) + "</td><td>" + dGset.toFixed(2) + "</td><td>" +
-                            oldOdvh.toFixed(2)  + "</td><td>" + newOdvh.toFixed(2) +"</td><td>" + dOdvh.toFixed(2) + "</td><td>" +
-                            "N/A" + "</td><td>" + true + "</td></tr>";
+                            oldMav  + "</td><td>" + newMav  + "</td><td>" + dMav + "</td><td>" +
+                            oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td><td>" +
+                            oldOdvh  + "</td><td>" + newOdvh +"</td><td>" + dOdvh + "</td></tr>";
                     basicTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
-                            oldGset.toFixed(2) + "</td><td>" + newGset.toFixed(2) + "</td><td>" + dGset.toFixed(2) + "</td>" +
-                            oldOdvh.toFixed(2)  + "</td><td>" + newOdvh.toFixed(2) +"</td><td>" + dOdvh.toFixed(2) + "</td>" +
+                            oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td>" +
+                            oldOdvh  + "</td><td>" + newOdvh +"</td><td>" + dOdvh + "</td>" +
                             "</tr>";
                 }
             }
