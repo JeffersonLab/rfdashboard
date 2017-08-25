@@ -63,8 +63,8 @@ public class BypassedAjax extends HttpServlet {
             throw new ServletException("Error parseing start/end", ex);
         }
 
-        String[] valid = {"json"};
-        String out = RequestParamUtil.processOut(request, valid, "json");
+        String[] valid = {"flot"};
+        String out = RequestParamUtil.processOut(request, valid, "flot");
         if (out == null) {
             throw new ServletException("Unsupported out format requested");
         }
@@ -102,7 +102,7 @@ public class BypassedAjax extends HttpServlet {
         }
 
         try {                
-            if (out.equals("json")) {
+            if (out.equals("flot")) {
                 PrintWriter pw = response.getWriter();
                 JsonObject json = DataFormatter.toFlotFromDateMap(factoredData);
                 response.setContentType("application/json");
