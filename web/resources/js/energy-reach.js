@@ -52,7 +52,7 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, url) {
         $("#" + chartId).append("<div style='position:absolute;left:" + p4.left + "px;top:" + (p4.top - 17) + "px; color:#666;font-size:smaller'>4 trips/hr</div>");
 
     }).fail(function (jqXHR, textStatus, errorThrown) {
-        jlab.hideChartLoading("lem-scan", "Error querying data");
+        jlab.hideChartLoading(chartId, "Error querying data");
         console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);;
     });
 };
@@ -103,7 +103,7 @@ jlab.energyReach.loadEnergyReachChart = function(chartId, start, end, url) {
         });
 
     }).fail(function (jqXHR, textStatus, errorThrown) {
-        jlab.hideChartLoading("lem-scan", "Error querying data");
+        jlab.hideChartLoading(chartId, "Error querying data");
         console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
     });
 };
