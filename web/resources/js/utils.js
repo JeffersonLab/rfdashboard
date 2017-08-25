@@ -217,7 +217,8 @@ jlab.hideChartLoading = function (chartId, msg) {
     $('#' + chartId + "-loader").hide();
 };
 
-jlab.toPrettyTimeString = function (date) {
+// Prints a formated time string similar to ISO 8601, but in local time and with out the 'T'
+jlab.formatTimestampPretty = function (date) {
 
     function pad(number) {
         if (number < 10) {
