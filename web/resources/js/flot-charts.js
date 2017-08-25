@@ -24,11 +24,16 @@ jlab.flotCharts = jlab.flotCharts || {};
 //     - tooltip: true or false to enable/disable tooltips.  Useful for setting up more complicated behavior
 
 jlab.flotCharts.drawChart = function (chartId, data, flotOptions, settings) {
+    // Add a title if specified - do this first so any error messages that get displayed have some context
+    if (typeof settings.title !== "undefined") {
+        jlab.chartWidget.addTitle(chartId, settings.title);
+    }
+
     var exitFunc = function (msg) {
         $("#" + chartId).prepend(msg);
         window.console && console.log(msg);
         throw msg;
-    };
+    };    
 
     // Required
     if (typeof chartId === "undefined") {
@@ -36,7 +41,7 @@ jlab.flotCharts.drawChart = function (chartId, data, flotOptions, settings) {
     }
     if (!$.isArray(data)) {
         exitFunc("Error: Data format incorrect");
-    } else if (!$.isArray(data[0].data)) {
+    } else if (typeof data[0] === "undefined" || !$.isArray(data[0].data)) {
         // Possible that no data exists.  Should return nicely, not throw an exception
         $("#" + chartId).prepend("No data available");
         return;
@@ -139,11 +144,6 @@ jlab.flotCharts.drawChart = function (chartId, data, flotOptions, settings) {
     // Draw the flot plot
     var plot = $.plot($("#" + chartId), plotData, options);
     
-    // Add a title if specified
-    if (typeof settings.title !== "undefined") {
-        jlab.chartWidget.addTitle(chartId, settings.title);
-    }
-
     // Add a custom legend off to the side
     if ( settings.legend ) {
          jlab.flotCharts.addLegend(chartId, settings.colors, settings.labels);

@@ -8,96 +8,95 @@ var jlab = jlab || {};
 
 
 jlab.mod_anode = jlab.mod_anode || {};
-jlab.mod_anode.loadCharts = function (start, end, timeUnit) {
-    mavUrl = "/RFDashboard/mod-anode";
-    mavAjaxUrl = "/RFDashboard/ajax/mod-anode";
-    linacAjaxUrl = "/RFDashboard/ajax/linac";
+jlab.mod_anode.mavUrl = "/RFDashboard/mod-anode";
+jlab.mod_anode.mavAjaxUrl = "/RFDashboard/ajax/mod-anode";
+jlab.mod_anode.linacAjaxUrl = "/RFDashboard/ajax/linac";
 
-    var settings1 = {
-        chartId: 'mav-count-by-linac',
-        url: mavAjaxUrl,
-        start: start,
-        end: end,
-        timeUnit: timeUnit,
-        colors: jlab.colors.linacs,
-        yLabel: "# Cavities w/ M.A.V.",
-        title: "Cavities With Mod Anode Voltage<br>(By Linac)",
-        timeMode: true,
-        ajaxData: {
-            start: start,
-            end: end,
-            factor: "linac",
-            "timeUnit": timeUnit
+jlab.mod_anode.loadLEMSimChart = function(chartId, start, end, url, timeUnit) {
+     jlab.showChartLoading(chartId);
+    var lemScan = $.getJSON(url, {start: start, end: end, out: "flot", timeUnit: timeUnit});
+    lemScan.done(function(json) {
+        var settings = {
+            colors: jlab.colors.modAnodeHarvester.slice(0, 4),          // Grab the North, South, and Total colors
+            labels: json.labels,
+            timeUnit: timeUnit,
+            title: "<strong>LEMSim Estimated Trip Impact of Mod Anode Voltage</strong>",
+            tooltips: true,
+            tooltipX: "Date",
+            tooltipY: "Trips/Hr",
+            legend: true,
+            chartType: "bar"
+        };
+        var flotOptions = {
+            xaxis: { mode: "time" },
+            yaxis: { axisLabel: "Trips / Hour"},
+            grid: { clickable: true }
+        };
+        
+        var flotData = [];
+        for(i=0; i < json.data.length; i++) {
+            flotData[i] = {data: json.data[i], points:{show: false} };
         }
-    };
-    jlab.barChart.updateChart(settings1);
-    $('#mav-count-by-linac').bind("plotclick", function (event, pos, item) {
-        if (item) {
-            var timestamp = item.series.data[item.dataIndex][0];
-            var dateString = jlab.millisToDate(timestamp);
-            var url = mavUrl + "?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString + "&timeUnit=" + timeUnit;
-            console.log("Linking to " + url);
-            window.location.href = url;
-        }
-    });
 
-    var settings2 = {
-        chartId: 'mav-count-by-cmtype',
-        url: mavAjaxUrl,
-        start: start,
-        end: end,
-        timeUnit: timeUnit,
-        colors: jlab.colors.cmtypes,
-        yLabel: "# Cavities w/ M.A.V.",
-        title: "Cavities With Mod Anode Voltage<br>(By Module Type)",
-        timeMode: true,
-        ajaxData: {
-            start: start,
-            end: end,
-            factor: "cmtype",
-            "timeUnit": timeUnit
-        }
-    };
-    jlab.barChart.updateChart(settings2);
-    $('#mav-count-by-cmtype').bind("plotclick", function (event, pos, item) {
-        if (item) {
-            var timestamp = item.series.data[item.dataIndex][0];
-            var dateString = jlab.millisToDate(timestamp);
-            var url = mavUrl + "?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString + "&timeUnit=" + timeUnit;
-            console.log("Linking to " + url);
-            window.location.href = url;
-        }
+        jlab.hideChartLoading(chartId);
+        var plot = jlab.flotCharts.drawChart(chartId, flotData, flotOptions, settings);
+        $("#" + chartId).bind("plotclick", function (event, pos, item) {
+            if (item) {
+                var timestamp = item.series.data[item.dataIndex][0];
+                var dateString = jlab.millisToDate(timestamp);
+                var url = jlab.mod_anode.mavUrl + "?start=" + start + "&end=" + end + "&tableDate=" + dateString + "&timeUnit=" + timeUnit;
+                window.location.href = url;
+            }
+        });
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+        jlab.hideChartLoading(chartId, "Error querying data");
+        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);;
     });
-    
-        var settings3 = {
-        chartId: 'mav-mah-trip-impact',
-        url: linacAjaxUrl,
-        start: start,
-        end: end,
-        timeUnit: timeUnit,
-        colors: jlab.colors.modAnodeHarvester,
-        yLabel: "C25 Trips / Hour",
-        title: "LEMSim Estimated Trip Impact of Mod Anode Voltage",
-        timeMode: true,
-        ajaxData: {
-            start: start,
-            end: end,
-            out: "flot",
-            "timeUnit": timeUnit
-        }
-    };
-    jlab.barChart.updateChart(settings3);
-    $('#mav-mah-trip-impact').bind("plotclick", function (event, pos, item) {
-        if (item) {
-            var timestamp = item.series.data[item.dataIndex][0];
-            var dateString = jlab.millisToDate(timestamp);
-            var url = mavUrl + "?start=" + jlab.start + "&end=" + jlab.end + "&tableDate=" + dateString + "&timeUnit=" + timeUnit;
-            console.log("Linking to " + url);
-            window.location.href = url;
-        }
-    });
-
 };
+
+
+jlab.mod_anode.loadMAVCountByFactorChart= function(chartId, start, end, url, timeUnit, factor) {
+     jlab.showChartLoading(chartId);
+    var lemScan = $.getJSON(url, {start: start, end: end, out: "flot", timeUnit: timeUnit, factor: factor});
+    lemScan.done(function(json) {
+        var settings = {
+            colors: jlab.colors.cmtypes,          // Grab the North, South, and Total colors
+            labels: json.labels,
+            timeUnit: timeUnit,
+            title: "<strong>Cavities With Mod Anode Voltage<br>(by " + factor + ")</strong>",
+            tooltips: true,
+            tooltipX: "Date",
+            tooltipY: "Value",
+            legend: true,
+            chartType: "bar"
+        };
+        var flotOptions = {
+            xaxis: { mode: "time" },
+            yaxis: { axisLabel: "# Cavities w/ M.A.V."},
+            grid: { clickable: true }
+        };
+        
+        var flotData = [];
+        for(i=0; i < json.data.length; i++) {
+            flotData[i] = {data: json.data[i], points:{show: false} };
+        }
+
+        jlab.hideChartLoading(chartId);
+        var plot = jlab.flotCharts.drawChart(chartId, flotData, flotOptions, settings);
+        $("#" + chartId).bind("plotclick", function (event, pos, item) {
+            if (item) {
+                var timestamp = item.series.data[item.dataIndex][0];
+                var dateString = jlab.millisToDate(timestamp);
+                var url = jlab.mod_anode.mavUrl + "?start=" + start + "&end=" + end + "&tableDate=" + dateString + "&timeUnit=" + timeUnit;
+                window.location.href = url;
+            }
+        });
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+        jlab.hideChartLoading(chartId, "Error querying data");
+        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);;
+    });
+};
+
 
 /* 
  * Create a cavity data table.
@@ -187,9 +186,14 @@ jlab.mod_anode.createModAnodeHarvesterTable = function (tableId, date) {
 
 $(function () {
 
+    // Load the tables
     jlab.mod_anode.createTable("mav-table", jlab.tableDate);
     jlab.mod_anode.createModAnodeHarvesterTable("mav-mah-table", jlab.tableDate);
-    jlab.mod_anode.loadCharts(jlab.start, jlab.end, jlab.timeUnit);
+
+    // Load the charts
+    jlab.mod_anode.loadMAVCountByFactorChart("mav-count-by-linac", jlab.start, jlab.end, jlab.mod_anode.mavAjaxUrl, jlab.timeUnit, "linac");
+    jlab.mod_anode.loadMAVCountByFactorChart("mav-count-by-cmtype", jlab.start, jlab.end, jlab.mod_anode.mavAjaxUrl, jlab.timeUnit, "cmtype");
+    jlab.mod_anode.loadLEMSimChart('mav-mah-trip-impact', jlab.start, jlab.end, jlab.mod_anode.linacAjaxUrl, jlab.timeUnit);
 
     // Setup the date picker(s)
     $(".date-field").datepicker({
