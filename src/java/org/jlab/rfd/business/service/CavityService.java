@@ -102,8 +102,7 @@ public class CavityService {
                 // These could return null if timestamp is a future date.  Shouldn't happen as we check end before, but let''s check
                 // and throw an exception if it does happen.
                 Map<String, BigDecimal> gsets = ms.getCavityMyaData(timestamp, name2Epics, "GSET");
-                Map<String, BigDecimal> odvhs = ms.getCavityMyaData(timestamp, name2Epics, "ODVH");
-                if ( gsets == null || odvhs == null ) {
+                if ( gsets == null ) {
                     throw new RuntimeException("MyaService returned null.  Likely requesting data from future date.");
                 }
 
@@ -161,9 +160,11 @@ public class CavityService {
                     maxGset = new BigDecimal(properties.getString("MaxGSET"));
                     length = new BigDecimal(properties.getString("Length"));
                     
-                    // opsGsetMax is CED optional with the convention that it is the same as GsetMax if unset
-                    if ( opsGsetMax == null ) {
-                        opsGsetMax = maxGset;
+                    
+                    BigDecimal odvh = maxGset;
+                    // The ops drive high (odvh) is set to the opsGsetMax if it exists or GsetMax otherwise
+                    if ( opsGsetMax != null ) {
+                        odvh = opsGsetMax;
                     }
 
                     // If we got back ModAnodeHarvester data for this timestamp, make sure that we have data for every cavity.
@@ -174,12 +175,12 @@ public class CavityService {
                     }
                     if ( cgds == null ) {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
-                                odvhs.get(cavityName), q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, 
+                                odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, 
                                 length, null));
                         
                     } else {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
-                                odvhs.get(cavityName), q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
+                                odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
                                 length, cgds.get(epicsName)));
                     }
                 }
