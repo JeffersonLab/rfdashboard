@@ -2,7 +2,11 @@ var jlab = jlab || {};
 jlab.flotCharts = jlab.flotCharts || {};
 
 
-//
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++
+// Plot functions
+//+++++++++++++++++++++++++++++++++++++++++++++++++
+
 // updateChart takes a single settings objecti and recognizes the following parameters:
 // 
 // chartId - the html ID of the chart placeholder div without the preceding '#' (REQUIRED)
@@ -80,26 +84,64 @@ jlab.flotCharts.drawChart = function (chartId, data, flotOptions, settings) {
         }
     };
 
+    // Bar plot customizations to options
+    if (typeof settings.chartType !== "undefined" && settings.chartType === "bar") {
+        var tickOpts = jlab.flotCharts.getSmallDataXAxisTickOptions(data, settings.timeUnit);
+        // tickOpts will be undefined if the data size is large enough
+        if (typeof tickOpts !== "undefined") {
+            options.xaxis.ticks = tickOpts.ticks;
+            options.xaxis.tickSize = tickOpts.tickSize;
+        }
+    }
+
     // Do a deep, recursive overwrite of the supplied flotOptions onto the default options object
     if (typeof flotOptions !== 'undefined' & flotOptions !== null) {
         $.extend(true, options, flotOptions);
     }
 
-    // Setup the flot data objects with some defaults.  This is really a convenience...
+    // Setup the data object
     var plotData = [];
-    for (i = 0; i < data.length; i++) {
-        // Default to a regular point plot
-        plotData[i] = {points: {show: true}, color: settings.colors[i], label: settings.labels[i]};
+    if (typeof settings.chartType !== "undefined" && settings.chartType === "bar") {
+        // Bar plot data settings
+
+        // Days / number of bars * (1-(%gap_between_datapoints/100))
+        var numSeries = data.length;
+        var dataPointWidth = jlab.flotCharts.getMinDataWidth(data);
+        var barWidth = dataPointWidth / numSeries * (1 - 0.2);
+        for (i = 0; i < data.length; i++) {
+            plotData[i] = {
+                label: settings.labels[i],
+                data: data[i].data,
+                bars: {
+                    order: i + 1,
+                    show: true,
+                    lineWidth: 1,
+                    fill: true
+                }
+            };
+
+            plotData[i].color = settings.colors[i];
+            plotData[i].bars.fillColor = settings.colors[i];
+            if (barWidth !== Number.MAX_SAFE_INTEGER) {
+                plotData[i].bars.barWidth = barWidth;
+            }
+        }
+    } else {
+        // Default point plot data settings
+        for (i = 0; i < data.length; i++) {
+            plotData[i] = {points: {show: true}, color: settings.colors[i], label: settings.labels[i]};
+        }
     }
+
     // Update the plotData objects with whatever the user supplied as part of the data parameter.
     $.extend(true, plotData, data);
     
     // Draw the flot plot
-    $.plot($("#" + chartId), plotData, options);
+    var plot = $.plot($("#" + chartId), plotData, options);
     
     // Add a title if specified
     if (typeof settings.title !== "undefined") {
-        jlab.chartWidget.addTitle(chartId, "<strong>" + settings.title + "</strong>");
+        jlab.chartWidget.addTitle(chartId, settings.title);
     }
 
     // Add a custom legend off to the side
@@ -111,7 +153,39 @@ jlab.flotCharts.drawChart = function (chartId, data, flotOptions, settings) {
     if ( settings.tooltips ) {
         jlab.flotCharts.addXYToolTip(chartId, settings.tooltipX, settings.tooltipY)();
     }
+    
+    return plot;
 };
+
+
+
+//            // These prev_* variables track whether or not the plothover event is for the same bar -- removes the "flicker" effect.
+//            var prev_point = null;
+//            var prev_label = null;
+//            
+//            $('#' + chartId).bind("plothover", function (event, pos, item) {
+//                if (item) {
+//                    if ((prev_point != item.dataIndex) || (prev_label != item.series.label)) {
+//                        prev_point = item.dataIndex;
+//                        prev_label = item.series.label;
+//
+//                        $('#flot-tooltip').remove();
+//                        // The item.datapoint is x coordinate of the bar, not of the original data point.  item.series.data contains
+//                        // the original data, and item.dataIndex this item's index in the data.
+//                        var timestamp = item.series.data[item.dataIndex][0];
+//                        var d = new Date(timestamp);
+//                        var time = jlab.triCharMonthNames[d.getMonth()] + " " + d.getDate();
+//                        var y = item.datapoint[1];
+//                        var borderColor = item.series.color;
+//                        var content = "<b>Series:</b> " + item.series.label + "<br /><b>Date:</b> " + time + "<br /><b>Value:</b> " + y;
+//                        jlab.showTooltip(item.pageX + 20, item.pageY - 20, content, borderColor);
+//                    }
+//                } else {
+//                    $('#flot-tooltip').remove();
+//                    prev_point = null;
+//                    prev_label = null;
+//                }
+//            });
 
 
 //+++++++++++++++++++++++++++++++++
@@ -226,4 +300,64 @@ jlab.flotCharts.addLegend = function (chartId, colors, labels) {
     }
     legendString += '</table></div>';
     $("#" +chartId + "-legend-panel").prepend(legendString);
+};
+
+
+
+
+//+++++++++++++++++++++++++++++++++
+// Utility Functions
+//+++++++++++++++++++++++++++++++++
+
+jlab.flotCharts.getSmallDataXAxisTickOptions = function (data, timeUnit) {
+    var options;
+    // Handle custom tick placement sizing for small datasets
+    if (data[0].length <= 3) {
+        var tickSize;
+        tickSize = [7, "day"];
+        if (timeUnit === "day") {
+            tickSize = [1, "day"];
+        } else if (timeUnit === "month") {
+            tickSize = [1, "month"];
+        }
+        options.tickSize = tickSize;
+        // Use the sample dates as the tick locations if the numbers are small
+        var ticks = [];
+        for (i = 0; i < data[0].length; i++) {
+            ticks[i] = data[0][i][0];
+        }
+        options.ticks = ticks;
+    }
+    
+    return options;
+};
+
+
+
+/**
+ * This calculates the minimum x distance between to points in a series in the array of flot data objects.  
+ * @param {type} data Array of flot data objects
+ * @returns {Number|width|Number.MAX_SAFE_INTEGER} The minimum x-distance between two points in a series.
+ */
+jlab.flotCharts.getMinDataWidth = function (flotArray) {
+    var min = Number.MAX_SAFE_INTEGER;
+    var maxLength = 0;
+
+    for (var i = 0; i < flotArray.length; i++) {
+        if (flotArray[i].data.length > maxLength) {
+            maxLength = flotArray[i].data.length;
+        }
+        for (var j = 1; j < flotArray[i].data.length; j++) {
+            width = flotArray[i].data[j][0] - flotArray[i].data[j - 1][0];
+            if (min > width) {
+                min = width;
+            }
+        }
+    }
+
+    // If only one datapoint is in the list, assume a width of 1 day
+    if (maxLength === 1) {
+        min = 60 * 60 * 24 * 1000;
+    }
+    return min;
 };
