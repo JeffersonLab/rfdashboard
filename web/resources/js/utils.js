@@ -24,6 +24,7 @@ jlab.colors.linacs = ["#FF0000", "#006400", "#273BE7", "#333333", "#ECAF2F"];
 jlab.colors.cmtypes = ["#FFCE00", "#0375B4", "#007849", "#333333", "#ECAF2F"];
 // Total 1050, Total 1050 No M.A.V, Total 1090, Total 1090 No M.A.V
 jlab.colors.modAnodeHarvester = ["#5e3c99", "#b2abd2", "#e66101", "#fdb863"];
+jlab.colors.energyReach = ["#666666"];
 
 // Default JQuery dialog properties
 jlab.dialogProperties = {
