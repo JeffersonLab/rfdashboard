@@ -89,10 +89,10 @@ public class LemScanAjax extends HttpServlet {
                 throw new ServletException("Error querying RF Gradient Team database", ex);
             }
 
-            // Defaults to json, anything else will throw an exception
+            // Defaults to flot, anything else will throw an exception
             String out = request.getParameter("out");
             if (out == null) {
-                out = "json";
+                out = "flot";
             }
 
             // The Lem service in start include and end exclusive.  Decrement end by one day to show the last day of data
@@ -100,7 +100,7 @@ public class LemScanAjax extends HttpServlet {
             SortedMap<Integer, SortedMap<String, BigDecimal>> tripRates = span.getTripRateCurve(start);
             PrintWriter pw = response.getWriter();
             try {
-                if (out.equals("json")) {
+                if (out.equals("flot")) {
                     JsonObject json = DataFormatter.toFlotFromIntMap(tripRates);
                     response.setContentType("application/json");
                     pw.write(json.toString());
