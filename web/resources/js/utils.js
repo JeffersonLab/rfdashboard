@@ -17,49 +17,6 @@ jlab.requestEnd = function () {
     jlab.ajaxInProgress = false;
 };
 
-//// "Unminified" version of tryAutoLogin from smoothness
-//jlab.tryAutoLogin = function () {
-//    var e = false;
-//    var auth = jQuery.ajax({
-//        url: "/spnego/ace-auth",
-//        type: "GET",
-//        dataType: "json",
-//        done: function (t) {
-//            null !== t.username && "" !== t.username && "null" !== t.username && (e = false, window.location.reload());
-//        },
-//        error: function (e, t) {
-//            window.console && console.log("Unable to auto-login: Text Status: " + t + ", Ready State: " + e.readyState + ", HTTP Status Code: " + e.status);
-//        },
-//        always: function () {
-//            e || jlab.tryAutoLoginCue();
-//        }
-//    });
-//};
-//
-//// "Unminified" version of tryAutoLoginCue from smoothness
-//jlab.tryAutoLoginCue = function () {
-//    var e = false;
-//    var t = jQuery.ajax({
-//        url: "/spnego/cue-auth",
-//        type: "GET",
-//        dataType: "json",
-//        done: function (t) {
-//            null !== t.username && "" !== t.username && "null" !== t.username && (e = !0, window.location.reload());
-//        },
-//        error: function (e, t) {
-//            window.console && console.log("Unable to auto-login: Text Status: " + t + ", Ready State: " + e.readyState + ", HTTP Status Code: " + e.status);
-//        },
-//        always: function () {
-//            e || document.getElementById("login-link").click();
-//        }
-//    });
-//};
-//
-//// "Unminified" version from smoothness
-//$(document).on("click", "#auto-login", function () {
-//    return jlab.tryAutoLogin(), false;
-//});
-
 jlab.colors = jlab.colors || {};
 // Inj, North, South, Total, Unknown
 jlab.colors.linacs = ["#FF0000", "#006400", "#273BE7", "#333333", "#ECAF2F"];
