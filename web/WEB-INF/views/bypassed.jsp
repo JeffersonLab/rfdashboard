@@ -21,7 +21,7 @@
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/axislabels/2.2.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/sideBySideImproved/jquery.flot.orderBars.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/chart-widget.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/flot-barchart.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/flot-charts.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cavity.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/bypassed.js"></script>
@@ -88,7 +88,7 @@
                         <label class="required-field" for="tableDate" title="Table Date">Table Date</label>
                     </div>
                     <div class="li-value">
-                        <input type="text" class="date-field nowable-field" id="tableDate" name="tableDate" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
+                        <input type="text" class="date-field nowable-field" id="tableDate" name="tableDate" placeholder="YYYY-MM-DD" value="${requestScope.tableDate}"/>
                     </div>
                     <div class="li-key">
                         <label class="required-field" for="timeUnit" title="Time Interval">Time Units</label>
