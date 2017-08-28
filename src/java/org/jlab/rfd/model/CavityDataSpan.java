@@ -35,6 +35,15 @@ public class CavityDataSpan {
     }
     
     /**
+     * Returns the set of CavityDataPoints for a given date
+     * @param date The requested date
+     * @return A set of CavityDataPoints relating to the requested date
+     */
+    public Set<CavityDataPoint> get(Date date) {
+        return dataSpan.get(date);
+    }
+    
+    /**
      * Adds a single data point to the ModAnodeDataSpan. If this is the first
      * datapoint for it's timestamp, the internal TreeMap adds a key/HashSet for
      * that timestamp. Otherwise it is added to the existing HashSet.
