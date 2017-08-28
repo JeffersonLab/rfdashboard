@@ -79,87 +79,79 @@ public class CavityDataSpan {
             sample.add("date", sdf.format(d));
             
             JsonArrayBuilder cavities = Json.createArrayBuilder();
-            for ( CavityDataPoint dp : dataSpan.get(d) ) {
+            for (CavityDataPoint dp : dataSpan.get(d)) {
+                JsonObjectBuilder cavBuilder = Json.createObjectBuilder();
+                cavBuilder.add("name", dp.getCavityName()).add("linac", dp.getLinacName().toString());
+                // The json builder throws an exception on Null or Double.NaN.  This seemed like the smartest way to handle it.
                 if (dp.getGset() != null) {
-                    JsonObjectBuilder cavBuilder = Json.createObjectBuilder();
-                    cavBuilder.add("name", dp.getCavityName()).add("linac", dp.getLinacName().toString());
-                    // The json builder throws an exception on Null or Double.NaN.  This seemed like the smartest way to handle it.
-                    if (dp.getModAnodeVoltage() != null) {
-                        cavBuilder.add("modAnodeVoltage_kv", dp.getModAnodeVoltage().doubleValue());
-                    } else {
-                        cavBuilder.add("modAnodeVoltage_kv", "");
-                    }
-                    if (dp.getGset() != null) {
-                        cavBuilder.add("gset", dp.getGset().doubleValue());
-                    } else {
-                        cavBuilder.add("gset", "");
-                    }
-                    if (dp.getOdvh() != null) {
-                        cavBuilder.add("odvh", dp.getOdvh().doubleValue());
-                    } else {
-                        cavBuilder.add("odvh", "");
-                    }
-                    if ( dp.getQ0() != null ) {
-                        cavBuilder.add("q0", dp.getQ0());
-                    } else {
-                        cavBuilder.add("q0", "");
-                    }
-
-                    if ( dp.getqExternal() != null ) {
-                        cavBuilder.add("qExternal", dp.getqExternal());
-                    } else {
-                        cavBuilder.add("qExternal", "");
-                    }
-                    if ( dp.getMaxGset() != null ) {
-                        cavBuilder.add("maxGset", dp.getMaxGset().doubleValue());
-                    } else {
-                        cavBuilder.add("maxGset", "");
-                    }
-                    if ( dp.getOpsGsetMax() != null ) {
-                        cavBuilder.add("opsGsetMax", dp.getOpsGsetMax().doubleValue());
-                    } else {
-                        cavBuilder.add("opsGsetMax", "");
-                    }
-                    if ( dp.getTripOffset() != null ) {
-                        cavBuilder.add("tripOffset", dp.getTripOffset().doubleValue());
-                    } else {
-                        cavBuilder.add("tripOffset", "");
-                    }
-                    if ( dp.getTripSlope() != null ) {
-                        cavBuilder.add("tripSlope", dp.getTripSlope().doubleValue());
-                    } else {
-                        cavBuilder.add("tripSlope", "");
-                    }
-                    if ( dp.getLength() != null ) {
-                        cavBuilder.add("length", dp.getLength().doubleValue());
-                    } else {
-                        cavBuilder.add("length", "");
-                    }
-
-
-
-
-
-
-                    
-                    // Some of these will have ModAnodeHarvester data, but definitely not Injector cavities
-                    if (dp.getModAnodeHarvesterGsetData() != null ) {
-                        cavBuilder.add("modAnodeHarvester", dp.getModAnodeHarvesterGsetData().toJson());
-                    }
-                    
-                    // Add the last couple of properties, build the builder, and add it to the cavities object
-                    cavities.add(cavBuilder
-                            .add("moduleType", dp.getCryomoduleType().toString())
-                            .add("epicsName", dp.getEpicsName()).build());
+                    cavBuilder.add("gset", dp.getGset().doubleValue());
+                } else {
+                    cavBuilder.add("gset", "");
                 }
+                if (dp.getModAnodeVoltage() != null) {
+                    cavBuilder.add("modAnodeVoltage_kv", dp.getModAnodeVoltage().doubleValue());
+                } else {
+                    cavBuilder.add("modAnodeVoltage_kv", "");
+                }
+                if (dp.getOdvh() != null) {
+                    cavBuilder.add("odvh", dp.getOdvh().doubleValue());
+                } else {
+                    cavBuilder.add("odvh", "");
+                }
+                if (dp.getQ0() != null) {
+                    cavBuilder.add("q0", dp.getQ0());
+                } else {
+                    cavBuilder.add("q0", "");
+                }
+
+                if (dp.getqExternal() != null) {
+                    cavBuilder.add("qExternal", dp.getqExternal());
+                } else {
+                    cavBuilder.add("qExternal", "");
+                }
+                if (dp.getMaxGset() != null) {
+                    cavBuilder.add("maxGset", dp.getMaxGset().doubleValue());
+                } else {
+                    cavBuilder.add("maxGset", "");
+                }
+                if (dp.getOpsGsetMax() != null) {
+                    cavBuilder.add("opsGsetMax", dp.getOpsGsetMax().doubleValue());
+                } else {
+                    cavBuilder.add("opsGsetMax", "");
+                }
+                if (dp.getTripOffset() != null) {
+                    cavBuilder.add("tripOffset", dp.getTripOffset().doubleValue());
+                } else {
+                    cavBuilder.add("tripOffset", "");
+                }
+                if (dp.getTripSlope() != null) {
+                    cavBuilder.add("tripSlope", dp.getTripSlope().doubleValue());
+                } else {
+                    cavBuilder.add("tripSlope", "");
+                }
+                if (dp.getLength() != null) {
+                    cavBuilder.add("length", dp.getLength().doubleValue());
+                } else {
+                    cavBuilder.add("length", "");
+                }
+
+                // Some of these will have ModAnodeHarvester data, but definitely not Injector cavities
+                if (dp.getModAnodeHarvesterGsetData() != null) {
+                    cavBuilder.add("modAnodeHarvester", dp.getModAnodeHarvesterGsetData().toJson());
+                }
+
+                // Add the last couple of properties, build the builder, and add it to the cavities object
+                cavities.add(cavBuilder
+                        .add("moduleType", dp.getCryomoduleType().toString())
+                        .add("epicsName", dp.getEpicsName()).build());
             }
             sample.add("cavities", cavities.build());
             data.add(sample.build());
         }
-        
-        JsonObject out = Json.createObjectBuilder().add("data", data.build()).build();
-        return out;
-    }
+
+    JsonObject out = Json.createObjectBuilder().add("data", data.build()).build();
+    return out ;
+}
     
     /**
      * This returns a TreeMap keyed on date with values being the count of cavities with non-zero modAnodeVoltage by linac
