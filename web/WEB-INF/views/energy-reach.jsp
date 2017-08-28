@@ -70,10 +70,9 @@
             The "C25 Trip Rates" chart displays C25 trips/hour vs. energy curves for the North and South Linacs as well as combined.
             <br><br>
             The "Cavity Set Point Deltas" table shows changes cavity-specific set-point changes from "Delta Start" to "Delta End."
-            These are the archived EPICS settings from midnight on the stated dates  This
+            These are the archived EPICS settings and historical CED values from midnight on the stated dates  This
             table can be sorted by clicking on the column hears.  Complex sorting can be achieved by "Shift+Click"ing the headers.
-            Data from this table is gathered from the MYA Archiver and the CED.  There are both "Basic" and "Advanced" versions
-            of this table that can be toggled using the "Basic/Advanced" button.
+            There are both "Basic" and "Advanced" versions of this table that can be toggled using the "Basic/Advanced" button.
         </div>
         <div id="control-form">
             <form action="${pageContext.request.contextPath}/energy-reach" method="get">
