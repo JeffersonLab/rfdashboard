@@ -40,14 +40,7 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
     });
 
     // Get the Energy Reach data
-    var lemPromise = $.ajax({
-        url: "/RFDashboard/ajax/lem-scan",
-        data: {
-            "start": start,
-            "end": end,
-            "type": "reach-scan"
-        }
-    });
+    var lemPromise = $.getJSON("/RFDashboard/ajax/lem-scan", {"start": start, "end": end, "type": "reach-scan"});
 
     $.when(cryoPromise, lemPromise).then(function (cryoAjax, lemAjax) {
         // First the success/done handler
@@ -124,6 +117,7 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
             }
             jlab.hideChartLoading(chartId);
             var settings = {
+                chartType: "errorBar",
                 tooltips: false,
                 timeUnit: timeUnit,
                 colors: colors,
@@ -154,7 +148,7 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
             //   [millis, mean, sigma], [millis, mean, sigma], ...],
             //   ...
             // ]
-            jlab.errorBarChart.drawChart(chartId, flotData, flotOptions, settings);
+            jlab.flotCharts.drawChart(chartId, flotData, flotOptions, settings);
             jlab.cryo.addCryoReachToolTip(chartId, timeUnit);
 
             $('#' + chartId).bind("plotclick", function (event, pos, item) {
