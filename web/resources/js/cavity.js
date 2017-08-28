@@ -154,16 +154,24 @@ jlab.cavity.createTotalsTable = function(tableId, start, end) {
 
             // Tally up totals for the start period, then the end period, then calculate the difference in the totals
             for (var i = 0; i < cavStart.length; i++) {
-                startTotals.Total[0] += cavStart[i].gset;
-                startTotals.Total[1] += cavStart[i].odvh;
-                startTotals[cavStart[i].moduleType][0] += cavStart[i].gset;
-                startTotals[cavStart[i].moduleType][1] += cavStart[i].odvh;
+                if (cavStart[i].gset !== "") {
+                    startTotals.Total[0] += cavStart[i].gset;
+                    startTotals[cavStart[i].moduleType][0] += cavStart[i].gset;
+                }
+                if (cavStart[i].gset !== "") {
+                    startTotals.Total[1] += cavStart[i].odvh;
+                    startTotals[cavStart[i].moduleType][1] += cavStart[i].odvh;
+                }
             }
             for (var i = 0; i < cavEnd.length; i++) {
-                endTotals.Total[0] += cavEnd[i].gset;
-                endTotals.Total[1] += cavEnd[i].odvh;
-                endTotals[cavEnd[i].moduleType][0] += cavEnd[i].gset;
-                endTotals[cavEnd[i].moduleType][1] += cavEnd[i].odvh;
+                if (cavEnd[i].gset !== "") {
+                    endTotals.Total[0] += cavEnd[i].gset;
+                    endTotals[cavEnd[i].moduleType][0] += cavEnd[i].gset;
+                }
+                if (cavEnd[i].odvh !== "") {
+                    endTotals.Total[1] += cavEnd[i].odvh;
+                    endTotals[cavEnd[i].moduleType][1] += cavEnd[i].odvh;
+                }
             }
             // All three of the totals objects should have the same properties
             for (var prop in startTotals) {
@@ -253,57 +261,61 @@ jlab.cavity.createBasicAdvTable = function (basicTableId, advTableId, start, end
                         // an empty string (data was not returned from the gset service)
                         // nothing (somthing went really wrong. this isn't expected, but still good to check)
                         if (typeof cavStart[j].gset !== "undefined" && cavStart[j].gset !== "") {
-                            oldGset = cavStart[j].gset.toFixed(2);
+                            oldGset = cavStart[j].gset;
                         } else {
-                            oldGset = "";
+                            oldGset = "N/A";
                         }
                         if (typeof cavEnd[i].gset !== "undefined" && cavEnd[j].gset !== "") {
-                            newGset = cavEnd[i].gset.toFixed(2);
+                            newGset = cavEnd[i].gset;
                         } else {
-                            newGset = "";
+                            newGset = "N/A";
                         }
-                        if ( newGset !== "" && oldGset !== ""  && newGset !== null && oldGset !== null) {
-                            dGset = newGset - oldGset;
+                        if ( newGset !== "N/A" && oldGset !== "N/A"  && newGset !== null && oldGset !== null) {
+                            dGset = (newGset - oldGset).toFixed(2);
+                            newGset = newGset.toFixed(2);
+                            oldGset = oldGset.toFixed(2);
                         } else {
                             dGset = "N/A";
                         }
                         
                         // Process MAVs
                         if (typeof cavStart[j].modAnodeVoltage_kv !== "undefined" && cavStart[j].modAnodeVoltage_kv !== "") {
-                            oldMav = cavStart[j].modAnodeVoltage_kv.toFixed(2);
+                            oldMav = cavStart[j].modAnodeVoltage_kv;
                         } else {
-                            oldMav = "";
+                            oldMav = "N/A";
                         }
                         if (typeof cavEnd[i].modAnodeVoltage_kv !== "undefined" && cavEnd[j].modAnodeVoltage_kv !== "") {
-                            newMav = cavEnd[i].modAnodeVoltage_kv.toFixed(2);
+                            newMav = cavEnd[i].modAnodeVoltage_kv;
                         } else {
-                            newMav = "";
+                            newMav = "N/A";
                         }
-                        if ( newMav !== "" && oldMav !== "" && newMav !== null && oldMav !== null) {
-                            dMav = newMav - oldMav;
+                        if ( newMav !== "N/A" && oldMav !== "N/A" && newMav !== null && oldMav !== null) {
+                            dMav = (newMav - oldMav).toFixed(2);
                         } else {
                             dMav = "N/A";
+                            newMav = newMav.toFixed(2);
+                            oldMav = oldMav.toFixed(2);
                         }
                         
                         // Process Ops Drive Highs
                         if (typeof cavStart[j].odvh !== "undefined" && cavStart[j].odvh !== "") {
-                            oldOdvh = cavStart[j].odvh.toFixed(2);
+                            oldOdvh = cavStart[j].odvh;
                         } else {
-                            oldOdvh = "";
+                            oldOdvh = "N/A";
                         }
                         if (typeof cavEnd[i].odvh !== "undefined" && cavEnd[j].odvh !== "") {
-                            newOdvh = cavEnd[i].odvh.toFixed(2);
+                            newOdvh = cavEnd[i].odvh;
                         } else {
-                            newOdvh = "";
+                            newOdvh = "N/A";
                         }
-                        if ( newOdvh !== "" && oldOdvh !== "" && newOdvh !== null && oldOdvh !== null) {
-                            dOdvh = newOdvh - oldOdvh;
+                        if ( newOdvh !== "N/A" && oldOdvh !== "N/A" && newOdvh !== null && oldOdvh !== null) {
+                            dOdvh = (newOdvh - oldOdvh).toFixed(2);
+                            newOdvh = newOdvh.toFixed(2);
+                            oldOdvh = oldOdvh.toFixed(2);
                         } else {
                             dOdvh = "N/A";
                         }
                         
-                        console.log(start);
-                        console.log([name, cmType, oldOdvh, newOdvh, oldMav, newMav, dMav, oldGset, newGset, dGset, moduleChange]);
                         // Add a row to the table for this cavity
                         advTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
                                 oldMav  + "</td><td>" + newMav  + "</td><td>" + dMav + "</td><td>" +
@@ -316,6 +328,9 @@ jlab.cavity.createBasicAdvTable = function (basicTableId, advTableId, start, end
                     }
                 }
                 if ( ! foundMatch ) {
+                        console.log("No matching cavity found for: ", cavEnd[i]);
+//                        console.log([name, cmType, oldOdvh, newOdvh, oldMav, newMav, dMav, oldGset, newGset, dGset, moduleChange]);
+                    
                     advTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
                             oldMav  + "</td><td>" + newMav  + "</td><td>" + dMav + "</td><td>" +
                             oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td><td>" +
@@ -323,7 +338,7 @@ jlab.cavity.createBasicAdvTable = function (basicTableId, advTableId, start, end
                     basicTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
                             oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td>" +
                             oldOdvh  + "</td><td>" + newOdvh +"</td><td>" + dOdvh + "</td>" +
-                            "</tr>";
+                          "</tr>";
                 }
             }
             advTableString += "</tbody></table>";
