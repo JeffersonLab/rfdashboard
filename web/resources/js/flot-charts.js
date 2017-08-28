@@ -26,7 +26,7 @@ jlab.flotCharts = jlab.flotCharts || {};
 jlab.flotCharts.drawChart = function (chartId, data, flotOptions, settings) {
     // Add a title if specified - do this first so any error messages that get displayed have some context
     if (typeof settings.title !== "undefined") {
-        jlab.chartWidget.addTitle(chartId, settings.title);
+        jlab.flotCharts.addTitle(chartId, settings.title);
     }
 
     var exitFunc = function (msg) {
@@ -131,7 +131,22 @@ jlab.flotCharts.drawChart = function (chartId, data, flotOptions, settings) {
                 plotData[i].bars.barWidth = barWidth;
             }
         }
-    } else {
+    } else if (typeof settings.chartType !== "undefined" && settings.chartType === "errorBar") {
+        for (i = 0; i < data.length; i++) {
+            plotData[i] = {
+                points: {
+                    show: true,
+                    // The scale factor helps small datasets look better
+                    radius: 3 + 10 / (data[i].data.length),
+                    errorbars: "y",
+                    // The scale factor helps small datasets look better
+                    yerr: {show: true, upperCap: "-", lowerCap: "-", radius: 5 + 10 / (data[i].data.length)}
+                }
+            };
+        }
+        options.zoom.interactive = true;
+        options.pan.interactive = true;
+    }else {
         // Default point plot data settings
         for (i = 0; i < data.length; i++) {
             plotData[i] = {points: {show: true}, color: settings.colors[i], label: settings.labels[i]};
@@ -151,7 +166,11 @@ jlab.flotCharts.drawChart = function (chartId, data, flotOptions, settings) {
 
     // Add tooltips with detailed info
     if ( settings.tooltips ) {
-        jlab.flotCharts.addXYToolTip(chartId, settings.tooltipX, settings.tooltipY)();
+        if ( settings.chartType === "errorBar" ) {
+           jlab.flotCharts.addErrorBarToolTip(chartId, settings.tooltipX, settings.timeUnit);
+        } else {
+           jlab.flotCharts.addXYToolTip(chartId, settings.tooltipX, settings.tooltipY)();
+        }
     }
     
     return plot;
@@ -192,9 +211,10 @@ jlab.flotCharts.drawChart = function (chartId, data, flotOptions, settings) {
 // Tooltip Functions
 //+++++++++++++++++++++++++++++++++
 
+// NOTE: this is likely unused, but left here for future use cases.
 // This function returns a closure that allows the inner function to keep track of whether or not the currently "hovered" point
 // is new or has changed from before.  Call with extra set up parens.  E.g., addErrorBarToolTip(chartId)();
-jlab.flotCharts.addErrorBarToolTip = function(chartId, xlabel) {
+jlab.flotCharts.addErrorBarToolTip = function(chartId, xlabel, timeUnit) {
     // These prev_* variables track whether or not the plothover event is for the same bar -- removes the "flicker" effect.
     var prev_point = null;
     var prev_label = null;
@@ -212,6 +232,21 @@ jlab.flotCharts.addErrorBarToolTip = function(chartId, xlabel) {
                         // the original data, and item.dataIndex this item's index in the data.
                         var timestamp = item.series.data[item.dataIndex][0];
                         var start = new Date(timestamp);
+                        var end;
+
+                        if (timeUnit === "week") {
+                            end = new Date(timestamp);
+                            end.setDate(end.getDate() + 7);
+                            end = jlab.triCharMonthNames[end.getMonth()] + " " + end.getDate();
+                            x = start + " - " + end;
+                        } else if (timeUnit === "day") {
+                            end = new Date(timestamp);
+                            end.setDate(end.getDate() + 1);
+                            end = jlab.triCharMonthNames[end.getMonth()] + " " + end.getDate();
+                            x = start + " - " + end;
+                        } else {
+                            x = "Begining " + start;
+                        }
                         x = jlab.triCharMonthNames[start.getMonth()] + " " + start.getDate();
                     } else {
                         x = item.series.data[item.dataIndex][0];
@@ -277,6 +312,15 @@ jlab.flotCharts.addXYToolTip = function(chartId, xlabel, ylabel) {
             }
         });
     };
+};
+
+
+//+++++++++++++++++++++++++++++++++
+// Title Functions
+//+++++++++++++++++++++++++++++++++
+
+jlab.flotCharts.addTitle = function(chartId, title) {
+  $("#" + chartId + "-chart-wrap").prepend("<div id='" + chartId + "-chart-title' class='chart-title'>" + title + "</div>");  
 };
 
 
