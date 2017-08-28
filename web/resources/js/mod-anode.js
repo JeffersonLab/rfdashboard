@@ -118,8 +118,12 @@ jlab.mod_anode.createTable = function (tableId, date) {
                 var cavities = data[i].cavities;
                 for (var j = 0; j < cavities.length; j++) {
                     if (cavities[j].modAnodeVoltage_kv > 0) {
+                        var gset = "N/A";
+                        if ( cavities[j].gset !== "" ) { 
+                            gset = cavities[j].gset.toFixed(3);
+                        }
                         tableString += "<tr><td>" + cavities[j].name + "</td><td>" + cavities[j].moduleType + "</td><td>" +
-                                cavities[j].modAnodeVoltage_kv + "</td><td>" + cavities[j].gset + "</tr>";
+                                cavities[j].modAnodeVoltage_kv + "</td><td>" + gset + "</tr>";
                     }
                 }
             }
@@ -158,10 +162,10 @@ jlab.mod_anode.createModAnodeHarvesterTable = function (tableId, date) {
                 for (var j = 0; j < cavities.length; j++) {
                     if (cavities[j].hasOwnProperty("modAnodeHarvester")) {
                         if (cavities[j].modAnodeHarvester.modAnodeVoltage_kv > 0) {
-                            var gset1050 = Number.parseFloat(cavities[j].modAnodeHarvester.gset1050).toFixed(3);
-                            var gsetNoMav1050 = Number.parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1050).toFixed(3);
-                            var gset1090 = Number.parseFloat(cavities[j].modAnodeHarvester.gset1090).toFixed(3);
-                            var gsetNoMav1090 = Number.parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1090).toFixed(3);
+                            var gset1050 = parseFloat(cavities[j].modAnodeHarvester.gset1050).toFixed(3);
+                            var gsetNoMav1050 = parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1050).toFixed(3);
+                            var gset1090 = parseFloat(cavities[j].modAnodeHarvester.gset1090).toFixed(3);
+                            var gsetNoMav1090 = parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1090).toFixed(3);
                             
                             tableString += "<tr><td>" + cavities[j].name + "</td><td>" + cavities[j].moduleType + "</td><td>"
                                     + cavities[j].modAnodeHarvester.epicsDate + "</td><td>"
