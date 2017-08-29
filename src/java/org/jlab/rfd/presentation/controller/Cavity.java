@@ -10,7 +10,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -18,7 +22,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.jlab.rfd.model.TimeUnit;
+import org.jlab.rfd.presentation.util.DataFormatter;
 import org.jlab.rfd.presentation.util.ParamChecker;
+import org.jlab.rfd.presentation.util.RequestParamUtil;
 
 /**
  *
@@ -41,122 +48,72 @@ public class Cavity extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-        Date end, start;
         boolean redirectNeeded = false;
-
-        LOGGER.log(Level.FINEST, "EnergyReach controler with received parameters: {0}", request.getParameterMap());        
-        if (request.getParameter("end") == null || request.getParameter("end").equals("")) {
-            LOGGER.log(Level.FINEST, "No end parameter supplied.  Defaulting to today.");
-            end = new Date();
-            request.setAttribute("end", sdf.format(end));
-            redirectNeeded = true;
-        } else {
-            try {
-                end = sdf.parse(request.getParameter("end"));
-                request.setAttribute("end", sdf.format(end));
-            } catch (ParseException e) {
-                end = new Date();  // In case something bad happend during try.
-                LOGGER.log(Level.WARNING, "Error parsing end parameter '{0}'.  Defaulting to today", request.getParameter("end"));
-                request.setAttribute("end", sdf.format(end));
+        String[] requiredParameters = new String[]{"start", "end", "linacs", "cmtypes", "properties"};
+        for ( String param : requiredParameters ) {
+            if (request.getParameter(param) == null) {
                 redirectNeeded = true;
             }
         }
-        
-        if (request.getParameter("start") == null || request.getParameter("start").equals("") ) {
-            // Default to end - four weeks
-            start = new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7 * 4);
+
+        Map<String, Date> startEnd;
+        Date start;
+        Date end;
+        try {
+            startEnd = RequestParamUtil.processStartEnd(request, TimeUnit.WEEK, 4);
+            start = startEnd.get("start");
+            end = startEnd.get("end");
             request.setAttribute("start", sdf.format(start));
-            redirectNeeded = true;
-        } else {
-            try {
-                start = sdf.parse(request.getParameter("start"));
-                request.setAttribute("start", sdf.format(start));
-            } catch (ParseException e) {
-                LOGGER.log(Level.WARNING, "Error parsing start parameter '{0}'.  Defaulting to -7d", request.getParameter("start"));
-                start = new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7);
-                request.setAttribute("start", sdf.format(start));
-                redirectNeeded = true;
-            }
-        }
-
-                // Throws a RuntimeException if invalid
-        if ( start != null && end != null) {
-            ParamChecker.validateStartEnd(start, end);
-        }
-
-        
-        if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
-            // Default to week
-            LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
-            request.setAttribute("timeUnit", "week");
-            redirectNeeded = true;
-        } else {
-            String timeUnit;
-            switch (request.getParameter("timeUnit")) {
-                case "day":
-                    timeUnit = "day";
-                    break;
-                case "week":
-                    timeUnit = "week";
-                    break;
-                default:
-                    timeUnit = "day";
-            }
-            request.setAttribute("timeUnit", timeUnit);
+            request.setAttribute("end", sdf.format(end));
+        } catch (ParseException ex) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            LOGGER.log(Level.SEVERE, "Error parsing start/end parameters", ex);
+            throw new ServletException("Error parsing start/end parameters");
         }
         
-        Date diffStart, diffEnd;
-        if (request.getParameter("diffStart") == null || request.getParameter("diffStart").equals("")) {
-            diffStart = start;
-            request.setAttribute("diffStart", request.getAttribute("start"));
-            redirectNeeded = true;
-        } else {
-            try {
-                diffStart = sdf.parse(request.getParameter("diffStart"));
-                request.setAttribute("diffStart", sdf.format(diffStart));
-            } catch (ParseException e) {
-                LOGGER.log(Level.WARNING, "Error parsing diffStart parameter '{0}'.  Defaulting to value of start", request.getParameter("diffStart"));
-                diffStart = start;
-                request.setAttribute("diffStart", request.getAttribute("start"));
-                redirectNeeded = true;
-            }
+        List<String> linacs = RequestParamUtil.processMultiValuedParameter(request, "linacs");
+        if (linacs == null ) {
+            String[] allLinacs = new String[] {"inj", "north", "south"};
+            linacs = new ArrayList<>();
+            linacs.addAll(Arrays.asList(allLinacs));
         }
+        request.setAttribute("linacs", DataFormatter.listToMap(linacs));
 
-        if (request.getParameter("diffEnd") == null || request.getParameter("diffEnd").equals("")) {
-            diffEnd = end;
-            request.setAttribute("diffEnd", request.getAttribute("end"));
-            redirectNeeded = true;
-        } else {
-            try {
-                diffEnd = sdf.parse(request.getParameter("diffEnd"));
-                request.setAttribute("diffEnd", sdf.format(diffEnd));
-            } catch (ParseException e) {
-                LOGGER.log(Level.WARNING, "Error parsing diffEnd parameter '{0}'.  Defaulting to value of end", request.getParameter("diffEnd"));
-                diffEnd = end;
-                request.setAttribute("diffEnd", request.getAttribute("end"));
-                redirectNeeded = true;
-            }
+        List<String> cmtypes = RequestParamUtil.processMultiValuedParameter(request, "cmtypes");
+        if (cmtypes == null ) {
+            String[] allTypes = new String[] {"C25", "C50", "C100"};
+            cmtypes = new ArrayList<>();
+            cmtypes.addAll(Arrays.asList(allTypes));
         }
-        // Throws a RuntimeException if invalid
-        if ( diffStart != null && diffEnd != null) {
-            ParamChecker.validateStartEnd(diffStart, diffEnd);
+        request.setAttribute("cmtypes", DataFormatter.listToMap(cmtypes));
+
+        List<String> properties = RequestParamUtil.processMultiValuedParameter(request, "properties");
+        if (properties == null ) {
+            String[] allProps = new String[] {"cmtype", "odvh", "opsGsetMax", "maxGset", "q0", "qExternal", "tripOffset",
+                "tripSlope", "modAnode", "comments"};
+            properties = new ArrayList<>();
+            properties.addAll(Arrays.asList(allProps));
         }
-
-
+        request.setAttribute("properties", DataFormatter.listToMap(properties));
         
-        LOGGER.log(Level.FINEST, "Start: {0} - End: {1}", new Object[]{request.getAttribute("start"), request.getAttribute("end")});
-
         if (redirectNeeded) {
             String redirectUrl;
             try {
                 redirectUrl = request.getContextPath()
                         + "/cavity?start=" + URLEncoder.encode((String) request.getAttribute("start"), "UTF-8")
-                        + "&end=" + URLEncoder.encode((String) request.getAttribute("end"), "UTF-8")
-                        + "&diffStart=" + URLEncoder.encode((String) request.getAttribute("diffStart"), "UTF-8")
-                        + "&diffEnd=" + URLEncoder.encode((String) request.getAttribute("diffEnd"), "UTF-8")
-                        + "&timeUnit=" + URLEncoder.encode((String) request.getAttribute("timeUnit"), "UTF-8");
+                        + "&end=" + URLEncoder.encode((String) request.getAttribute("end"), "UTF-8");
+                for(String linac : linacs) {
+                    redirectUrl = redirectUrl + "&linacs=" + URLEncoder.encode(linac, "UTF-8");
+                }
+                for(String cmtype : cmtypes) {
+                    redirectUrl = redirectUrl + "&cmtypes=" + URLEncoder.encode(cmtype, "UTF-8");
+                }
+                for(String prop : properties) {
+                    redirectUrl = redirectUrl + "&properties=" + URLEncoder.encode(prop, "UTF-8");
+                }
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException("JVM doesn't support UTF-8");
             }

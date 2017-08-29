@@ -105,7 +105,7 @@ $(function () {
     // often, but if it does, we should put them in variables, etc.
    // jlab.cavity.createBasicAdvTable("diff-table-basic", "diff-table-advanced", jlab.diffStart, jlab.diffEnd);
    // jlab.cavity.createTotalsTable("summary-table", jlab.diffStart, jlab.diffEnd);
-    jlab.cavity.loadCharts(jlab.lemScanUrl, jlab.start, jlab.end, jlab.diffEnd, jlab.timeUnit);
+//    jlab.cavity.loadCharts(jlab.lemScanUrl, jlab.start, jlab.end, jlab.diffEnd, jlab.timeUnit);
 
     $(".date-field").datepicker({
         dateFormat: "yy-mm-dd"
@@ -113,10 +113,10 @@ $(function () {
     
     // This enables the "Basic/Advanced" menu button to toggle between the two tables.  diff-table-advanced starts out with
     // display: none.
-    $("#menu-toggle").click(function() {
-        $('#diff-table-basic-wrap').toggle();
-        $('#diff-table-advanced-wrap').toggle();
-    });
+//    $("#menu-toggle").click(function() {
+//        $('#diff-table-basic-wrap').toggle();
+//        $('#diff-table-advanced-wrap').toggle();
+//    });
     
     $("#page-details-dialog").dialog(jlab.dialogProperties);
     $("#page-details-opener").click(function() {
