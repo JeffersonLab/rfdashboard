@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -26,6 +28,48 @@ public class DataFormatter {
 
     private static final Logger LOGGER = Logger.getLogger(DataFormatter.class.getName());
 
+    /**
+     * Turns a list into a string where the values of the list are separated by commas (',')
+     * @param list
+     * @return A string of comma separated values
+     */
+    public static String listToCSVString(List<String> list) {
+        String out = null;
+        if (list != null) {
+            for (String item : list) {
+                if (item != null) {
+                    if (out == null) {
+                        out = item;
+                    } else {
+                        out = out + "," + item;
+                    }
+                }
+            }
+        }
+        return out;
+    }
+    
+    /**
+     * This turns a list of Strings into a Map where each list value become a key/value pair in the string.  Useful for passing to
+     * JSP where existence of key is checked.
+     * @param list A list of strings
+     * @return A map where keys are equal to value
+     */
+    public static Map<String, String> listToMap(List<String> list) {
+        Map out = new HashMap<>();
+        if (list != null) {
+            for (String item : list) {
+                if (item != null) {
+                    System.out.println(item);
+                    out.put(item, item);
+                    System.out.println(out.get(item));
+                }
+            }
+        }
+        return out;
+    }
+    
+    
     /**
      * This function is designed to format a "By Linac", time series data
      * structure as in JSON format.
