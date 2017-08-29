@@ -161,4 +161,25 @@ public class RequestParamUtil {
         }
         return dates;
     }
+    
+    /**
+     * Processes a multivalued request parameter into a List of it's values.  Note: A multivalued request parameter
+     * is a parameter that appears multiple times in a single request.
+     * @param request
+     * @param param The parameter to process
+     * @return A List of values associated with the specified request parameter
+     */
+    public static List<String> processMultiValuedParameter(HttpServletRequest request, String param) {
+        List<String> props = null;
+        
+        if ( request.getParameter(param) != null ) {
+            props = new ArrayList<>();
+            for (String value : request.getParameterValues(param) ) {
+                if ( value != null ) {
+                    props.add(value);
+                }
+            }
+        }
+        return props;
+    }
 }
