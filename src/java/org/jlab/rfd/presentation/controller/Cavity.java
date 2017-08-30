@@ -76,7 +76,7 @@ public class Cavity extends HttpServlet {
         
         List<String> linacs = RequestParamUtil.processMultiValuedParameter(request, "linacs");
         if (linacs == null ) {
-            String[] allLinacs = new String[] {"inj", "north", "south"};
+            String[] allLinacs = new String[] {"injector", "north", "south"};
             linacs = new ArrayList<>();
             linacs.addAll(Arrays.asList(allLinacs));
         }
@@ -84,7 +84,7 @@ public class Cavity extends HttpServlet {
 
         List<String> cmtypes = RequestParamUtil.processMultiValuedParameter(request, "cmtypes");
         if (cmtypes == null ) {
-            String[] allTypes = new String[] {"C25", "C50", "C100"};
+            String[] allTypes = new String[] {"QTR", "C25", "C50", "C100"};
             cmtypes = new ArrayList<>();
             cmtypes.addAll(Arrays.asList(allTypes));
         }
@@ -92,7 +92,7 @@ public class Cavity extends HttpServlet {
 
         List<String> properties = RequestParamUtil.processMultiValuedParameter(request, "properties");
         if (properties == null ) {
-            String[] allProps = new String[] {"cmtype", "odvh", "opsGsetMax", "maxGset", "q0", "qExternal", "tripOffset",
+            String[] allProps = new String[] {"cmtype", "linac", "length", "odvh", "opsGsetMax", "maxGset", "q0", "qExternal", "tripOffset",
                 "tripSlope", "modAnode", "comments"};
             properties = new ArrayList<>();
             properties.addAll(Arrays.asList(allProps));
