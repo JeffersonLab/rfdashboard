@@ -83,6 +83,19 @@
                             <fieldset>
                                 <div class="fieldset-label">Cryomodule Type</div>
                                 <div class="li-key">
+                                    <label for="QTR" title="">QTR</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${cmtypes.containsKey('QTR')}">
+                                            <input type="checkbox" id="QTR" name="cmtypes" value="QTR" checked/>
+                                        </c:when>
+                                        <c:when test="${not cmtypes.containsKey('QTR')}">
+                                            <input type="checkbox" id="QTR" name="cmtypes" value="QTR" checked/>
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                                <div class="li-key">
                                     <label for="c25" title="">C25</label>
                                 </div>
                                 <div class="li-value">
@@ -127,15 +140,15 @@
                             <fieldset>
                                 <div class="fieldset-label">Linac</div>
                                 <div class="li-key">
-                                    <label for="inj" title="">Injector</label>
+                                    <label for="injector" title="">Injector</label>
                                 </div>
                                 <div class="li-value">
                                     <c:choose>
-                                        <c:when test="${linacs.containsKey('inj')}">
-                                            <input type="checkbox" id="inj" name="linacs" value="inj" checked/>
+                                        <c:when test="${linacs.containsKey('injector')}">
+                                            <input type="checkbox" id="injector" name="linacs" value="injector" checked/>
                                         </c:when>
-                                        <c:when test="${not linacs.containsKey('inj')}">
-                                            <input type="checkbox" id="inj" name="linacs" value="inj" />
+                                        <c:when test="${not linacs.containsKey('injector')}">
+                                            <input type="checkbox" id="injector" name="linacs" value="injector" />
                                         </c:when>
                                     </c:choose>
                                 </div>
@@ -187,6 +200,40 @@
                                         </c:choose>
                                     </div>
                                 </div>
+
+                                <div class="input-elem">
+                                    <div class="li-key">
+                                        <label for="linac" title="linac">Linac</label>
+                                    </div>
+                                    <div class="li-value">
+                                        <c:choose>
+                                            <c:when test="${properties.containsKey('linac')}">
+                                                <input type="checkbox" id="linac" name="properties" value="linac" checked/>
+                                            </c:when>
+                                            <c:when test="${not properties.containsKey('linac')}">
+                                                <input type="checkbox" id="linac" name="properties" value="linac"/>
+                                            </c:when>
+                                        </c:choose>
+                                    </div>
+                                </div>
+                                <div class="input-elem">
+                                    <div class="li-key">
+                                        <label for="length" title="length">Length</label>
+                                    </div>
+                                    <div class="li-value">
+                                        <c:choose>
+                                            <c:when test="${properties.containsKey('length')}">
+                                                <input type="checkbox" id="length" name="properties" value="length" checked/>
+                                            </c:when>
+                                            <c:when test="${not properties.containsKey('length')}">
+                                                <input type="checkbox" id="length" name="properties" value="length"/>
+                                            </c:when>
+                                        </c:choose>
+                                    </div>
+                                </div>
+
+                                
+
                                 <div class="input-elem">
                                     <div class="li-key">
                                         <label for="odvh" title="odvh">ODVH</label>
@@ -332,9 +379,7 @@
             <hr>
 
         </div>
-        <%--
-                <t:tablesorter tableTitle="Cavity Properties (${requestScope.diffStart} to ${requestScope.diffEnd})" tableId="summary-table"></t:tablesorter>
-        --%>
+                <t:tablesorter tableTitle="Cavity Properties (${requestScope.start} vs ${requestScope.end})" tableId="summary-table"></t:tablesorter>
         <script>
 
             // Not terribly elegant, but need to get request parameters into javascript for further use.
