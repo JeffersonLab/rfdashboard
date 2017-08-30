@@ -22,7 +22,7 @@ jlab.cavity.loadDetailedTable = function (tableId, start, end, linacs, cmtypes, 
         },
         dataType: "json"
     });
-    
+
     cavityData.done(function (json) {
 
         var startMap, endMap;
@@ -51,24 +51,18 @@ jlab.cavity.loadDetailedTable = function (tableId, start, end, linacs, cmtypes, 
 };
 
 $(function () {
-    // The "diff-table-*" names need to be be manually kept in sync with the IDs given in the JSP.  This shouldn't need to
-    // often, but if it does, we should put them in variables, etc.
-    // jlab.cavity.createBasicAdvTable("diff-table-basic", "diff-table-advanced", jlab.diffStart, jlab.diffEnd);
-    // jlab.cavity.createTotalsTable("summary-table", jlab.diffStart, jlab.diffEnd);
-//    jlab.cavity.loadCharts(jlab.lemScanUrl, jlab.start, jlab.end, jlab.diffEnd, jlab.timeUnit);
 
     $(".date-field").datepicker({
         dateFormat: "yy-mm-dd"
     });
 
-    // This enables the "Basic/Advanced" menu button to toggle between the two tables.  diff-table-advanced starts out with
-    // display: none.
-//    $("#menu-toggle").click(function() {
-//        $('#diff-table-basic-wrap').toggle();
-//        $('#diff-table-advanced-wrap').toggle();
-//    });
-
     jlab.cavity.loadDetailedTable("summary-table", jlab.start, jlab.end, jlab.linacs, jlab.cmtypes, jlab.properties);
+    $("#export").click(function () {
+        // The caption is used as the file name of the export
+        $("#summary-table-table").append("<caption id=\"temp-export\" style=\"display: none\">cavProps_" + jlab.start + "_vs_" + jlab.end + "</caption>");
+        $("#summary-table-table").tableToCSV();
+        $("#temp-export").remove();
+    });
 
     $("#page-details-dialog").dialog(jlab.dialogProperties);
     $("#page-details-opener").click(function () {
