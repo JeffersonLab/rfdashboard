@@ -199,13 +199,9 @@ jlab.cavity.cavityMapsTo2DArray = function(startMap, endMap, linacs, cmtypes, pr
 
         // Filter out the unwanted cavities
         if ( ! linacs.includes(startCav.linac.toLowerCase()) ) {
-            console.log(linacs, startCav);
-            console.log("Linac filtered: " + name);
             continue;
         }
         if ( ! cmtypes.includes(startCav.moduleType.toUpperCase()) ) {
-            console.log(cmtypes, startCav)
-            console.log("CMType filtered: " + name);
             continue;
         }
          
@@ -554,18 +550,17 @@ jlab.cavity.createBasicAdvTable = function (basicTableId, advTableId, start, end
                                 "</tr>";
                     }
                 }
-                if ( ! foundMatch ) {
-                        console.log("No matching cavity found for: ", cavEnd[i]);
-//                        console.log([name, cmType, oldOdvh, newOdvh, oldMav, newMav, dMav, oldGset, newGset, dGset, moduleChange]);
+                if (!foundMatch) {
+                    console.log("No matching cavity found for: ", cavEnd[i]);
                     
                     advTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
-                            oldMav  + "</td><td>" + newMav  + "</td><td>" + dMav + "</td><td>" +
+                            oldMav + "</td><td>" + newMav + "</td><td>" + dMav + "</td><td>" +
                             oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td><td>" +
-                            oldOdvh  + "</td><td>" + newOdvh +"</td><td>" + dOdvh + "</td></tr>";
+                            oldOdvh + "</td><td>" + newOdvh + "</td><td>" + dOdvh + "</td></tr>";
                     basicTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
                             oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td>" +
-                            oldOdvh  + "</td><td>" + newOdvh +"</td><td>" + dOdvh + "</td>" +
-                          "</tr>";
+                            oldOdvh + "</td><td>" + newOdvh + "</td><td>" + dOdvh + "</td>" +
+                            "</tr>";
                 }
             }
             advTableString += "</tbody></table>";
