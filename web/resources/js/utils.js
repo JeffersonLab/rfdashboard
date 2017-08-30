@@ -5,6 +5,7 @@
  */
 
 var jlab = jlab || {};
+jlab.util = jlab.util || {};
 
 jlab.contextPath = '/RFDashboard';
 jlab.isRequest = function () {
@@ -126,11 +127,11 @@ jlab.millisToDate = function (time) {
 
 // This calculates the number days between two yyyy-MM-dd formated date strings.  Converts them both to UTC as it
 // ignores DST changes and days are always 24*60*60*1000 milliseconds long.
-jlab.daysBetweenDates = function(d1, d2) {
+jlab.daysBetweenDates = function (d1, d2) {
     var d1 = new Date(d1);  // d1 is ISO 8061 compliant.  Without time info this becomes UTC.
     var d2 = new Date(d2);
-    
-    var millisPerDay = 24 * 60 * 60 *1000;
+
+    var millisPerDay = 24 * 60 * 60 * 1000;
     return (d2 - d1) / millisPerDay;
 };
 
@@ -191,4 +192,43 @@ jlab.formatTimestampPretty = function (date) {
             ' ' + pad(this.getHours()) +
             ':' + pad(this.getMinutes()) +
             ':' + pad(this.getSeconds());
+};
+
+// Note: to be used with a tablesorter widget
+jlab.util.createTableSorterTable = function (tableId, contents) {
+    if ( typeof contents.data === "undefined" ) {
+        console.log("No data supplied to createTableSorterTable");
+        return;
+    }
+    var data = contents.data;
+    var sortList = contents.sortList || [[0,0]]; // Default to first column ascending
+
+    // Build the table HTML
+    var tableString = "<table class=\"tablesorter\">";
+    for (var i = 0; i < data.length; i++) {
+        if (i === 0) {
+            
+            // Header row
+            tableString += "<thead><tr>";
+            for (var j = 0; j < data[i].length; j++) {
+                tableString += "<th>" + data[i][j] + "</th>";
+            }
+            tableString += "</tr></thead><tbody>";
+        } else {
+            
+            // Body rows
+            tableString += "<tr>";
+            for (var j = 0; j < data[i].length; j++) {
+                tableString += "<td>" + data[i][j] + "</td>";
+            }
+            tableString += "</tr>";
+        }
+    }
+
+    // Append the table HTML
+    $("#" + tableId + "-table").append(tableString);
+    // Setup the sortable functionality
+    $(".tablesorter")
+            .tablesorter({"sortList": sortList}) // sort on the first column (asc)
+            .tablesorterPager({container: $("#" + tableId + "-pager")});
 };

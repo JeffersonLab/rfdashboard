@@ -89,6 +89,233 @@ jlab.cavity.getCavityData = function(settings) {
     $.ajax(ajaxSettings);
 };
 
+// Takes a single date response of the AJAX cavity service and turns it into a map keyed on cavity name
+jlab.cavity.createCavityMap = function(cavityData) {
+    var map = new Map();
+    var cavities = cavityData.cavities;
+    for(var i=0; i < cavities.length; i++ ) {
+        map.set(cavities[i].name, cavities[i]);
+    }
+    return map;
+}
+
+// This turns two cavity maps into a 2D array that can be used to create an HTML table.  The table
+// includes the request parameters and the delta for those values between start and end.
+jlab.cavity.cavityMapsTo2DArray = function(startMap, endMap, linacs, cmtypes, properties) {
+    
+    // Check that the two maps contain identical cavity sets
+    if (startMap.keys().length !== endMap.keys().length) {
+        console.log("Error: start and end maps contain different cavities");
+        return null;
+    }
+    for ( let sName of startMap.keys() ) {
+        var match = false;
+        for ( let eName of endMap.keys() ) { if (sName == eName ) { match = true; } }
+        if ( ! match ) {
+            console.log("Error: start and end maps contain different cavities");
+            return null;
+        }
+    }
+
+    // Setup the 2D cavity array with the header row
+    var cavArray = new Array();    
+    
+    var hArray = new Array();
+    
+    hArray.push("Name");
+    if ( properties.includes("cmtype") ) {
+        hArray.push("Module Type");
+    }
+    if ( properties.includes("linac") ) {
+        hArray.push("Linac");
+    }
+    for( let prop of properties ) {
+        switch (prop) {
+            case "cmtype":
+                break; //handled explicitly
+            case "linac":
+                break; //handled explicitly
+            case "comments":
+                break; //handled explicitly
+            case "length":
+                hArray.push("Length");
+                break;
+            case "modAnode":
+                hArray.push("Old M.A.V.");
+                hArray.push("New M.A.V.");
+                hArray.push("Delta M.A.V.");
+                break;
+            case "odvh":
+                hArray.push("Old ODVH");
+                hArray.push("New ODVH");
+                hArray.push("Delta ODVH");
+                break;
+            case "opsGsetMax":
+                hArray.push("Old OpsGsetMax");
+                hArray.push("New OpsGsetMax");
+                hArray.push("Delta OpsGsetMax");
+                break;
+            case "maxGset":
+                hArray.push("Old MaxGSET");
+                hArray.push("New MaxGSET");
+                hArray.push("Delta MaxGSET");
+                break;
+            case "q0":
+                hArray.push("Old Q0");
+                hArray.push("New Q0");
+                hArray.push("Delta Q0");
+                break;
+            case "qExternal":
+                hArray.push("Old Q External");
+                hArray.push("New Q External");
+                hArray.push("Delta Q External");
+                break;
+            case "tripOffset":
+                hArray.push("Old Trip Offset");
+                hArray.push("New Trip Offset");
+                hArray.push("Delta  Trip Offset");
+                break;
+            case "tripSlope":
+                hArray.push("Old Trip Slope");
+                hArray.push("New Trip Slope");
+                hArray.push("Delta Trip Slope");
+                break;
+            default:
+                hArray.push(prop);
+        }
+    }
+    if ( properties.includes("comments") ) {
+        hArray.push("Comments");
+    }
+    cavArray.push(hArray);
+
+    // Now process the cavities and create the data rows of the cavArray
+    var startCav, endCav;
+    var j = 0;
+    for( let name of startMap.keys() ) {
+        
+        startCav = startMap.get(name);
+        endCav = endMap.get(name);
+
+        // Filter out the unwanted cavities
+        if ( ! linacs.includes(startCav.linac.toLowerCase()) ) {
+            console.log(linacs, startCav);
+            console.log("Linac filtered: " + name);
+            continue;
+        }
+        if ( ! cmtypes.includes(startCav.moduleType.toUpperCase()) ) {
+            console.log(cmtypes, startCav)
+            console.log("CMType filtered: " + name);
+            continue;
+        }
+         
+        rowArray = new Array();
+        rowArray.push(startCav.name);
+        if (properties.includes("cmtype")) {
+            var cmtype = startCav.moduleType;
+            if (startCav.moduleType != endCav.moduleType ) {
+                cmtype += "/" + endCav.moduleType;
+            }
+            rowArray.push(cmtype);
+        }
+        if (properties.includes("linac")) {
+            rowArray.push(startCav.linac);;
+        }
+        for (let prop of properties) {
+            switch (prop) {
+                case "cmtype":
+                    break; //handled explicitly
+                case "linac":
+                    break; //handled explicitly
+                case "comments":
+                    break; //handled explicitly
+                case "length":
+                    var length = startCav.length.toFixed(2);
+                    if ( startCav.length != endCav.length ) {
+                        length += "/" + endCav.length.toFixed(2);
+                    }
+                    rowArray.push(length);
+                    break;
+                case "modAnode":
+                    rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "modAnodeVoltage_kv"));
+                    break;
+                case "odvh":
+                    rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "odvh"));
+                    break;
+                case "opsGsetMax":
+                    rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "opsGsetMax"));
+                    break;
+                case "maxGset":
+                    rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "maxGset"));
+                    break;
+                case "q0":
+                    rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "q0", true));
+                    break;
+                case "qExternal":
+                    rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "qExternal", true));
+                    break;
+                case "tripOffset":
+                    rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "tripOffset"));
+                    break;
+                case "tripSlope":
+                    rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "tripSlope"));
+                    break;
+                default:
+                    rowArray.push(startCav.prop);
+            }
+        }
+        if (properties.includes("comments")) {
+            rowArray.push("");
+        }
+        cavArray.push(rowArray);
+    }
+    
+                console.log(cavArray);
+    return cavArray;
+}
+
+
+/*
+ * 
+ * @param {type} startCav The cavity object with the earlier timestamp
+ * @param {type} endCav The cavity object with the later timestamp
+ * @param {type} prop The property to be processed
+ * @param {type} scientific A boolean as to whether the property is a string representing a number in scientific notation
+ * @returns {undefined} An array containing the the start ("Old") string, the end ("New") string, and the delta string
+ */
+jlab.cavity.processNumericTableEntry = function (startCav, endCav, prop, scientific) {
+    var out = new Array();
+    var sp = startCav[prop];
+    var ep = endCav[prop];
+
+    if (sp === "") {
+        out.push("");
+    } else if (scientific) {
+        sp = Number(sp);
+        out.push(sp.toExponential(2));
+    } else {
+        out.push(sp.toFixed(2));
+    }
+
+    if (ep === "") {
+        out.push("");
+    } else if (scientific) {
+        ep = Number(ep);
+        out.push(ep.toExponential(2));
+    } else {
+        out.push(ep.toFixed(2));
+    }
+
+    if ( sp === "" || ep === "" ) {
+        out.push("N/A");
+    } else if ( scientific ) {
+        out.push((ep - sp).toExponential(2));
+    } else {
+        out.push((ep - sp).toFixed(2));
+    }
+
+    return out;
+}
 
 /* 
  * Create a cavity data table.
