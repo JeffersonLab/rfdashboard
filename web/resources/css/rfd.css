@@ -694,3 +694,7 @@ th.scrollbar-header {
     margin: 0 auto;
     border: 1px solid black;
 }
+.ui-tooltip {
+    padding: 2px;
+    font-size: 10px;
+}
