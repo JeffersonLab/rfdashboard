@@ -14,9 +14,7 @@
         <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/css/theme.default.min.css"/>
         <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/css/jquery.tablesorter.pager.min.css"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter-widget.css"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/bootstrap-subset.css"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/cavity.css"/>
-        <link rel="stylesheet" type="text/css" href="/RFDashboard/resources/css/tablesorter-widget.css"/>
     </jsp:attribute>
     <jsp:attribute name="scripts">
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/jquery.tablesorter.combined.js"></script>
@@ -40,10 +38,10 @@
             <h3>Page Controls</h3>
             <ul>
                 <li>
-                    Start Date - The start date to be displayed in the energy reach chart
+                    Start Date - The start date for displaying cavity details
                 </li>
                 <li>
-                    End Date - The end date to be displayed in the energy reach chart
+                    End Date - The end date for displaying cavity details
                 </li>
                 <li>
                     Cryomodule Type - Select the cryomodule types to display
@@ -59,348 +57,337 @@
             <br><br>
             <h3> Tables </h3>
             The "Cavity Properties" table displays the selected properties for the start date, the end date, and their delta.  Cavities
-            can be filtered out based on their Linac location or Cryomoule type.  This table
-            is sortable by clicking/Shift-clicking the header fields of the columns.  In addition, the export button downloads the 
-            table as it appears on your page.
-
+            can be filtered out based on their Linac location or Cryomoule type.  This table supports a number of features.  It is sortable
+            by clicking/Shift-clicking the header fields of the columns.  It supports filtering results by entering search strings and
+            a limited command set (documentation <a href="https://mottie.github.io/tablesorter/docs/example-widget-filter.html">here</a>).
+            The data can be output in a number of different formats using the 'Output' button and 'Output Options' dropdown menu.
         </div>
         <div id="control-form">
             <form action="${pageContext.request.contextPath}/cavity" method="get">
                 <div class="fieldset-container">
                     <div class="fieldset-row">
                         <div class="fieldset-cell">
-                            <!--<fieldset>-->
-                                <div class="fieldset-label">Date Range</div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label class="required-field" for="start">Start Date</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <input type="text" class="date-field" id="start" name="start" placeholder="YYYY-MM-DD" value="${requestScope.start}"/>
-                                    </div>
+                            <div class="fieldset-label">Date Range</div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label class="required-field" for="start">Start Date</label>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label class="required-field" for="end" >End Date</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <input type="text" class="date-field nowable-field" id="end" name="end" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
-                                    </div>
+                                <div class="li-value">
+                                    <input type="text" class="date-field" id="start" name="start" placeholder="YYYY-MM-DD" value="${requestScope.start}"/>
                                 </div>
-                            <!--</fieldset>-->
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label class="required-field" for="end" >End Date</label>
+                                </div>
+                                <div class="li-value">
+                                    <input type="text" class="date-field nowable-field" id="end" name="end" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
+                                </div>
+                            </div>
                         </div>
                         <div class="fieldset-cell">
-                            <!--<fieldset>-->
-                                <div class="fieldset-label">Cryomodule Type</div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="QTR">QTR</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${cmtypes.containsKey('QTR')}">
-                                                <input type="checkbox" id="QTR" name="cmtypes" value="QTR" checked/>
-                                            </c:when>
-                                            <c:when test="${not cmtypes.containsKey('QTR')}">
-                                                <input type="checkbox" id="QTR" name="cmtypes" value="QTR" checked/>
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                            <div class="fieldset-label">Cryomodule Type</div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="QTR">QTR</label>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="c25" >C25</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${cmtypes.containsKey('C25')}">
-                                                <input type="checkbox" id="c25" name="cmtypes" value="C25" checked/>
-                                            </c:when>
-                                            <c:when test="${not cmtypes.containsKey('C25')}">
-                                                <input type="checkbox" id="c25" name="cmtypes" value="C25" checked/>
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${cmtypes.containsKey('QTR')}">
+                                            <input type="checkbox" id="QTR" name="cmtypes" value="QTR" checked/>
+                                        </c:when>
+                                        <c:when test="${not cmtypes.containsKey('QTR')}">
+                                            <input type="checkbox" id="QTR" name="cmtypes" value="QTR" checked/>
+                                        </c:when>
+                                    </c:choose>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="c50" >C50</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${cmtypes.containsKey('C50')}">
-                                                <input type="checkbox" id="c50" name="cmtypes" value="C50" checked/>
-                                            </c:when>
-                                            <c:when test="${not cmtypes.containsKey('C50')}">
-                                                <input type="checkbox" id="c50" name="cmtypes" value="C50" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="c25" >C25</label>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="c100">C100</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${cmtypes.containsKey('C100')}">
-                                                <input type="checkbox" id="c100" name="cmtypes" value="C100" checked/>
-                                            </c:when>
-                                            <c:when test="${not cmtypes.containsKey('C100')}">
-                                                <input type="checkbox" id="c100" name="cmtypes" value="C100" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${cmtypes.containsKey('C25')}">
+                                            <input type="checkbox" id="c25" name="cmtypes" value="C25" checked/>
+                                        </c:when>
+                                        <c:when test="${not cmtypes.containsKey('C25')}">
+                                            <input type="checkbox" id="c25" name="cmtypes" value="C25" checked/>
+                                        </c:when>
+                                    </c:choose>
                                 </div>
-                            <!--</fieldset>-->
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="c50" >C50</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${cmtypes.containsKey('C50')}">
+                                            <input type="checkbox" id="c50" name="cmtypes" value="C50" checked/>
+                                        </c:when>
+                                        <c:when test="${not cmtypes.containsKey('C50')}">
+                                            <input type="checkbox" id="c50" name="cmtypes" value="C50" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="c100">C100</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${cmtypes.containsKey('C100')}">
+                                            <input type="checkbox" id="c100" name="cmtypes" value="C100" checked/>
+                                        </c:when>
+                                        <c:when test="${not cmtypes.containsKey('C100')}">
+                                            <input type="checkbox" id="c100" name="cmtypes" value="C100" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
                         </div>
                         <div class="fieldset-cell">
-                            <!--<fieldset>-->
-                                <div class="fieldset-label">Linac</div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="injector">Injector</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${linacs.containsKey('injector')}">
-                                                <input type="checkbox" id="injector" name="linacs" value="injector" checked/>
-                                            </c:when>
-                                            <c:when test="${not linacs.containsKey('injector')}">
-                                                <input type="checkbox" id="injector" name="linacs" value="injector" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                            <div class="fieldset-label">Linac</div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="injector">Injector</label>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="north">North</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${linacs.containsKey('north')}">
-                                                <input type="checkbox" id="nlorth" name="linacs" value="north" checked/>
-                                            </c:when>
-                                            <c:when test="${not linacs.containsKey('north')}">
-                                                <input type="checkbox" id="nlorth" name="linacs" value="north" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${linacs.containsKey('injector')}">
+                                            <input type="checkbox" id="injector" name="linacs" value="injector" checked/>
+                                        </c:when>
+                                        <c:when test="${not linacs.containsKey('injector')}">
+                                            <input type="checkbox" id="injector" name="linacs" value="injector" />
+                                        </c:when>
+                                    </c:choose>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="south">South</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${linacs.containsKey('south')}">
-                                                <input type="checkbox" id="south" name="linacs" value="south" checked/>
-                                            </c:when>
-                                            <c:when test="${not linacs.containsKey('south')}">
-                                                <input type="checkbox" id="south" name="linacs" value="south" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="north">North</label>
                                 </div>
-                            <!--</fieldset>-->
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${linacs.containsKey('north')}">
+                                            <input type="checkbox" id="nlorth" name="linacs" value="north" checked/>
+                                        </c:when>
+                                        <c:when test="${not linacs.containsKey('north')}">
+                                            <input type="checkbox" id="nlorth" name="linacs" value="north" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="south">South</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${linacs.containsKey('south')}">
+                                            <input type="checkbox" id="south" name="linacs" value="south" checked/>
+                                        </c:when>
+                                        <c:when test="${not linacs.containsKey('south')}">
+                                            <input type="checkbox" id="south" name="linacs" value="south" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="fieldset-row">
                         <div class="fieldset-cell">
-                            <!--<fieldset>-->
-                                <div class="fieldset-label">Cavity Properties</div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="cmtype">Module Type</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${properties.containsKey('cmtype')}">
-                                                <input type="checkbox" id="cmtype" name="properties" value="cmtype" checked/>
-                                            </c:when>
-                                            <c:when test="${not properties.containsKey('cmtype')}">
-                                                <input type="checkbox" id="cmtype" name="properties" value="cmtype"/>
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                            <div class="fieldset-label">Cavity Properties</div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="cmtype">Module Type</label>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="linac">Linac</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${properties.containsKey('linac')}">
-                                                <input type="checkbox" id="linac" name="properties" value="linac" checked/>
-                                            </c:when>
-                                            <c:when test="${not properties.containsKey('linac')}">
-                                                <input type="checkbox" id="linac" name="properties" value="linac"/>
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('cmtype')}">
+                                            <input type="checkbox" id="cmtype" name="properties" value="cmtype" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('cmtype')}">
+                                            <input type="checkbox" id="cmtype" name="properties" value="cmtype"/>
+                                        </c:when>
+                                    </c:choose>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="length">Length</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${properties.containsKey('length')}">
-                                                <input type="checkbox" id="length" name="properties" value="length" checked/>
-                                            </c:when>
-                                            <c:when test="${not properties.containsKey('length')}">
-                                                <input type="checkbox" id="length" name="properties" value="length"/>
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="linac">Linac</label>
                                 </div>
-
-
-
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="odvh">ODVH</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${properties.containsKey('odvh')}">
-                                                <input type="checkbox" id="odvh" name="properties" value="odvh" checked/>
-                                            </c:when>
-                                            <c:when test="${not properties.containsKey('odvh')}">
-                                                <input type="checkbox" id="odvh" name="properties" value="odvh" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('linac')}">
+                                            <input type="checkbox" id="linac" name="properties" value="linac" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('linac')}">
+                                            <input type="checkbox" id="linac" name="properties" value="linac"/>
+                                        </c:when>
+                                    </c:choose>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="opsGsetMax">OpsGsetMax</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${properties.containsKey('opsGsetMax')}">
-                                                <input type="checkbox" id="opsGsetMax" name="properties" value="opsGsetMax" checked/>
-                                            </c:when>
-                                            <c:when test="${not properties.containsKey('opsGsetMax')}">
-                                                <input type="checkbox" id="opsGsetMax" name="properties" value="opsGsetMax" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="length">Length</label>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="maxGset">MaxGSET</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${properties.containsKey('maxGset')}">
-                                                <input type="checkbox" id="maxGset" name="properties" value="maxGset" checked/>
-                                            </c:when>
-                                            <c:when test="${not properties.containsKey('maxGset')}">
-                                                <input type="checkbox" id="maxGset" name="properties" value="maxGset" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('length')}">
+                                            <input type="checkbox" id="length" name="properties" value="length" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('length')}">
+                                            <input type="checkbox" id="length" name="properties" value="length"/>
+                                        </c:when>
+                                    </c:choose>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="q0">Q0</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${properties.containsKey('q0')}">
-                                                <input type="checkbox" id="q0" name="properties" value="q0" checked/>
-                                            </c:when>
-                                            <c:when test="${not properties.containsKey('q0')}">
-                                                <input type="checkbox" id="q0" name="properties" value="q0" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="odvh">ODVH</label>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="qExternal">Q External</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${properties.containsKey('qExternal')}">
-                                                <input type="checkbox" id="qExternal" name="properties" value="qExternal" checked/>
-                                            </c:when>
-                                            <c:when test="${not properties.containsKey('qExternal')}">
-                                                <input type="checkbox" id="qExternal" name="properties" value="qExternal" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('odvh')}">
+                                            <input type="checkbox" id="odvh" name="properties" value="odvh" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('odvh')}">
+                                            <input type="checkbox" id="odvh" name="properties" value="odvh" />
+                                        </c:when>
+                                    </c:choose>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="tripOffset">Trip Offset</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${properties.containsKey('tripOffset')}">
-                                                <input type="checkbox" id="tripOffset" name="properties" value="tripOffset" checked/>
-                                            </c:when>
-                                            <c:when test="${not properties.containsKey('tripOffset')}">
-                                                <input type="checkbox" id="tripOffset" name="properties" value="tripOffset" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="opsGsetMax">OpsGsetMax</label>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="tripSlope">Trip Slope</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${properties.containsKey('tripSlope')}">
-                                                <input type="checkbox" id="tripSlope" name="properties" value="tripSlope" checked/>
-                                            </c:when>
-                                            <c:when test="${not properties.containsKey('tripSlope')}">
-                                                <input type="checkbox" id="tripSlope" name="properties" value="tripSlope" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('opsGsetMax')}">
+                                            <input type="checkbox" id="opsGsetMax" name="properties" value="opsGsetMax" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('opsGsetMax')}">
+                                            <input type="checkbox" id="opsGsetMax" name="properties" value="opsGsetMax" />
+                                        </c:when>
+                                    </c:choose>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="modAnode">Mod Anode</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${properties.containsKey('modAnode')}">
-                                                <input type="checkbox" id="modAnode" name="properties" value="modAnode" checked/>
-                                            </c:when>
-                                            <c:when test="${not properties.containsKey('modAnode')}">
-                                                <input type="checkbox" id="modAnode" name="properties" value="modAnode" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="maxGset">MaxGSET</label>
                                 </div>
-                                <div class="input-elem">
-                                    <div class="li-key">
-                                        <label for="comments">Comments</label>
-                                    </div>
-                                    <div class="li-value">
-                                        <c:choose>
-                                            <c:when test="${properties.containsKey('comments')}">
-                                                <input type="checkbox" id="comments" name="properties" value="comments" checked/>
-                                            </c:when>
-                                            <c:when test="${not properties.containsKey('comments')}">
-                                                <input type="checkbox" id="comments" name="properties" value="comments" />
-                                            </c:when>
-                                        </c:choose>
-                                    </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('maxGset')}">
+                                            <input type="checkbox" id="maxGset" name="properties" value="maxGset" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('maxGset')}">
+                                            <input type="checkbox" id="maxGset" name="properties" value="maxGset" />
+                                        </c:when>
+                                    </c:choose>
                                 </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="q0">Q0</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('q0')}">
+                                            <input type="checkbox" id="q0" name="properties" value="q0" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('q0')}">
+                                            <input type="checkbox" id="q0" name="properties" value="q0" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="qExternal">Q External</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('qExternal')}">
+                                            <input type="checkbox" id="qExternal" name="properties" value="qExternal" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('qExternal')}">
+                                            <input type="checkbox" id="qExternal" name="properties" value="qExternal" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="tripOffset">Trip Offset</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('tripOffset')}">
+                                            <input type="checkbox" id="tripOffset" name="properties" value="tripOffset" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('tripOffset')}">
+                                            <input type="checkbox" id="tripOffset" name="properties" value="tripOffset" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="tripSlope">Trip Slope</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('tripSlope')}">
+                                            <input type="checkbox" id="tripSlope" name="properties" value="tripSlope" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('tripSlope')}">
+                                            <input type="checkbox" id="tripSlope" name="properties" value="tripSlope" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="modAnode">Mod Anode</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('modAnode')}">
+                                            <input type="checkbox" id="modAnode" name="properties" value="modAnode" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('modAnode')}">
+                                            <input type="checkbox" id="modAnode" name="properties" value="modAnode" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="comments">Comments</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('comments')}">
+                                            <input type="checkbox" id="comments" name="properties" value="comments" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('comments')}">
+                                            <input type="checkbox" id="comments" name="properties" value="comments" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
                         </div>
-                        <!--</fieldset>-->
                     </div>
                 </div>
                 <input type="submit" value="Submit"/>
             </form>
             <hr>
         </div>
-        <t:tablesorter tableTitle="Cavity Properties (${requestScope.start} vs ${requestScope.end})" widgetId="test-table" filename="${requestScope.start}_${requestScope.end}_cavProps.csv"></t:tablesorter-new>
+        <t:tablesorter tableTitle="Cavity Properties (${requestScope.start} vs ${requestScope.end})" widgetId="details-table" filename="${requestScope.start}_${requestScope.end}_cavProps.csv"></t:tablesorter>
             <script>
 
                 // Not terribly elegant, but need to get request parameters into javascript for further use.
