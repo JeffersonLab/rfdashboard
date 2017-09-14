@@ -29,16 +29,14 @@ jlab.cavity.loadDetailedTable = function (widgetId, start, end, linacs, cmtypes,
 
         jlab.util.hideTableLoading(widgetId);
         var startMap, endMap;
-        if (json.data[0].date === start && json.data[1].date === end) {
-            startMap = jlab.cavity.createCavityMap(json.data[0]);
-            endMap = jlab.cavity.createCavityMap(json.data[1]);
-        } else if (json.data[1].date === start && json.data[0].date === end) {
-            startMap = jlab.cavity.createCavityMap(json.data[1]);
-            endMap = jlab.cavity.createCavityMap(json.data[0]);
-        } else {
+        var maps = jlab.cavity.getStartEndMaps(json, start, end);
+        if ( maps === null ) {
             jlab.util.hideTableLoading(widgetId, "Error querying data");
             console.log("Error: received unexpected AJAX cavity service repsonse", json);
             return;
+        } else {
+            startMap = maps[0];
+            endMap = maps[1];
         }
 
         var tableArray = jlab.cavity.cavityMapsTo2DArray(startMap, endMap, linacs, cmtypes, properties);
