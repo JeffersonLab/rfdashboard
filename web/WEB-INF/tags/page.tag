@@ -25,6 +25,8 @@
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/img/favicon.ico"/>
         <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-ui/1.10.3/theme/smoothness/jquery-ui.min.css"/>
         <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-plugins/timepicker/jquery-ui-timepicker-1.5.0.css"/>
+        <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/css/theme.default.min.css"/>
+        <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/css/jquery.tablesorter.pager.min.css"/>
         <link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/rfd.css">
         <jsp:invoke fragment="stylesheets"/>
     </head>
