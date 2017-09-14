@@ -301,9 +301,8 @@ jlab.cavity.cavityMapsTo2DArray = function (startMap, endMap, linacs, cmtypes, p
         cavArray.push(rowArray);
     }
 
-    console.log(cavArray);
     return cavArray;
-}
+};
 
 
 /*
