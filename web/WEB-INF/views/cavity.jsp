@@ -11,17 +11,21 @@
 <c:set var="title" value="Cavity Details" />
 <t:page title="${title}" pageStart="${requestScope.start}" pageEnd="${requestScope.end}"> 
     <jsp:attribute name="stylesheets">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/flot-barchart.css"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter.css"/>
+        <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/css/theme.default.min.css"/>
+        <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/css/jquery.tablesorter.pager.min.css"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter-widget.css"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/bootstrap-subset.css"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/cavity.css"/>
+        <link rel="stylesheet" type="text/css" href="/RFDashboard/resources/css/tablesorter-widget.css"/>
     </jsp:attribute>
     <jsp:attribute name="scripts">
+        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/jquery.tablesorter.combined.js"></script>
+        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/widgets/widget-output.min.js"></script>
+        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/parsers/parser-input-select.min.js"></script>
+        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/extras/jquery.tablesorter.pager.min.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cavity-utils.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tabletoCSV.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tablesorter.min.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tablesorter.pager.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/flot-charts.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/tablesorter-widget.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cavity.js"></script>
     </jsp:attribute>
     <jsp:body>
@@ -63,14 +67,13 @@
         <div id="control-form">
             <form action="${pageContext.request.contextPath}/cavity" method="get">
                 <div class="fieldset-container">
-                    <hr>
                     <div class="fieldset-row">
                         <div class="fieldset-cell">
-                            <fieldset>
+                            <!--<fieldset>-->
                                 <div class="fieldset-label">Date Range</div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label class="required-field" for="start" title="Inclusive (Closed)">Start Date</label>
+                                        <label class="required-field" for="start">Start Date</label>
                                     </div>
                                     <div class="li-value">
                                         <input type="text" class="date-field" id="start" name="start" placeholder="YYYY-MM-DD" value="${requestScope.start}"/>
@@ -78,20 +81,20 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label class="required-field" for="end" title="Exclusive (Open)">End Date</label>
+                                        <label class="required-field" for="end" >End Date</label>
                                     </div>
                                     <div class="li-value">
                                         <input type="text" class="date-field nowable-field" id="end" name="end" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
                                     </div>
                                 </div>
-                            </fieldset>
+                            <!--</fieldset>-->
                         </div>
                         <div class="fieldset-cell">
-                            <fieldset>
+                            <!--<fieldset>-->
                                 <div class="fieldset-label">Cryomodule Type</div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="QTR" title="">QTR</label>
+                                        <label for="QTR">QTR</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -106,7 +109,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="c25" title="">C25</label>
+                                        <label for="c25" >C25</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -121,7 +124,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="c50" title="">C50</label>
+                                        <label for="c50" >C50</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -136,7 +139,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="c100" title="">C100</label>
+                                        <label for="c100">C100</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -149,14 +152,14 @@
                                         </c:choose>
                                     </div>
                                 </div>
-                            </fieldset>
+                            <!--</fieldset>-->
                         </div>
                         <div class="fieldset-cell">
-                            <fieldset>
+                            <!--<fieldset>-->
                                 <div class="fieldset-label">Linac</div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="injector" title="">Injector</label>
+                                        <label for="injector">Injector</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -171,7 +174,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="north" title="">North</label>
+                                        <label for="north">North</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -186,7 +189,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="south" title="">South</label>
+                                        <label for="south">South</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -199,16 +202,16 @@
                                         </c:choose>
                                     </div>
                                 </div>
-                            </fieldset>
+                            <!--</fieldset>-->
                         </div>
                     </div>
                     <div class="fieldset-row">
                         <div class="fieldset-cell">
-                            <fieldset>
+                            <!--<fieldset>-->
                                 <div class="fieldset-label">Cavity Properties</div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="cmtype" title="cmtype">Module Type</label>
+                                        <label for="cmtype">Module Type</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -223,7 +226,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="linac" title="linac">Linac</label>
+                                        <label for="linac">Linac</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -238,7 +241,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="length" title="length">Length</label>
+                                        <label for="length">Length</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -256,7 +259,7 @@
 
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="odvh" title="odvh">ODVH</label>
+                                        <label for="odvh">ODVH</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -271,7 +274,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="opsGsetMax" title="opsGsetMax">OpsGsetMax</label>
+                                        <label for="opsGsetMax">OpsGsetMax</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -286,7 +289,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="maxGset" title="maxGset">MaxGSET</label>
+                                        <label for="maxGset">MaxGSET</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -301,7 +304,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="q0" title="q0">Q0</label>
+                                        <label for="q0">Q0</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -316,7 +319,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="qExternal" title="qExternal">Q External</label>
+                                        <label for="qExternal">Q External</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -331,7 +334,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="tripOffset" title="tripOffset">Trip Offset</label>
+                                        <label for="tripOffset">Trip Offset</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -346,7 +349,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="tripSlope" title="tripSlope">Trip Slope</label>
+                                        <label for="tripSlope">Trip Slope</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -361,7 +364,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="modAnode" title="modAnode">Mod Anode</label>
+                                        <label for="modAnode">Mod Anode</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -376,7 +379,7 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
-                                        <label for="comments" title="comments">Comments</label>
+                                        <label for="comments">Comments</label>
                                     </div>
                                     <div class="li-value">
                                         <c:choose>
@@ -390,25 +393,20 @@
                                     </div>
                                 </div>
                         </div>
-                        </fieldset>
+                        <!--</fieldset>-->
                     </div>
                 </div>
                 <input type="submit" value="Submit"/>
             </form>
             <hr>
         </div>
-        <button id="export" data-export="export">Export</button>
-        <t:tablesorter tableTitle="Cavity Properties (${requestScope.start} vs ${requestScope.end})" tableId="summary-table"></t:tablesorter>
+        <t:tablesorter tableTitle="Cavity Properties (${requestScope.start} vs ${requestScope.end})" widgetId="test-table" filename="${requestScope.start}_${requestScope.end}_cavProps.csv"></t:tablesorter-new>
             <script>
-
 
                 // Not terribly elegant, but need to get request parameters into javascript for further use.
                 var jlab = jlab || {};
                 jlab.start = "${requestScope.start}";
                 jlab.end = "${requestScope.end}";
-                jlab.diffStart = "${requestScope.diffStart}";
-                jlab.diffEnd = "${requestScope.diffEnd}";
-                jlab.timeUnit = "${requestScope.timeUnit}";
 
                 jlab.properties = new Array();
             <c:forEach var="prop" items="${properties}">
@@ -424,7 +422,6 @@
             <c:forEach var="cmtype" items="${cmtypes}">
                 jlab.cmtypes.push("${cmtype.key}");
             </c:forEach>
-
         </script>
     </jsp:body>
 </t:page>
