@@ -698,3 +698,156 @@ th.scrollbar-header {
     padding: 2px;
     font-size: 10px;
 }
+/**********
+tablesorter tag styles
+**********/
+.rfd-tablesorter-widget {
+    max-width: 100%
+}
+.rfd-tablesorter-widget .table-panel {
+    padding: 0.25em;
+    position: relative;
+    max-height: 500px;
+    min-height: 100px;
+    width: 99%;
+    padding-top: 6px;
+    overflow: scroll;
+    border: 1px solid gray;
+}
+.rfd-tablesorter-widget .table-wrap {
+    padding: 0.5em;
+}
+.rfd-tablesorter-widget .table-header {
+    display: inline-block;
+    padding-bottom: 0.25em;
+    width: 100%;
+    vertical-align: bottom;
+}
+.rfd-tablesorter-widget .table-title {
+    max-width: 44%;
+    display: inline-block;
+    text-align: left;
+    float: left;
+}
+.rfd-tablesorter-widget .table-controls{
+    display: inline;
+    width: 55%;
+    float: right;
+}
+/* Table control elements */
+.rfd-tablesorter-widget .table-controls .output-group {
+    display: inline-block;
+    float: right;
+    max-width: 30%;
+    margin: 0;
+}
+.rfd-tablesorter-widget .table-controls .pager {
+    display: inline-block;
+    float: right;
+    max-width: 90%;
+    margin: 0;
+    padding: 0;
+}
+.rfd-tablesorter-widget .table-controls .dropdown-menu h5 {
+    text-align: right;
+    margin-right: 4px;
+}
+.rfd-tablesorter-widget .table-controls .dropdown-menu li div {
+    margin-bottom: 5px;
+}
+.rfd-tablesorter-widget .table-controls .output-separator, .output-replacequotes, .output-quotes {
+    font-family: Tahoma, Geneva, sans-serif;
+    min-width: 18px;
+    height: 22px;
+}
+.rfd-tablesorter-widget .table-controls .output-separator-input {
+    width: 2.5em;
+}
+.rfd-tablesorter-widget .table-controls .output-replacequotes {
+    width: 1em;
+}
+.rfd-tablesorter-widget table.tablesorter, .tablesorter th, .tablesorter td {
+    border: 1px solid #ddd;
+    padding: 2px;
+    border-collapse: collapse;
+}
+.rfd-tablesorter-widget table.tablesorter tbody tr.odd.checked td {
+    background: #8080c0;
+    color: #fff;
+}
+.rfd-tablesorter-widget table.tablesorter tbody tr.even.checked td {
+    background: #a0a0e0;
+    color: #fff;
+}
+/* Dropdown menu and associated buttons */
+.rfd-tablesorter-widget .table-controls .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0%;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 360px;
+    padding: 10px;
+    margin: 2px 0 0;
+    font-size: 12px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    /*    border: 1px solid rgba(0, 0, 0, .15);*/
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    box-sizing: border-box;
+}
+.rfd-tablesorter-widget .table-controls .dropdown-menu h5 {
+    font-size: 14px;
+    margin: 0px;
+}
+.rfd-tablesorter-widget .table-controls .output-group {
+    position: relative;
+}
+.rfd-tablesorter-widget .table-controls .btn-group {
+    display: inline-block;
+    font-size: 0;
+}
+.rfd-tablesorter-widget .table-controls .dropdown-menu .btn, .btn-group, label {
+    vertical-align: middle;
+}
+/* Toggle Buttons */
+.rfd-tablesorter-widget .table-controls .btn-group.toggles input:checked + label {
+        background: linear-gradient(lightgray,gray);
+}
+.rfd-tablesorter-widget .table-controls .btn-group.toggles label {
+    float: left;
+    font-size: 10pt;
+    vertical-align: baseline;
+    display: inline-block;
+    font-weight: normal;
+    text-align: center;
+    text-shadow: none;
+    background: linear-gradient(white,lightgray);
+    padding: 1px 2px;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    box-shadow:  1px rgba(0, 0, 0, 0.4);
+}
+.rfd-tablesorter-widget .table-controls .btn-group.toggles label:hover {
+    cursor: pointer;
+}
+.rfd-tablesorter-widget .table-controls .btn-group.toggles label:first-of-type {
+    border-radius: 4px 0 0 4px;
+}
+.rfd-tablesorter-widget .table-controls .btn-group.toggles label:last-of-type {
+    border-radius: 0 4px 4px 0;
+}
+.rfd-tablesorter-widget .table-controls .btn-group.toggles input[type=radio] {
+    position: absolute !important;
+    clip: rect(0, 0, 0, 0);
+    height: 1px;
+    width: 1px;
+    border: 0;
+    overflow: hidden;
+}
