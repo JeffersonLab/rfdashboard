@@ -81,6 +81,11 @@
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery-migrate-1.4.1.min.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-ui/1.10.3/jquery-ui.min.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/timepicker/jquery-ui-timepicker-1.5.0.min.js"></script>
+        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/jquery.tablesorter.combined.js"></script>
+        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/widgets/widget-output.min.js"></script>
+        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/parsers/parser-input-select.min.js"></script>
+        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/extras/jquery.tablesorter.pager.min.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/tablesorter-widget.js"></script>
         <jsp:invoke fragment="scripts"/>
     </body>
 </html>
