@@ -167,6 +167,16 @@ jlab.showChartLoading = function (chartId) {
     $('#' + chartId + '-loader').show();
 };
 
+jlab.util.showTableLoading = function(widgetId) {
+        $(widgetId + ' .ajax-loader').show();
+};
+jlab.util.hideTableLoading = function(widgetId, msg) {
+    if ( typeof msg !== "undefined" && msg !== "" ) {
+        $(widgetId + '.table-panel').prepend(msg);
+    }
+        $(widgetId + ' .ajax-loader').hide();
+};
+
 // Hide a loading icon for the given HTML element and optionally display message.
 // To be used with the chart-widget tag
 jlab.hideChartLoading = function (chartId, msg) {
@@ -195,40 +205,77 @@ jlab.formatTimestampPretty = function (date) {
 };
 
 // Note: to be used with a tablesorter widget
-jlab.util.createTableSorterTable = function (tableId, contents) {
-    if ( typeof contents.data === "undefined" ) {
+//jlab.util.createTableSorterTable = function (tableId, contents) {
+//    if (typeof contents.data === "undefined") {
+//        console.log("No data supplied to createTableSorterTable");
+//        return;
+//    }
+//    var data = contents.data;
+//    var sortList = contents.sortList || [[0, 0]]; // Default to first column ascending
+//
+//    // Build the table HTML
+//    var tableString = "<table class=\"tablesorter\">";
+//    for (var i = 0; i < data.length; i++) {
+//        if (i === 0) {
+//
+//            // Header row
+//            tableString += "<thead><tr>";
+//            for (var j = 0; j < data[i].length; j++) {
+//                tableString += "<th>" + data[i][j] + "</th>";
+//            }
+//            tableString += "</tr></thead><tbody>";
+//        } else {
+//
+//            // Body rows
+//            tableString += "<tr>";
+//            for (var j = 0; j < data[i].length; j++) {
+//                tableString += "<td>" + data[i][j] + "</td>";
+//            }
+//            tableString += "</tr>";
+//        }
+//    }
+//
+//    // Append the table HTML
+//    $("#" + tableId + "-table").append(tableString);
+//    // Setup the sortable functionality
+//    $(".tablesorter")
+//            .tablesorter({"sortList": sortList}) // sort on the first column (asc)
+//            .tablesorterPager({container: $("#" + tableId + "-pager")});
+//};
+
+
+// Note: to be used with a tablesorter widget
+jlab.util.createTableSorterTable = function (widgetId, contents) {
+    if (typeof contents.data === "undefined") {
         console.log("No data supplied to createTableSorterTable");
         return;
     }
     var data = contents.data;
-    var sortList = contents.sortList || [[0,0]]; // Default to first column ascending
+    var sortList = contents.sortList || [[0, 0]]; // Default to first column ascending
 
     // Build the table HTML
-    var tableString = "<table class=\"tablesorter\">";
+    var tableString = "";
     for (var i = 0; i < data.length; i++) {
         if (i === 0) {
-            
+
             // Header row
-            tableString += "<thead><tr>";
+            tableString += "<thead><tr><th></th>";
             for (var j = 0; j < data[i].length; j++) {
                 tableString += "<th>" + data[i][j] + "</th>";
             }
             tableString += "</tr></thead><tbody>";
         } else {
-            
+
             // Body rows
-            tableString += "<tr>";
+            tableString += '<tr><td><input type="checkbox"></td>';
             for (var j = 0; j < data[i].length; j++) {
                 tableString += "<td>" + data[i][j] + "</td>";
             }
             tableString += "</tr>";
         }
     }
+    tableString += "</tbody>";
 
-    // Append the table HTML
-    $("#" + tableId + "-table").append(tableString);
-    // Setup the sortable functionality
-    $(".tablesorter")
-            .tablesorter({"sortList": sortList}) // sort on the first column (asc)
-            .tablesorterPager({container: $("#" + tableId + "-pager")});
+    $(widgetId + " table").append(tableString);
+    jlab.tableSorter.initTable(widgetId);
 };
