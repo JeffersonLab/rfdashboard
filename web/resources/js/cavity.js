@@ -11,8 +11,10 @@ jlab.cavity.ajaxUrl = "/RFDashboard/ajax/cavity";
 
 jlab.cavity = jlab.cavity || {};
 
-jlab.cavity.loadDetailedTable = function (tableId, start, end, linacs, cmtypes, properties) {
+jlab.cavity.loadDetailedTable = function (widgetId, start, end, linacs, cmtypes, properties) {
 
+
+    jlab.util.showTableLoading(widgetId);
     var cavityData = $.ajax({
         traditional: true,
         url: jlab.cavity.ajaxUrl,
@@ -25,6 +27,7 @@ jlab.cavity.loadDetailedTable = function (tableId, start, end, linacs, cmtypes, 
 
     cavityData.done(function (json) {
 
+        jlab.util.hideTableLoading(widgetId);
         var startMap, endMap;
         if (json.data[0].date === start && json.data[1].date === end) {
             startMap = jlab.cavity.createCavityMap(json.data[0]);
@@ -33,17 +36,16 @@ jlab.cavity.loadDetailedTable = function (tableId, start, end, linacs, cmtypes, 
             startMap = jlab.cavity.createCavityMap(json.data[1]);
             endMap = jlab.cavity.createCavityMap(json.data[0]);
         } else {
-            jlab.hideChartLoading(tableId, "Error querying data");
+            jlab.util.hideTableLoading(widgetId, "Error querying data");
             console.log("Error: received unexpected AJAX cavity service repsonse", json);
             return;
         }
 
         var tableArray = jlab.cavity.cavityMapsTo2DArray(startMap, endMap, linacs, cmtypes, properties);
-        jlab.util.createTableSorterTable("summary-table", {data: tableArray});
-
+        jlab.util.createTableSorterTable(widgetId, {data: tableArray});
 
     }).fail(function (jqXHR, textStatus, errorThrown) {
-        jlab.hideChartLoading(tableId, "Error querying data");
+        jlab.util.hideTableLoading(widgetId, "Error querying data");
         console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
         ;
     });
@@ -52,20 +54,14 @@ jlab.cavity.loadDetailedTable = function (tableId, start, end, linacs, cmtypes, 
 
 $(function () {
 
-    $(".date-field").datepicker({
-        dateFormat: "yy-mm-dd"
-    });
-
-    jlab.cavity.loadDetailedTable("summary-table", jlab.start, jlab.end, jlab.linacs, jlab.cmtypes, jlab.properties);
-    $("#export").click(function () {
-        // The caption is used as the file name of the export
-        $("#summary-table-table").append("<caption id=\"temp-export\" style=\"display: none\">cavProps_" + jlab.start + "_vs_" + jlab.end + "</caption>");
-        $("#summary-table-table").tableToCSV();
-        $("#temp-export").remove();
-    });
-
     $("#page-details-dialog").dialog(jlab.dialogProperties);
     $("#page-details-opener").click(function () {
         $("#page-details-dialog").dialog("open");
     });
+
+    $(".date-field").datepicker({
+        dateFormat: "yy-mm-dd"
+    });
+
+    jlab.cavity.loadDetailedTable("#details-table", jlab.start, jlab.end, jlab.linacs, jlab.cmtypes, jlab.properties);
 });
