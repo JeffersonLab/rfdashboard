@@ -7,7 +7,16 @@ and open the template in the editor.
     Created on : Aug 30, 2017, 3:30:04 PM
     Author     : adamc
 */
+.fieldset-container {
+    border: 1px solid gray;
+    box-sizing: border-box;
+}
 
-.tablesorter-table {
-    max-height: none;
+.fieldset-cell {
+    padding-left: 13px;
+    padding-right: 13px;
+}
+
+.fieldset-label {
+    font-weight: bold;
 }
