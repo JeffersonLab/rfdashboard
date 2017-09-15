@@ -16,7 +16,8 @@
 
     <div class="table-wrap">
         <div class="table-header">
-            <div class="table-title"><strong>${tableTitle}</strong></div>
+            <div id="${widgetId}-help-dialog" title="Table Help"></div>
+            <div class="table-title"><strong>${tableTitle}</strong><span class="help-launcher ui-icon ui-icon-help" title="Table Help"></span></div>
             <div class="table-controls">
                 <div class="pager">
                     Page: <select class="gotoPage"></select>
