@@ -11,19 +11,12 @@
 <c:set var="title" value="Cavity Details" />
 <t:page title="${title}" pageStart="${requestScope.start}" pageEnd="${requestScope.end}"> 
     <jsp:attribute name="stylesheets">
-        <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/css/theme.default.min.css"/>
-        <link rel="stylesheet" type="text/css" href="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/css/jquery.tablesorter.pager.min.css"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter-widget.css"/>
+        <!--<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter-widget.css"/>-->
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/cavity.css"/>
     </jsp:attribute>
     <jsp:attribute name="scripts">
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/jquery.tablesorter.combined.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/widgets/widget-output.min.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/parsers/parser-input-select.min.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/extras/jquery.tablesorter.pager.min.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cavity-utils.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/tablesorter-widget.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cavity.js"></script>
     </jsp:attribute>
     <jsp:body>
