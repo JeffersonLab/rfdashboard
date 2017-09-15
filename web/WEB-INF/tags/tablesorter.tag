@@ -54,24 +54,24 @@
                         <li>
                             <label>Send to:</label>
                             <div class="btn-group toggles output-download-popup" title="Download file or open in Popup window">
-                                <input id="${widgetId}-popup" name="delivery1" class="output-popup" type="radio" checked> 
+                                <input id="${widgetId}-popup" name="${widgetId}-delivery1" class="output-popup" type="radio" checked> 
                                 <label class="btn btn-default btn-sm active" for="${widgetId}-popup">Popup</label>
-                                <input id="${widgetId}-download" name="delivery1" class="output-download" type="radio"> 
+                                <input id="${widgetId}-download" name="${widgetId}-delivery1" class="output-download" type="radio"> 
                                 <label class="btn btn-default btn-sm" for="${widgetId}-download">Download</label>
                             </div>
                         </li>
                         <li>
                             <label>Include:</label>
                             <div class="btn-group toggles output-filter-all" data-toggle="buttons" title="Output only filtered, visible, selected, selected+visible or all rows">
-                                <input id="${widgetId}-filtered"name="getrows1" class="output-filter" checked="checked" type="radio">
+                                <input id="${widgetId}-filtered"name="${widgetId}-getrows1" class="output-filter" checked="checked" type="radio">
                                 <label class="btn btn-default btn-sm active" for="${widgetId}-filtered">Filtered</label>
-                                <input id="${widgetId}-visible"name="getrows1" class="output-visible" type="radio"> 
+                                <input id="${widgetId}-visible"name="${widgetId}-getrows1" class="output-visible" type="radio"> 
                                 <label class="btn btn-default btn-sm" for="${widgetId}-visible">Visible</label>
-                                <input id="${widgetId}-selected"name="getrows1" class="output-selected" type="radio"> 
+                                <input id="${widgetId}-selected"name="${widgetId}-getrows1" class="output-selected" type="radio"> 
                                 <label class="btn btn-default btn-sm" for="${widgetId}-selected">Selected</label>
-                                <input id="${widgetId}-selvis"name="getrows1" class="output-sel-vis" type="radio">
+                                <input id="${widgetId}-selvis"name="${widgetId}-getrows1" class="output-sel-vis" type="radio">
                                 <label class="btn btn-default btn-sm" for="${widgetId}-selvis">Sel+Vis</label>
-                                <input id="${widgetId}-all"name="getrows1" class="output-all" type="radio"> 
+                                <input id="${widgetId}-all"name="${widgetId}-getrows1" class="output-all" type="radio"> 
                                 <label class="btn btn-default btn-sm" for="${widgetId}-all">All</label>
                             </div>
                         </li>
