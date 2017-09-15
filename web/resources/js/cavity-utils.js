@@ -125,30 +125,20 @@ jlab.cavity.getStartEndMaps = function (cavityJson, start, end) {
     return cavityMaps;
 };
 
+
 // This turns two cavity maps into a 2D array that can be used to create an HTML table.  The table
 // includes the request parameters and the delta for those values between start and end.
-jlab.cavity.cavityMapsTo2DArray = function (startMap, endMap, linacs, cmtypes, properties) {
+jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes, properties) {
 
     // Check that the two maps contain identical cavity sets
-    if (startMap.keys().length !== endMap.keys().length) {
+    var match = jlab.util.compareMapKeySets(startMap, endMap);
+    if (!match) {
         console.log("Error: start and end maps contain different cavities");
         return null;
-    }
-    for (let sName of startMap.keys()) {
-        var match = false;
-        for (let eName of endMap.keys()) {
-            if (sName == eName) {
-                match = true; }
-        }
-        if (!match) {
-            console.log("Error: start and end maps contain different cavities");
-            return null;
-        }
     }
 
     // Setup the 2D cavity array with the header row
     var cavArray = new Array();
-
     var hArray = new Array();
 
     hArray.push("Name");
@@ -243,7 +233,7 @@ jlab.cavity.cavityMapsTo2DArray = function (startMap, endMap, linacs, cmtypes, p
         rowArray.push(startCav.name);
         if (properties.includes("cmtype")) {
             var cmtype = startCav.moduleType;
-            if (startCav.moduleType != endCav.moduleType) {
+            if (startCav.moduleType !== endCav.moduleType) {
                 cmtype += "/" + endCav.moduleType;
             }
             rowArray.push(cmtype);
@@ -262,13 +252,16 @@ jlab.cavity.cavityMapsTo2DArray = function (startMap, endMap, linacs, cmtypes, p
                     break; //handled explicitly
                 case "length":
                     var length = startCav.length.toFixed(2);
-                    if (startCav.length != endCav.length) {
+                    if (startCav.length !== endCav.length) {
                         length += "/" + endCav.length.toFixed(2);
                     }
                     rowArray.push(length);
                     break;
                 case "modAnode":
                     rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "modAnodeVoltage_kv"));
+                    break;
+                case "gset":
+                    rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "gset"));
                     break;
                 case "odvh":
                     rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "odvh"));
@@ -345,7 +338,7 @@ jlab.cavity.processNumericTableEntry = function (startCav, endCav, prop, scienti
     }
 
     return out;
-}
+};
 
 /* 
  * Create a cavity data table.
@@ -458,156 +451,258 @@ jlab.cavity.createTotalsTable = function (tableId, start, end) {
     });
 };
 
-/* 
- * Create a two tables showing advanced/basic changes on cavity-by-cavity basis between start and end dates.
- * Only one cavity is shown at a time.  Which one is displayed is changed by the on-screen button toggle.
- * basicTableId - the tablesorter tag tableId for the basic table 
- * advTableId - the tablesorter tag tableId for the advanced
- * date - the date for which to query data
- * */
-jlab.cavity.createBasicAdvTable = function (basicTableId, advTableId, start, end) {
 
-    jlab.cavity.getCavityData({
-        asRange: false,
-        dates: [start, end],
-        success: function (jsonData, textStatus, jqXHR) {
-            var data = jsonData.data;
-            var advTableString = "<table id=\"" + advTableId + "\" class=\"tablesorter\">";
-            var basicTableString = "<table id=\"" + basicTableId + "\" class=\"tablesorter\">";
-            advTableString += "<thead><tr><th>Name</th><th>Module Type</th>" +
-                    "<th>Old MAV</th><th>New MAV</th><th>Delta MAV (kV)</th>" +
-                    "<th>Old GSET</th><th>New GSET</th><th>Delta GSET</th>" +
-                    "<th>Old ODHV</th><th>New ODHV</th><th>Delta ODHV</th>" +
-                    "</tr></thead>";
-            advTableString += "<tbody>";
-            basicTableString += "<thead><tr><th>Name</th><th>Module Type</th>" +
-                    "<th>Old GSET</th><th>New GSET</th><th>Delta GSET</th>" +
-                    "<th>Old ODHV</th><th>New ODHV</th><th>Delta ODHV</th>" +
-                    "</tr></thead>";
-            basicTableString += "<tbody>";
-            if (data[0].cavities === null || data[1].cavities === null) {
-                var msg = "Error processing data.";
-                console.log("Error processing cavity service data. start:" + start + "  end: " + end);
-                $("#" + advTableId + "-table").append(msg);
-                $("#" + basicTableId + "-table").append(msg);
-            }
+/* This function relies on the tablesorter tag,  jquery.tablesorter (JS/CSS), and jquery.tablesorter.pager (JS/CSS).  It creates
+ * a sortable table of totals, and their differences between start and end.
+ */
+jlab.cavity.getTotalsByCMType = function (startMap, endMap) {
 
-            var cavStart = data[0].cavities;
-            var cavEnd = data[1].cavities;
+    var match = jlab.util.compareMapKeySets(startMap, endMap);
+    if (!match) {
+        console.log("Error: start and end maps contain different cavities");
+        return null;
+    }
 
-            for (var i = 0; i < cavEnd.length; i++) {
-                var foundMatch = false;
-                for (var j = 0; j < cavStart.length; j++) {
+    var outArray = new Array();
+    outArray.push(["Subset",
+        "Old GSET Count", "Old GSET Total", "Old GSET Mean", "New GSET Count", "New GSET Total", "New GSET Mean", "Delta GSET Total",
+        "Old ODVH Count", "Old ODVH Total", "Old ODVH Mean", "New ODVH Count", "New ODVH Total", "New ODVH  Mean", "Delta ODVH Total"
+    ]);
 
-                    if (cavEnd[i].name === cavStart[j].name) {
-                        foundMatch = true;
+    // Setup objects to hold the tallies for all of this
+    var startTotals = {
+        Total: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
+        QTR: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
+        C25: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
+        C50: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
+        C100: {gset: 0, odvh: 0, nGset:0, nOdvh:0}
+    };
+    var endTotals = {
+        Total: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
+        QTR: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
+        C25: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
+        C50: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
+        C100: {gset: 0, odvh: 0, nGset:0, nOdvh:0}
+    };
+    var diffTotals = {
+        Total: {gset: 0, odvh: 0},
+        QTR: {gset: 0, odvh: 0},
+        C25: {gset: 0, odvh: 0},
+        C50: {gset: 0, odvh: 0},
+        C100: {gset: 0, odvh: 0}
+    };
 
-                        var name, cmType, dGset, dMav, dOdvh, moduleChange;
-                        var oldGset, oldMav, newGset, newMav, oldOdvh, newOdvh;
-                        name = cavEnd[i].name;
-                        if (cavEnd[i].moduleType === cavStart[j].moduleType) {
-                            moduleChange = false;
-                            cmType = cavEnd[i].moduleType;
-                        } else {
-                            moduleChange = true;
-                            cmType = cavStart[j].moduleType + "/" + cavEnd[i].moduleType;
-                        }
+    var nCavs = startMap.keys().length;
+    for (let name of startMap.keys()) {
 
-                        // Process gsets - the cavity data service hands back one of three things
-                        // a number (data existed, all is well)
-                        // an empty string (data was not returned from the gset service)
-                        // nothing (somthing went really wrong. this isn't expected, but still good to check)
-                        if (typeof cavStart[j].gset !== "undefined" && cavStart[j].gset !== "") {
-                            oldGset = cavStart[j].gset;
-                        } else {
-                            oldGset = "N/A";
-                        }
-                        if (typeof cavEnd[i].gset !== "undefined" && cavEnd[j].gset !== "") {
-                            newGset = cavEnd[i].gset;
-                        } else {
-                            newGset = "N/A";
-                        }
-                        if (newGset !== "N/A" && oldGset !== "N/A" && newGset !== null && oldGset !== null) {
-                            dGset = (newGset - oldGset).toFixed(2);
-                            newGset = newGset.toFixed(2);
-                            oldGset = oldGset.toFixed(2);
-                        } else {
-                            dGset = "N/A";
-                        }
+        startCav = startMap.get(name);
+        endCav = endMap.get(name);
 
-                        // Process MAVs
-                        if (typeof cavStart[j].modAnodeVoltage_kv !== "undefined" && cavStart[j].modAnodeVoltage_kv !== "") {
-                            oldMav = cavStart[j].modAnodeVoltage_kv;
-                        } else {
-                            oldMav = "N/A";
-                        }
-                        if (typeof cavEnd[i].modAnodeVoltage_kv !== "undefined" && cavEnd[j].modAnodeVoltage_kv !== "") {
-                            newMav = cavEnd[i].modAnodeVoltage_kv;
-                        } else {
-                            newMav = "N/A";
-                        }
-                        if (newMav !== "N/A" && oldMav !== "N/A" && newMav !== null && oldMav !== null) {
-                            dMav = (newMav - oldMav).toFixed(2);
-                        } else {
-                            dMav = "N/A";
-                            newMav = newMav.toFixed(2);
-                            oldMav = oldMav.toFixed(2);
-                        }
-
-                        // Process Ops Drive Highs
-                        if (typeof cavStart[j].odvh !== "undefined" && cavStart[j].odvh !== "") {
-                            oldOdvh = cavStart[j].odvh;
-                        } else {
-                            oldOdvh = "N/A";
-                        }
-                        if (typeof cavEnd[i].odvh !== "undefined" && cavEnd[j].odvh !== "") {
-                            newOdvh = cavEnd[i].odvh;
-                        } else {
-                            newOdvh = "N/A";
-                        }
-                        if (newOdvh !== "N/A" && oldOdvh !== "N/A" && newOdvh !== null && oldOdvh !== null) {
-                            dOdvh = (newOdvh - oldOdvh).toFixed(2);
-                            newOdvh = newOdvh.toFixed(2);
-                            oldOdvh = oldOdvh.toFixed(2);
-                        } else {
-                            dOdvh = "N/A";
-                        }
-
-                        // Add a row to the table for this cavity
-                        advTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
-                                oldMav + "</td><td>" + newMav + "</td><td>" + dMav + "</td><td>" +
-                                oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td><td>" +
-                                oldOdvh + "</td><td>" + newOdvh + "</td><td>" + dOdvh + "</td></tr>";
-                        basicTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
-                                oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td><td>" +
-                                oldOdvh + "</td><td>" + newOdvh + "</td><td>" + dOdvh + "</td>" +
-                                "</tr>";
-                    }
-                }
-                if (!foundMatch) {
-                    console.log("No matching cavity found for: ", cavEnd[i]);
-
-                    advTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
-                            oldMav + "</td><td>" + newMav + "</td><td>" + dMav + "</td><td>" +
-                            oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td><td>" +
-                            oldOdvh + "</td><td>" + newOdvh + "</td><td>" + dOdvh + "</td></tr>";
-                    basicTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
-                            oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td>" +
-                            oldOdvh + "</td><td>" + newOdvh + "</td><td>" + dOdvh + "</td>" +
-                            "</tr>";
-                }
-            }
-            advTableString += "</tbody></table>";
-            basicTableString += "</tbody></table>";
-            $("#" + advTableId + "-table").append(advTableString);
-            $("#" + basicTableId + "-table").append(basicTableString);
-            // Setup the sortable cavity tables
-            $("#" + advTableId)
-                    .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
-                    .tablesorterPager({container: $("#" + advTableId + "-pager")});
-            $("#" + basicTableId)
-                    .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
-                    .tablesorterPager({container: $("#" + basicTableId + "-pager")});
+        if (startCav.gset !== "") {
+            startTotals.Total.gset += startCav.gset;
+            startTotals.Total.nGset++;
+            startTotals[startCav.moduleType].gset += startCav.gset;
+            startTotals[startCav.moduleType].nGset++;
         }
-    });
+        if (startCav.odvh !== "") {
+            startTotals.Total.odvh += startCav.odvh;
+            startTotals.Total.nOdvh++;
+            startTotals[startCav.moduleType].odvh += startCav.odvh;
+            startTotals[startCav.moduleType].nOdvh++;
+        }
+        if (endCav.gset !== "") {
+            endTotals.Total.gset += endCav.gset;
+            endTotals.Total.nGset++;
+            endTotals[endCav.moduleType].gset += endCav.gset;
+            endTotals[endCav.moduleType].nGset++;
+        }
+        if (endCav.odvh !== "") {
+            endTotals.Total.odvh += endCav.odvh;
+            endTotals.Total.nOdvh++;
+            endTotals[endCav.moduleType].odvh += endCav.odvh;
+            endTotals[endCav.moduleType].nOdvh++;
+        }
+    }
+
+    // The diffTotals will have a subset of the properties since the counts don't make sense for the diffs
+    for (let total in startTotals) {
+        if (diffTotals.hasOwnProperty(total)) {
+            for (let prop in diffTotals[total]) {
+                diffTotals[total][prop] = endTotals[total][prop] - startTotals[total][prop];
+            }
+        }
+    }
+
+    // total (cmtype) and each represents a single row of the table
+    for (let total in startTotals) {
+        if (startTotals.hasOwnProperty(total)) {
+            let sGMean = (startTotals[total].gset / startTotals[total].nGset).toFixed(2)  || "N/A";
+            let eGMean = (endTotals[total].gset / endTotals[total].nGset).toFixed(2)     || "N/A";
+            let sOMean = (startTotals[total].odvh / startTotals[total].nOdvh).toFixed(2)  || "N/A";
+            let eOMean = (endTotals[total].odvh / endTotals[total].nOdvh).toFixed(2)    || "N/A";
+            outArray.push([
+                total, // The label
+                startTotals[total].nGset, startTotals[total].gset.toFixed(2), sGMean, endTotals[total].nGset, endTotals[total].gset.toFixed(2), eGMean, diffTotals[total].gset.toFixed(2),
+                startTotals[total].nOdvh, startTotals[total].odvh.toFixed(2), sOMean, endTotals[total].nOdvh, endTotals[total].odvh.toFixed(2), eOMean, diffTotals[total].odvh.toFixed(2)
+            ]);
+            
+        }
+    }    
+
+    return outArray;
 };
+
+
+///* 
+// * Create a two tables showing advanced/basic changes on cavity-by-cavity basis between start and end dates.
+// * Only one cavity is shown at a time.  Which one is displayed is changed by the on-screen button toggle.
+// * basicTableId - the tablesorter tag tableId for the basic table 
+// * advTableId - the tablesorter tag tableId for the advanced
+// * date - the date for which to query data
+// * */
+//jlab.cavity.createBasicAdvTable = function (basicTableId, advTableId, start, end) {
+//
+//    jlab.cavity.getCavityData({
+//        asRange: false,
+//        dates: [start, end],
+//        success: function (jsonData, textStatus, jqXHR) {
+//            var data = jsonData.data;
+//            var advTableString = "<table id=\"" + advTableId + "\" class=\"tablesorter\">";
+//            var basicTableString = "<table id=\"" + basicTableId + "\" class=\"tablesorter\">";
+//            advTableString += "<thead><tr><th>Name</th><th>Module Type</th>" +
+//                    "<th>Old MAV</th><th>New MAV</th><th>Delta MAV (kV)</th>" +
+//                    "<th>Old GSET</th><th>New GSET</th><th>Delta GSET</th>" +
+//                    "<th>Old ODHV</th><th>New ODHV</th><th>Delta ODHV</th>" +
+//                    "</tr></thead>";
+//            advTableString += "<tbody>";
+//            basicTableString += "<thead><tr><th>Name</th><th>Module Type</th>" +
+//                    "<th>Old GSET</th><th>New GSET</th><th>Delta GSET</th>" +
+//                    "<th>Old ODHV</th><th>New ODHV</th><th>Delta ODHV</th>" +
+//                    "</tr></thead>";
+//            basicTableString += "<tbody>";
+//            if (data[0].cavities === null || data[1].cavities === null) {
+//                var msg = "Error processing data.";
+//                console.log("Error processing cavity service data. start:" + start + "  end: " + end);
+//                $("#" + advTableId + "-table").append(msg);
+//                $("#" + basicTableId + "-table").append(msg);
+//            }
+//
+//            var cavStart = data[0].cavities;
+//            var cavEnd = data[1].cavities;
+//
+//            for (var i = 0; i < cavEnd.length; i++) {
+//                var foundMatch = false;
+//                for (var j = 0; j < cavStart.length; j++) {
+//
+//                    if (cavEnd[i].name === cavStart[j].name) {
+//                        foundMatch = true;
+//
+//                        var name, cmType, dGset, dMav, dOdvh, moduleChange;
+//                        var oldGset, oldMav, newGset, newMav, oldOdvh, newOdvh;
+//                        name = cavEnd[i].name;
+//                        if (cavEnd[i].moduleType === cavStart[j].moduleType) {
+//                            moduleChange = false;
+//                            cmType = cavEnd[i].moduleType;
+//                        } else {
+//                            moduleChange = true;
+//                            cmType = cavStart[j].moduleType + "/" + cavEnd[i].moduleType;
+//                        }
+//
+//                        // Process gsets - the cavity data service hands back one of three things
+//                        // a number (data existed, all is well)
+//                        // an empty string (data was not returned from the gset service)
+//                        // nothing (somthing went really wrong. this isn't expected, but still good to check)
+//                        if (typeof cavStart[j].gset !== "undefined" && cavStart[j].gset !== "") {
+//                            oldGset = cavStart[j].gset;
+//                        } else {
+//                            oldGset = "N/A";
+//                        }
+//                        if (typeof cavEnd[i].gset !== "undefined" && cavEnd[j].gset !== "") {
+//                            newGset = cavEnd[i].gset;
+//                        } else {
+//                            newGset = "N/A";
+//                        }
+//                        if (newGset !== "N/A" && oldGset !== "N/A" && newGset !== null && oldGset !== null) {
+//                            dGset = (newGset - oldGset).toFixed(2);
+//                            newGset = newGset.toFixed(2);
+//                            oldGset = oldGset.toFixed(2);
+//                        } else {
+//                            dGset = "N/A";
+//                        }
+//
+//                        // Process MAVs
+//                        if (typeof cavStart[j].modAnodeVoltage_kv !== "undefined" && cavStart[j].modAnodeVoltage_kv !== "") {
+//                            oldMav = cavStart[j].modAnodeVoltage_kv;
+//                        } else {
+//                            oldMav = "N/A";
+//                        }
+//                        if (typeof cavEnd[i].modAnodeVoltage_kv !== "undefined" && cavEnd[j].modAnodeVoltage_kv !== "") {
+//                            newMav = cavEnd[i].modAnodeVoltage_kv;
+//                        } else {
+//                            newMav = "N/A";
+//                        }
+//                        if (newMav !== "N/A" && oldMav !== "N/A" && newMav !== null && oldMav !== null) {
+//                            dMav = (newMav - oldMav).toFixed(2);
+//                        } else {
+//                            dMav = "N/A";
+//                            newMav = newMav.toFixed(2);
+//                            oldMav = oldMav.toFixed(2);
+//                        }
+//
+//                        // Process Ops Drive Highs
+//                        if (typeof cavStart[j].odvh !== "undefined" && cavStart[j].odvh !== "") {
+//                            oldOdvh = cavStart[j].odvh;
+//                        } else {
+//                            oldOdvh = "N/A";
+//                        }
+//                        if (typeof cavEnd[i].odvh !== "undefined" && cavEnd[j].odvh !== "") {
+//                            newOdvh = cavEnd[i].odvh;
+//                        } else {
+//                            newOdvh = "N/A";
+//                        }
+//                        if (newOdvh !== "N/A" && oldOdvh !== "N/A" && newOdvh !== null && oldOdvh !== null) {
+//                            dOdvh = (newOdvh - oldOdvh).toFixed(2);
+//                            newOdvh = newOdvh.toFixed(2);
+//                            oldOdvh = oldOdvh.toFixed(2);
+//                        } else {
+//                            dOdvh = "N/A";
+//                        }
+//
+//                        // Add a row to the table for this cavity
+//                        advTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
+//                                oldMav + "</td><td>" + newMav + "</td><td>" + dMav + "</td><td>" +
+//                                oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td><td>" +
+//                                oldOdvh + "</td><td>" + newOdvh + "</td><td>" + dOdvh + "</td></tr>";
+//                        basicTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
+//                                oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td><td>" +
+//                                oldOdvh + "</td><td>" + newOdvh + "</td><td>" + dOdvh + "</td>" +
+//                                "</tr>";
+//                    }
+//                }
+//                if (!foundMatch) {
+//                    console.log("No matching cavity found for: ", cavEnd[i]);
+//
+//                    advTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
+//                            oldMav + "</td><td>" + newMav + "</td><td>" + dMav + "</td><td>" +
+//                            oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td><td>" +
+//                            oldOdvh + "</td><td>" + newOdvh + "</td><td>" + dOdvh + "</td></tr>";
+//                    basicTableString += "<tr><td>" + name + "</td><td>" + cmType + "</td><td>" +
+//                            oldGset + "</td><td>" + newGset + "</td><td>" + dGset + "</td>" +
+//                            oldOdvh + "</td><td>" + newOdvh + "</td><td>" + dOdvh + "</td>" +
+//                            "</tr>";
+//                }
+//            }
+//            advTableString += "</tbody></table>";
+//            basicTableString += "</tbody></table>";
+//            $("#" + advTableId + "-table").append(advTableString);
+//            $("#" + basicTableId + "-table").append(basicTableString);
+//            // Setup the sortable cavity tables
+//            $("#" + advTableId)
+//                    .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
+//                    .tablesorterPager({container: $("#" + advTableId + "-pager")});
+//            $("#" + basicTableId)
+//                    .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
+//                    .tablesorterPager({container: $("#" + basicTableId + "-pager")});
+//        }
+//    });
+//};
