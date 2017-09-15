@@ -39,7 +39,7 @@ jlab.cavity.loadDetailedTable = function (widgetId, start, end, linacs, cmtypes,
             endMap = maps[1];
         }
 
-        var tableArray = jlab.cavity.cavityMapsTo2DArray(startMap, endMap, linacs, cmtypes, properties);
+        var tableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, properties);
         jlab.util.createTableSorterTable(widgetId, {data: tableArray});
 
     }).fail(function (jqXHR, textStatus, errorThrown) {
