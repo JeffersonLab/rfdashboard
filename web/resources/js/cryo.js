@@ -280,14 +280,6 @@ jlab.cryo.addCryoReachToolTip = function (chartId, timeUnit) {
 
 $(function () {
 
-    $(".date-field").datepicker({
-        dateFormat: "yy-mm-dd"
-    });
-
-    jlab.cavity.createBasicAdvTable("diff-table-basic", "diff-table-advanced", jlab.diffStart, jlab.diffEnd);
-    jlab.cavity.createTotalsTable("summary-table", jlab.diffStart, jlab.diffEnd);
-    jlab.cryo.updateCryoPressureChart('cryo-linac-pressure', jlab.start, jlab.end, jlab.timeUnit);
-
     // This enables the "Basic/Advanced" menu button to toggle between the two tables.  diff-table-advanced starts out with
     // display: none.
     $("#menu-toggle").click(function() {
@@ -299,5 +291,12 @@ $(function () {
     $("#page-details-opener").click(function () {
         $("#page-details-dialog").dialog("open");
     });
+
+    $(".date-field").datepicker({
+        dateFormat: "yy-mm-dd"
+    });
+
+    jlab.cavity.createCavitySetPointTables("#diff-table-basic", "#diff-table-advanced", "#summary-table", jlab.diffStart, jlab.diffEnd);
+    jlab.cryo.updateCryoPressureChart('cryo-linac-pressure', jlab.start, jlab.end, jlab.timeUnit);
 
 });
