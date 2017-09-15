@@ -283,8 +283,8 @@ $(function () {
     // This enables the "Basic/Advanced" menu button to toggle between the two tables.  diff-table-advanced starts out with
     // display: none.
     $("#menu-toggle").click(function() {
-        $('#diff-table-basic-wrap').toggle();
-        $('#diff-table-advanced-wrap').toggle();
+        $('#diff-table-basic').toggle();
+        $('#diff-table-advanced').toggle();
     });
     
     $("#page-details-dialog").dialog(jlab.dialogProperties);
