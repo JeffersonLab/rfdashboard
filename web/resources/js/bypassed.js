@@ -60,39 +60,38 @@ jlab.bypassed.loadBypassedCountByFactorChart =  function(chartId, start, end, ur
  * tableId - the tablesorter tag tableId
  * date - the date for which to query data
  * */
-jlab.bypassed.createTable = function (tableId, date) {
+jlab.bypassed.createTable = function (widgetId, date) {
 
+    jlab.util.showTableLoading(widgetId);
     jlab.cavity.getCavityData({
         asRange: false,
         dates: [date],
         timeUnit: "day",
         success: function (jsonData, textStatus, jqXHR) {
+            jlab.util.hideTableLoading(widgetId);
             var data = jsonData.data;
-            var tableString = "<table class=\"tablesorter\">";
-            tableString += "<thead><tr><th>Name</th><th>Module Type</th><th>Mod Anode Voltage (kV)</th><th>GSET</th></tr></thead>";
-            tableString += "<tbody>";
+            var tableArray = new Array();
+            tableArray.push(["Name", "Module Type", "Mod Anode Voltage (kV)", "GSET"]);
             for (var i = 0; i < data.length; i++) {
                 var cavities = data[i].cavities;
                 for (var j = 0; j < cavities.length; j++) {
-                    if (cavities[j].gset < 0.0001) {
-                        tableString += "<tr><td>" + cavities[j].name + "</td><td>" + cavities[j].moduleType + "</td><td>" +
-                                cavities[j].modAnodeVoltage_kv + "</td><td>" + cavities[j].gset + "</tr>";
+                    if (cavities[j].gset < 0.00001) {
+                        tableArray.push([cavities[j].name, cavities[j].moduleType, cavities[j].modAnodeVoltage_kv, cavities[j].gset]);
                     }
                 }
             }
-            tableString += "</tbody></table>";
-            $("#" + tableId + "-table").append(tableString);
-            // Setup the sortable cavity table
-            $(".tablesorter")
-                    .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
-                    .tablesorterPager({container: $("#" + tableId + "-pager")});
+            jlab.util.createTableSorterTable(widgetId, {data:tableArray});
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            jlab.util.hideTableLoading(widgetId, "Error querying data");
+            console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
         }
     });
 };
 
 
 $(function () {
-    jlab.bypassed.createTable("bypassed-table", jlab.tableDate);
+    jlab.bypassed.createTable("#bypassed-table", jlab.tableDate);
     jlab.bypassed.loadBypassedCountByFactorChart("bypassed-count-by-linac", jlab.start, jlab.end, jlab.bypassed.ajaxUrl, jlab.timeUnit, "linac");
     jlab.bypassed.loadBypassedCountByFactorChart("bypassed-count-by-cmtype", jlab.start, jlab.end, jlab.bypassed.ajaxUrl, jlab.timeUnit, "cmtype");
 

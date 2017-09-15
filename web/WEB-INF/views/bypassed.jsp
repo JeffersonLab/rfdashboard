@@ -12,7 +12,6 @@
 <t:page title="${title}" pageStart="${requestScope.start}" pageEnd="${requestScope.end}"> 
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/flot-barchart.css"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter.css"/>
     </jsp:attribute>
     <jsp:attribute name="scripts">
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.js"></script>
@@ -24,8 +23,6 @@
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cavity-utils.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/bypassed.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/flot-charts.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tablesorter.min.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tablesorter.pager.js"></script>
         <script>
 
         </script>
@@ -106,7 +103,7 @@
             <hr></hr><br></br>
         <t:chart-widget placeholderId="bypassed-count-by-cmtype"></t:chart-widget>
         <hr></hr><br></br>
-        <t:tablesorter tableTitle="Bypassed Cavities (${requestScope.tableDate})" tableId="bypassed-table"></t:tablesorter>
+        <t:tablesorter tableTitle="Bypassed Cavities (${requestScope.tableDate})" widgetId="bypassed-table" filename="${requestScope.tableDate}_bypassed.csv"></t:tablesorter>
             <script>
                 var jlab = jlab || {};
                 jlab.start = "${requestScope.start}";
