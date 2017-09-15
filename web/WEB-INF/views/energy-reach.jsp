@@ -12,7 +12,7 @@
 <t:page title="${title}" pageStart="${requestScope.start}" pageEnd="${requestScope.end}"> 
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/flot-barchart.css"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter.css"/>
+        <!--<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter.css"/>-->
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/energy-reach.css"/>
     </jsp:attribute>
     <jsp:attribute name="scripts">
@@ -22,8 +22,6 @@
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.resize.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/axislabels/2.2.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/sideBySideImproved/jquery.flot.orderBars.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tablesorter.min.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tablesorter.pager.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cavity-utils.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/flot-charts.js"></script>
@@ -110,9 +108,9 @@
         <t:chart-widget placeholderId="lem-scan"></t:chart-widget>
             <hr></hr><br></br>
         <button id="menu-toggle">Basic/Advanced</button>
-        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" tableId="diff-table-basic"></t:tablesorter>
-        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" tableId="diff-table-advanced"></t:tablesorter>
-        <t:tablesorter tableTitle="Cavity Set Point Totals (${requestScope.diffStart} to ${requestScope.diffEnd})" tableId="summary-table"></t:tablesorter>
+        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-basic" filename="${requestScopre.start}_${requestScope.end}_reachBasic"></t:tablesorter>
+        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-advanced" filename="${requestScopre.start}_${requestScope.end}_reachAdv"></t:tablesorter>
+        <t:tablesorter tableTitle="Cavity Set Point Summary (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="summary-table" filename="${requestScopre.start}_${requestScope.end}_reachSummary"></t:tablesorter>
             <script>
                 var jlab = jlab || {};
                 jlab.start = "${requestScope.start}";
