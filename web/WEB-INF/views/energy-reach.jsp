@@ -108,9 +108,9 @@
         <t:chart-widget placeholderId="lem-scan"></t:chart-widget>
             <hr></hr><br></br>
         <button id="menu-toggle">Basic/Advanced</button>
-        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-basic" filename="${requestScopre.start}_${requestScope.end}_reachBasic"></t:tablesorter>
-        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-advanced" filename="${requestScopre.start}_${requestScope.end}_reachAdv"></t:tablesorter>
-        <t:tablesorter tableTitle="Cavity Set Point Summary (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="summary-table" filename="${requestScopre.start}_${requestScope.end}_reachSummary"></t:tablesorter>
+        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-basic" filename="${requestScopre.start}_${requestScope.end}_cavSetPointBasic"></t:tablesorter>
+        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-advanced" filename="${requestScopre.start}_${requestScope.end}_cavSetPointAdv"></t:tablesorter>
+        <t:tablesorter tableTitle="Cavity Set Point Summary (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="summary-table" filename="${requestScopre.start}_${requestScope.end}_cavSetPointSummary"></t:tablesorter>
             <script>
                 var jlab = jlab || {};
                 jlab.start = "${requestScope.start}";
