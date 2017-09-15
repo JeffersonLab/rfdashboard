@@ -5,19 +5,20 @@
  */
 
 var jlab = jlab || {};
-
-jlab.energyReachUrl = "/RFDashboard/ajax/lem-scan";
-
 jlab.energyReach = jlab.energyReach || {};
+
+jlab.energyReach.energyReachUrl = "/RFDashboard/ajax/lem-scan";
+jlab.energyReach.cavityAjaxUrl = "/RFDashboard/ajax/cavity";
+
 
 // Create and show the single day, lem-scan trip curve plot
 jlab.energyReach.loadLemScanChart = function (chartId, date, url) {
 
     jlab.showChartLoading(chartId);
     var lemScan = $.getJSON(url, {type: "day-scan", date: date, out: "flot"});
-    lemScan.done(function(json) {
+    lemScan.done(function (json) {
         var settings = {
-            colors: jlab.colors.linacs.slice(1, 4),          // Grab the North, South, and Total colors
+            colors: jlab.colors.linacs.slice(1, 4), // Grab the North, South, and Total colors
             labels: json.labels,
             timeUnit: "day",
             title: "<strong>LEM Estimated Trip Rates</strong><br/><div style='font-size:smaller'>" + date + "</div>",
@@ -27,14 +28,14 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, url) {
             legend: false
         };
         var flotOptions = {
-            xaxis: { axisLabel: "Linac Energy (MeV)", mode: null, min: 1000, max: 1190 },
-            yaxis: { axisLabel: "Trips / Hour", min: 0, max: 15},
-            grid: { clickable: false, markings: [{yaxis: {from: 8, to: 8}, color: "#000000"}, {yaxis: {from: 4, to: 4}, color: "#000000"}] }
+            xaxis: {axisLabel: "Linac Energy (MeV)", mode: null, min: 1000, max: 1190},
+            yaxis: {axisLabel: "Trips / Hour", min: 0, max: 15},
+            grid: {clickable: false, markings: [{yaxis: {from: 8, to: 8}, color: "#000000"}, {yaxis: {from: 4, to: 4}, color: "#000000"}]}
         };
-        
+
         var flotData = [];
-        for(i=0; i < json.data.length; i++) {
-            flotData[i] = {data: json.data[i], points:{show: false}, lines:{show:true} };
+        for (i = 0; i < json.data.length; i++) {
+            flotData[i] = {data: json.data[i], points: {show: false}, lines: {show: true}};
         }
 
         jlab.hideChartLoading(chartId);
@@ -53,15 +54,16 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, url) {
 
     }).fail(function (jqXHR, textStatus, errorThrown) {
         jlab.hideChartLoading(chartId, "Error querying data");
-        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);;
+        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
+        ;
     });
 };
 
 // The creates and shows the energy reach barchart
-jlab.energyReach.loadEnergyReachChart = function(chartId, start, end, url) {
+jlab.energyReach.loadEnergyReachChart = function (chartId, start, end, url) {
     var timeUnit = "day";
     var energyReach = $.getJSON(url, {start: start, end: end, timeUnit: timeUnit, type: "reach-scan"});
-    energyReach.done(function(json) {
+    energyReach.done(function (json) {
         var settings = {
             colors: jlab.colors.energyReach,
             labels: json.labels,
@@ -73,19 +75,19 @@ jlab.energyReach.loadEnergyReachChart = function(chartId, start, end, url) {
             legend: true,
             chartType: "bar"
         };
-        
+
         // Flot wants times in milliseconds from UTC
         var xmin = new Date(start).getTime();
         var xmax = new Date(end).getTime();
         var flotOptions = {
-            xaxis: { mode: "time", min: xmin, max: xmax },
-            yaxis: { axisLabel: "Linac Energy (MeV)", min: 1000, max: 1190},
-            grid: { clickable: true }
+            xaxis: {mode: "time", min: xmin, max: xmax},
+            yaxis: {axisLabel: "Linac Energy (MeV)", min: 1000, max: 1190},
+            grid: {clickable: true}
         };
-        
+
         var flotData = [];
-        for(i=0; i < json.data.length; i++) {
-            flotData[i] = {data: json.data[i], points:{show: false} };
+        for (i = 0; i < json.data.length; i++) {
+            flotData[i] = {data: json.data[i], points: {show: false}};
         }
 
         jlab.hideChartLoading(chartId);
@@ -145,7 +147,7 @@ jlab.energyReach.getEnergyReach = function (jsonData) {
         reaches[1] = "N/A";
     }
     if (tripData.total.tripRate.length > 2) {
-    reaches[2] = everpolate.linear([8], tripData.total.tripRate, tripData.total.energy)[0].toFixed(1);
+        reaches[2] = everpolate.linear([8], tripData.total.tripRate, tripData.total.energy)[0].toFixed(1);
     } else {
         reaches[2] = "N/A";
     }
@@ -167,29 +169,77 @@ jlab.energyReach.addLegend = function (chartId, colors, labels, reaches) {
     $("#" + chartId + "-legend-panel").prepend(legendString);
 };
 
+jlab.energyReach.createTables = function (basicId, advId, summaryId, start, end) {
+    var linacs = ["north", "south", "injector"];
+    var cmtypes = ["C25", "C50", "C100", "QTR"];
+    var basicProps = ["cmtype", "gset", "odvh"];
+    var advProps = ["cmtype", "modAnode", "gset", "odvh"];
+    jlab.util.showTableLoading(basicId);
+    jlab.util.showTableLoading(summaryId);
+    var cavityData = $.ajax({
+        traditional: true,
+        url: jlab.energyReach.cavityAjaxUrl,
+        data: {
+            date: [start, end],
+            out: "json"
+        },
+        dataType: "json"
+    });
+    cavityData.done(function (json) {
+        jlab.util.hideTableLoading(basicId);
+        jlab.util.hideTableLoading(summaryId);
+        var startMap, endMap;
+        var maps = jlab.cavity.getStartEndMaps(json, start, end);
+        if (maps === null) {
+            jlab.util.hideTableLoading(basicId, "Error querying data");
+            jlab.util.hideTableLoading(summaryId, "Error querying data");
+            console.log("Error: received unexpected AJAX cavity service repsonse", json);
+            return;
+        } else {
+            startMap = maps[0];
+            endMap = maps[1];
+        }
+
+        var summaryArray = jlab.cavity.getTotalsByCMType(startMap, endMap);
+        jlab.util.createTableSorterTable(summaryId, {data:summaryArray});
+
+        var basicTableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, basicProps);
+        var advTableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, advProps);
+
+        jlab.util.createTableSorterTable(basicId, {data: basicTableArray});
+        
+        // The tablesorter plugin has issues initializing style to elements with display: none.  IDK... this happens fast enough that
+        // users won't notice.
+        $(advId).show();
+        jlab.util.createTableSorterTable(advId, {data: advTableArray});
+        $(advId).hide();
+
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+        jlab.util.hideTableLoading(basicId, "Error querying data");
+        jlab.util.hideTableLoading(advId, "Error querying data");
+        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
+    });
+};
+
+
 $(function () {
-    // The "diff-table-*" names need to be be manually kept in sync with the IDs given in the JSP.  This shouldn't need to
-    // often, but if it does, we should put them in variables, etc.
 
-    jlab.cavity.createBasicAdvTable("diff-table-basic", "diff-table-advanced", jlab.diffStart, jlab.diffEnd);
-    jlab.cavity.createTotalsTable("summary-table", jlab.diffStart, jlab.diffEnd);
-
-    jlab.energyReach.loadLemScanChart("lem-scan", jlab.diffEnd, jlab.energyReachUrl);
-    jlab.energyReach.loadEnergyReachChart("energy-reach", jlab.start, jlab.end, jlab.energyReachUrl);
-
+    $("#page-details-dialog").dialog(jlab.dialogProperties);
+    $("#page-details-opener").click(function () {
+        $("#page-details-dialog").dialog("open");
+    });
+    // 
+    // This enables the "Basic/Advanced" menu button to toggle between the two tables.  diff-table-advanced starts out with
+    // display: none.
+    $("#menu-toggle").click(function () {
+        $('#diff-table-basic').toggle();
+        $('#diff-table-advanced').toggle();
+    });
     $(".date-field").datepicker({
         dateFormat: "yy-mm-dd"
     });
-    
-    // This enables the "Basic/Advanced" menu button to toggle between the two tables.  diff-table-advanced starts out with
-    // display: none.
-    $("#menu-toggle").click(function() {
-        $('#diff-table-basic-wrap').toggle();
-        $('#diff-table-advanced-wrap').toggle();
-    });
-    
-    $("#page-details-dialog").dialog(jlab.dialogProperties);
-    $("#page-details-opener").click(function() {
-       $("#page-details-dialog").dialog("open");
-    });
+
+    jlab.energyReach.createTables("#diff-table-basic", "#diff-table-advanced", "#summary-table", jlab.diffStart, jlab.diffEnd);
+    jlab.energyReach.loadLemScanChart("lem-scan", jlab.diffEnd, jlab.energyReach.energyReachUrl);
+    jlab.energyReach.loadEnergyReachChart("energy-reach", jlab.start, jlab.end, jlab.energyReach.energyReachUrl);
 });
