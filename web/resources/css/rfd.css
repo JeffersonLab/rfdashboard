@@ -711,7 +711,7 @@ tablesorter tag styles
     min-height: 100px;
     width: 99%;
     padding-top: 6px;
-    overflow: scroll;
+    overflow: auto;
     border: 1px solid gray;
 }
 .rfd-tablesorter-widget .table-wrap {
@@ -767,7 +767,7 @@ tablesorter tag styles
     width: 1em;
 }
 .rfd-tablesorter-widget table.tablesorter, .tablesorter th, .tablesorter td {
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     padding: 2px;
     border-collapse: collapse;
 }
