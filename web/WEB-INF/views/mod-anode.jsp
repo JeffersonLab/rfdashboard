@@ -13,7 +13,7 @@
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/mod-anode.css"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/flot-barchart.css"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter.css"/>
+        <!--<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter.css"/>-->
     </jsp:attribute>
     <jsp:attribute name="scripts">
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.js"></script>
@@ -25,8 +25,6 @@
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cavity-utils.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/mod-anode.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tablesorter.min.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/lib/jquery.tablesorter.pager.js"></script>
     </jsp:attribute>
     <jsp:body>
 
@@ -114,13 +112,13 @@
         </div>
         <t:chart-widget placeholderId="mav-mah-trip-impact"></t:chart-widget>
         <hr></hr><br></br>
-        <t:tablesorter tableTitle="LEMSim Estimated Mod Anode Voltage Affects (${requestScope.tableDate})" tableId="mav-mah-table"></t:tablesorter>
+        <t:tablesorter tableTitle="LEMSim Estimated Mod Anode Voltage Affects (${requestScope.tableDate})" widgetId="mav-mah-table" filename="${requestScope.tableDate}_LEMSim_MAV.csv"></t:tablesorter>
         <hr></hr><br></br>
         <t:chart-widget placeholderId="mav-count-by-linac"></t:chart-widget>
         <hr></hr><br></br>
         <t:chart-widget placeholderId="mav-count-by-cmtype"></t:chart-widget>
         <hr></hr><br></br>
-        <t:tablesorter tableTitle="Cavities with Non-Zero Mod Anode Voltage (${requestScope.tableDate})" tableId="mav-table"></t:tablesorter>
+        <t:tablesorter tableTitle="Mod Anode Voltage By Cavities (${requestScope.tableDate})" widgetId="mav-table" filename="${request_Scope.tableDate}_MAV.csv"></t:tablesorter>
         <script>
             var jlab = jlab || {};
             jlab.start = "${requestScope.start}";

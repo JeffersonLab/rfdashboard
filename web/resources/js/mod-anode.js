@@ -12,12 +12,12 @@ jlab.mod_anode.mavUrl = "/RFDashboard/mod-anode";
 jlab.mod_anode.mavAjaxUrl = "/RFDashboard/ajax/mod-anode";
 jlab.mod_anode.linacAjaxUrl = "/RFDashboard/ajax/linac";
 
-jlab.mod_anode.loadLEMSimChart = function(chartId, start, end, url, timeUnit) {
-     jlab.showChartLoading(chartId);
+jlab.mod_anode.loadLEMSimChart = function (chartId, start, end, url, timeUnit) {
+    jlab.showChartLoading(chartId);
     var lemScan = $.getJSON(url, {start: start, end: end, out: "flot", timeUnit: timeUnit});
-    lemScan.done(function(json) {
+    lemScan.done(function (json) {
         var settings = {
-            colors: jlab.colors.modAnodeHarvester.slice(0, 4),          // Grab the North, South, and Total colors
+            colors: jlab.colors.modAnodeHarvester.slice(0, 4), // Grab the North, South, and Total colors
             labels: json.labels,
             timeUnit: timeUnit,
             title: "<strong>LEMSim Estimated Trip Impact of Mod Anode Voltage</strong>",
@@ -28,14 +28,14 @@ jlab.mod_anode.loadLEMSimChart = function(chartId, start, end, url, timeUnit) {
             chartType: "bar"
         };
         var flotOptions = {
-            xaxis: { mode: "time" },
-            yaxis: { axisLabel: "Trips / Hour"},
-            grid: { clickable: true }
+            xaxis: {mode: "time"},
+            yaxis: {axisLabel: "Trips / Hour"},
+            grid: {clickable: true}
         };
-        
+
         var flotData = [];
-        for(i=0; i < json.data.length; i++) {
-            flotData[i] = {data: json.data[i], points:{show: false} };
+        for (i = 0; i < json.data.length; i++) {
+            flotData[i] = {data: json.data[i], points: {show: false}};
         }
 
         jlab.hideChartLoading(chartId);
@@ -50,17 +50,17 @@ jlab.mod_anode.loadLEMSimChart = function(chartId, start, end, url, timeUnit) {
         });
     }).fail(function (jqXHR, textStatus, errorThrown) {
         jlab.hideChartLoading(chartId, "Error querying data");
-        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);;
+        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
+        ;
     });
 };
 
-
-jlab.mod_anode.loadMAVCountByFactorChart= function(chartId, start, end, url, timeUnit, factor) {
-     jlab.showChartLoading(chartId);
+jlab.mod_anode.loadMAVCountByFactorChart = function (chartId, start, end, url, timeUnit, factor) {
+    jlab.showChartLoading(chartId);
     var lemScan = $.getJSON(url, {start: start, end: end, out: "flot", timeUnit: timeUnit, factor: factor});
-    lemScan.done(function(json) {
+    lemScan.done(function (json) {
         var settings = {
-            colors: jlab.colors.cmtypes,          // Grab the North, South, and Total colors
+            colors: jlab.colors.cmtypes, // Grab the North, South, and Total colors
             labels: json.labels,
             timeUnit: timeUnit,
             title: "<strong>Cavities With Mod Anode Voltage<br>(by " + factor + ")</strong>",
@@ -71,14 +71,14 @@ jlab.mod_anode.loadMAVCountByFactorChart= function(chartId, start, end, url, tim
             chartType: "bar"
         };
         var flotOptions = {
-            xaxis: { mode: "time" },
-            yaxis: { axisLabel: "# Cavities w/ M.A.V."},
-            grid: { clickable: true }
+            xaxis: {mode: "time"},
+            yaxis: {axisLabel: "# Cavities w/ M.A.V."},
+            grid: {clickable: true}
         };
-        
+
         var flotData = [];
-        for(i=0; i < json.data.length; i++) {
-            flotData[i] = {data: json.data[i], points:{show: false} };
+        for (i = 0; i < json.data.length; i++) {
+            flotData[i] = {data: json.data[i], points: {show: false}};
         }
 
         jlab.hideChartLoading(chartId);
@@ -93,7 +93,8 @@ jlab.mod_anode.loadMAVCountByFactorChart= function(chartId, start, end, url, tim
         });
     }).fail(function (jqXHR, textStatus, errorThrown) {
         jlab.hideChartLoading(chartId, "Error querying data");
-        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);;
+        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
+        ;
     });
 };
 
@@ -103,36 +104,31 @@ jlab.mod_anode.loadMAVCountByFactorChart= function(chartId, start, end, url, tim
  * tableId - the tablesorter tag tableId
  * date - the date for which to query data
  * */
-jlab.mod_anode.createTable = function (tableId, date) {
+jlab.mod_anode.createCavityTable = function (widgetId, date) {
 
+    jlab.util.showTableLoading(widgetId);
     jlab.cavity.getCavityData({
         asRange: false,
         dates: [date],
         timeUnit: "day",
         success: function (jsonData, textStatus, jqXHR) {
+            jlab.util.hideTableLoading(widgetId);
             var data = jsonData.data;
-            var tableString = "<table id=" + tableId + " class=\"tablesorter\">";
-            tableString += "<thead><tr><th>Name</th><th>Module Type</th><th>Mod Anode Voltage (kV)</th><th>GSET</th></tr></thead>";
-            tableString += "<tbody>";
+            var tableArray = new Array();
+            tableArray.push(["Name", "Module Type", "Mod Anode Voltage (kV)", "GSET"]);
+
             for (var i = 0; i < data.length; i++) {
                 var cavities = data[i].cavities;
                 for (var j = 0; j < cavities.length; j++) {
-                    if (cavities[j].modAnodeVoltage_kv > 0) {
-                        var gset = "N/A";
-                        if ( cavities[j].gset !== "" ) { 
-                            gset = cavities[j].gset.toFixed(3);
-                        }
-                        tableString += "<tr><td>" + cavities[j].name + "</td><td>" + cavities[j].moduleType + "</td><td>" +
-                                cavities[j].modAnodeVoltage_kv + "</td><td>" + gset + "</tr>";
+                    var gset = "N/A";
+                    if (cavities[j].gset !== "") {
+                        gset = cavities[j].gset.toFixed(3);
                     }
+                    tableArray.push([cavities[j].name, cavities[j].moduleType, cavities[j].modAnodeVoltage_kv, gset]);
                 }
             }
-            tableString += "</tbody></table>";
-            $("#" + tableId + "-table").append(tableString);
-            // Setup the sortable cavity table
-            $("#" + tableId)
-                    .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
-                    .tablesorterPager({container: $("#" + tableId + "-pager")});
+            console.log(tableArray);
+            jlab.util.createTableSorterTable(widgetId, {data: tableArray});
         }
     });
 };
@@ -166,7 +162,7 @@ jlab.mod_anode.createModAnodeHarvesterTable = function (tableId, date) {
                             var gsetNoMav1050 = parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1050).toFixed(3);
                             var gset1090 = parseFloat(cavities[j].modAnodeHarvester.gset1090).toFixed(3);
                             var gsetNoMav1090 = parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1090).toFixed(3);
-                            
+
                             tableString += "<tr><td>" + cavities[j].name + "</td><td>" + cavities[j].moduleType + "</td><td>"
                                     + cavities[j].modAnodeHarvester.epicsDate + "</td><td>"
                                     + cavities[j].modAnodeHarvester.modAnodeVoltage_kv + "</td><td>"
@@ -191,7 +187,7 @@ jlab.mod_anode.createModAnodeHarvesterTable = function (tableId, date) {
 $(function () {
 
     // Load the tables
-    jlab.mod_anode.createTable("mav-table", jlab.tableDate);
+    jlab.mod_anode.createCavityTable("#mav-table", jlab.tableDate);
     jlab.mod_anode.createModAnodeHarvesterTable("mav-mah-table", jlab.tableDate);
 
     // Load the charts
