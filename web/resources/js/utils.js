@@ -7,7 +7,12 @@
 var jlab = jlab || {};
 jlab.util = jlab.util || {};
 
+// Setup commonly used URLs
 jlab.contextPath = '/RFDashboard';
+jlab.util.energyReachUrl = jlab.contextPath + "/ajax/lem-scan";
+jlab.util.cavityAjaxUrl = jlab.contextPath + "/ajax/cavity";
+
+
 jlab.isRequest = function () {
     return jlab.ajaxInProgress;
 };
