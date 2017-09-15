@@ -167,14 +167,14 @@ jlab.showChartLoading = function (chartId) {
     $('#' + chartId + '-loader').show();
 };
 
-jlab.util.showTableLoading = function(widgetId) {
-        $(widgetId + ' .ajax-loader').show();
+jlab.util.showTableLoading = function (widgetId) {
+    $(widgetId + ' .ajax-loader').show();
 };
-jlab.util.hideTableLoading = function(widgetId, msg) {
-    if ( typeof msg !== "undefined" && msg !== "" ) {
+jlab.util.hideTableLoading = function (widgetId, msg) {
+    if (typeof msg !== "undefined" && msg !== "") {
         $(widgetId + '.table-panel').prepend(msg);
     }
-        $(widgetId + ' .ajax-loader').hide();
+    $(widgetId + ' .ajax-loader').hide();
 };
 
 // Hide a loading icon for the given HTML element and optionally display message.
@@ -278,4 +278,31 @@ jlab.util.createTableSorterTable = function (widgetId, contents) {
 
     $(widgetId + " table").append(tableString);
     jlab.tableSorter.initTable(widgetId);
+};
+
+/*
+ * This checks that the maps have the same keysets.  True if they do, false if they don't.
+ * @param {type} m1 First map
+ * @param {type} m2 Second map
+ * @returns boolean
+ */
+jlab.util.compareMapKeySets = function (m1, m2) {
+    // Check that the two maps contain identical cavity set sizes
+    if (m1.keys().length !== m2.keys().length) {
+        return false;
+    }
+    // Check that every key from the first is found in the second.
+    for (let k1 of m1.keys()) {
+        var match = false;
+        for (let k2 of m2.keys()) {
+            if (k1 === k2) {
+                match = true;
+            }
+        }
+        if (!match) {
+            return false;
+        }
+    }
+    // If both conditions hold, then the sets are identical.
+    return true;
 };
