@@ -160,7 +160,6 @@ jlab.getArgNames = function (func) {
     return args;
 };
 
-
 // Show a loading icon for the given chartId.
 // To be used with the chart-widget tag
 jlab.showChartLoading = function (chartId) {
