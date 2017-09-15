@@ -36,6 +36,7 @@ jlab.colors.energyReach = ["#666666"];
 jlab.dialogProperties = {
     autoOpen: false,
     modal: true,
+    maxHeight: 700,
     midWidth: 300,
     maxWidth: 1400,
     width: 800,
