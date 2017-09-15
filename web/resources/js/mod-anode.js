@@ -51,7 +51,6 @@ jlab.mod_anode.loadLEMSimChart = function (chartId, start, end, url, timeUnit) {
     }).fail(function (jqXHR, textStatus, errorThrown) {
         jlab.hideChartLoading(chartId, "Error querying data");
         console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
-        ;
     });
 };
 
@@ -98,7 +97,6 @@ jlab.mod_anode.loadMAVCountByFactorChart = function (chartId, start, end, url, t
     });
 };
 
-
 /* 
  * Create a cavity data table.
  * tableId - the tablesorter tag tableId
@@ -129,6 +127,10 @@ jlab.mod_anode.createCavityTable = function (widgetId, date) {
             }
             console.log(tableArray);
             jlab.util.createTableSorterTable(widgetId, {data: tableArray});
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            jlab.util.hideTableLoading(widgetId, "Error querying data");
+            console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
         }
     });
 };
@@ -139,46 +141,92 @@ jlab.mod_anode.createCavityTable = function (widgetId, date) {
  * tableId - the tablesorter tag tableId
  * date - the scan timestamp date for which to query data
  * */
-jlab.mod_anode.createModAnodeHarvesterTable = function (tableId, date) {
+/*
+ jlab.mod_anode.createModAnodeHarvesterTable = function (tableId, date) {
+ 
+ jlab.cavity.getCavityData({
+ asRange: false,
+ dates: [date],
+ timeUnit: "day",
+ success: function (jsonData, textStatus, jqXHR) {
+ var data = jsonData.data;
+ var tableString = "<table id=" + tableId + " class=\"tablesorter\">";
+ tableString += "<thead><tr><th>Name</th><th>Module<br>Type</th><th>EPICS Date</th><th>Mod Anode<br>Voltage (kV)</th>"
+ + "<th>GSET<br>(1050 MeV)</th><th>GSET No M.A.V.<br>(1050 MeV)</th><th>Delta GSET<br>(1050 MeV)</th>"
+ + "<th>GSET<br>(1090 MeV)</th><th>GSET No M.A.V.<br>(1090 MeV)</th><th>Delta GSET<br>(1090 MeV)</th>"
+ + "</tr></thead>";
+ tableString += "<tbody>";
+ for (var i = 0; i < data.length; i++) {
+ var cavities = data[i].cavities;
+ for (var j = 0; j < cavities.length; j++) {
+ if (cavities[j].hasOwnProperty("modAnodeHarvester")) {
+ if (cavities[j].modAnodeHarvester.modAnodeVoltage_kv > 0) {
+ var gset1050 = parseFloat(cavities[j].modAnodeHarvester.gset1050).toFixed(3);
+ var gsetNoMav1050 = parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1050).toFixed(3);
+ var gset1090 = parseFloat(cavities[j].modAnodeHarvester.gset1090).toFixed(3);
+ var gsetNoMav1090 = parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1090).toFixed(3);
+ 
+ tableString += "<tr><td>" + cavities[j].name + "</td><td>" + cavities[j].moduleType + "</td><td>"
+ + cavities[j].modAnodeHarvester.epicsDate + "</td><td>"
+ + cavities[j].modAnodeHarvester.modAnodeVoltage_kv + "</td><td>"
+ + gset1050 + "</td><td>" + gsetNoMav1050 + "</td><td>" + (gsetNoMav1050 - gset1050).toFixed(3) + "</td><td>"
+ + gset1090 + "</td><td>" + gsetNoMav1090 + "</td><td>" + (gsetNoMav1090 - gset1090).toFixed(3) + "</td>"
+ + "</tr>";
+ }
+ }
+ }
+ }
+ tableString += "</tbody></table>";
+ $("#" + tableId + "-table").append(tableString);
+ // Setup the sortable cavity table
+ $("#" + tableId)
+ .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
+ .tablesorterPager({container: $("#" + tableId + "-pager")});
+ }
+ });
+ };
+ */
+jlab.mod_anode.createModAnodeHarvesterTable = function (widgetId, date) {
 
+    jlab.util.showTableLoading(widgetId);
     jlab.cavity.getCavityData({
         asRange: false,
         dates: [date],
         timeUnit: "day",
         success: function (jsonData, textStatus, jqXHR) {
+            jlab.util.hideTableLoading(widgetId);
             var data = jsonData.data;
-            var tableString = "<table id=" + tableId + " class=\"tablesorter\">";
-            tableString += "<thead><tr><th>Name</th><th>Module<br>Type</th><th>EPICS Date</th><th>Mod Anode<br>Voltage (kV)</th>"
-                    + "<th>GSET<br>(1050 MeV)</th><th>GSET No M.A.V.<br>(1050 MeV)</th><th>Delta GSET<br>(1050 MeV)</th>"
-                    + "<th>GSET<br>(1090 MeV)</th><th>GSET No M.A.V.<br>(1090 MeV)</th><th>Delta GSET<br>(1090 MeV)</th>"
-                    + "</tr></thead>";
-            tableString += "<tbody>";
+            var tableArray = new Array();
+            tableArray.push([
+                "Name", "Module Type", "EPICS Date", "Mod Anode Voltage (kV)",
+                "GSET (1050 MeV)", "GSET No M.A.V. (1050 MeV)", "Delta GSET (1050 MeV)",
+                "GSET (1090 MeV)", "GSET No M.A.V. (1090 MeV)", "Delta GSET (1090 MeV)"
+            ]);
+
             for (var i = 0; i < data.length; i++) {
+                let rowArray = new Array();
                 var cavities = data[i].cavities;
                 for (var j = 0; j < cavities.length; j++) {
-                    if (cavities[j].hasOwnProperty("modAnodeHarvester")) {
-                        if (cavities[j].modAnodeHarvester.modAnodeVoltage_kv > 0) {
-                            var gset1050 = parseFloat(cavities[j].modAnodeHarvester.gset1050).toFixed(3);
-                            var gsetNoMav1050 = parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1050).toFixed(3);
-                            var gset1090 = parseFloat(cavities[j].modAnodeHarvester.gset1090).toFixed(3);
-                            var gsetNoMav1090 = parseFloat(cavities[j].modAnodeHarvester.gsetNoMav1090).toFixed(3);
+                    let cav = cavities[j];
+                    if (cav.hasOwnProperty("modAnodeHarvester")) {
+                        var gset1050 = parseFloat(cav.modAnodeHarvester.gset1050).toFixed(3);
+                        var gsetNoMav1050 = parseFloat(cav.modAnodeHarvester.gsetNoMav1050).toFixed(3);
+                        var gset1090 = parseFloat(cav.modAnodeHarvester.gset1090).toFixed(3);
+                        var gsetNoMav1090 = parseFloat(cav.modAnodeHarvester.gsetNoMav1090).toFixed(3);
 
-                            tableString += "<tr><td>" + cavities[j].name + "</td><td>" + cavities[j].moduleType + "</td><td>"
-                                    + cavities[j].modAnodeHarvester.epicsDate + "</td><td>"
-                                    + cavities[j].modAnodeHarvester.modAnodeVoltage_kv + "</td><td>"
-                                    + gset1050 + "</td><td>" + gsetNoMav1050 + "</td><td>" + (gsetNoMav1050 - gset1050).toFixed(3) + "</td><td>"
-                                    + gset1090 + "</td><td>" + gsetNoMav1090 + "</td><td>" + (gsetNoMav1090 - gset1090).toFixed(3) + "</td>"
-                                    + "</tr>";
-                        }
+                        tableArray.push([
+                            cav.name, cav.moduleType, cav.modAnodeHarvester.epicsDate, cav.modAnodeHarvester.modAnodeVoltage_kv,
+                            gset1050, gsetNoMav1050, (gsetNoMav1050 - gset1050).toFixed(3),
+                            gset1090, gsetNoMav1090, (gsetNoMav1090 - gset1090).toFixed(3)
+                        ]);
                     }
                 }
             }
-            tableString += "</tbody></table>";
-            $("#" + tableId + "-table").append(tableString);
-            // Setup the sortable cavity table
-            $("#" + tableId)
-                    .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
-                    .tablesorterPager({container: $("#" + tableId + "-pager")});
+            jlab.util.createTableSorterTable(widgetId, {data: tableArray});
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            jlab.util.hideTableLoading(widgetId, "Error querying data");
+            console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
         }
     });
 };
@@ -188,7 +236,7 @@ $(function () {
 
     // Load the tables
     jlab.mod_anode.createCavityTable("#mav-table", jlab.tableDate);
-    jlab.mod_anode.createModAnodeHarvesterTable("mav-mah-table", jlab.tableDate);
+    jlab.mod_anode.createModAnodeHarvesterTable("#mav-mah-table", jlab.tableDate);
 
     // Load the charts
     jlab.mod_anode.loadMAVCountByFactorChart("mav-count-by-linac", jlab.start, jlab.end, jlab.mod_anode.mavAjaxUrl, jlab.timeUnit, "linac");
