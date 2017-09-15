@@ -7,10 +7,6 @@
 var jlab = jlab || {};
 jlab.energyReach = jlab.energyReach || {};
 
-jlab.energyReach.energyReachUrl = "/RFDashboard/ajax/lem-scan";
-jlab.energyReach.cavityAjaxUrl = "/RFDashboard/ajax/cavity";
-
-
 // Create and show the single day, lem-scan trip curve plot
 jlab.energyReach.loadLemScanChart = function (chartId, date, url) {
 
@@ -97,9 +93,8 @@ jlab.energyReach.loadEnergyReachChart = function (chartId, start, end, url) {
             if (item) {
                 var timestamp = item.series.data[item.dataIndex][0];
                 var dateString = jlab.millisToDate(timestamp);
-                var url = "/RFDashboard/energy-reach?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
+                var url = jlab.contextPath + "/energy-reach?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
                         jlab.addDays(dateString, -1) + "&diffEnd=" + dateString;
-                console.log("Linking to " + url);
                 window.location.href = url;
             }
         });
@@ -169,57 +164,7 @@ jlab.energyReach.addLegend = function (chartId, colors, labels, reaches) {
     $("#" + chartId + "-legend-panel").prepend(legendString);
 };
 
-jlab.energyReach.createTables = function (basicId, advId, summaryId, start, end) {
-    var linacs = ["north", "south", "injector"];
-    var cmtypes = ["C25", "C50", "C100", "QTR"];
-    var basicProps = ["cmtype", "gset", "odvh"];
-    var advProps = ["cmtype", "modAnode", "gset", "odvh"];
-    jlab.util.showTableLoading(basicId);
-    jlab.util.showTableLoading(summaryId);
-    var cavityData = $.ajax({
-        traditional: true,
-        url: jlab.energyReach.cavityAjaxUrl,
-        data: {
-            date: [start, end],
-            out: "json"
-        },
-        dataType: "json"
-    });
-    cavityData.done(function (json) {
-        jlab.util.hideTableLoading(basicId);
-        jlab.util.hideTableLoading(summaryId);
-        var startMap, endMap;
-        var maps = jlab.cavity.getStartEndMaps(json, start, end);
-        if (maps === null) {
-            jlab.util.hideTableLoading(basicId, "Error querying data");
-            jlab.util.hideTableLoading(summaryId, "Error querying data");
-            console.log("Error: received unexpected AJAX cavity service repsonse", json);
-            return;
-        } else {
-            startMap = maps[0];
-            endMap = maps[1];
-        }
 
-        var summaryArray = jlab.cavity.getTotalsByCMType(startMap, endMap);
-        jlab.util.createTableSorterTable(summaryId, {data:summaryArray});
-
-        var basicTableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, basicProps);
-        var advTableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, advProps);
-
-        jlab.util.createTableSorterTable(basicId, {data: basicTableArray});
-        
-        // The tablesorter plugin has issues initializing style to elements with display: none.  IDK... this happens fast enough that
-        // users won't notice.
-        $(advId).show();
-        jlab.util.createTableSorterTable(advId, {data: advTableArray});
-        $(advId).hide();
-
-    }).fail(function (jqXHR, textStatus, errorThrown) {
-        jlab.util.hideTableLoading(basicId, "Error querying data");
-        jlab.util.hideTableLoading(advId, "Error querying data");
-        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
-    });
-};
 
 
 $(function () {
@@ -239,7 +184,7 @@ $(function () {
         dateFormat: "yy-mm-dd"
     });
 
-    jlab.energyReach.createTables("#diff-table-basic", "#diff-table-advanced", "#summary-table", jlab.diffStart, jlab.diffEnd);
-    jlab.energyReach.loadLemScanChart("lem-scan", jlab.diffEnd, jlab.energyReach.energyReachUrl);
-    jlab.energyReach.loadEnergyReachChart("energy-reach", jlab.start, jlab.end, jlab.energyReach.energyReachUrl);
+    jlab.cavity.createCavitySetPointTables("#diff-table-basic", "#diff-table-advanced", "#summary-table", jlab.diffStart, jlab.diffEnd);
+    jlab.energyReach.loadLemScanChart("lem-scan", jlab.diffEnd, jlab.util.energyReachUrl);
+    jlab.energyReach.loadEnergyReachChart("energy-reach", jlab.start, jlab.end, jlab.util.energyReachUrl);
 });
