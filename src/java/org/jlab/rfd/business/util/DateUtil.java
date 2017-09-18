@@ -25,10 +25,14 @@ public class DateUtil {
     private static final SimpleDateFormat YMD_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat YMD_HMS_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
+    public static String formatDateYMDHMS(Date d1) {
+        return YMD_HMS_DATE_FORMATTER.format(d1);
+    }
+    
     public static Date parseDateStringYMDHMS(String d1) throws ParseException {
         Date date;
         try {
-            date = YMD_DATE_FORMATTER.parse(d1);
+            date = YMD_HMS_DATE_FORMATTER.parse(d1);
         } catch (ParseException ex) {
             LOGGER.log(Level.SEVERE, "Error parse date {0}", d1);
             throw ex;
