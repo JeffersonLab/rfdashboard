@@ -29,7 +29,7 @@
 
         <div class="page-title-bar">
             <h2 id="page-header-title"><c:out value="${title}"/></h2>
-            (<a href="#" id="page-details-opener">Details</a>)
+            (<a href="#" id="page-details-opener" title="Page Details">Details</a>)
         </div>
         <div id="page-details-dialog" title="Details">
             <h3>Mod Anode Voltage</h3>
@@ -77,27 +77,27 @@
             <form action="${pageContext.request.contextPath}/mod-anode" method="get">
                 <fieldset>
                     <div class="li-key">
-                        <label class="required-field" for="start" title="Inclusive (Closed)">Start Date</label>
+                        <label class="required-field" for="start">Start Date</label>
                         <div class="date-note">(Inclusive)</div>
                     </div>
                     <div class="li-value">
                         <input type="text" class="date-field" id="start" name="start" placeholder="YYYY-MM-DD" value="${requestScope.start}"/>
                     </div>
                     <div class="li-key">
-                        <label class="required-field" for="end" title="Exclusive (Open)">End Date</label>
+                        <label class="required-field" for="end">End Date</label>
                         <div class="date-note">(Inclusive)</div>
                     </div>
                     <div class="li-value">
                         <input type="text" class="date-field nowable-field" id="end" name="end" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
                     </div>
                     <div class="li-key">
-                        <label class="required-field" for="tableDate" title="Table Date">Table Date</label>
+                        <label class="required-field" for="tableDate">Table Date</label>
                     </div>
                     <div class="li-value">
                         <input type="text" class="date-field nowable-field" id="tableDate" name="tableDate" placeholder="YYYY-MM-DD" value="${requestScope.tableDate}"/>
                     </div>
                     <div class="li-key">
-                        <label class="required-field" for="timeUnit" title="Time Interval">Time Units</label>
+                        <label class="required-field" for="timeUnit">Time Units</label>
                     </div>
                     <div class="li-value">
                         <select id="timeUnit" name="timeUnit">

@@ -22,7 +22,7 @@
     <jsp:body>
         <div class="page-title-bar">
             <h2 id="page-header-title"><c:out value="${title}"/></h2>
-            (<a href="#" id="page-details-opener">Details</a>)
+            (<a href="#" id="page-details-opener" title="Page Details">Details</a>)
         </div>
         <div id="page-details-dialog" title="Details">
             <h3> Cavity Details</h3>
