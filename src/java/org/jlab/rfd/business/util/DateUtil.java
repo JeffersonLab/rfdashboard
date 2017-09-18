@@ -23,12 +23,26 @@ public class DateUtil {
     private static final Logger LOGGER = Logger.getLogger(DateUtil.class.getName());
 
     private static final SimpleDateFormat YMD_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat YMD_HMS_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
+    public static Date parseDateStringYMDHMS(String d1) throws ParseException {
+        Date date;
+        try {
+            date = YMD_DATE_FORMATTER.parse(d1);
+        } catch (ParseException ex) {
+            LOGGER.log(Level.SEVERE, "Error parse date {0}", d1);
+            throw ex;
+        }
+        return date;
+    }
 
     /**
      * Converts a Date object to day precision.
+     *
      * @param d1
-     * @return A Date object corresponding to the start of the day in the specified Date
-     * @throws ParseException 
+     * @return A Date object corresponding to the start of the day in the
+     * specified Date
+     * @throws ParseException
      */
     public static Date truncateToDays(Date d1) throws ParseException {
         Date date;
@@ -42,7 +56,9 @@ public class DateUtil {
     }
 
     /**
-     * Converts strings to Date objects with day precision.  Expects a date format of yyyy-MM-dd.
+     * Converts strings to Date objects with day precision. Expects a date
+     * format of yyyy-MM-dd.
+     *
      * @param d1 The date string to be converted
      * @return
      * @throws ParseException
@@ -60,9 +76,11 @@ public class DateUtil {
 
     /**
      * Get the last second of the day (11:59:59)
+     *
      * @param d1 The specified date
-     * @return A Date object corresponding to the start of the last full second of the day in the given date.
-     * @throws ParseException 
+     * @return A Date object corresponding to the start of the last full second
+     * of the day in the given date.
+     * @throws ParseException
      */
     public static Date getEndOfDay(Date d1) throws ParseException {
         Date curr = truncateToDays(d1);
@@ -72,12 +90,14 @@ public class DateUtil {
         cal.add(Calendar.SECOND, -1);
         return cal.getTime();
     }
-    
+
     /**
-     * Get a Date object that matches the start of the day after the supplied date
+     * Get a Date object that matches the start of the day after the supplied
+     * date
+     *
      * @param d1 The specified date
      * @return Returns a date object that represents 12AM of the very next day
-     * @throws ParseException 
+     * @throws ParseException
      */
     public static Date getNextDay(Date d1) throws ParseException {
         Date curr = truncateToDays(d1);
@@ -89,6 +109,7 @@ public class DateUtil {
 
     /**
      * Calculate the number of whole days between to points in time.
+     *
      * @param d1 The first date
      * @param d2 The second date
      * @return The number of whole days between the two points in time
