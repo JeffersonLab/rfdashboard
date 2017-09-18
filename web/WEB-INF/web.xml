@@ -22,19 +22,19 @@
     </context-param>
     <context-param>
         <param-name>cdnContextPath</param-name>
-        <param-value>//cdn.acc.jlab.org</param-value>
+        <param-value>https://cdn.acc.jlab.org</param-value>
     </context-param>
     <context-param>
         <param-name>resourceVersionNumber</param-name>
-        <param-value>10</param-value>
+        <param-value>11</param-value>
     </context-param>
     <context-param>
         <param-name>releaseNumber</param-name>
-        <param-value>1.3.4</param-value>
+        <param-value>1.4</param-value>
     </context-param>
     <context-param>
         <param-name>releaseDate</param-name>
-        <param-value>30 Aug 2017</param-value>
+        <param-value>18 Sep 2017</param-value>
     </context-param>
         <filter>
         <filter-name>UrlRewriteFilter</filter-name>
