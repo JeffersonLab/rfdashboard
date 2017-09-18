@@ -34,7 +34,7 @@ public class DateUtil {
         try {
             date = YMD_HMS_DATE_FORMATTER.parse(d1);
         } catch (ParseException ex) {
-            LOGGER.log(Level.SEVERE, "Error parse date {0}", d1);
+            LOGGER.log(Level.SEVERE, "Error parsing date {0}", d1);
             throw ex;
         }
         return date;
