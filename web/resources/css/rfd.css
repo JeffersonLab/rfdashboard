@@ -724,14 +724,14 @@ tablesorter tag styles
     vertical-align: bottom;
 }
 .rfd-tablesorter-widget .table-title {
-    max-width: 44%;
+    max-width: 50%;
     display: inline-block;
     text-align: left;
     float: left;
 }
 .rfd-tablesorter-widget .table-controls{
     display: inline;
-    width: 55%;
+    width: 49%;
     float: right;
 }
 /* Table control elements */
@@ -851,8 +851,30 @@ tablesorter tag styles
     border: 0;
     overflow: hidden;
 }
-
 .rfd-tablesorter-widget .table-header .help-launcher {
     cursor: pointer;
     display: inline-block;
+}
+.rfd-tablesorter-widget .comment-dialog.ui-icon-comment {
+    cursor: pointer;
+    display: inline-block;
+    float: right;
+}
+
+.update-history-dialog table{
+    text-align: left;
+    width: 100%;
+    font-size: 75%;
+    border: 1px solid #ddd;
+    border-collapse: collapse;
+}
+.update-history-dialog th, .update-history-dialog td, .update-history-dialog tr{
+    padding: 0.5em;
+    border: 1px solid #aaa;
+}
+.update-history-dialog tbody tr:nth-child(odd) {
+    background-color: #efefef;
+}
+.update-history-dialog tbody tr:nth-child(even){
+    background-color: #dfdfdf;
 }

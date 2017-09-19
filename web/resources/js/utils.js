@@ -219,18 +219,20 @@ jlab.util.createHTMLTable = function (array) {
     var ts = "<table>";
     for (let i = 0; i < array.length; i++) {
         if (i === 0) {
-            ts += "<thead>";
+            ts += "<thead><tr>";
             for (let j = 0; j < array[i].length; j++) {
                 ts += "<th>" + array[i][j] + "</th>";
             }
-            ts += "</thead><tbody>";
+            ts += "</tr></thead><tbody>";
         } else {
+            ts += "<tr>";
             for (let j = 0; j < array[i].length; j++) {
                 ts += "<td>" + array[i][j] + "</td>";
             }
+            ts += "</tr>";
         }
-        ts +="</tbody>";
     }
+    ts += "</tbody>";
     return ts;
 };
 

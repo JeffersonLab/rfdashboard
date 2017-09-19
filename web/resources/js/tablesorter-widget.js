@@ -44,10 +44,64 @@ jlab.tableSorter.initTable = function (widgetId) {
     $table.tablesorterPager(pagerOptions);
 
     jlab.tableSorter.initOutputWidget(widgetId);
-    
     jlab.tableSorter.initHelpDialog(widgetId);
+    jlab.tableSorter.initCommentDialogs(widgetId);
 
     $(widgetId).tooltip();
+};
+
+jlab.tableSorter.initCommentDialogs = function (widgetId) {
+    $(widgetId + " span.comment-dialog").each(function () {
+
+        var name = $(this).data("jlab-cavity");
+        var prop = $(this).data("jlab-cav-property");
+        var dialogId = name + "-" + prop + "-dialog";
+        var dialogProperties = jlab.dialogProperties;
+        dialogProperties.height = 400;
+        dialogProperties.maxHeight = 1000;
+
+        $(this).click(function () {
+            
+            if ($("#"+dialogId).length === 0) {
+                $("body").append("<div id='" + dialogId + "' class='dialog update-history-dialog' title='" + name + " " + prop + " Update History'</div>");
+                var promise = $.getJSON(jlab.util.cedUpdateHistoryAjaxUrl, {"elem": name, "prop": prop});
+                promise.done(function (json) {
+                    var tableArray = jlab.tableSorter.updateHistoryToArray(json);
+                    $("#" + dialogId).append(jlab.util.createHTMLTable(tableArray));
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    $("#" + dialogId).append("Error querying data");
+                    console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
+                });
+                $("#" + dialogId).dialog(dialogProperties);
+            }
+            $("#" + dialogId).dialog("open");
+        });
+    });
+};
+
+/*
+ * Turn a JSON response from ajax/ced-update-history into an array, one update per-line.
+ * @param {type} history The JSON response.  Assumes that the response has only one property
+ * @returns {undefined}
+ */
+jlab.tableSorter.updateHistoryToArray = function (history) {
+    var array = new Array();
+    $.each(history.updates, function (index, value) {
+        var update = value;
+        var date = update.date;
+        var updateValue, username, comment, property;
+        $.each(update.properties, function (key, value) {
+            property = key;
+            updateValue = value.value;
+            username = value.username;
+            comment = value.comment;
+        });
+        array.push([date, property, updateValue, username, comment]);
+    });
+    array.push(["Date", "Property", "Value", "User", "Comment"]);
+
+    // The history is originally sorted with oldest first.  Other way.
+    return array.reverse();
 };
 
 jlab.tableSorter.initOutputWidget = function (outputId) {
@@ -107,7 +161,7 @@ jlab.tableSorter.initOutputWidget = function (outputId) {
 /*
  * This causes a dialog containing help information about basic tablesorter functionality to be displayed on 'element' click events.
  */
-jlab.tableSorter.initHelpDialog = function(widgetId) {
+jlab.tableSorter.initHelpDialog = function (widgetId) {
     console.log(widgetId);
     var dialogHTML = `<h4>Table Functionality</h4>
     <p>The RF Dashboard uses the jQuery Tablesorter 2.0 plugin and widget library.  These tables support advanced functionality
@@ -125,12 +179,12 @@ jlab.tableSorter.initHelpDialog = function(widgetId) {
     <img src="/RFDashboard/resources/img/jquery.tablesorter/filter-syntax.png"/>`;
 
 //    $(widgetId + " .table-header").append(dialogHTML);
-var dialogProperties = jlab.dialogProperties;
-dialogProperties.width = 1000;
-console.log($(widgetId));
+    var dialogProperties = jlab.dialogProperties;
+    dialogProperties.width = 1000;
+    console.log($(widgetId));
     $(widgetId + "-help-dialog").append(dialogHTML);
     $(widgetId + "-help-dialog").dialog(dialogProperties);
-    $(widgetId).find(".help-launcher").click(function() {
+    $(widgetId).find(".help-launcher").click(function () {
         $(widgetId + "-help-dialog").dialog("open");
     });
 };
