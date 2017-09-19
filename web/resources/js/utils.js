@@ -231,6 +231,7 @@ jlab.util.createHTMLTable = function (array) {
         }
         ts +="</tbody>";
     }
+    return ts;
 };
 
 // Note: to be used with a tablesorter widget
