@@ -11,6 +11,7 @@ jlab.util = jlab.util || {};
 jlab.contextPath = '/RFDashboard';
 jlab.util.energyReachUrl = jlab.contextPath + "/ajax/lem-scan";
 jlab.util.cavityAjaxUrl = jlab.contextPath + "/ajax/cavity";
+jlab.util.cedUpdateHistoryAjaxUrl = jlab.contextPath + "/ajax/ced-update-history";
 
 
 jlab.isRequest = function () {
@@ -207,6 +208,29 @@ jlab.formatTimestampPretty = function (date) {
             ' ' + pad(this.getHours()) +
             ':' + pad(this.getMinutes()) +
             ':' + pad(this.getSeconds());
+};
+
+/*
+ * Generates a simple HTML table from a 2D arary.  Uses the first row as headers.
+ * @param {type} array A 2D array
+ * @returns String A string containing the HTML definition of the table
+ */
+jlab.util.createHTMLTable = function (array) {
+    var ts = "<table>";
+    for (let i = 0; i < array.length; i++) {
+        if (i === 0) {
+            ts += "<thead>";
+            for (let j = 0; j < array[i].length; j++) {
+                ts += "<th>" + array[i][j] + "</th>";
+            }
+            ts += "</thead><tbody>";
+        } else {
+            for (let j = 0; j < array[i].length; j++) {
+                ts += "<td>" + array[i][j] + "</td>";
+            }
+        }
+        ts +="</tbody>";
+    }
 };
 
 // Note: to be used with a tablesorter widget
