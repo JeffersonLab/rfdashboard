@@ -110,13 +110,13 @@
             </form>
         </div>
         <t:chart-widget placeholderId="mav-mah-trip-impact"></t:chart-widget>
-        <hr></hr><br></br>
+        <hr><br>
         <t:tablesorter tableTitle="LEMSim-Based Mod Anode Voltage Affects (${requestScope.tableDate})" widgetId="mav-mah-table" filename="${requestScope.tableDate}_LEMSim_MAV.csv"></t:tablesorter>
-        <hr></hr><br></br>
+        <hr><br>
         <t:chart-widget placeholderId="mav-count-by-linac"></t:chart-widget>
-        <hr></hr><br></br>
+        <hr><br>
         <t:chart-widget placeholderId="mav-count-by-cmtype"></t:chart-widget>
-        <hr></hr><br></br>
+        <hr><br>
         <t:tablesorter tableTitle="Mod Anode Voltage By Cavities (${requestScope.tableDate})" widgetId="mav-table" filename="${requestScope.tableDate}_MAV.csv"></t:tablesorter>
         <script>
             var jlab = jlab || {};
