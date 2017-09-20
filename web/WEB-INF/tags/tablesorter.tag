@@ -16,7 +16,22 @@
 
     <div class="table-wrap">
         <div class="table-header">
-            <div id="${widgetId}-help-dialog" title="Table Help"></div>
+            <div id="${widgetId}-help-dialog" class='dialog' title="Table Help">
+                <h4>Table Functionality</h4>
+                <p>The RF Dashboard uses the jQuery Tablesorter 2.0 plugin and widget library.  These tables support advanced functionality
+                    beyond simple HTML tables.</p>
+                <h5>Sorting</h5>
+                <p>Clicking on the header cell of any column will sort the entire table according to that column.  A multi-column sort can be
+                    achieved by "Shift-Clicking" on the columns to be sorted.  This sorting functionality extends to the checkbox column as well.</p>
+                <h5>Table Controls</h5>
+                <p>Each table contains a set of pagination and data export controls.  The pagination controls allow the user to select the
+                    number of rows per page and the page that is displayed.  Data is exported via the "Output" button.  This output function supports
+                    a number of different formats and data filters which can be controlled through the Output Options dropdown menu button
+                <h5>Filtering</h5>
+                <p>The first cell of each column contains a text input field that can be used to filter the displayed data.  The following syntax
+                    rules can be used to support this filtering.</p>
+                <img src="/RFDashboard/resources/img/jquery.tablesorter/filter-syntax.png"/>
+            </div>
             <div class="table-title"><strong>${tableTitle}</strong><span class="help-launcher ui-icon ui-icon-help" title="Table Help"></span></div>
             <div class="table-controls">
                 <div class="pager">
@@ -37,7 +52,7 @@
                 <div class="output-group">
                     <div class="btn-group">
                         <button type="button" class="btn btn-default download" title="Output data">Output</button>
-                        <button type="button" class="btn btn-default dropdown-toggle" title="Output Options" data-toggle="dropdown">&#9660</button>
+                        <button type="button" class="btn btn-default dropdown-toggle" title="Output Options" data-toggle="dropdown">Options</button>
                     </div>
                     <ul class="dropdown-menu" role="menu">
                         <li><h5><strong>Output Options</strong></h5></li>
