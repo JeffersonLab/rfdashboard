@@ -24,7 +24,7 @@
             <h2 id="page-header-title"><c:out value="${title}"/></h2>
             (<a href="#" id="page-details-opener" title="Page Details">Details</a>)
         </div>
-        <div id="page-details-dialog" title="Details">
+        <div id="page-details-dialog" class="dialog" title="Details">
             <h3> Cavity Details</h3>
             Cavity information provided here is pulled from the Archiver and the CED History deployment.  All data is representative
             of values from these sources at 12 AM on the dates provided.

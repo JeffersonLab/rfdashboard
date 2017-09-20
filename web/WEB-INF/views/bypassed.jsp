@@ -32,7 +32,7 @@
             <h2 id="page-header-title"><c:out value="${title}"/></h2>
             (<a href="#" id="page-details-opener" title="Page Details">Details</a>)
         </div>
-        <div id="page-details-dialog" title="Details">
+        <div id="page-details-dialog" class="dialog" title="Details">
             <h3> Bypassed Cavities </h3>
             Bypassed cavities are here defined as those cavities with an EPICS GSET value of zero.  This data is pulled from the
             archiver with supporting data from the CED.

@@ -34,7 +34,7 @@
             <h2 id="page-header-title"><c:out value="${title}"/></h2>
             (<a href="#" id="page-details-opener" title="Page Details">Details</a>)
         </div>
-        <div id="page-details-dialog" title="Details">
+        <div id="page-details-dialog" class='dialog' title="Details">
             <h3> Linac Cryogen Pressure </h3>
             Linac cryogen pressure refers to helium pressure as measured at the "T" on each linac.  Specific PVs are listed for extra
             clarity.

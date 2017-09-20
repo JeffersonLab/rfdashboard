@@ -31,7 +31,7 @@
             <h2 id="page-header-title"><c:out value="${title}"/></h2>
             (<a href="#" id="page-details-opener" title="Page Details">Details</a>)
         </div>
-        <div id="page-details-dialog" title="Details">
+        <div id="page-details-dialog" class="dialog" title="Details">
             <h3>Mod Anode Voltage</h3>
             Mod Anode Voltage is applied to klystrons to extend the life of aging klystron tubes.  This data is updated in the EPICS
             control system and is then manually ported to the CED.  LEM uses the CED ModAnode property of CryoCavity elements

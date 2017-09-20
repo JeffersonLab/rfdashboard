@@ -33,7 +33,7 @@
             <h2 id="page-header-title"><c:out value="${title}"/></h2>
             (<a href="#" id="page-details-opener" title="Page Details">Details</a>)
         </div>
-        <div id="page-details-dialog" title="Details">
+        <div id="page-details-dialog" class='dialog' title="Details">
             <h3> Energy Reach </h3>
             Energy reach is defined here as the linac energy with an expected total of eight C25 TrueArc trips per hour.
             Energy reach values are calculated by running the Linac Energy Manager (LEM) tool at linac energies ranging from 1000 MeV to 1190 MeV
