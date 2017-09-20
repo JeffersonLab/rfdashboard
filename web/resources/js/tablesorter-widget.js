@@ -162,24 +162,9 @@ jlab.tableSorter.initOutputWidget = function (outputId) {
  * This causes a dialog containing help information about basic tablesorter functionality to be displayed on 'element' click events.
  */
 jlab.tableSorter.initHelpDialog = function (widgetId) {
-    var dialogHTML = '<h4>Table Functionality</h4>\n\
-    <p>The RF Dashboard uses the jQuery Tablesorter 2.0 plugin and widget library.  These tables support advanced functionality\n\
-    beyond simple HTML tables.</p>\n\
-    <h5>Sorting</h5>\n\
-    <p>Clicking on the header cell of any column will sort the entire table according to that column.  A multi-column sort can be\n\
-    achieved by "Shift-Clicking" on the columns to be sorted.  This sorting functionality extends to the checkbox column as well.</p>\n\
-    <h5>Table Controls</h5>\n\
-    <p>Each table contains a set of pagination and data export controls.  The pagination controls allow the user to select the\n\
-    number of rows per page and the page that is displayed.  Data is exported via the "Output" button.  This output function supports\n\
-    a number of different formats and data filters which can be controlled through the "&#9660" / Output Options dropdown menu button.\n\
-    <h5>Filtering</h5>\n\
-    <p>The first cell of each column contains a text input field that can be used to filter the displayed data.  The following syntax\n\
-    rules can be used to support this filtering.</p>\n\
-    <img src="/RFDashboard/resources/img/jquery.tablesorter/filter-syntax.png"/>';
 
     var dialogProperties = jlab.dialogProperties;
     dialogProperties.width = 1000;
-    $(widgetId + "-help-dialog").append(dialogHTML);
     $(widgetId + "-help-dialog").dialog(dialogProperties);
     $(widgetId).find(".help-launcher").click(function () {
         $(widgetId + "-help-dialog").dialog("open");
