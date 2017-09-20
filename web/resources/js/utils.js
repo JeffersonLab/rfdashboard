@@ -313,28 +313,53 @@ jlab.util.createTableSorterTable = function (widgetId, contents) {
 };
 
 /*
+ * Array.prototype.includes is not supported by IE, but indexOf is pretty universal.  If array doesn't contain value, then indexOf
+ * returns -1.  Otherwise it returns the index.
+ * @param {type} array
+ * @param {type} value
+ * @returns {Boolean}
+ */
+jlab.util.arrayIncludes = function (array, value) {
+    var pos = array.indexOf(value);
+    if (pos >= 0) {
+        return true;
+    }
+    return false;
+};
+
+/*
  * This checks that the maps have the same keysets.  True if they do, false if they don't.
  * @param {type} m1 First map
  * @param {type} m2 Second map
  * @returns boolean
  */
 jlab.util.compareMapKeySets = function (m1, m2) {
-    // Check that the two maps contain identical cavity set sizes
-    if (m1.keys().length !== m2.keys().length) {
-        return false;
-    }
+    var nkeys1 = 0;
+    var nkeys2 = 0;
+
     // Check that every key from the first is found in the second.
-    for (let k1 of m1.keys()) {
+//    for (let i = 0; i < m1k.length; i++) {
+    m1.forEach(function(v1, k1) { 
+        nkeys1++;
         var match = false;
-        for (let k2 of m2.keys()) {
+        m2.forEach(function(v2, k2) { 
+            // Don't want to multi count the keys in the inner loop
+            if (nkeys1 === 1) {
+                nkeys2++;
+            }
             if (k1 === k2) {
                 match = true;
             }
-        }
+        });
         if (!match) {
             return false;
         }
+    });
+    // Check that the two maps contain identical cavity set sizes
+    if ( nkeys1 !== nkeys2) {
+        return false;
     }
+
     // If both conditions hold, then the sets are identical.
     return true;
 };
