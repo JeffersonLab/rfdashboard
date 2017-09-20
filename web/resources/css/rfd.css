@@ -861,7 +861,9 @@ tablesorter tag styles
     display: inline-block;
     float: right;
 }
-
+.rfd-tablesorter-widget .table-controls .output-filename {
+    width: 19em;
+}
 .update-history-dialog table{
     text-align: left;
     width: 100%;
