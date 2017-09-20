@@ -100,9 +100,9 @@
             </form>
         </div>
         <t:chart-widget placeholderId="bypassed-count-by-linac"></t:chart-widget>
-            <hr></hr><br></br>
+            <hr><br>
         <t:chart-widget placeholderId="bypassed-count-by-cmtype"></t:chart-widget>
-        <hr></hr><br></br>
+            <hr><br>
         <t:tablesorter tableTitle="Bypassed Cavities (${requestScope.tableDate})" widgetId="bypassed-table" filename="${requestScope.tableDate}_bypassed.csv"></t:tablesorter>
             <script>
                 var jlab = jlab || {};
