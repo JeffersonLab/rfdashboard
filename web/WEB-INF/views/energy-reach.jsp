@@ -104,9 +104,9 @@
             </form>
         </div>
         <t:chart-widget placeholderId="energy-reach"></t:chart-widget>
-            <br></br><hr style="border: none; height: 3px; background-color: #330000"></hr><br></br>
+            <br><hr><br>
         <t:chart-widget placeholderId="lem-scan"></t:chart-widget>
-            <hr></hr><br></br>
+            <hr><br>
         <button id="menu-toggle">Basic/Advanced</button>
         <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-basic" filename="${requestScopre.start}_${requestScope.end}_cavSetPointBasic"></t:tablesorter>
         <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-advanced" filename="${requestScopre.start}_${requestScope.end}_cavSetPointAdv"></t:tablesorter>
