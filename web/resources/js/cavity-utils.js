@@ -142,13 +142,14 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
     var hArray = new Array();
 
     hArray.push("Name");
-    if (properties.includes("cmtype")) {
+    if (jlab.util.arrayIncludes(properties, "cmtype")) {
         hArray.push("Module Type");
     }
-    if (properties.includes("linac")) {
+    if (jlab.util.arrayIncludes(properties, "linac")) {
         hArray.push("Linac");
     }
-    for (let prop of properties) {
+    for (let i = 0; i < properties.length; i++) {
+        let prop = properties[i];
         switch (prop) {
             case "cmtype":
                 break; //handled explicitly
@@ -208,7 +209,7 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
                 hArray.push(prop);
         }
     }
-    if (properties.includes("comments")) {
+    if (jlab.util.arrayIncludes(properties, "comments")) {
         hArray.push("Comments");
     }
     cavArray.push(hArray);
@@ -216,33 +217,38 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
     // Now process the cavities and create the data rows of the cavArray
     var startCav, endCav;
     var j = 0;
-    for (let name of startMap.keys()) {
+    startMap.forEach(function (value, key) {
+        let name = key;
 
         startCav = startMap.get(name);
         endCav = endMap.get(name);
 
         // Filter out the unwanted cavities
-        if (!linacs.includes(startCav.linac.toLowerCase())) {
-            continue;
+        if (!jlab.util.arrayIncludes(linacs, startCav.linac.toLowerCase())) {
+            console.log(linacs, startCav.linac);
+            return;
+            //continue;
         }
-        if (!cmtypes.includes(startCav.moduleType.toUpperCase())) {
-            continue;
+        if (!jlab.util.arrayIncludes(cmtypes, startCav.moduleType.toUpperCase())) {
+            console.log(cmtypes, startCav.moduleType);
+            return;
+            //continue;
         }
 
         rowArray = new Array();
         rowArray.push(startCav.name);
-        if (properties.includes("cmtype")) {
+        if (jlab.util.arrayIncludes(properties, "cmtype")) {
             var cmtype = startCav.moduleType;
             if (startCav.moduleType !== endCav.moduleType) {
                 cmtype += "/" + endCav.moduleType;
             }
             rowArray.push(cmtype);
         }
-        if (properties.includes("linac")) {
+        if (jlab.util.arrayIncludes(properties, "linac")) {
             rowArray.push(startCav.linac);
-            ;
         }
-        for (let prop of properties) {
+        for (let i = 0; i < properties.length; i++) {
+            let prop = properties[i];
             switch (prop) {
                 case "cmtype":
                     break; //handled explicitly
@@ -291,11 +297,11 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
                     rowArray.push(startCav.prop);
             }
         }
-        if (properties.includes("comments")) {
+        if (jlab.util.arrayIncludes(properties, "comments")) {
             rowArray.push("");
         }
         cavArray.push(rowArray);
-    }
+    });
 
     return cavArray;
 };
@@ -473,18 +479,18 @@ jlab.cavity.getTotalsByCMType = function (startMap, endMap) {
 
     // Setup objects to hold the tallies for all of this
     var startTotals = {
-        Total: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
-        QTR: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
-        C25: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
-        C50: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
-        C100: {gset: 0, odvh: 0, nGset:0, nOdvh:0}
+        Total: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        QTR: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        C25: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        C50: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        C100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0}
     };
     var endTotals = {
-        Total: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
-        QTR: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
-        C25: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
-        C50: {gset: 0, odvh: 0, nGset:0, nOdvh:0},
-        C100: {gset: 0, odvh: 0, nGset:0, nOdvh:0}
+        Total: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        QTR: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        C25: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        C50: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        C100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0}
     };
     var diffTotals = {
         Total: {gset: 0, odvh: 0},
@@ -494,11 +500,10 @@ jlab.cavity.getTotalsByCMType = function (startMap, endMap) {
         C100: {gset: 0, odvh: 0}
     };
 
-    var nCavs = startMap.keys().length;
-    for (let name of startMap.keys()) {
-
-        startCav = startMap.get(name);
-        endCav = endMap.get(name);
+    startMap.forEach(function (value, key) {
+        let name = key;
+        let startCav = startMap.get(name);
+        let endCav = endMap.get(name);
 
         if (startCav.gset !== "") {
             startTotals.Total.gset += startCav.gset;
@@ -524,7 +529,8 @@ jlab.cavity.getTotalsByCMType = function (startMap, endMap) {
             endTotals[endCav.moduleType].odvh += endCav.odvh;
             endTotals[endCav.moduleType].nOdvh++;
         }
-    }
+    });
+
 
     // The diffTotals will have a subset of the properties since the counts don't make sense for the diffs
     for (let total in startTotals) {
@@ -538,18 +544,18 @@ jlab.cavity.getTotalsByCMType = function (startMap, endMap) {
     // total (cmtype) and each represents a single row of the table
     for (let total in startTotals) {
         if (startTotals.hasOwnProperty(total)) {
-            let sGMean = (startTotals[total].gset / startTotals[total].nGset).toFixed(2)  || "N/A";
-            let eGMean = (endTotals[total].gset / endTotals[total].nGset).toFixed(2)     || "N/A";
-            let sOMean = (startTotals[total].odvh / startTotals[total].nOdvh).toFixed(2)  || "N/A";
-            let eOMean = (endTotals[total].odvh / endTotals[total].nOdvh).toFixed(2)    || "N/A";
+            let sGMean = (startTotals[total].gset / startTotals[total].nGset).toFixed(2) || "N/A";
+            let eGMean = (endTotals[total].gset / endTotals[total].nGset).toFixed(2) || "N/A";
+            let sOMean = (startTotals[total].odvh / startTotals[total].nOdvh).toFixed(2) || "N/A";
+            let eOMean = (endTotals[total].odvh / endTotals[total].nOdvh).toFixed(2) || "N/A";
             outArray.push([
                 total, // The label
                 startTotals[total].nGset, startTotals[total].gset.toFixed(2), sGMean, endTotals[total].nGset, endTotals[total].gset.toFixed(2), eGMean, diffTotals[total].gset.toFixed(2),
                 startTotals[total].nOdvh, startTotals[total].odvh.toFixed(2), sOMean, endTotals[total].nOdvh, endTotals[total].odvh.toFixed(2), eOMean, diffTotals[total].odvh.toFixed(2)
             ]);
-            
+
         }
-    }    
+    }
 
     return outArray;
 };
@@ -587,13 +593,13 @@ jlab.cavity.createCavitySetPointTables = function (basicId, advId, summaryId, st
         }
 
         var summaryArray = jlab.cavity.getTotalsByCMType(startMap, endMap);
-        jlab.util.createTableSorterTable(summaryId, {data:summaryArray});
+        jlab.util.createTableSorterTable(summaryId, {data: summaryArray});
 
         var basicTableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, basicProps);
         var advTableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, advProps);
 
         jlab.util.createTableSorterTable(basicId, {data: basicTableArray});
-        
+
         // The tablesorter plugin has issues initializing style to elements with display: none.  IDK... this happens fast enough that
         // users won't notice.
         $(advId).show();
