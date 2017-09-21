@@ -37,6 +37,7 @@ jlab.tableSorter.initTable = function (widgetId) {
         headers: {0: {sorter: 'checkbox', filter: false}},
         widgetOptions: {
             output_includeHeader: true,
+            output_ignoreColumns: [0],
             stickyHeaders_addResizeEvent: true,
             stickyHeaders_attachTo: widgetId + " .table-panel"
         }
