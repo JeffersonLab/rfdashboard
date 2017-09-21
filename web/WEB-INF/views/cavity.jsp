@@ -388,6 +388,7 @@
                                     </c:choose>
                                 </div>
                             </div>
+<%--
                             <div class="input-elem">
                                 <div class="li-key">
                                     <label for="comments">Comments</label>
@@ -403,6 +404,7 @@
                                     </c:choose>
                                 </div>
                             </div>
+--%>
                         </div>
                     </div>
                 </div>
