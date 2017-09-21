@@ -26,11 +26,11 @@
     </context-param>
     <context-param>
         <param-name>resourceVersionNumber</param-name>
-        <param-value>15</param-value>
+        <param-value>16</param-value>
     </context-param>
     <context-param>
         <param-name>releaseNumber</param-name>
-        <param-value>1.4.2</param-value>
+        <param-value>1.4.3</param-value>
     </context-param>
     <context-param>
         <param-name>releaseDate</param-name>

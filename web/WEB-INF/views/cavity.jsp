@@ -270,6 +270,21 @@
                             </div>
                             <div class="input-elem">
                                 <div class="li-key">
+                                    <label for="gset">GSET</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('gset')}">
+                                            <input type="checkbox" id="gset" name="properties" value="gset" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('gset')}">
+                                            <input type="checkbox" id="gset" name="properties" value="gset" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
                                     <label for="bypassed">TunerBad</label>
                                 </div>
                                 <div class="li-value">

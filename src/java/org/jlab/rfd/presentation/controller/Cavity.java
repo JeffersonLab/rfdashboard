@@ -94,9 +94,9 @@ public class Cavity extends HttpServlet {
         if (properties == null ) {
             // Removing the default comment option until CED portion is setup
 //            String[] allProps = new String[] {"cmtype", "linac", "length", "odvh", "opsGsetMax", "maxGset", "q0", "qExternal", "tripOffset",
-//                "tripSlope", "modAnode", "comments", "bypassed", "tunerBad"};
+//                "tripSlope", "modAnode", "comments", "bypassed", "tunerBad", "gset"};
             String[] allProps = new String[] {"cmtype", "linac", "length", "odvh", "opsGsetMax", "maxGset", "q0", "qExternal", "tripOffset",
-                "tripSlope", "modAnode", "bypassed", "tunerBad"};
+                "tripSlope", "modAnode", "bypassed", "tunerBad", "gset"};
             properties = new ArrayList<>();
             properties.addAll(Arrays.asList(allProps));
         }
