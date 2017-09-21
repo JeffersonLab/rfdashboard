@@ -43,11 +43,12 @@ public class CavityDataPoint {
     private final BigDecimal length;
     private final boolean bypassed;
     private final boolean tunerBad;
+    private final String comments;
     
     public CavityDataPoint(Date timestamp, String cavityName, CryomoduleType cryomoduleType,
             BigDecimal modAnodeVoltage, String epicsName, BigDecimal gset, BigDecimal odvh,
             String q0, String qExternal, BigDecimal maxGset, BigDecimal opsGsetMax, BigDecimal tripOffset, BigDecimal tripSlope,
-            BigDecimal length, CavityGsetData modAnodeHarvesterGsetData, boolean bypassed, boolean tunerBad) {
+            BigDecimal length, CavityGsetData modAnodeHarvesterGsetData, boolean bypassed, boolean tunerBad, String comments) {
 
         if (!cavityName.matches("\\dL\\d\\d-\\d")) {
             LOGGER.log(Level.SEVERE, "Improper cavity name format - {0}", cavityName);
@@ -72,6 +73,11 @@ public class CavityDataPoint {
         this.modAnodeHarvesterGsetData = modAnodeHarvesterGsetData;
         this.bypassed = bypassed;
         this.tunerBad = tunerBad;
+        this.comments = comments;
+    }
+
+    public String getComments() {
+        return comments;
     }
 
     public String getQ0() {
@@ -136,6 +142,14 @@ public class CavityDataPoint {
 
     public CavityGsetData getModAnodeHarvesterGsetData() {
         return modAnodeHarvesterGsetData;
+    }
+
+    public boolean isBypassed() {
+        return bypassed;
+    }
+
+    public boolean isTunerBad() {
+        return tunerBad;
     }
 
 }

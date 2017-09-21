@@ -134,6 +134,10 @@ public class CavityDataSpan {
                 } else {
                     cavBuilder.add("length", "");
                 }
+                cavBuilder.add("bypassed", dp.isBypassed());
+                cavBuilder.add("tunerBad", dp.isTunerBad());
+                cavBuilder.add("comments", dp.getComments());
+                
 
                 // Some of these will have ModAnodeHarvester data, but definitely not Injector cavities
                 if (dp.getModAnodeHarvesterGsetData() != null) {

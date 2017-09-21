@@ -165,6 +165,14 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
                 hArray.push("New M.A.V.");
                 hArray.push("Delta M.A.V.");
                 break;
+            case "tunerBad":
+                hArray.push("Old Tuner Bad");
+                hArray.push("New Tuner Bad");
+                break;
+            case "bypassed":
+                hArray.push("Old Bypassed");
+                hArray.push("New Bypassed");
+                break;
             case "gset":
                 hArray.push("Old GSET");
                 hArray.push("New GSET");
@@ -272,6 +280,17 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
                 case "odvh":
                     rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "odvh"));
                     break;
+                case "tunerBad":
+                    console.log(startCav);
+                    rowArray.push(startCav.tunerBad + "<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='"
+                            + startCav.name + "' data-jlab-cav-property='tunerBad'></span>");
+                    rowArray.push(endCav.tunerBad);
+                    break;
+                case "bypassed":
+                    rowArray.push(startCav.bypassed + "<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='"
+                            + startCav.name + "' data-jlab-cav-property='bypassed'></span>");
+                    rowArray.push(endCav.bypassed);
+                    break;
                 case "opsGsetMax":
                     var temp = jlab.cavity.processNumericTableEntry(startCav, endCav, "opsGsetMax");
                     temp[0] += "<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='" + startCav.name +
@@ -298,7 +317,8 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
             }
         }
         if (jlab.util.arrayIncludes(properties, "comments")) {
-            rowArray.push("");
+            rowArray.push(startCav.comments+ "<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='"
+                            + startCav.name + "' data-jlab-cav-property='comments'></span>");
         }
         cavArray.push(rowArray);
     });

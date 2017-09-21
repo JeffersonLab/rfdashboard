@@ -116,6 +116,7 @@ public class CavityService {
                                                                               // CED units: kilovolts  
                     boolean tunerBad = false; // CED note: false unless set
                     boolean bypassed = false; // CED note: false unless set
+                    String comments = ""; // Null implies no comment
                     BigDecimal tripOffset = null;   // CED units: trips per shift
                     BigDecimal tripSlope = null;   // CED units: trips per shift
                     BigDecimal opsGsetMax = null;  // CED units: MeV/m
@@ -137,6 +138,9 @@ public class CavityService {
                     }
                     if (properties.containsKey("Bypassed")) {
                         bypassed = true;
+                    }
+                    if (properties.containsKey("Comments")) {
+                        comments = properties.getString("Comments");
                     }
                     if (properties.containsKey("TripOffset")) {
                         tripOffset = new BigDecimal(properties.getString("TripOffset"));
@@ -180,12 +184,12 @@ public class CavityService {
                     if ( cgds == null ) {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
                                 odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, 
-                                length, null, bypassed, tunerBad));
+                                length, null, bypassed, tunerBad, comments));
                         
                     } else {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
                                 odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
-                                length, cgds.get(epicsName), bypassed, tunerBad));
+                                length, cgds.get(epicsName), bypassed, tunerBad, comments));
                     }
                 }
             }

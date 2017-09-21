@@ -93,7 +93,7 @@ public class Cavity extends HttpServlet {
         List<String> properties = RequestParamUtil.processMultiValuedParameter(request, "properties");
         if (properties == null ) {
             String[] allProps = new String[] {"cmtype", "linac", "length", "odvh", "opsGsetMax", "maxGset", "q0", "qExternal", "tripOffset",
-                "tripSlope", "modAnode", "comments"};
+                "tripSlope", "modAnode", "comments", "bypassed", "tunerBad"};
             properties = new ArrayList<>();
             properties.addAll(Arrays.asList(allProps));
         }

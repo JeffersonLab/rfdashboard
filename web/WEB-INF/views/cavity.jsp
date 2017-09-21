@@ -255,6 +255,36 @@
                             </div>
                             <div class="input-elem">
                                 <div class="li-key">
+                                    <label for="bypassed">Bypassed</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('bypassed')}">
+                                            <input type="checkbox" id="bypassed" name="properties" value="bypassed" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('bypassed')}">
+                                            <input type="checkbox" id="bypassed" name="properties" value="bypassed" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
+                                    <label for="bypassed">TunerBad</label>
+                                </div>
+                                <div class="li-value">
+                                    <c:choose>
+                                        <c:when test="${properties.containsKey('tunerBad')}">
+                                            <input type="checkbox" id="tunerBad" name="properties" value="tunerBad" checked/>
+                                        </c:when>
+                                        <c:when test="${not properties.containsKey('tunerBad')}">
+                                            <input type="checkbox" id="tunerBad" name="properties" value="tunerBad" />
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div class="input-elem">
+                                <div class="li-key">
                                     <label for="opsGsetMax">OpsGsetMax</label>
                                 </div>
                                 <div class="li-value">
