@@ -1,8 +1,6 @@
 var jlab = jlab || {};
 jlab.flotCharts = jlab.flotCharts || {};
 
-
-
 //+++++++++++++++++++++++++++++++++++++++++++++++++
 // Plot functions
 //+++++++++++++++++++++++++++++++++++++++++++++++++
@@ -380,11 +378,11 @@ jlab.flotCharts.getSmallDataXAxisTickOptions = function (data, timeUnit) {
 
 /**
  * This calculates the minimum x distance between to points in a series in the array of flot data objects.  
- * @param {type} data Array of flot data objects
+ * @param {type} flotArray Array of flot data objects
  * @returns {Number|width|Number.MAX_SAFE_INTEGER} The minimum x-distance between two points in a series.
  */
 jlab.flotCharts.getMinDataWidth = function (flotArray) {
-    var min = Number.MAX_SAFE_INTEGER;
+    var min = Number.MAX_VALUE;
     var maxLength = 0;
 
     for (var i = 0; i < flotArray.length; i++) {
