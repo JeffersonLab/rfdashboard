@@ -115,6 +115,7 @@ public class CavityService {
                     BigDecimal mav = new BigDecimal(0);  // No ModAnode property indicates a zero modulating anode voltage is applied
                                                                               // CED units: kilovolts  
                     boolean tunerBad = false; // CED note: false unless set
+                    boolean bypassed = false; // CED note: false unless set
                     BigDecimal tripOffset = null;   // CED units: trips per shift
                     BigDecimal tripSlope = null;   // CED units: trips per shift
                     BigDecimal opsGsetMax = null;  // CED units: MeV/m
@@ -133,6 +134,9 @@ public class CavityService {
                     // Check for the existence of CED optional parameters
                     if (properties.containsKey("TunerBad")) {
                         tunerBad = true;
+                    }
+                    if (properties.containsKey("Bypassed")) {
+                        bypassed = true;
                     }
                     if (properties.containsKey("TripOffset")) {
                         tripOffset = new BigDecimal(properties.getString("TripOffset"));
@@ -176,12 +180,12 @@ public class CavityService {
                     if ( cgds == null ) {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
                                 odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, 
-                                length, null));
+                                length, null, bypassed, tunerBad));
                         
                     } else {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
                                 odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
-                                length, cgds.get(epicsName)));
+                                length, cgds.get(epicsName), bypassed, tunerBad));
                     }
                 }
             }
