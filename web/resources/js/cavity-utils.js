@@ -233,19 +233,14 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
 
         // Filter out the unwanted cavities
         if (!jlab.util.arrayIncludes(linacs, startCav.linac.toLowerCase())) {
-            console.log(linacs, startCav.linac);
             return;
-            //continue;
         }
         if (!jlab.util.arrayIncludes(cmtypes, startCav.moduleType.toUpperCase())) {
-            console.log(cmtypes, startCav.moduleType);
             return;
-            //continue;
         }
 
         rowArray = new Array();
         rowArray.push("<div class=nobr>" + startCav.name + "<a class=cell-link href='https://ced.acc.jlab.org/elem/" + name + "' target='_blank'><span class='ui-icon ui-icon-extlink'></span></a><div>");
-//        rowArray.push(startCav.name + "<a class=cell-link href='https://ced.acc.jlab.org/elem/" + name + "' target='_blank'><span class='ui-icon ui-icon-extlink'></span></a>");
         if (jlab.util.arrayIncludes(properties, "cmtype")) {
             var cmtype = startCav.moduleType;
             if (startCav.moduleType !== endCav.moduleType) {
@@ -282,7 +277,6 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
                     rowArray = rowArray.concat(jlab.cavity.processNumericTableEntry(startCav, endCav, "odvh"));
                     break;
                 case "tunerBad":
-                    console.log(startCav);
                     rowArray.push(startCav.tunerBad + "<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='"
                             + startCav.name + "' data-jlab-cav-property='tunerBad'></span>");
                     rowArray.push(endCav.tunerBad);
@@ -369,116 +363,6 @@ jlab.cavity.processNumericTableEntry = function (startCav, endCav, prop, scienti
 
     return out;
 };
-
-/* 
- * Create a cavity data table.
- * tableId - the tablesorter tag tableId
- * date - the date for which to query data
- * */
-//jlab.cavity.createTable = function (tableId, date) {
-//
-//    jlab.cavity.getCavityData({
-//        start: date,
-//        end: jlab.addDays(date, 1),
-//        timeUnit: "day",
-//        success: function (jsonData, textStatus, jqXHR) {
-//            console.log(jsonData);
-//            var data = jsonData.data;
-//            var tableString = "<table class=\"tablesorter\">";
-//            tableString += "<thead><tr><th>Name</th><th>Module Type</th><th>Mod Anode Voltage (kV)</th><th>GSET</th></tr></thead>";
-//            tableString += "<tbody>";
-//            for (var i = 0; i < data.length; i++) {
-//                var cavities = data[i].cavities;
-//                for (var j = 0; j < cavities.length; j++) {
-//                    tableString += "<tr><td>" + cavities[j].name + "</td><td>" + cavities[j].moduleType + "</td><td>" +
-//                            cavities[j].modAnodeVoltage_kv + "</td><td>" + cavities[j].gset + "</tr>";
-//                }
-//            }
-//            tableString += "</tbody></table>";
-//            $("#" + tableId + "-table").append(tableString);
-//            // Setup the sortable cavity table
-//            $(".tablesorter")
-//                    .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
-//                    .tablesorterPager({container: $("#" + tableId + "-pager")});
-//        }
-//    });
-//};
-
-///* This function relies on the tablesorter tag,  jquery.tablesorter (JS/CSS), and jquery.tablesorter.pager (JS/CSS).  It creates
-// * a sortable table of totals, and their differences between start and end.
-// */
-//jlab.cavity.createTotalsTable = function (tableId, start, end) {
-//    jlab.cavity.getCavityData({
-//        asRange: false,
-//        dates: [start, end],
-//        success: function (jsonData, textStatus, jqXHR) {
-//            var data = jsonData.data;
-//            var tableString = "<table id=\"" + tableId + "\" class=\"tablesorter\">";
-//            tableString += "<thead><tr><th>Subset</th>" +
-//                    "<th>Old GSET</th><th>New GSET</th><th>Delta GSET</th>" +
-//                    "<th>Old ODHV</th><th>New ODHV</th><th>Delta ODHV</th>" +
-//                    "</tr></thead>";
-//            tableString += "<tbody>";
-//            if (data[0].cavities === null || data[1].cavities === null) {
-//                var msg = "Error processing data.";
-//                console.log("Error processing cavity service data. start:" + start + "  end: " + end);
-//                $("#" + tableId + "-table").append(msg);
-//            }
-//            var cavStart = data[0].cavities;
-//            var cavEnd = data[1].cavities;
-//
-//            // The array counts are [GSET, ODVH]
-//            var startTotals = {Total: [0, 0], QTR: [0, 0], C25: [0, 0], C50: [0, 0], C100: [0, 0]};
-//            var endTotals = {Total: [0, 0], QTR: [0, 0], C25: [0, 0], C50: [0, 0], C100: [0, 0]};
-//            var diffTotals = {Total: [0, 0], QTR: [0, 0], C25: [0, 0], C50: [0, 0], C100: [0, 0]};
-//
-//            // Tally up totals for the start period, then the end period, then calculate the difference in the totals
-//            for (var i = 0; i < cavStart.length; i++) {
-//                if (cavStart[i].gset !== "") {
-//                    startTotals.Total[0] += cavStart[i].gset;
-//                    startTotals[cavStart[i].moduleType][0] += cavStart[i].gset;
-//                }
-//                if (cavStart[i].gset !== "") {
-//                    startTotals.Total[1] += cavStart[i].odvh;
-//                    startTotals[cavStart[i].moduleType][1] += cavStart[i].odvh;
-//                }
-//            }
-//            for (var i = 0; i < cavEnd.length; i++) {
-//                if (cavEnd[i].gset !== "") {
-//                    endTotals.Total[0] += cavEnd[i].gset;
-//                    endTotals[cavEnd[i].moduleType][0] += cavEnd[i].gset;
-//                }
-//                if (cavEnd[i].odvh !== "") {
-//                    endTotals.Total[1] += cavEnd[i].odvh;
-//                    endTotals[cavEnd[i].moduleType][1] += cavEnd[i].odvh;
-//                }
-//            }
-//            // All three of the totals objects should have the same properties
-//            for (var prop in startTotals) {
-//                if (startTotals.hasOwnProperty(prop)) {
-//                    for (var i = 0; i < diffTotals[prop].length; i++) {
-//                        diffTotals[prop][i] = endTotals[prop][i] - startTotals[prop][i];
-//                    }
-//                }
-//            }
-//
-//            for (var prop in startTotals) {
-//                if (startTotals.hasOwnProperty(prop)) {
-//                    tableString += "<tr><td>" + prop + "</td><td>" +
-//                            startTotals[prop][0].toFixed(2) + "</td><td>" + endTotals[prop][0].toFixed(2) + "</td><td>" +
-//                            diffTotals[prop][0].toFixed(2) + "</td><td>" + startTotals[prop][1].toFixed(2) + "</td><td>" +
-//                            endTotals[prop][1].toFixed(2) + "</td><td>" + diffTotals[prop][1].toFixed(2) + "</td></tr>";
-//                }
-//            }
-//
-//            $("#" + tableId + "-table").append(tableString);
-//            // Setup the sortable cavity tables
-//            $("#" + tableId)
-//                    .tablesorter({sortList: [[0, 0]]}) // sort on the first column (asc)
-//                    .tablesorterPager({container: $("#" + tableId + "-pager")});
-//        }
-//    });
-//};
 
 
 /* This function relies on the tablesorter tag,  jquery.tablesorter (JS/CSS), and jquery.tablesorter.pager (JS/CSS).  It creates
