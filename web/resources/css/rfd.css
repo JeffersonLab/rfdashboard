@@ -861,6 +861,14 @@ tablesorter tag styles
     display: inline-block;
     float: right;
 }
+.rfd-tablesorter-widget .cell-link {
+    display: inline-block;
+}
+.rfd-tablesorter-widget .ui-icon-extlink {
+    cursor: pointer;
+    display: inline-block;
+    float: right;
+}
 .rfd-tablesorter-widget .table-controls .output-filename {
     width: 19em;
 }
@@ -881,8 +889,10 @@ tablesorter tag styles
 .update-history-dialog tbody tr:nth-child(even){
     background-color: #dfdfdf;
 }
-
 .btn-group .btn.download, .btn-group .btn.dropdown-toggle {
     vertical-align: top;
     font-size: 9pt;
+}
+.nobr {
+    white-space: nowrap;
 }

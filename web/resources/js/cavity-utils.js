@@ -244,7 +244,8 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
         }
 
         rowArray = new Array();
-        rowArray.push(startCav.name);
+        rowArray.push("<div class=nobr>" + startCav.name + "<a class=cell-link href='https://ced.acc.jlab.org/elem/" + name + "' target='_blank'><span class='ui-icon ui-icon-extlink'></span></a><div>");
+//        rowArray.push(startCav.name + "<a class=cell-link href='https://ced.acc.jlab.org/elem/" + name + "' target='_blank'><span class='ui-icon ui-icon-extlink'></span></a>");
         if (jlab.util.arrayIncludes(properties, "cmtype")) {
             var cmtype = startCav.moduleType;
             if (startCav.moduleType !== endCav.moduleType) {
