@@ -62,18 +62,31 @@ jlab.tableSorter.initCommentDialogs = function (widgetId) {
         dialogProperties.maxHeight = 1000;
 
         $(this).click(function () {
-            
-            if ($("#"+dialogId).length === 0) {
-                $("body").append("<div id='" + dialogId + "' class='dialog update-history-dialog' title='" + name + " " + prop + " Update History'</div>");
-                var promise = $.getJSON(jlab.util.cedUpdateHistoryAjaxUrl, {"elem": name, "prop": prop});
-                promise.done(function (json) {
-                    var tableArray = jlab.tableSorter.updateHistoryToArray(json);
-                    $("#" + dialogId).append(jlab.util.createHTMLTable(tableArray));
-                }).fail(function (jqXHR, textStatus, errorThrown) {
-                    $("#" + dialogId).append("Error querying data");
-                    console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
-                });
-                $("#" + dialogId).dialog(dialogProperties);
+
+            if ($("#" + dialogId).length === 0) {
+                if (prop === "comments") {
+                    $("body").append("<div id='" + dialogId + "' class='dialog update-history-dialog' title='" + name + " CED Comments'</div>");
+                    var promise = $.getJSON(jlab.util.cedUpdateHistoryAjaxUrl, {"elem": name, "prop": prop});
+                    promise.done(function (json) {
+                        var tableArray = jlab.tableSorter.updateHistoryToArray(json, true);
+                        $("#" + dialogId).append(jlab.util.createHTMLTable(tableArray));
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        $("#" + dialogId).append("Error querying data");
+                        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
+                    });
+                    $("#" + dialogId).dialog(dialogProperties);
+                } else {
+                    $("body").append("<div id='" + dialogId + "' class='dialog update-history-dialog' title='" + name + " " + prop + " Update History'</div>");
+                    var promise = $.getJSON(jlab.util.cedUpdateHistoryAjaxUrl, {"elem": name, "prop": prop});
+                    promise.done(function (json) {
+                        var tableArray = jlab.tableSorter.updateHistoryToArray(json);
+                        $("#" + dialogId).append(jlab.util.createHTMLTable(tableArray));
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        $("#" + dialogId).append("Error querying data");
+                        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
+                    });
+                    $("#" + dialogId).dialog(dialogProperties);
+                }
             }
             $("#" + dialogId).dialog("open");
         });
@@ -81,11 +94,13 @@ jlab.tableSorter.initCommentDialogs = function (widgetId) {
 };
 
 /*
- * Turn a JSON response from ajax/ced-update-history into an array, one update per-line.
+ * Turn a JSON response from ajax/ced-update-history into an array, one update per-line.  The element's comment field should
+ * be handled slightly differently.  Use 'isComments' to control this behavior.
  * @param {type} history The JSON response.  Assumes that the response has only one property
+ * @param {type} isComments Boolean for whether or not the property is the element Comments field
  * @returns {undefined}
  */
-jlab.tableSorter.updateHistoryToArray = function (history) {
+jlab.tableSorter.updateHistoryToArray = function (history, isComments) {
     var array = new Array();
     $.each(history.updates, function (index, value) {
         var update = value;
@@ -97,9 +112,17 @@ jlab.tableSorter.updateHistoryToArray = function (history) {
             username = value.username;
             comment = value.comment;
         });
-        array.push([date, property, updateValue, username, comment]);
+        if (isComments) {
+            array.push([date, username, updateValue]);
+        } else {
+            array.push([date, property, updateValue, username, comment]);
+        }
     });
-    array.push(["Date", "Property", "Value", "User", "Comment"]);
+    if (isComments) {
+        array.push(["Date", "User", "Comment"]);
+    } else {
+        array.push(["Date", "Property", "Value", "User", "Comment"]);
+    }
 
     // The history is originally sorted with oldest first.  Other way.
     return array.reverse();
