@@ -113,9 +113,9 @@ jlab.tableSorter.updateHistoryToArray = function (history, isComments) {
             comment = value.comment;
         });
         if (isComments) {
-            array.push([date, username, updateValue]);
+            array.push([date, username, "<div class=pre-wrap>" + updateValue + "</div>"]);
         } else {
-            array.push([date, property, updateValue, username, comment]);
+            array.push([date, property, updateValue, username, "<div class=pre-wrap>" + comment + "</div>"]);
         }
     });
     if (isComments) {

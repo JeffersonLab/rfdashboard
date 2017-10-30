@@ -896,3 +896,6 @@ tablesorter tag styles
 .nobr {
     white-space: nowrap;
 }
+.pre-wrap {
+    white-space: pre-wrap;
+}

@@ -312,7 +312,7 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
             }
         }
         if (jlab.util.arrayIncludes(properties, "comments")) {
-            rowArray.push(startCav.comments+ "<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='"
+            rowArray.push("<div class=pre-wrap>" + startCav.comments +"</div>"+ "<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='"
                             + startCav.name + "' data-jlab-cav-property='comments'></span>");
         }
         cavArray.push(rowArray);
