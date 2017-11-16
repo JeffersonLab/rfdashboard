@@ -46,7 +46,7 @@ public class CEDUpdateHistoryService {
                     JsonObject update = history.getJsonObject(i);
                     
                     String dateString = update.getString("date");
-                    Date date = DateUtil.parseDateStringYMDHMS(dateString);
+                    Date date = DateUtil.parseDateStringYMDHM(dateString);
                     String value = update.getString("value");
                     String username = update.getString("username");
                     String comment = update.getString("comment");
