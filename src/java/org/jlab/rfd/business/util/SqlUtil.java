@@ -29,7 +29,7 @@ public final class SqlUtil {
 
     static {
         try {
-            source = (DataSource) new InitialContext().lookup("jdbc/rfgradteam_read");
+            source = (DataSource) new InitialContext().lookup("jdbc/rfgradteam_rw");
         } catch (NamingException e) {
             LOGGER.log(Level.WARNING, "JDBC resource lookup failed", e);
             throw new ExceptionInInitializerError(e);
