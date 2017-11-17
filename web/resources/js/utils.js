@@ -12,6 +12,7 @@ jlab.contextPath = '/RFDashboard';
 jlab.util.energyReachUrl = jlab.contextPath + "/ajax/lem-scan";
 jlab.util.cavityAjaxUrl = jlab.contextPath + "/ajax/cavity";
 jlab.util.cedUpdateHistoryAjaxUrl = jlab.contextPath + "/ajax/ced-update-history";
+jlab.util.commentsAjaxUrl = jlab.contextPath + "/ajax/comments";
 
 
 jlab.isRequest = function () {

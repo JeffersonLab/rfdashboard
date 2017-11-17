@@ -66,9 +66,9 @@ jlab.tableSorter.initCommentDialogs = function (widgetId) {
             if ($("#" + dialogId).length === 0) {
                 if (prop === "comments") {
                     $("body").append("<div id='" + dialogId + "' class='dialog update-history-dialog' title='" + name + " CED Comments'</div>");
-                    var promise = $.getJSON(jlab.util.cedUpdateHistoryAjaxUrl, {"elem": name, "prop": prop});
+                    var promise = $.getJSON(jlab.util.commentsAjaxUrl, {"topic": name});
                     promise.done(function (json) {
-                        var tableArray = jlab.tableSorter.updateHistoryToArray(json, true);
+                        var tableArray = jlab.tableSorter.rfdCommentsToArray(json);
                         $("#" + dialogId).append(jlab.util.createHTMLTable(tableArray));
                     }).fail(function (jqXHR, textStatus, errorThrown) {
                         $("#" + dialogId).append("Error querying data");
@@ -84,6 +84,7 @@ jlab.tableSorter.initCommentDialogs = function (widgetId) {
                     }).fail(function (jqXHR, textStatus, errorThrown) {
                         $("#" + dialogId).append("Error querying data");
                         console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
+                        console.log("responseText: " + jqXHR.responseText);
                     });
                     $("#" + dialogId).dialog(dialogProperties);
                 }
@@ -97,10 +98,9 @@ jlab.tableSorter.initCommentDialogs = function (widgetId) {
  * Turn a JSON response from ajax/ced-update-history into an array, one update per-line.  The element's comment field should
  * be handled slightly differently.  Use 'isComments' to control this behavior.
  * @param {type} history The JSON response.  Assumes that the response has only one property
- * @param {type} isComments Boolean for whether or not the property is the element Comments field
  * @returns {undefined}
  */
-jlab.tableSorter.updateHistoryToArray = function (history, isComments) {
+jlab.tableSorter.updateHistoryToArray = function (history) {
     var array = new Array();
     $.each(history.updates, function (index, value) {
         var update = value;
@@ -112,20 +112,26 @@ jlab.tableSorter.updateHistoryToArray = function (history, isComments) {
             username = value.username;
             comment = value.comment;
         });
-        if (isComments) {
-            array.push([date, username, "<div class=pre-wrap>" + updateValue + "</div>"]);
-        } else {
-            array.push([date, property, updateValue, username, "<div class=pre-wrap>" + comment + "</div>"]);
-        }
+        array.push([date, property, updateValue, username, "<div class=pre-wrap>" + comment + "</div>"]);
     });
-    if (isComments) {
-        array.push(["Date", "User", "Comment"]);
-    } else {
-        array.push(["Date", "Property", "Value", "User", "Comment"]);
-    }
+    array.push(["Date", "Property", "Value", "User", "Comment"]);
 
     // The history is originally sorted with oldest first.  Other way.
     return array.reverse();
+};
+
+/*
+ * Function to process the results of a query to the RFD comment service from JSON object to a 2D JSON array.
+ * @param {type} comments
+ * @returns {Array|jlab.tableSorter.rfdCommentsToArray.array}
+ */
+jlab.tableSorter.rfdCommentsToArray = function (comments) {
+    var array = new Array();
+    array.push(["Timestamp", "User", "Comment"]);
+    $.each(comments.data, function (index, value) {
+        array.push([value.timestamp, value.username, value.content]);
+    });
+    return array;
 };
 
 jlab.tableSorter.initOutputWidget = function (outputId) {

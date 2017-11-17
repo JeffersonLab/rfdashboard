@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
@@ -77,7 +78,7 @@ public class CommentsAjax extends HttpServlet {
             pw.flush();
             return;
         }
-        
+
         pw.write("{\"data\": \"success\"}");
         pw.flush();
     }
@@ -115,8 +116,20 @@ public class CommentsAjax extends HttpServlet {
 
         String s = request.getParameter("start");
         String e = request.getParameter("end");
+        String l = request.getParameter("limit");
         Date start = null;
         Date end = null;
+        Integer limit = null;
+        if (l != null) {
+            try {
+                limit = Integer.parseInt(l);
+            } catch (NumberFormatException ex) {
+                LOGGER.log(Level.INFO, "Unable to process limit parameter");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                error = "{\"error\": \"unable to parse 'limit'\"}";
+            }
+        }
+        
         try {
             if (s != null) {
                 start = DateUtil.parseDateStringYMDHMS(s);
@@ -127,14 +140,15 @@ public class CommentsAjax extends HttpServlet {
                 end = DateUtil.parseDateStringYMDHMS(e);
             }
         } catch (ParseException ex) {
+            LOGGER.log(Level.INFO, "Unable to process start or end parameters");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            error = "{error: 'unable to process start or end parameters'}";
+            error = "{\"error\": \"unable to process start or end parameters\"}";
         }
 
         CommentService cs = new CommentService();
-        List<Comment> comments = null;
+        SortedSet<Comment> comments = null;
         try {
-            comments = cs.getComments(users, topics, start, end);
+            comments = cs.getComments(users, topics, start, end, limit);
         } catch (SQLException | ParseException ex) {
             LOGGER.log(Level.SEVERE, "Error querying database for comments");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -151,7 +165,6 @@ public class CommentsAjax extends HttpServlet {
                 JsonArrayBuilder jab = Json.createArrayBuilder();
                 for (Comment com : comments) {
                     jab.add(com.toJsonObject());
-                    // TODO: Consider using a SortedList for comments so that the results will always be in chronological order
                 }
                 JsonObject out = job.add("data", jab.build()).build();
                 JsonWriter jw = Json.createWriter(pw);

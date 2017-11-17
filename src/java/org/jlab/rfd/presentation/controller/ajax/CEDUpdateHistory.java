@@ -42,13 +42,13 @@ public class CEDUpdateHistory extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        response.setContentType("application/json");
         PrintWriter pw = response.getWriter();
 
         String elem = request.getParameter("elem");
         if (elem == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             LOGGER.log(Level.SEVERE, "elem parameter required");
-            response.setContentType("application/json");
             pw.write("{error: 'elem required'}");
             return;
         }
@@ -56,7 +56,6 @@ public class CEDUpdateHistory extends HttpServlet {
         if (props == null || props.length == 0) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             LOGGER.log(Level.SEVERE, "prop parameter required");
-            response.setContentType("application/json");
             pw.write("{error: 'prop required'}");
             return;
         }
@@ -69,7 +68,6 @@ public class CEDUpdateHistory extends HttpServlet {
         } catch (ParseException ex) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             LOGGER.log(Level.SEVERE, "Error querying data from CED");
-            response.setContentType("application/json");
             pw.write("{error: 'Error querying data from CED'}");
             return;
         }

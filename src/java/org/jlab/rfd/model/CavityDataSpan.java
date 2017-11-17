@@ -136,9 +136,10 @@ public class CavityDataSpan {
                 }
                 cavBuilder.add("bypassed", dp.isBypassed());
                 cavBuilder.add("tunerBad", dp.isTunerBad());
-                cavBuilder.add("comments", dp.getComments());
+                if ( dp.getComment() != null ) {
+                    cavBuilder.add("comment", dp.getComment().toJsonObject());
+                } 
                 
-
                 // Some of these will have ModAnodeHarvester data, but definitely not Injector cavities
                 if (dp.getModAnodeHarvesterGsetData() != null) {
                     cavBuilder.add("modAnodeHarvester", dp.getModAnodeHarvesterGsetData().toJson());

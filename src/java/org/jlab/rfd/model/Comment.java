@@ -1,4 +1,3 @@
-
 package org.jlab.rfd.model;
 
 import java.util.Date;
@@ -12,12 +11,13 @@ import org.jlab.rfd.business.util.DateUtil;
  *
  * @author adamc
  */
-public class Comment {
+public class Comment implements Comparable<Comment> {
+
     private final String username;
     private final Date timestamp;
     private final String topic;
     private final String content;
-    
+
     public Comment(String username, Date timestamp, String topic, String content) {
         this.username = username;
         this.timestamp = timestamp;
@@ -40,7 +40,7 @@ public class Comment {
     public String getContent() {
         return content;
     }
-    
+
     public JsonObject toJsonObject() {
         return Json.createObjectBuilder()
                 .add("username", username)
@@ -48,5 +48,16 @@ public class Comment {
                 .add("topic", topic)
                 .add("content", content)
                 .build();
+    }
+
+    @Override
+    public int compareTo(Comment c) {
+        int cmp = 0;
+        if (this.timestamp.before(c.getTimestamp())) {
+            cmp = -1;
+        } else if (this.timestamp.after(c.getTimestamp())) {
+            cmp = 1;
+        }
+        return cmp;
     }
 }

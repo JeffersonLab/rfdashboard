@@ -44,9 +44,6 @@
                 var comment = $("#comment-field").val();
                 var topic = $("#topic-field").val();
 
-                console.log(comment);
-                console.log(topic);
-
                 var request = $.ajax({
                     url: jlab.contextPath + "/ajax/comments",
                     type: "POST",

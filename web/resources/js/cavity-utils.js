@@ -312,7 +312,11 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
             }
         }
         if (jlab.util.arrayIncludes(properties, "comments")) {
-            rowArray.push("<div class=pre-wrap>" + startCav.comments +"</div>"+ "<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='"
+            var cavComment = "";
+            if (startCav.hasOwnProperty("comment")) {
+                cavComment = jlab.cavity.formatComment(startCav.comment);
+            }
+            rowArray.push("<div class=pre-wrap>" + cavComment +"</div>"+ "<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='"
                             + startCav.name + "' data-jlab-cav-property='comments'></span>");
         }
         cavArray.push(rowArray);
@@ -321,6 +325,9 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
     return cavArray;
 };
 
+jlab.cavity.formatComment = function(comment) {
+    return comment.timestamp + "  --  " + comment.username + "\n" + comment.content;
+};
 
 /*
  * 
