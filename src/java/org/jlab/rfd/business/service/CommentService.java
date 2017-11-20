@@ -5,11 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -30,8 +28,8 @@ public class CommentService {
     private static final Logger LOGGER = Logger.getLogger(CommentService.class.getName());
 
     public SortedSet<Comment> getComments(List<String> users, List<String> topics, Date start, Date end, Integer limit) throws SQLException, ParseException {
-        
-        System.out.println(users + " -- " + topics  + " -- " + start  + " -- " + end + " -- " + limit);
+
+        System.out.println(users + " -- " + topics + " -- " + start + " -- " + end + " -- " + limit);
         SortedSet<Comment> comments = new TreeSet<>();
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -41,10 +39,10 @@ public class CommentService {
             conn = SqlUtil.getConnection();
 
             String sql = "SELECT COMMENT_TIME, USERNAME, TOPIC, COMMENT_STRING FROM RFD_COMMENTS";
-            if ( start != null ) {
+            if (start != null) {
                 sql += " WHERE COMMENT_TIME >= ?";
             }
-            if ( end != null ) {
+            if (end != null) {
                 if (start == null) {
                     sql += " WHERE";
                 } else {
@@ -52,22 +50,24 @@ public class CommentService {
                 }
                 sql += " COMMENT_TIME <= ?";
             }
-            if ( limit != null ) {
+            if (limit != null) {
                 sql = "SELECT * FROM (" + sql + " ORDER BY COMMENT_TIME DESC) WHERE ROWNUM <= ?";
             }
 
+            LOGGER.log(Level.FINEST, "SQL query used: {0}", sql);
+
             int index = 1;
             pstmt = conn.prepareStatement(sql);
-            if ( start != null ) {
+            if (start != null) {
                 pstmt.setDate(index++, new java.sql.Date(start.getTime()));
             }
-            if ( end != null ) {
+            if (end != null) {
                 pstmt.setDate(index++, new java.sql.Date(end.getTime()));
             }
-            if ( limit != null ) {
+            if (limit != null) {
                 pstmt.setInt(index++, limit);
             }
-            
+
             rs = pstmt.executeQuery();
             while (rs.next()) {
                 String username = rs.getString(2);
@@ -116,20 +116,19 @@ public class CommentService {
 
         LOGGER.log(Level.INFO, "Created comment for user {0} - {1}", new Object[]{username, content});
     }
-    
-    
+
     public Map<String, SortedSet<Comment>> getCommentsByTopic(List<String> users, List<String> topics, Date start, Date end, Integer limit) throws SQLException, ParseException {
         Map<String, SortedSet<Comment>> sorted = new HashMap<>();
         SortedSet<Comment> comments = this.getComments(users, topics, start, end, limit);
-        for(Comment c : comments) {
-            if ( ! sorted.containsKey(c.getTopic()) ) {
+        for (Comment c : comments) {
+            if (!sorted.containsKey(c.getTopic())) {
                 sorted.put(c.getTopic(), new TreeSet<>());
             }
             sorted.get(c.getTopic()).add(c);
         }
         return sorted;
     }
-    
+
     // This is a simplified wrapper for getting all comments by topic
     public Map<String, SortedSet<Comment>> getCommentsByTopic() throws SQLException, ParseException {
         return this.getCommentsByTopic(null, null, null, null, null);
