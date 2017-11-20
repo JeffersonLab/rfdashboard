@@ -111,7 +111,11 @@ public class CavityService {
 
                 // Grab any relevant comments about the cavities
                 CommentService cs = new CommentService();
-                Map<String, SortedSet<Comment>> allComments = cs.getCommentsByTopic();
+//                Map<String, SortedSet<Comment>> allComments = cs.getCommentsByTopic(null, null, null, null, null);    
+                Map<String, SortedSet<Comment>> allComments = cs.getCommentsByTopic(null, null, null, DateUtil.getEndOfDay(timestamp), null);
+                for (String key : allComments.keySet()) {
+                    System.out.println(key + " -- " + allComments.get(key).size());
+                }
                 
                 // Get the ModAnodeHarvesterData
                 ModAnodeHarvesterService mahs = new ModAnodeHarvesterService();
