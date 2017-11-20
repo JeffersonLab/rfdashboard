@@ -285,7 +285,7 @@
                             </div>
                             <div class="input-elem">
                                 <div class="li-key">
-                                    <label for="bypassed">TunerBad</label>
+                                    <label for="tunerBad">TunerBad</label>
                                 </div>
                                 <div class="li-value">
                                     <c:choose>
