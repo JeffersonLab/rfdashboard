@@ -126,12 +126,12 @@ public class RequestParamUtil {
             start = cal.getTime();
         }
 
-        if ( start.after(end) ) {
+        if (start.after(end)) {
             LOGGER.log(Level.SEVERE, "start is not before end");
             throw new IllegalArgumentException(errMsg);
         }
-        
-        if ( end.after(new Date()) ) {
+
+        if (end.after(new Date())) {
             LOGGER.log(Level.SEVERE, "end is a future date");
             throw new IllegalArgumentException(errMsg);
         }
@@ -143,39 +143,50 @@ public class RequestParamUtil {
 
     /**
      * Method for getting the values of the date request parameter.
+     *
      * @param request
-     * @return A List of Date objects representing the value of request "date" parameters to day precision.  Null if no date 
-     * parameters were requested.
+     * @return A List of Date objects representing the value of request "date"
+     * parameters to day precision. Null if no date parameters were requested.
      * @throws java.text.ParseException
      */
     public static List<Date> processDate(HttpServletRequest request) throws ParseException {
         List<Date> dates = null;
-        
-        if ( request.getParameter("date") != null ) {
+
+        if (request.getParameter("date") != null) {
             dates = new ArrayList<>();
-            for (String date : request.getParameterValues("date") ) {
-                if ( date != null ) {
+            for (String date : request.getParameterValues("date")) {
+                if (date != null) {
+                    if ( date.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d$") ) {
                         dates.add(DateUtil.parseDateStringYMD(date));
+                    } else if ( date.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\dd$")) {
+                        dates.add(DateUtil.parseDateStringYMDHM(date));
+                    } else if ( date.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\dd:\\d$")) {
+                        dates.add(DateUtil.parseDateStringYMDHMS(date));
+                    } else {
+                        throw new ParseException("Unable to parse supplied date format.", -1);
+                    }
                 }
             }
         }
         return dates;
     }
-    
+
     /**
-     * Processes a multivalued request parameter into a List of it's values.  Note: A multivalued request parameter
-     * is a parameter that appears multiple times in a single request.
+     * Processes a multivalued request parameter into a List of it's values.
+     * Note: A multivalued request parameter is a parameter that appears
+     * multiple times in a single request.
+     *
      * @param request
      * @param param The parameter to process
      * @return A List of values associated with the specified request parameter
      */
     public static List<String> processMultiValuedParameter(HttpServletRequest request, String param) {
         List<String> props = null;
-        
-        if ( request.getParameter(param) != null ) {
+
+        if (request.getParameter(param) != null) {
             props = new ArrayList<>();
-            for (String value : request.getParameterValues(param) ) {
-                if ( value != null ) {
+            for (String value : request.getParameterValues(param)) {
+                if (value != null) {
                     props.add(value);
                 }
             }
