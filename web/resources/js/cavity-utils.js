@@ -89,11 +89,25 @@ jlab.cavity.getCavityData = function (settings) {
     $.ajax(ajaxSettings);
 };
 
-// Takes a single date response of the AJAX cavity service and turns it into a map keyed on cavity name
-jlab.cavity.createCavityMap = function (cavityData) {
+/**
+ * Creates a map of cavity objects keyed on cavity name.  If commentData is supplied, the most recent comment for each
+ * cavity is attached to appropriate cavity object
+ * @param {type} cavityData The json object returned by the ajax/cavity service for a single date
+ * @param {type} commentData The json object returned by the ajax/comments service categorized by topic (by=topic)
+ * @returns {Map|jlab.cavity.createCavityMap.map}
+ */
+jlab.cavity.createCavityMap = function (cavityData, commentData) {
     var map = new Map();
     var cavities = cavityData.cavities;
+    var cavity;
+
     for (var i = 0; i < cavities.length; i++) {
+        cavity = cavities[i];
+        if (typeof commentData !== "undefined") {
+            if (commentData.hasOwnProperty(cavity.name)) {
+                cavity.comment = commentData[cavity.name][0];
+            }
+        }
         map.set(cavities[i].name, cavities[i]);
     }
     return map;
@@ -106,17 +120,17 @@ jlab.cavity.createCavityMap = function (cavityData) {
  * @param {type} cavityJson The JSON object returned from the cavity AJAX request
  * @param {type} start The intended "start" date
  * @param {type} end The intedned "end" date
+ * @param {type} commentData The comment data to be added to the end cavity map.
  * @returns {Array}
  */
-jlab.cavity.getStartEndMaps = function (cavityJson, start, end) {
+jlab.cavity.getStartEndMaps = function (cavityJson, start, end, commentData) {
     var cavityMaps = [];
-
     if (cavityJson.data[0].date === start && cavityJson.data[1].date === end) {
-        cavityMaps[0] = jlab.cavity.createCavityMap(cavityJson.data[0]);
-        cavityMaps[1] = jlab.cavity.createCavityMap(cavityJson.data[1]);
+        cavityMaps[0] = jlab.cavity.createCavityMap(cavityJson.data[0]); // start
+        cavityMaps[1] = jlab.cavity.createCavityMap(cavityJson.data[1], commentData); // end
     } else if (cavityJson.data[1].date === start && cavityJson.data[0].date === end) {
-        cavityMaps[0] = jlab.cavity.createCavityMap(cavityJson.data[1]);
-        cavityMaps[1] = jlab.cavity.createCavityMap(cavityJson.data[0]);
+        cavityMaps[0] = jlab.cavity.createCavityMap(cavityJson.data[1], commentData); // end
+        cavityMaps[1] = jlab.cavity.createCavityMap(cavityJson.data[0]); //start
     } else {
         console.log("Error: received unexpected AJAX cavity service repsonse", cavityJson);
         return null;
@@ -312,12 +326,8 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
             }
         }
         if (jlab.util.arrayIncludes(properties, "comments")) {
-            var cavComment = "";
-            if (startCav.hasOwnProperty("comment")) {
-                cavComment = jlab.cavity.formatComment(startCav.comment);
-            }
-            rowArray.push("<div class=pre-wrap>" + cavComment +"</div>"+ "<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='"
-                            + startCav.name + "' data-jlab-cav-property='comments'></span>");
+            cavComment = jlab.cavity.formatCavityComment(endCav);
+            rowArray.push(cavComment);
         }
         cavArray.push(rowArray);
     });
@@ -325,8 +335,18 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
     return cavArray;
 };
 
-jlab.cavity.formatComment = function(comment) {
-    return comment.timestamp + "  --  " + comment.username + "\n" + comment.content;
+jlab.cavity.formatCavityComment = function (cavity) {
+    var commentString;
+    var commentIcon = "<span class='ui-icon ui-icon-comment comment-dialog cavity-comment-icon' data-jlab-cavity='" + cavity.name
+            + "' data-jlab-cav-property='comments'></span>";
+    
+    if (cavity.hasOwnProperty("comment")) {
+        commentString = "<div class='nobr cavity-comment-header'>" + cavity.comment.timestamp + "  --  " + cavity.comment.username
+                + commentIcon + "</div><div class=pre-wrap>" + cavity.comment.content.encodeXml() + "</div>";        
+    } else {
+        commentString = "<div class='nobr cavity-comment-header'>" + commentIcon + "</div>";
+    }
+    return commentString;
 };
 
 /*
