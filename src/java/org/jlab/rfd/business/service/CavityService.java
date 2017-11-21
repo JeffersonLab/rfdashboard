@@ -32,7 +32,6 @@ import javax.json.JsonReader;
 import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.model.CavityDataPoint;
 import org.jlab.rfd.model.CavityDataSpan;
-import org.jlab.rfd.model.Comment;
 import org.jlab.rfd.model.CryomoduleType;
 import org.jlab.rfd.model.ModAnodeHarvester.CavityGsetData;
 import org.jlab.rfd.model.TimeUnit;
@@ -109,14 +108,6 @@ public class CavityService {
                     throw new RuntimeException("MyaService returned null.  Likely requesting data from future date.");
                 }
 
-                // Grab any relevant comments about the cavities
-                CommentService cs = new CommentService();
-//                Map<String, SortedSet<Comment>> allComments = cs.getCommentsByTopic(null, null, null, null, null);    
-                Map<String, SortedSet<Comment>> allComments = cs.getCommentsByTopic(null, null, null, DateUtil.getEndOfDay(timestamp), null);
-                for (String key : allComments.keySet()) {
-                    System.out.println(key + " -- " + allComments.get(key).size());
-                }
-                
                 // Get the ModAnodeHarvesterData
                 ModAnodeHarvesterService mahs = new ModAnodeHarvesterService();
                 Map<String, CavityGsetData> cgds = mahs.getCavityGsetData(timestamp);
@@ -127,11 +118,9 @@ public class CavityService {
                                                                               // CED units: kilovolts  
                     boolean tunerBad = false; // CED note: false unless set
                     boolean bypassed = false; // CED note: false unless set
-                    String comments = ""; // Null implies no comment
                     BigDecimal tripOffset = null;   // CED units: trips per shift
                     BigDecimal tripSlope = null;   // CED units: trips per shift
                     BigDecimal opsGsetMax = null;  // CED units: MeV/m
-                    Comment comment = null; // RFD comment (most recent)
                     
                     // Required in CED
                     String q0;
@@ -143,10 +132,6 @@ public class CavityService {
                     cmType = cmTypes.get(cavityName.substring(0, 4));
 
                     JsonObject properties = element.getJsonObject("properties");
-
-                    if (allComments.containsKey(cavityName)) {
-                         comment = allComments.get(cavityName).last();
-                    }
                     
                     // Check for the existence of CED optional parameters
                     if (properties.containsKey("TunerBad")) {
@@ -197,12 +182,12 @@ public class CavityService {
                     if ( cgds == null ) {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
                                 odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, 
-                                length, null, bypassed, tunerBad, comment));
+                                length, null, bypassed, tunerBad));
                         
                     } else {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
                                 odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
-                                length, cgds.get(epicsName), bypassed, tunerBad, comment));
+                                length, cgds.get(epicsName), bypassed, tunerBad));
                     }
                 }
             }
