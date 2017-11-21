@@ -29,7 +29,23 @@ public class DateUtil {
     public static String formatDateYMDHMS(Date d1) {
         return YMD_HMS_DATE_FORMATTER.format(d1);
     }
-    
+
+    public static Date parseDateString(String d1) throws ParseException {
+        Date date = null;
+        if (d1 != null) {
+            if (d1.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d$")) {
+                date = parseDateStringYMD(d1);
+            } else if (d1.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\dd$")) {
+                date = parseDateStringYMDHM(d1);
+            } else if (d1.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\dd:\\d$")) {
+                date = parseDateStringYMDHMS(d1);
+            } else {
+                throw new ParseException("Unable to parse supplied date format.", -1);
+            }
+        }
+        return date;
+    }
+
     public static Date parseDateStringYMDHMS(String d1) throws ParseException {
         Date date;
         try {
@@ -41,7 +57,7 @@ public class DateUtil {
         return date;
     }
 
-        public static Date parseDateStringYMDHM(String d1) throws ParseException {
+    public static Date parseDateStringYMDHM(String d1) throws ParseException {
         Date date;
         try {
             date = YMD_HM_DATE_FORMATTER.parse(d1);

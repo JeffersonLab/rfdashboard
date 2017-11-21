@@ -156,15 +156,7 @@ public class RequestParamUtil {
             dates = new ArrayList<>();
             for (String date : request.getParameterValues("date")) {
                 if (date != null) {
-                    if ( date.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d$") ) {
-                        dates.add(DateUtil.parseDateStringYMD(date));
-                    } else if ( date.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\dd$")) {
-                        dates.add(DateUtil.parseDateStringYMDHM(date));
-                    } else if ( date.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\dd:\\d$")) {
-                        dates.add(DateUtil.parseDateStringYMDHMS(date));
-                    } else {
-                        throw new ParseException("Unable to parse supplied date format.", -1);
-                    }
+                    dates.add(DateUtil.parseDateString(date));
                 }
             }
         }
