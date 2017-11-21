@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -117,9 +118,11 @@ public class CommentsAjax extends HttpServlet {
         String s = request.getParameter("start");
         String e = request.getParameter("end");
         String l = request.getParameter("limit");
+        String b = request.getParameter("by");
         Date start = null;
         Date end = null;
         Integer limit = null;
+        String by = null;
         if (l != null) {
             try {
                 limit = Integer.parseInt(l);
@@ -129,7 +132,25 @@ public class CommentsAjax extends HttpServlet {
                 error = "{\"error\": \"unable to parse 'limit'\"}";
             }
         }
-        
+
+        if (null == b) {
+            by = "timestamp";
+        } else {
+            switch (b) {
+                case "timestamp":
+                    by = "timestamp";
+                    break;
+                case "topic":
+                    by = "topic";
+                    break;
+                default:
+                    LOGGER.log(Level.INFO, "Unsupported 'by' parameter value");
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    error = "{\"error\": \"Unsupported 'by' parameter value\"}";
+                    break;
+            }
+        }
+
         try {
             if (s != null) {
                 start = DateUtil.parseDateStringYMDHMS(s);
@@ -140,37 +161,73 @@ public class CommentsAjax extends HttpServlet {
                 end = DateUtil.parseDateStringYMDHMS(e);
             }
         } catch (ParseException ex) {
-            LOGGER.log(Level.INFO, "Unable to process start or end parameters");
+            LOGGER.log(Level.WARNING, "Unable to process start or end parameters - {0}", ex);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             error = "{\"error\": \"unable to process start or end parameters\"}";
         }
 
-        CommentService cs = new CommentService();
-        SortedSet<Comment> comments = null;
-        try {
-            comments = cs.getComments(users, topics, start, end, limit);
-        } catch (SQLException | ParseException ex) {
-            LOGGER.log(Level.SEVERE, "Error querying database for comments");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            error = "{error: 'Error querying database for comments'}";
+        // The strategy here is to create a JSON object that will be written out to the PrintWriter or to create an error string that
+        // should be written out instead.
+        JsonObject out = null;
+        // Check that we haven't hit an error before we submit the request
+        if (error == null) {
+            try {
+                CommentService cs = new CommentService();
+                JsonObjectBuilder top = Json.createObjectBuilder();
+
+                // by shouldn't be null since it gets assigned based on 'b' being null or not
+                switch (by) {
+                    case "timestamp":
+                        SortedSet<Comment> commentSet = null;  // null value used in a check below
+                        commentSet = cs.getComments(users, topics, start, end, limit);
+                        top = Json.createObjectBuilder();
+                        JsonArrayBuilder jab = Json.createArrayBuilder();
+                        if (commentSet != null) {
+                            for (Comment com : commentSet) {
+                                jab.add(com.toJsonObject());
+                            }
+                        }
+                        out = top.add("data", jab.build()).build();
+                        break;
+
+                    case "topic":
+                        Map<String, SortedSet<Comment>> commentMap = null;
+                        commentMap = cs.getCommentsByTopic(users, topics, start, end, limit);
+                        for (String topicKey : commentMap.keySet()) {
+                            JsonArrayBuilder topicComments = Json.createArrayBuilder();
+                            for (Comment com : commentMap.get(topicKey)) {
+                                topicComments.add(com.toJsonObject());
+                            }
+                            top.add(topicKey, topicComments.build());
+                        }
+                        out = top.build();
+                        break;
+                    default:
+                        LOGGER.log(Level.SEVERE, "Error querying database for comments");
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        error = "{\"error\": \"Unsupported 'by' parameter\"}";
+                        break;
+                }
+            } catch (SQLException | ParseException ex) {
+                LOGGER.log(Level.SEVERE, "Error querying database for comments");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                error = "{\"error\": 'Error querying database for comments'}";
+            }
         }
 
+        // See if we have an error. If not, respond with the real output
         PrintWriter pw = response.getWriter();
         if (error != null) {
             pw.print(error);
             pw.flush();
         } else {
-            if (comments != null) {
-                JsonObjectBuilder job = Json.createObjectBuilder();
-                JsonArrayBuilder jab = Json.createArrayBuilder();
-                for (Comment com : comments) {
-                    jab.add(com.toJsonObject());
-                }
-                JsonObject out = job.add("data", jab.build()).build();
+            if (out != null) {
                 JsonWriter jw = Json.createWriter(pw);
                 jw.writeObject(out);
             } else {
-                pw.print("{data: []}");
+                LOGGER.log(Level.SEVERE, "Unexpected error querying database for comments");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                pw.print("{\"error\": \"Unexpected error querying database for comments\"}");
                 pw.flush();
             }
         }
