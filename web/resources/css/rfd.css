@@ -899,3 +899,12 @@ tablesorter tag styles
 .pre-wrap {
     white-space: pre-wrap;
 }
+.cavity-comment-header {
+    position: relative;
+    padding-right: 25px;
+    min-width: 50em;
+}
+.cavity-comment-icon {
+    position: absolute;
+    right: 0px;
+}
