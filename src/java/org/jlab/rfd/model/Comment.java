@@ -50,13 +50,14 @@ public class Comment implements Comparable<Comment> {
                 .build();
     }
 
+    // We almost always want the most recent comment first, which mean reverse chronological order.
     @Override
     public int compareTo(Comment c) {
         int cmp = 0;
         if (this.timestamp.before(c.getTimestamp())) {
-            cmp = -1;
-        } else if (this.timestamp.after(c.getTimestamp())) {
             cmp = 1;
+        } else if (this.timestamp.after(c.getTimestamp())) {
+            cmp = -1;
         }
         return cmp;
     }
