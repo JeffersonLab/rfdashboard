@@ -129,7 +129,7 @@ jlab.tableSorter.rfdCommentsToArray = function (comments) {
     var array = new Array();
     array.push(["Timestamp", "User", "Comment"]);
     $.each(comments.data, function (index, value) {
-        array.push([value.timestamp, value.username, value.content]);
+        array.push([value.timestamp, value.username, value.content.encodeXml()]);
     });
     return array;
 };
