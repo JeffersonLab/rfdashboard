@@ -14,6 +14,25 @@ jlab.util.cavityAjaxUrl = jlab.contextPath + "/ajax/cavity";
 jlab.util.cedUpdateHistoryAjaxUrl = jlab.contextPath + "/ajax/ced-update-history";
 jlab.util.commentsAjaxUrl = jlab.contextPath + "/ajax/comments";
 
+/* globally enchance String object */
+if (!String.prototype.encodeXml) {
+    String.prototype.encodeXml = function () {
+        return this.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/'/g, '&apos;')
+                .replace(/"/g, '&quot;');
+    };
+}
+if (!String.prototype.decodeXml) {
+    String.prototype.decodeXml = function () {
+        return this.replace(/&quot;/g, '"')
+                .replace(/&apos;/g, '\'')
+                .replace(/&gt;/g, '>')
+                .replace(/&lt;/g, '<')
+                .replace(/&amp;/g, '&');
+    };
+}
 
 jlab.isRequest = function () {
     return jlab.ajaxInProgress;
