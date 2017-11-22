@@ -21,7 +21,7 @@ import org.jlab.rfd.business.util.CebafNames;
  *
  * @author adamc
  */
-public class CavityDataPoint {
+public class CavityDataPoint implements Cloneable {
 
     private static final Logger LOGGER = Logger.getLogger(CavityDataPoint.class.getName());
 
@@ -43,7 +43,32 @@ public class CavityDataPoint {
     private final BigDecimal length;
     private final boolean bypassed;
     private final boolean tunerBad;
-    
+
+    /**
+     * Copy constructor
+     * @param cdp Object to base th copy on
+     */
+    public CavityDataPoint(CavityDataPoint cdp) {
+        this.timestamp = cdp.getTimestamp();
+        this.cavityName = cdp.getCavityName();
+        this.cryomoduleType = cdp.getCryomoduleType();
+        this.modAnodeVoltage = cdp.getModAnodeVoltage();
+        this.linacName = cdp.getLinacName();
+        this.epicsName = cdp.getEpicsName();
+        this.gset = cdp.getGset();
+        this.odvh = cdp.getOdvh();
+        this.q0 = cdp.getQ0();
+        this.qExternal = cdp.getqExternal();
+        this.maxGset = cdp.getMaxGset();
+        this.opsGsetMax = cdp.getOpsGsetMax();
+        this.tripOffset = cdp.getTripOffset();
+        this.tripSlope = cdp.getTripSlope();
+        this.length = cdp.getLength();
+        this.modAnodeHarvesterGsetData = cdp.getModAnodeHarvesterGsetData();
+        this.bypassed = cdp.isBypassed();
+        this.tunerBad = cdp.isTunerBad();
+    }
+
     public CavityDataPoint(Date timestamp, String cavityName, CryomoduleType cryomoduleType,
             BigDecimal modAnodeVoltage, String epicsName, BigDecimal gset, BigDecimal odvh,
             String q0, String qExternal, BigDecimal maxGset, BigDecimal opsGsetMax, BigDecimal tripOffset, BigDecimal tripSlope,
