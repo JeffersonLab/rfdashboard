@@ -72,17 +72,27 @@ public class CavityDataSpan {
         return dataSpan.put(timestamp, dataSet);
     }
 
+    /**
+     * Generates a JSON object representing the CavityDataSpan. This should take
+     * the format of { data: [ { date: 'YYYY-MM-DD', cavities: [{cavityObj}, {},
+     * ... ] }, ... { date: 'YYYY-MM-DD', cavities: [{cavityObj}, {}, ... ] } ]
+     * }
+     *
+     * @return
+     */
     public JsonObject toJson() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         JsonArrayBuilder data = Json.createArrayBuilder();
         for (Date d : dataSpan.keySet()) {
             JsonObjectBuilder sample = Json.createObjectBuilder();
             sample.add("date", sdf.format(d));
+            JsonArrayBuilder cavities = Json.createArrayBuilder();
 
             for (CavityDataPoint dp : dataSpan.get(d)) {
-                sample.add("cavities", dp.toJson());
-                data.add(sample.build());
+                cavities.add(dp.toJson());
             }
+            sample.add("cavities", cavities.build());
+            data.add(sample.build());
         }
 
         JsonObject out = Json.createObjectBuilder().add("data", data.build()).build();
