@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package org.jlab.rfd.presentation.controller;
 
 import java.io.IOException;
@@ -24,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jlab.rfd.model.TimeUnit;
 import org.jlab.rfd.presentation.util.DataFormatter;
-import org.jlab.rfd.presentation.util.ParamChecker;
 import org.jlab.rfd.presentation.util.RequestParamUtil;
 
 /**
@@ -36,7 +31,6 @@ public class Cavity extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(Cavity.class.getName());
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
