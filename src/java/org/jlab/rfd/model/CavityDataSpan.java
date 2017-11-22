@@ -24,7 +24,7 @@ import javax.json.JsonObjectBuilder;
  */
 public class CavityDataSpan {
 
-    private final TreeMap<Date, Set<CavityDataPoint>> dataSpan;
+    private final TreeMap<Date, Set<CavityResponse>> dataSpan;
 
     public CavityDataSpan() {
         dataSpan = new TreeMap<>();
@@ -33,16 +33,17 @@ public class CavityDataSpan {
     public int size() {
         return dataSpan.size();
     }
-    
+
     /**
      * Returns the set of CavityDataPoints for a given date
+     *
      * @param date The requested date
      * @return A set of CavityDataPoints relating to the requested date
      */
-    public Set<CavityDataPoint> get(Date date) {
+    public Set<CavityResponse> get(Date date) {
         return dataSpan.get(date);
     }
-    
+
     /**
      * Adds a single data point to the ModAnodeDataSpan. If this is the first
      * datapoint for it's timestamp, the internal TreeMap adds a key/HashSet for
@@ -51,7 +52,7 @@ public class CavityDataSpan {
      * @param dataPoint
      * @return
      */
-    public Object add(CavityDataPoint dataPoint) {
+    public Object add(CavityResponse dataPoint) {
         if (!dataSpan.containsKey(dataPoint.getTimestamp())) {
             dataSpan.put(dataPoint.getTimestamp(), new HashSet<>());
         }
@@ -66,7 +67,7 @@ public class CavityDataSpan {
      * @param dataSet
      * @return
      */
-    public Object put(Date timestamp, Set<CavityDataPoint> dataSet) {
+    public Object put(Date timestamp, Set<CavityResponse> dataSet) {
 
         return dataSpan.put(timestamp, dataSet);
     }
@@ -74,109 +75,44 @@ public class CavityDataSpan {
     public JsonObject toJson() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         JsonArrayBuilder data = Json.createArrayBuilder();
-        for ( Date d : dataSpan.keySet() ) {
+        for (Date d : dataSpan.keySet()) {
             JsonObjectBuilder sample = Json.createObjectBuilder();
             sample.add("date", sdf.format(d));
-            
-            JsonArrayBuilder cavities = Json.createArrayBuilder();
+
             for (CavityDataPoint dp : dataSpan.get(d)) {
-                JsonObjectBuilder cavBuilder = Json.createObjectBuilder();
-                cavBuilder.add("name", dp.getCavityName()).add("linac", dp.getLinacName().toString());
-                // The json builder throws an exception on Null or Double.NaN.  This seemed like the smartest way to handle it.
-                if (dp.getGset() != null) {
-                    cavBuilder.add("gset", dp.getGset().doubleValue());
-                } else {
-                    cavBuilder.add("gset", "");
-                }
-                if (dp.getModAnodeVoltage() != null) {
-                    cavBuilder.add("modAnodeVoltage_kv", dp.getModAnodeVoltage().doubleValue());
-                } else {
-                    cavBuilder.add("modAnodeVoltage_kv", "");
-                }
-                if (dp.getOdvh() != null) {
-                    cavBuilder.add("odvh", dp.getOdvh().doubleValue());
-                } else {
-                    cavBuilder.add("odvh", "");
-                }
-                if (dp.getQ0() != null) {
-                    cavBuilder.add("q0", dp.getQ0());
-                } else {
-                    cavBuilder.add("q0", "");
-                }
-
-                if (dp.getqExternal() != null) {
-                    cavBuilder.add("qExternal", dp.getqExternal());
-                } else {
-                    cavBuilder.add("qExternal", "");
-                }
-                if (dp.getMaxGset() != null) {
-                    cavBuilder.add("maxGset", dp.getMaxGset().doubleValue());
-                } else {
-                    cavBuilder.add("maxGset", "");
-                }
-                if (dp.getOpsGsetMax() != null) {
-                    cavBuilder.add("opsGsetMax", dp.getOpsGsetMax().doubleValue());
-                } else {
-                    cavBuilder.add("opsGsetMax", "");
-                }
-                if (dp.getTripOffset() != null) {
-                    cavBuilder.add("tripOffset", dp.getTripOffset().doubleValue());
-                } else {
-                    cavBuilder.add("tripOffset", "");
-                }
-                if (dp.getTripSlope() != null) {
-                    cavBuilder.add("tripSlope", dp.getTripSlope().doubleValue());
-                } else {
-                    cavBuilder.add("tripSlope", "");
-                }
-                if (dp.getLength() != null) {
-                    cavBuilder.add("length", dp.getLength().doubleValue());
-                } else {
-                    cavBuilder.add("length", "");
-                }
-                cavBuilder.add("bypassed", dp.isBypassed());
-                cavBuilder.add("tunerBad", dp.isTunerBad());
-                
-                // Some of these will have ModAnodeHarvester data, but definitely not Injector cavities
-                if (dp.getModAnodeHarvesterGsetData() != null) {
-                    cavBuilder.add("modAnodeHarvester", dp.getModAnodeHarvesterGsetData().toJson());
-                }
-
-                // Add the last couple of properties, build the builder, and add it to the cavities object
-                cavities.add(cavBuilder
-                        .add("moduleType", dp.getCryomoduleType().toString())
-                        .add("epicsName", dp.getEpicsName()).build());
+                sample.add("cavities", dp.toJson());
+                data.add(sample.build());
             }
-            sample.add("cavities", cavities.build());
-            data.add(sample.build());
         }
 
-    JsonObject out = Json.createObjectBuilder().add("data", data.build()).build();
-    return out ;
-}
-    
+        JsonObject out = Json.createObjectBuilder().add("data", data.build()).build();
+        return out;
+    }
+
     /**
-     * This returns a TreeMap keyed on date with values being the count of cavities with non-zero modAnodeVoltage by linac
-     * on that date.
-     * 
-     * Converts the enum linac names to strings so that it can easily be handled by formatter classes
+     * This returns a TreeMap keyed on date with values being the count of
+     * cavities with non-zero modAnodeVoltage by linac on that date.
+     *
+     * Converts the enum linac names to strings so that it can easily be handled
+     * by formatter classes
+     *
      * @return
      */
     public SortedMap<Date, SortedMap<String, BigDecimal>> getModAnodeCountByLinac() {
         SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
-        
+
         SortedMap<String, BigDecimal> byLinac;
         int total;
         int unknown;
-        for ( Date date : (Set<Date>) dataSpan.keySet() ) {
+        for (Date date : (Set<Date>) dataSpan.keySet()) {
             byLinac = new TreeMap<>();
             byLinac.put(LinacName.Injector.toString(), new BigDecimal(0));
             byLinac.put(LinacName.North.toString(), new BigDecimal(0));
             byLinac.put(LinacName.South.toString(), new BigDecimal(0));
             total = 0;
             unknown = 0;
-            
-            for (CavityDataPoint cDP : (Set<CavityDataPoint>) dataSpan.get(date)) {
+
+            for (CavityResponse cDP : (Set<CavityResponse>) dataSpan.get(date)) {
                 if (cDP.getModAnodeVoltage() == null) {
                     unknown++;
                 } else if (cDP.getModAnodeVoltage().doubleValue() > 0) {
@@ -191,34 +127,34 @@ public class CavityDataSpan {
         }
         return data;
     }
-    
-        public SortedMap<Date, SortedMap<String, BigDecimal>> getModAnodeCountByCMType() {
+
+    public SortedMap<Date, SortedMap<String, BigDecimal>> getModAnodeCountByCMType() {
         SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
-        
+
         SortedMap<String, BigDecimal> byCMType;
         int total;
         int unknown;
         String CMType;
 
-        for ( Date date : (Set<Date>) dataSpan.keySet() ) {
+        for (Date date : (Set<Date>) dataSpan.keySet()) {
             byCMType = new TreeMap<>();
             byCMType.put(CryomoduleType.C100.toString(), new BigDecimal(0));
             byCMType.put(CryomoduleType.C50.toString(), new BigDecimal(0));
             byCMType.put(CryomoduleType.C25.toString(), new BigDecimal(0));
             total = 0;
             unknown = 0;
-            
-            for (CavityDataPoint cDP : (Set<CavityDataPoint>) dataSpan.get(date)) {
-                
+
+            for (CavityResponse cDP : (Set<CavityResponse>) dataSpan.get(date)) {
+
                 if (cDP.getModAnodeVoltage() == null) {
                     unknown++;
                 } else if (cDP.getModAnodeVoltage().doubleValue() > 0) {
                     if (cDP.getCryomoduleType().equals(CryomoduleType.C100)
                             || cDP.getCryomoduleType().equals(CryomoduleType.C50)
-                            || cDP.getCryomoduleType().equals(CryomoduleType.C25)) {   
-                    CMType = cDP.getCryomoduleType().toString();
-                    byCMType.put(CMType, byCMType.get(CMType).add(new BigDecimal(1)));
-                    total++;
+                            || cDP.getCryomoduleType().equals(CryomoduleType.C25)) {
+                        CMType = cDP.getCryomoduleType().toString();
+                        byCMType.put(CMType, byCMType.get(CMType).add(new BigDecimal(1)));
+                        total++;
                     }
                 }
 
@@ -258,7 +194,7 @@ public class CavityDataSpan {
             total = 0;
             unknown = 0;
 
-            for (CavityDataPoint cDP : (Set<CavityDataPoint>) dataSpan.get(date)) {
+            for (CavityResponse cDP : (Set<CavityResponse>) dataSpan.get(date)) {
                 if (cDP.getGset() == null) {
                     unknown++;
                 } else if (cDP.getGset().doubleValue() == 0) {
@@ -284,7 +220,7 @@ public class CavityDataSpan {
         SortedMap<String, BigDecimal> byLinac;
         int total;
         int unknown;
-        for ( Date date : (Set<Date>) dataSpan.keySet() ) {
+        for (Date date : (Set<Date>) dataSpan.keySet()) {
             byLinac = new TreeMap<>();
             byLinac.put(LinacName.Injector.toString(), new BigDecimal(0));
             byLinac.put(LinacName.North.toString(), new BigDecimal(0));
@@ -292,11 +228,11 @@ public class CavityDataSpan {
             total = 0;
             unknown = 0;
 
-            for (CavityDataPoint cDP : (Set<CavityDataPoint>) dataSpan.get(date)) {
-                if (cDP.getGset() == null) {
+            for (CavityResponse cr : (Set<CavityResponse>) dataSpan.get(date)) {
+                if (cr.getGset() == null) {
                     unknown++;
-                } else if (cDP.getGset().doubleValue() == 0) {
-                    byLinac.put(cDP.getLinacName().toString(), byLinac.get(cDP.getLinacName().toString()).add(new BigDecimal(1)));
+                } else if (cr.getGset().doubleValue() == 0) {
+                    byLinac.put(cr.getLinacName().toString(), byLinac.get(cr.getLinacName().toString()).add(new BigDecimal(1)));
                     total++;
                 }
             }
@@ -305,6 +241,6 @@ public class CavityDataSpan {
             byLinac.put("Unknown", new BigDecimal(unknown));
         }
         return data;
-       
+
     }
 }

@@ -184,7 +184,7 @@ public class CommentsAjax extends HttpServlet {
                         JsonArrayBuilder jab = Json.createArrayBuilder();
                         if (commentSet != null) {
                             for (Comment com : commentSet) {
-                                jab.add(com.toJsonObject());
+                                jab.add(com.toJson());
                             }
                         }
                         out = top.add("data", jab.build()).build();
@@ -196,7 +196,7 @@ public class CommentsAjax extends HttpServlet {
                         for (String topicKey : commentMap.keySet()) {
                             JsonArrayBuilder topicComments = Json.createArrayBuilder();
                             for (Comment com : commentMap.get(topicKey)) {
-                                topicComments.add(com.toJsonObject());
+                                topicComments.add(com.toJson());
                             }
                             top.add(topicKey, topicComments.build());
                         }

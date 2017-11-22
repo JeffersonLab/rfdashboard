@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package org.jlab.rfd.business.service;
 
 import java.io.IOException;
@@ -32,12 +28,14 @@ import javax.json.JsonReader;
 import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.model.CavityDataPoint;
 import org.jlab.rfd.model.CavityDataSpan;
+import org.jlab.rfd.model.CavityResponse;
+import org.jlab.rfd.model.Comment;
 import org.jlab.rfd.model.CryomoduleType;
 import org.jlab.rfd.model.ModAnodeHarvester.CavityGsetData;
 import org.jlab.rfd.model.TimeUnit;
 
 /**
- * Returns null if timestamp is later than today
+ * This service object returns objects related to Cryocavity information in a number of different formats.
  * @author adamc
  */
 public class CavityService {
@@ -49,9 +47,13 @@ public class CavityService {
     // Caches getCavityData output.  The cached HashSets should be inserted with Collecitons.unmodifiableMap() to be safe.
     private static final ConcurrentHashMap<String, Set<CavityDataPoint>> CAVITY_CACHE = new ConcurrentHashMap<>();
 
-    public Set<CavityDataPoint> getCavityData(Date timestamp) throws IOException, ParseException, SQLException {
+    public Set<CavityResponse> getCavityData(Date timestamp) throws IOException, ParseException, SQLException {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        // Get the comments up through the end of the day of the specified date.  Then attach the comments to the cached
+        // cavity data points later on.
+        CommentService cs = new CommentService();
+        Map<String, SortedSet<Comment>> comments = cs.getCommentsByTopic(null, null, null, DateUtil.getEndOfDay(timestamp), null);
         
         if ( timestamp.after(new Date()) ) {
             return null;
@@ -64,7 +66,8 @@ public class CavityService {
         // Chech the cache.  If not there, run the query, build the results, check that somebody else hasn't already inserted this
         // into the cache, then add the query result to the cache.
         if (CAVITY_CACHE.containsKey(cavityQuery)) {
-            Set<CavityDataPoint> out = CAVITY_CACHE.get(cavityQuery);
+            Set<CavityDataPoint> temp = CAVITY_CACHE.get(cavityQuery);
+            Set<CavityResponse> out = this.createCommentResponseSet(temp, comments);
             return out;
         } else {
 
@@ -193,12 +196,32 @@ public class CavityService {
             }
 
             // In case somebody has already inserted it use putIfAbsent.
-            CAVITY_CACHE.putIfAbsent(cavityQuery, Collections.unmodifiableSet(data));            
-            return CAVITY_CACHE.get(cavityQuery);
+            CAVITY_CACHE.putIfAbsent(cavityQuery, Collections.unmodifiableSet(data));
+            
+            return this.createCommentResponseSet(CAVITY_CACHE.get(cavityQuery), comments);
         }
 
     }
 
+    /**
+     * Utility function for creating a set of CavityResponse objects.  Grabs the latest comment for each comment and adds it
+     * to the CavityResponse.  Note: The CavityDataPoints and the Comments should be from the same date for this to make sense.
+     * @param cavities The CavityDataPoints for a given date
+     * @param comments The comments split by topic (getCommentsByTopic) up until the end of the requested date
+     * @return 
+     */
+    private Set<CavityResponse> createCommentResponseSet(Set<CavityDataPoint> cavities, Map<String, SortedSet<Comment>> comments) {
+        Set<CavityResponse> cr = new HashSet<>();
+        for(CavityDataPoint cdp : cavities) {
+            SortedSet<Comment> temp = comments.get(cdp.getCavityName());
+            if ( temp == null ) {
+                cr.add(new CavityResponse(cdp, null));
+            } else {
+                cr.add(new CavityResponse(cdp, temp.first()));
+            }
+        }
+        return cr;
+    }
     
     /*
     * If end is for future date, set it for now.  Data isn't valid for future dates, but some of our data services (CED, MYA) give results anyway.
@@ -247,4 +270,6 @@ public class CavityService {
         }
         return span;
     }
+        
+
 }

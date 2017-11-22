@@ -10,6 +10,9 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import org.jlab.rfd.business.util.CebafNames;
 
 /**
@@ -17,7 +20,9 @@ import org.jlab.rfd.business.util.CebafNames;
  * in time. This includes MYA data like cavity GSET, CED data like
  * ModAnodeVoltage or CryoModule ModuleType, or custom database data like the
  * ModAnodeHarvester data that shows the difference in trips and GSET with and
- * without any CED ModAnode voltages.
+ * without any CED ModAnode voltages. Note: This object contains historical data that can easily be cached and doesn't
+ * change once set.  CavityResponse should be used to respond to queries of cavity data, espeically if the response 
+ * is a value that needs to vary over a date (since the cache is effectively keyed on date).
  *
  * @author adamc
  */
@@ -46,6 +51,7 @@ public class CavityDataPoint implements Cloneable {
 
     /**
      * Copy constructor
+     *
      * @param cdp Object to base th copy on
      */
     public CavityDataPoint(CavityDataPoint cdp) {
@@ -171,4 +177,71 @@ public class CavityDataPoint implements Cloneable {
         return tunerBad;
     }
 
+    public JsonObject toJson() {
+        JsonObjectBuilder cavBuilder = Json.createObjectBuilder();
+        cavBuilder.add("name", cavityName).add("linac", linacName.toString());
+        // The json builder throws an exception on Null or Double.NaN.  This seemed like the smartest way to handle it.
+        if (gset != null) {
+            cavBuilder.add("gset", gset.doubleValue());
+        } else {
+            cavBuilder.add("gset", "");
+        }
+        if (modAnodeVoltage != null) {
+            cavBuilder.add("modAnodeVoltage_kv", modAnodeVoltage.doubleValue());
+        } else {
+            cavBuilder.add("modAnodeVoltage_kv", "");
+        }
+        if (odvh != null) {
+            cavBuilder.add("odvh", odvh.doubleValue());
+        } else {
+            cavBuilder.add("odvh", "");
+        }
+        if (q0 != null) {
+            cavBuilder.add("q0", q0);
+        } else {
+            cavBuilder.add("q0", "");
+        }
+
+        if (qExternal != null) {
+            cavBuilder.add("qExternal", qExternal);
+        } else {
+            cavBuilder.add("qExternal", "");
+        }
+        if (maxGset != null) {
+            cavBuilder.add("maxGset", maxGset.doubleValue());
+        } else {
+            cavBuilder.add("maxGset", "");
+        }
+        if (opsGsetMax != null) {
+            cavBuilder.add("opsGsetMax", opsGsetMax.doubleValue());
+        } else {
+            cavBuilder.add("opsGsetMax", "");
+        }
+        if (tripOffset != null) {
+            cavBuilder.add("tripOffset", tripOffset.doubleValue());
+        } else {
+            cavBuilder.add("tripOffset", "");
+        }
+        if (tripSlope != null) {
+            cavBuilder.add("tripSlope", tripSlope.doubleValue());
+        } else {
+            cavBuilder.add("tripSlope", "");
+        }
+        if (length!= null) {
+            cavBuilder.add("length", length.doubleValue());
+        } else {
+            cavBuilder.add("length", "");
+        }
+        cavBuilder.add("bypassed", bypassed);
+        cavBuilder.add("tunerBad", tunerBad);
+
+        // Some of these will have ModAnodeHarvester data, but definitely not Injector cavities
+        if (modAnodeHarvesterGsetData != null) {
+            cavBuilder.add("modAnodeHarvester", modAnodeHarvesterGsetData.toJson());
+        }
+
+        cavBuilder.add("moduleType", cryomoduleType.toString()).add("epicsName", epicsName);
+
+        return cavBuilder.build();
+    }
 }

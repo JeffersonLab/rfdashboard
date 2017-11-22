@@ -41,7 +41,7 @@ public class Comment implements Comparable<Comment> {
         return content;
     }
 
-    public JsonObject toJsonObject() {
+    public JsonObject toJson() {
         return Json.createObjectBuilder()
                 .add("username", username)
                 .add("timestamp", DateUtil.formatDateYMDHMS(timestamp))
