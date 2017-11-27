@@ -30,6 +30,7 @@ jlab.tableSorter.initTable = function (widgetId) {
     $table.tablesorter({
         headerTemplate: '{content} {icon}', // new in v2.7. Needed to add the bootstrap icon!
         theme: "default",
+        sortList: [[1,0]],
         widthFixed: false,
         sortReset: true,
         showProcessing: true,
