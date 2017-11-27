@@ -256,45 +256,6 @@ jlab.util.createHTMLTable = function (array) {
     return ts;
 };
 
-// Note: to be used with a tablesorter widget
-//jlab.util.createTableSorterTable = function (tableId, contents) {
-//    if (typeof contents.data === "undefined") {
-//        console.log("No data supplied to createTableSorterTable");
-//        return;
-//    }
-//    var data = contents.data;
-//    var sortList = contents.sortList || [[0, 0]]; // Default to first column ascending
-//
-//    // Build the table HTML
-//    var tableString = "<table class=\"tablesorter\">";
-//    for (var i = 0; i < data.length; i++) {
-//        if (i === 0) {
-//
-//            // Header row
-//            tableString += "<thead><tr>";
-//            for (var j = 0; j < data[i].length; j++) {
-//                tableString += "<th>" + data[i][j] + "</th>";
-//            }
-//            tableString += "</tr></thead><tbody>";
-//        } else {
-//
-//            // Body rows
-//            tableString += "<tr>";
-//            for (var j = 0; j < data[i].length; j++) {
-//                tableString += "<td>" + data[i][j] + "</td>";
-//            }
-//            tableString += "</tr>";
-//        }
-//    }
-//
-//    // Append the table HTML
-//    $("#" + tableId + "-table").append(tableString);
-//    // Setup the sortable functionality
-//    $(".tablesorter")
-//            .tablesorter({"sortList": sortList}) // sort on the first column (asc)
-//            .tablesorterPager({container: $("#" + tableId + "-pager")});
-//};
-
 
 // Note: to be used with a tablesorter widget
 jlab.util.createTableSorterTable = function (widgetId, contents) {
@@ -303,7 +264,6 @@ jlab.util.createTableSorterTable = function (widgetId, contents) {
         return;
     }
     var data = contents.data;
-    var sortList = contents.sortList || [[0, 0]]; // Default to first column ascending
 
     // Build the table HTML
     var tableString = "";
