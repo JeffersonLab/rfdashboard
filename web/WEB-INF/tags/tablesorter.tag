@@ -109,7 +109,9 @@
         </div>
         <div class="table-panel">
             <div class="ajax-loader" style="display:none;"><img src="${pageContext.request.contextPath}/resources/img/ajax_loader_gray_48.gif"/></div>
-            <table class="tablesorter"></table>
+            <table class="tablesorter">
+                <jsp:doBody/>
+            </table>
         </div>
     </div>
 </div>
