@@ -60,9 +60,7 @@ public class DataFormatter {
         if (list != null) {
             for (String item : list) {
                 if (item != null) {
-                    System.out.println(item);
                     out.put(item, item);
-                    System.out.println(out.get(item));
                 }
             }
         }
