@@ -69,6 +69,10 @@ jlab.tableSorter.initCommentDialogs = function (widgetId) {
             if (!jlab.tableSorter.dialogTracker.hasOwnProperty(dialogId)) {
                 // The comments dialog uses a different datasource, has a JSP-staged div, and provides "write" functionality
                 if (prop === "comments") {
+                    // Bind the filter functionality to the comment filter button
+                    $("#" + dialogId).on("click", ".comment-filter-button", function () {
+                        jlab.tableSorter.filterComments(dialogId, name);
+                    });
 
                     // Add the latest comment table to the .history-panel
                     jlab.tableSorter.refreshRFDCommentHistory(dialogId, name);
@@ -145,7 +149,7 @@ jlab.tableSorter.refreshRFDCommentHistory = function (dialogId, topic) {
 
 };
 
-
+// This function is used to submit comments from the RFD Comments dialog window launched from tablesorter table.
 jlab.tableSorter.submitComment = function (dialogId) {
 
     // This prevents impatient "clicky" people from submitting the same comment multiple times.
@@ -185,6 +189,53 @@ jlab.tableSorter.submitComment = function (dialogId) {
     status.always(function () {
         $("#" + dialogId + " textarea").val("");
         jlab.requestEnd();
+    });
+};
+
+// This submits the filters to the comment-filter controller which updates the sessions with the specified filters.  Future comment
+// request should reflect this change.
+jlab.tableSorter.filterComments = function (dialogId, topic) {
+    if (jlab.isRequest()) {
+        window.console && console.log("Filter ajax in progress");
+        return;
+    }
+
+    jlab.requestStart();
+    var include = $("#" + dialogId + " .include-select").val();
+    var exclude = $("#" + dialogId + " .exclude-select").val();
+    
+    console.log(include, exclude);
+    var data = {};
+
+    // Some versions of jQuery return null if nothing is selected, others return null
+    if (include !== null && include.length > 0) {
+        data.include = include;
+    }
+    if (exclude !== null && exclude.length > 0) {
+        data.exclude = exclude;
+    }
+
+    var filter = $.ajax({
+        url: jlab.util.commentFilterAjaxUrl,
+        data: data,
+        method: "POST",
+        dataType: "json",
+        traditional: true
+    });
+
+    // If it works, then the user now has a session with a comment filters.  Refresh the comment history to reflect.
+    filter.done(function (data, textStatus, jqXHR) {
+        window.console && console.log(data);
+        jlab.tableSorter.refreshRFDCommentHistory(dialogId, topic);
+    });
+
+    filter.fail(function (jqXHR, textStatus, errorThrown) {
+        window.console && console.log("Filter submission failed.  textStatus:  " + textStatus + " -- errorThrown: " + errorThrown);
+        alert("Error submitting filter");
+    });
+    
+    filter.always(function(){
+       jlab.requestEnd(); 
     });
 };
 

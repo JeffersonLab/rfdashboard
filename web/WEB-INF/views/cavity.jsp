@@ -444,10 +444,33 @@
                         </c:when>
                         <c:otherwise>
                             <div class="message-box">
-                                <a href=<c:url value="/login?returnUrl=${fn:escapeXml(domainRelativeReturnUrl)}"/>>Login To Comment</a>
+                                <a href="<c:url value='/login'><c:param name = 'returnUrl' value = '${domainRelativeReturnUrl}'/></c:url>">Login To Comment</a>
                             </div>
                         </c:otherwise>
                     </c:choose>
+                </div>
+                <div class="comment-filter-form">
+                    <form method ="post" action="'<c:url value="/ajax/comment-filter" context="${pageContext.request.contextPath}"></c:url>'">
+                        <fieldset>
+                            Include Authors:<select class="include-select" name="include" multiple>
+                                <option value="adamc">adamc</option>
+                                <option value="testuser">testuser</option>
+                                <option value="testuser1">testuser1</option>
+                                <option value="testuser2">testuser2</option>
+                                <option value="testuser3">testuser3</option>
+                                <option value="testuser123">testuser123</option>
+                            </select>
+                            Exclude Authors:<select class="exclude-select" name="exclude" multiple>
+                                <option value="adamc">adamc</option>
+                                <option value="testuser">testuser</option>
+                                <option value="testuser1">testuser1</option>
+                                <option value="testuser2">testuser2</option>
+                                <option value="testuser3">testuser3</option>
+                                <option value="testuser123">testuser123</option>
+                            </select>
+                            <button type="button" class="comment-filter-button">Filter</button>
+                        </fieldset>
+                    </form>
                 </div>
                 <div class="history-panel"></div>
             </div>

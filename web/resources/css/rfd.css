@@ -916,7 +916,7 @@ textarea.comment-input {
     width: 99.8%;  
     height: 100%;
 }
-.update-history-dialog .comment-form {
+.update-history-dialog .comment-form .comment-filter-form {
     width: 100%;
     font-size: 75%;
 }
