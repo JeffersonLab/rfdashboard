@@ -7,6 +7,8 @@
 var jlab = jlab || {};
 jlab.tableSorter = jlab.tableSorter || {};
 
+jlab.tableSorter.dialogTracker = jlab.tableSorter.dialogTracker || {};
+
 jlab.tableSorter.initTable = function (widgetId) {
 
     $table = $(widgetId + " table");
@@ -30,7 +32,7 @@ jlab.tableSorter.initTable = function (widgetId) {
     $table.tablesorter({
         headerTemplate: '{content} {icon}', // new in v2.7. Needed to add the bootstrap icon!
         theme: "default",
-        sortList: [[1,0]],
+        sortList: [[1, 0]],
         widthFixed: false,
         sortReset: true,
         showProcessing: true,
@@ -64,36 +66,128 @@ jlab.tableSorter.initCommentDialogs = function (widgetId) {
 
         $(this).click(function () {
 
-            if ($("#" + dialogId).length === 0) {
+            if (!jlab.tableSorter.dialogTracker.hasOwnProperty(dialogId)) {
+                // The comments dialog uses a different datasource, has a JSP-staged div, and provides "write" functionality
                 if (prop === "comments") {
-                    $("body").append("<div id='" + dialogId + "' class='dialog update-history-dialog' title='" + name + " CED Comments'</div>");
-                    var promise = $.getJSON(jlab.util.commentsAjaxUrl, {"topic": name});
-                    promise.done(function (json) {
-                        var tableArray = jlab.tableSorter.rfdCommentsToArray(json);
-                        $("#" + dialogId).append(jlab.util.createHTMLTable(tableArray));
-                    }).fail(function (jqXHR, textStatus, errorThrown) {
-                        $("#" + dialogId).append("Error querying data");
-                        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
-                    });
+
+                    // Add the latest comment table to the .history-panel
+                    jlab.tableSorter.refreshRFDCommentHistory(dialogId, name);
+
+                    // Launch the dialog window
                     $("#" + dialogId).dialog(dialogProperties);
                 } else {
+                    // All other property "comment" (i.e., update histories) dialogs use the CED datasource, do not have a JSP-staged div, 
+                    // and do not provide "write" functionality
+
+                    // Update the tracker
+                    jlab.tableSorter.dialogTracker[dialogId] = true;
+
+                    // Create a div for the dialog
                     $("body").append("<div id='" + dialogId + "' class='dialog update-history-dialog' title='" + name + " " + prop + " Update History'</div>");
+
+                    // Get a fresh copy of the update history data
                     var promise = $.getJSON(jlab.util.cedUpdateHistoryAjaxUrl, {"elem": name, "prop": prop});
+
+                    // If successful, add a table with the data
                     promise.done(function (json) {
                         var tableArray = jlab.tableSorter.updateHistoryToArray(json);
                         $("#" + dialogId).append(jlab.util.createHTMLTable(tableArray));
-                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                    });
+
+                    // If it fails, add an error message
+                    promise.fail(function (jqXHR, textStatus, errorThrown) {
                         $("#" + dialogId).append("Error querying data");
                         console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
                         console.log("responseText: " + jqXHR.responseText);
                     });
+
+                    // Launch the dialog window
                     $("#" + dialogId).dialog(dialogProperties);
                 }
             }
+
             $("#" + dialogId).dialog("open");
         });
     });
 };
+
+/**
+ * This method is used to refresh the RFD Comment History in the RFD Comment dialogs.  Can be used to "initialize" as well
+ * since this drops all of the content in the $("#" + dialogId + " .history-panel") div, then adds the content.
+ * @param {type} dialogId The ID of the dialog div
+ * @param {type} name The name of the cavity/topic that is being commented upon
+ * @returns {undefined} Nothing
+ */
+jlab.tableSorter.refreshRFDCommentHistory = function (dialogId, topic) {
+
+    // Don't update the tracker.  Instead drop the comment table and recreate it
+    $("#" + dialogId + " .history-panel").html("");
+
+    // Get a fresh copy of the comment history
+    var promise = $.getJSON(jlab.util.commentsAjaxUrl, {"topic": topic});
+
+    // If successful, add a table with comments
+    promise.done(function (json) {
+        var tableArray = jlab.tableSorter.rfdCommentsToArray(json);
+        $("#" + dialogId + " .history-panel").append(jlab.util.createHTMLTable(tableArray));
+    })
+            ;
+    // If it fails, add an error mesage
+    promise.fail(function (jqXHR, textStatus, errorThrown) {
+        $("#" + dialogId + " .history-panel").append("Error querying data");
+        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
+    });
+
+    // The comment dialog also includes a form for adding a new comment.  Add the listener that submits the comments
+    $("#" + dialogId).on("click", "#" + topic + "-comment-button", function () {
+        jlab.tableSorter.submitComment(topic + "-comments-dialog");
+    });
+
+};
+
+
+jlab.tableSorter.submitComment = function (dialogId) {
+
+    // This prevents impatient "clicky" people from submitting the same comment multiple times.
+    if (jlab.isRequest()) {
+        window.console && console.log("Ajax in progress for " + dialogId + " comment");
+        return;
+    }
+    jlab.requestStart();
+
+    var topic = $("#" + dialogId + " input").val();
+    var comment = $("#" + dialogId + " textarea").val();
+
+    var status = $.ajax({
+        url: jlab.util.commentsAjaxUrl,
+        type: "POST",
+        data: {
+            topic: topic,
+            comment: comment
+        },
+        dataType: "json"
+    });
+
+    // If it works, throw an alert about success and refresh the comment history to show the recent addition
+    status.done(function (data, textStatus, jqXHR) {
+        alert("Comment submitted");
+        jlab.tableSorter.refreshRFDCommentHistory(dialogId, topic);
+    });
+
+    // If it fails, throw an alert, put some error details on the console, but don't refresh the history since that might fail too.
+    status.fail(function (jqXHR, textStatus, errorThrown) {
+        console.log("Comment submission failed: " + textStatus + " - " + errorThrown);
+        console.log("Response text: " + jqXHR.responseText);
+        alert("Comment submission failed.");
+    });
+
+    // Clear the comment box and end the request
+    status.always(function () {
+        $("#" + dialogId + " textarea").val("");
+        jlab.requestEnd();
+    });
+};
+
 
 /*
  * Turn a JSON response from ajax/ced-update-history into an array, one update per-line.  The element's comment field should

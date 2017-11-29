@@ -1,4 +1,3 @@
-
 package org.jlab.rfd.business.service;
 
 import java.io.IOException;
@@ -35,7 +34,9 @@ import org.jlab.rfd.model.ModAnodeHarvester.CavityGsetData;
 import org.jlab.rfd.model.TimeUnit;
 
 /**
- * This service object returns objects related to Cryocavity information in a number of different formats.
+ * This service object returns objects related to Cryocavity information in a
+ * number of different formats.
+ *
  * @author adamc
  */
 public class CavityService {
@@ -54,8 +55,8 @@ public class CavityService {
         // cavity data points later on.
         CommentService cs = new CommentService();
         Map<String, SortedSet<Comment>> comments = cs.getCommentsByTopic(null, null, null, DateUtil.getEndOfDay(timestamp), null);
-        
-        if ( timestamp.after(new Date()) ) {
+
+        if (timestamp.after(new Date())) {
             return null;
         }
 
@@ -73,7 +74,7 @@ public class CavityService {
 
             Map<String, CryomoduleType> cmTypes = new CryomoduleService().getCryoModuleTypes(timestamp);
             Set<CavityDataPoint> data = new HashSet<>();
-            
+
             //LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cavityQuery);
             URL url = new URL(CED_INVENTORY_URL + cavityQuery);
             InputStream in = url.openStream();
@@ -103,39 +104,39 @@ public class CavityService {
                     name2Epics.put(cavityName, epicsName);
                 }
                 MyaService ms = new MyaService();
-                
+
                 // These could return null if timestamp is a future date.  Shouldn't happen as we check end before, but let''s check
                 // and throw an exception if it does happen.
                 Map<String, BigDecimal> gsets = ms.getCavityMyaData(timestamp, name2Epics, "GSET");
-                if ( gsets == null ) {
+                if (gsets == null) {
                     throw new RuntimeException("MyaService returned null.  Likely requesting data from future date.");
                 }
 
                 // Get the ModAnodeHarvesterData
                 ModAnodeHarvesterService mahs = new ModAnodeHarvesterService();
                 Map<String, CavityGsetData> cgds = mahs.getCavityGsetData(timestamp);
-                
+
                 for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
                     // Optional in CED - objects initialized to null are not required to be displayed on dashboard
                     BigDecimal mav = new BigDecimal(0);  // No ModAnode property indicates a zero modulating anode voltage is applied
-                                                                              // CED units: kilovolts  
+                    // CED units: kilovolts  
                     boolean tunerBad = false; // CED note: false unless set
                     boolean bypassed = false; // CED note: false unless set
                     BigDecimal tripOffset = null;   // CED units: trips per shift
                     BigDecimal tripSlope = null;   // CED units: trips per shift
                     BigDecimal opsGsetMax = null;  // CED units: MeV/m
-                    
+
                     // Required in CED
                     String q0;
                     String qExternal;
                     BigDecimal maxGset; // CED units: MeV/m
                     BigDecimal length; // CED units: meters
-                    
+
                     String cavityName = element.getString("name");
                     cmType = cmTypes.get(cavityName.substring(0, 4));
 
                     JsonObject properties = element.getJsonObject("properties");
-                    
+
                     // Check for the existence of CED optional parameters
                     if (properties.containsKey("TunerBad")) {
                         tunerBad = true;
@@ -168,25 +169,24 @@ public class CavityService {
                     qExternal = properties.getString("Qexternal");
                     maxGset = new BigDecimal(properties.getString("MaxGSET"));
                     length = new BigDecimal(properties.getString("Length"));
-                    
-                    
+
                     BigDecimal odvh = maxGset;
                     // The ops drive high (odvh) is set to the opsGsetMax if it exists or GsetMax otherwise
-                    if ( opsGsetMax != null ) {
+                    if (opsGsetMax != null) {
                         odvh = opsGsetMax;
                     }
 
                     // If we got back ModAnodeHarvester data for this timestamp, make sure that we have data for every cavity.
                     // We either need a whole data set or throw an error.  Except that we expect this behavior for injector cavities
                     // since ModAnodeHarvester only runs against the North and South Linacs... ugh ...
-                    if ( cgds != null && cgds.get(epicsName) == null && ( ! Pattern.matches("^R0..", epicsName) ) ) {
+                    if (cgds != null && cgds.get(epicsName) == null && (!Pattern.matches("^R0..", epicsName))) {
                         throw new RuntimeException("ModAnodeHarvester data missing for " + epicsName + " on '" + timestamp);
                     }
-                    if ( cgds == null ) {
+                    if (cgds == null) {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
-                                odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, 
+                                odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
                                 length, null, bypassed, tunerBad));
-                        
+
                     } else {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
                                 odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
@@ -197,24 +197,28 @@ public class CavityService {
 
             // In case somebody has already inserted it use putIfAbsent.
             CAVITY_CACHE.putIfAbsent(cavityQuery, Collections.unmodifiableSet(data));
-            
+
             return this.createCommentResponseSet(CAVITY_CACHE.get(cavityQuery), comments);
         }
 
     }
 
     /**
-     * Utility function for creating a set of CavityResponse objects.  Grabs the latest comment for each comment and adds it
-     * to the CavityResponse.  Note: The CavityDataPoints and the Comments should be from the same date for this to make sense.
+     * Utility function for creating a set of CavityResponse objects. Grabs the
+     * latest comment for each comment and adds it to the CavityResponse. Note:
+     * The CavityDataPoints and the Comments should be from the same date for
+     * this to make sense.
+     *
      * @param cavities The CavityDataPoints for a given date
-     * @param comments The comments split by topic (getCommentsByTopic) up until the end of the requested date
-     * @return 
+     * @param comments The comments split by topic (getCommentsByTopic) up until
+     * the end of the requested date
+     * @return
      */
     private Set<CavityResponse> createCommentResponseSet(Set<CavityDataPoint> cavities, Map<String, SortedSet<Comment>> comments) {
         Set<CavityResponse> cr = new HashSet<>();
-        for(CavityDataPoint cdp : cavities) {
+        for (CavityDataPoint cdp : cavities) {
             SortedSet<Comment> temp = comments.get(cdp.getCavityName());
-            if ( temp == null ) {
+            if (temp == null) {
                 cr.add(new CavityResponse(cdp, null));
             } else {
                 cr.add(new CavityResponse(cdp, temp.first()));
@@ -222,10 +226,10 @@ public class CavityService {
         }
         return cr;
     }
-    
+
     /*
     * If end is for future date, set it for now.  Data isn't valid for future dates, but some of our data services (CED, MYA) give results anyway.
-    */
+     */
     public CavityDataSpan getCavityDataSpan(Date start, Date end, TimeUnit timeUnit) throws ParseException, IOException, SQLException {
         int timeInt;
         switch (timeUnit) {
@@ -236,7 +240,7 @@ public class CavityService {
             default:
                 timeInt = Calendar.WEEK_OF_YEAR;
         }
-        
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         // Convert date objects to have no hh:mm:ss ... portion
         Date curr = sdf.parse(sdf.format(start));
@@ -244,13 +248,13 @@ public class CavityService {
         Calendar cal = Calendar.getInstance();
         cal.setTime(curr);
 
-        if ( end.after(new Date()) ) {
+        if (end.after(new Date())) {
             e = sdf.parse(sdf.format(new Date()));
         }
 
         CavityDataSpan span = new CavityDataSpan();
 
-        while ( ! curr.after(e)) {
+        while (!curr.after(e)) {
             span.put(curr, this.getCavityData(curr));
             cal.add(timeInt, 1);
             curr = cal.getTime();
@@ -258,18 +262,16 @@ public class CavityService {
 
         return span;
     }
-    
-        public CavityDataSpan getCavityDataSpan(List<Date> dates) throws ParseException, IOException, SQLException {
-        
+
+    public CavityDataSpan getCavityDataSpan(List<Date> dates) throws ParseException, IOException, SQLException {
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         CavityDataSpan span = new CavityDataSpan();
-        for(Date d : dates) {
+        for (Date d : dates) {
             // Convert date objects to have no hh:mm:ss ... portion
             d = sdf.parse(sdf.format(d));
             span.put(d, this.getCavityData(d));
         }
         return span;
     }
-        
-
 }

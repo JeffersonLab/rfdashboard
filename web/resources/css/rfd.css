@@ -908,3 +908,21 @@ tablesorter tag styles
     position: absolute;
     right: 0px;
 }
+/* 
+The comment-input textarea sizes a little weird.  The 99.8% looks right on my box,
+but there isn't a garuantee on others.  Either way, this gets the look very close.
+*/
+textarea.comment-input {
+    width: 99.8%;  
+    height: 100%;
+}
+.update-history-dialog .comment-form {
+    width: 100%;
+    font-size: 75%;
+}
+.comment-form form {
+    width: 100%;
+}
+.comment-form .li-value{
+    width: 100%;
+}

@@ -11,7 +11,6 @@
 <c:set var="title" value="Cavity Details" />
 <t:page title="${title}" pageStart="${requestScope.start}" pageEnd="${requestScope.end}"> 
     <jsp:attribute name="stylesheets">
-        <!--<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/tablesorter-widget.css"/>-->
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/cavity.css"/>
     </jsp:attribute>
     <jsp:attribute name="scripts">
@@ -426,27 +425,46 @@
             <hr>
         </div>
         <t:tablesorter tableTitle="Cavity Properties (${requestScope.start} vs ${requestScope.end})" widgetId="details-table" filename="${requestScope.start}_${requestScope.end}_cavProps.csv"></t:tablesorter>
-            <script>
 
-                // Not terribly elegant, but need to get request parameters into javascript for further use.
-                var jlab = jlab || {};
-                jlab.start = "${requestScope.start}";
-                jlab.end = "${requestScope.end}";
+        <%-- 
+            Pre populated a bunch of comment forms that are either links to login or a functioning comment form.
+            Seemed safer/easier to make the "if logged in" determination on the server side, but the server side also
+            checks when you submit.
+        --%>
+        <c:forEach var="name" items="${requestScope.cavityNames}">
+            <div id="${name}-comments-dialog" class="dialog update-history-dialog" title="${name} RFD Comments">
+                <div class="comment-form">
+                    <c:choose>
+                        <c:when test="${pageContext.request.userPrincipal ne null}">
+                                <form method="post" action='<c:url value="/ajax/comments" context="${pageContext.request.contextPath}"></c:url>'>
+                                    <input type="text" value="${name}" name="topic" style="display: none;" disabled>
+                                    <div class="li-key">New Comment:<br><button type="button" id="${name}-comment-button">Submit</button></div>
+                                    <div class="li-value"><textarea class="comment-input" draggable="true" name="content"></textarea></div>
+                                </form>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="message-box">
+                                <a href=<c:url value="/login?returnUrl=${fn:escapeXml(domainRelativeReturnUrl)}"/>>Login To Comment</a>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+                <div class="history-panel"></div>
+            </div>
+        </c:forEach>
+        <script>
 
-                jlab.properties = new Array();
-            <c:forEach var="prop" items="${properties}">
-                jlab.properties.push("${prop.key}");
-            </c:forEach>
-
-                jlab.linacs = new Array();
-            <c:forEach var="linac" items="${linacs}">
-                jlab.linacs.push("${linac.key}");
-            </c:forEach>
-
-                jlab.cmtypes = new Array();
-            <c:forEach var="cmtype" items="${cmtypes}">
-                jlab.cmtypes.push("${cmtype.key}");
-            </c:forEach>
+            // Not terribly elegant, but need to get request parameters into javascript for further use.
+            var jlab = jlab || {};
+            jlab.start = "${requestScope.start}";
+            jlab.end = "${requestScope.end}";
+            jlab.properties = new Array();
+            <c:forEach var="prop" items="${properties}">jlab.properties.push("${prop.key}");</c:forEach>
+            jlab.linacs = new Array();
+            <c:forEach var="linac" items="${linacs}">jlab.linacs.push("${linac.key}");</c:forEach>
+            jlab.cmtypes = new Array();
+            <c:forEach var="cmtype" items="${cmtypes}">jlab.cmtypes.push("${cmtype.key}");</c:forEach>
+            jlab.cavityData = ${requestScope.cavityData};
         </script>
     </jsp:body>
 </t:page>
