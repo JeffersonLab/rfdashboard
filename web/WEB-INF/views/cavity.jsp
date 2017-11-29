@@ -89,7 +89,7 @@
                                             <input type="checkbox" id="QTR" name="cmtypes" value="QTR" checked/>
                                         </c:when>
                                         <c:when test="${not cmtypes.containsKey('QTR')}">
-                                            <input type="checkbox" id="QTR" name="cmtypes" value="QTR" checked/>
+                                            <input type="checkbox" id="QTR" name="cmtypes" value="QTR" />
                                         </c:when>
                                     </c:choose>
                                 </div>
@@ -104,7 +104,7 @@
                                             <input type="checkbox" id="c25" name="cmtypes" value="C25" checked/>
                                         </c:when>
                                         <c:when test="${not cmtypes.containsKey('C25')}">
-                                            <input type="checkbox" id="c25" name="cmtypes" value="C25" checked/>
+                                            <input type="checkbox" id="c25" name="cmtypes" value="C25" />
                                         </c:when>
                                     </c:choose>
                                 </div>
