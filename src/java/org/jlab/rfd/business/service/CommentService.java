@@ -27,7 +27,7 @@ public class CommentService {
 
     private static final Logger LOGGER = Logger.getLogger(CommentService.class.getName());
 
-    public SortedSet<Comment> getComments(List<String> users, List<String> topics, Date start, Date end, Integer limit) throws SQLException, ParseException {
+    public SortedSet<Comment> getComments(List<String> users, List<String> excludeUsers, List<String> topics, Date start, Date end, Integer limit) throws SQLException, ParseException {
 
         SortedSet<Comment> comments = new TreeSet<>();
         Connection conn = null;
@@ -73,13 +73,15 @@ public class CommentService {
                 String topic = rs.getString(3);
 
                 if ((users == null || users.contains(username)) && (topics == null || topics.contains(topic))) {
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTimeInMillis(rs.getTimestamp(1).getTime());
-                    Date time = cal.getTime();
+                    if (excludeUsers == null || !excludeUsers.contains(username)) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTimeInMillis(rs.getTimestamp(1).getTime());
+                        Date time = cal.getTime();
 
-                    String content = rs.getString(4);
+                        String content = rs.getString(4);
 
-                    comments.add(new Comment(username, time, topic, content));
+                        comments.add(new Comment(username, time, topic, content));
+                    }
                 }
             }
         } finally {
@@ -116,9 +118,10 @@ public class CommentService {
         LOGGER.log(Level.INFO, "Created comment for user {0} - {1}", new Object[]{username, content});
     }
 
-    public Map<String, SortedSet<Comment>> getCommentsByTopic(List<String> users, List<String> topics, Date start, Date end, Integer limit) throws SQLException, ParseException {
+    public Map<String, SortedSet<Comment>> getCommentsByTopic(List<String> users, List<String> excludeUsers, List<String> topics, 
+            Date start, Date end, Integer limit) throws SQLException, ParseException {
         Map<String, SortedSet<Comment>> sorted = new HashMap<>();
-        SortedSet<Comment> comments = this.getComments(users, topics, start, end, limit);
+        SortedSet<Comment> comments = this.getComments(users, excludeUsers, topics, start, end, limit);
         for (Comment c : comments) {
             if (!sorted.containsKey(c.getTopic())) {
                 sorted.put(c.getTopic(), new TreeSet<>());
@@ -130,6 +133,6 @@ public class CommentService {
 
     // This is a simplified wrapper for getting all comments by topic
     public Map<String, SortedSet<Comment>> getCommentsByTopic() throws SQLException, ParseException {
-        return this.getCommentsByTopic(null, null, null, null, null);
+        return this.getCommentsByTopic(null, null, null, null, null, null);
     }
 }

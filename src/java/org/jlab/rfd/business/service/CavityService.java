@@ -54,7 +54,7 @@ public class CavityService {
         // Get the comments up through the end of the day of the specified date.  Then attach the comments to the cached
         // cavity data points later on.
         CommentService cs = new CommentService();
-        Map<String, SortedSet<Comment>> comments = cs.getCommentsByTopic(null, null, null, DateUtil.getEndOfDay(timestamp), null);
+        Map<String, SortedSet<Comment>> comments = cs.getCommentsByTopic(null, null, null, null, DateUtil.getEndOfDay(timestamp), null);
 
         if (timestamp.after(new Date())) {
             return null;

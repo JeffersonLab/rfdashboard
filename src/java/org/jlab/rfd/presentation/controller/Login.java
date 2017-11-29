@@ -65,6 +65,7 @@ public class Login extends HttpServlet {
                 if (returnUrl == null || returnUrl.isEmpty()) {
                     returnUrl = request.getContextPath();
                 }
+                System.out.println(response.encodeRedirectUrl(returnUrl));
                 response.sendRedirect(response.encodeRedirectURL(returnUrl));
             } catch (ServletException e) {
                 /* either: 

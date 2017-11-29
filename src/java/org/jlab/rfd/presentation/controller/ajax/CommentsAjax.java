@@ -23,6 +23,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.jlab.rfd.business.service.CommentService;
 import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.business.util.SessionUtil;
@@ -103,11 +104,15 @@ public class CommentsAjax extends HttpServlet {
         String error = null;
 
         // If reading, then we can get everything or filter by username, topic, and timestamps (start/end).  Check for these
-        // options and pass them on to the proper service
+        // options and pass them on to the proper service.  Another layer of filter is handled by sessions.  If users are requested 
+        // using the user parameter, then use that list and ignore the session filters.  Otherwise, use the session filters.
         List<String> users = null;
-        String user = request.getParameter("user");
-        if (user != null) {
-            users = Arrays.asList(user.split(","));
+        String userParam = request.getParameter("user");
+        if (userParam != null) {
+            users = Arrays.asList(userParam.split(","));
+        } else {
+            HttpSession session = request.getSession();
+            users = (List<String>) session.getAttribute("CommentIncludeFilter");
         }
         List<String> topics = null;
         String topic = request.getParameter("topic");
@@ -174,11 +179,19 @@ public class CommentsAjax extends HttpServlet {
                 CommentService cs = new CommentService();
                 JsonObjectBuilder top = Json.createObjectBuilder();
 
+                // Use the session exclude filter if users were not specifically requested
+                List<String> excludeUsers = null;
+                if (userParam == null) {
+                    excludeUsers = (List<String>) request.getSession().getAttribute("CommentExcludeFilter");
+                }
+
                 // by shouldn't be null since it gets assigned based on 'b' being null or not
                 switch (by) {
                     case "timestamp":
+
                         SortedSet<Comment> commentSet = null;  // null value used in a check below
-                        commentSet = cs.getComments(users, topics, start, end, limit);
+                        commentSet = cs.getComments(users, excludeUsers, topics, start, end, limit);
+
                         top = Json.createObjectBuilder();
                         JsonArrayBuilder jab = Json.createArrayBuilder();
                         if (commentSet != null) {
@@ -191,7 +204,7 @@ public class CommentsAjax extends HttpServlet {
 
                     case "topic":
                         Map<String, SortedSet<Comment>> commentMap = null;
-                        commentMap = cs.getCommentsByTopic(users, topics, start, end, limit);
+                        commentMap = cs.getCommentsByTopic(users, excludeUsers, topics, start, end, limit);
                         for (String topicKey : commentMap.keySet()) {
                             JsonArrayBuilder topicComments = Json.createArrayBuilder();
                             for (Comment com : commentMap.get(topicKey)) {

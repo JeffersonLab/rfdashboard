@@ -126,25 +126,25 @@ public class Cavity extends HttpServlet {
         CavityService cs = new CavityService();
         try {
             CavityDataSpan cds = cs.getCavityDataSpan(dates);
-            
+
             // Quick way to give the cavity data to the clientside javascript
             request.setAttribute("cavityData", cds.toJson().toString());
-            
+
             // Get the set of cavity names for easy access in the JSP
             Set<String> names = new HashSet<>();
             for (CavityResponse cr : cds.get(start)) {
                 names.add(cr.getCavityName());
             }
             // On the odd chance that they have different cavities
-            for (CavityResponse cr : cds.get(end) ) {
+            for (CavityResponse cr : cds.get(end)) {
                 names.add(cr.getCavityName());
             }
             request.setAttribute("cavityNames", names);
-            
+
         } catch (ParseException | SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error querying cavity data", ex);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            throw new ServletException("Error querying cavity data");            
+            throw new ServletException("Error querying cavity data");
         }
 
         request.getRequestDispatcher("/WEB-INF/views/cavity.jsp").forward(request, response);
