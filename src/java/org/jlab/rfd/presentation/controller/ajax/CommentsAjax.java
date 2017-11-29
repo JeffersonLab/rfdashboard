@@ -154,7 +154,6 @@ public class CommentsAjax extends HttpServlet {
         try {
             if (s != null) {
                 start = DateUtil.parseDateStringYMDHMS(s);
-                System.out.println(start.toString());
 
             }
             if (e != null) {
