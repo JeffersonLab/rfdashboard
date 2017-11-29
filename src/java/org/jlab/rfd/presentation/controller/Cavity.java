@@ -146,7 +146,7 @@ public class Cavity extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new ServletException("Error querying cavity data");            
         }
-        System.out.println("HERE");
+
         request.getRequestDispatcher("/WEB-INF/views/cavity.jsp").forward(request, response);
     }
 }
