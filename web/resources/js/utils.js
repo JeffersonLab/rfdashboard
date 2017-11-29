@@ -13,6 +13,7 @@ jlab.util.energyReachUrl = jlab.contextPath + "/ajax/lem-scan";
 jlab.util.cavityAjaxUrl = jlab.contextPath + "/ajax/cavity";
 jlab.util.cedUpdateHistoryAjaxUrl = jlab.contextPath + "/ajax/ced-update-history";
 jlab.util.commentsAjaxUrl = jlab.contextPath + "/ajax/comments";
+jlab.util.commentFilterAjaxUrl = jlab.contextPath + "/ajax/comment-filter";
 
 /* globally enchance String object */
 if (!String.prototype.encodeXml) {
