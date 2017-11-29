@@ -164,10 +164,10 @@
                                 <div class="li-value">
                                     <c:choose>
                                         <c:when test="${linacs.containsKey('north')}">
-                                            <input type="checkbox" id="nlorth" name="linacs" value="north" checked/>
+                                            <input type="checkbox" id="north" name="linacs" value="north" checked/>
                                         </c:when>
                                         <c:when test="${not linacs.containsKey('north')}">
-                                            <input type="checkbox" id="nlorth" name="linacs" value="north" />
+                                            <input type="checkbox" id="north" name="linacs" value="north" />
                                         </c:when>
                                     </c:choose>
                                 </div>
