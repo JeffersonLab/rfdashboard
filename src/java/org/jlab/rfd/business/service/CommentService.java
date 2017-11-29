@@ -29,7 +29,6 @@ public class CommentService {
 
     public SortedSet<Comment> getComments(List<String> users, List<String> topics, Date start, Date end, Integer limit) throws SQLException, ParseException {
 
-        System.out.println(users + " -- " + topics + " -- " + start + " -- " + end + " -- " + limit);
         SortedSet<Comment> comments = new TreeSet<>();
         Connection conn = null;
         PreparedStatement pstmt = null;
