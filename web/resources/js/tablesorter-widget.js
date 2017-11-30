@@ -96,6 +96,7 @@ jlab.tableSorter.initCommentDialogs = function (widgetId) {
                     promise.done(function (json) {
                         var tableArray = jlab.tableSorter.updateHistoryToArray(json);
                         $("#" + dialogId).append(jlab.util.createHTMLTable(tableArray));
+                        $("#" + dialogId + " " + "table").addClass("comments-table");
                     });
 
                     // If it fails, add an error message
@@ -134,6 +135,7 @@ jlab.tableSorter.refreshRFDCommentHistory = function (dialogId, topic) {
     promise.done(function (json) {
         var tableArray = jlab.tableSorter.rfdCommentsToArray(json);
         $("#" + dialogId + " .history-panel").append(jlab.util.createHTMLTable(tableArray));
+        $("#" + dialogId + " .history-panel table").addClass("comments-table");
     })
             ;
     // If it fails, add an error mesage
@@ -203,7 +205,7 @@ jlab.tableSorter.filterComments = function (dialogId, topic) {
     jlab.requestStart();
     var include = $("#" + dialogId + " .include-select").val();
     var exclude = $("#" + dialogId + " .exclude-select").val();
-    
+
     console.log(include, exclude);
     var data = {};
 
@@ -233,9 +235,9 @@ jlab.tableSorter.filterComments = function (dialogId, topic) {
         window.console && console.log("Filter submission failed.  textStatus:  " + textStatus + " -- errorThrown: " + errorThrown);
         alert("Error submitting filter");
     });
-    
-    filter.always(function(){
-       jlab.requestEnd(); 
+
+    filter.always(function () {
+        jlab.requestEnd();
     });
 };
 

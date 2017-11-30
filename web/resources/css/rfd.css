@@ -872,7 +872,8 @@ tablesorter tag styles
 .rfd-tablesorter-widget .table-controls .output-filename {
     width: 19em;
 }
-.update-history-dialog table{
+/*.update-history-dialog table{*/
+table.comments-table{
     text-align: left;
     width: 100%;
     font-size: 75%;
