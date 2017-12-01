@@ -67,6 +67,17 @@ public class DataFormatter {
         return out;
     }
     
+    public static Map<String,String> setToMap(Set<String> set) {
+        Map out = new HashMap<>();
+        if (set != null) {
+            for (String item : set) {
+                if (item != null) {
+                    out.put(item, item);
+                }
+            }
+        }
+        return out;
+    }
     
     /**
      * This function is designed to format a "By Linac", time series data
