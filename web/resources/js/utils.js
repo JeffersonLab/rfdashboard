@@ -320,10 +320,10 @@ jlab.util.compareMapKeySets = function (m1, m2) {
 
     // Check that every key from the first is found in the second.
 //    for (let i = 0; i < m1k.length; i++) {
-    m1.forEach(function(v1, k1) { 
+    m1.forEach(function (v1, k1) {
         nkeys1++;
         var match = false;
-        m2.forEach(function(v2, k2) { 
+        m2.forEach(function (v2, k2) {
             // Don't want to multi count the keys in the inner loop
             if (nkeys1 === 1) {
                 nkeys2++;
@@ -337,10 +337,53 @@ jlab.util.compareMapKeySets = function (m1, m2) {
         }
     });
     // Check that the two maps contain identical cavity set sizes
-    if ( nkeys1 !== nkeys2) {
+    if (nkeys1 !== nkeys2) {
         return false;
     }
 
     // If both conditions hold, then the sets are identical.
     return true;
+};
+
+/*Custom time picker*/
+jlab.util.dateTimePickerControl = {
+    create: function (tp_inst, obj, unit, val, min, max, step) {
+        $('<input class="ui-timepicker-input" value="' + val + '" style="width:50%">')
+                .appendTo(obj)
+                .spinner({
+                    min: min,
+                    max: max,
+                    step: step,
+                    change: function (e, ui) { // key events
+                        // don't call if api was used and not key press
+                        if (e.originalEvent !== undefined)
+                            tp_inst._onTimeChange();
+                        tp_inst._onSelectHandler();
+                    },
+                    spin: function (e, ui) { // spin events
+                        tp_inst.control.value(tp_inst, obj, unit, ui.value);
+                        tp_inst._onTimeChange();
+                        tp_inst._onSelectHandler();
+                    }
+                });
+        return obj;
+    },
+    options: function (tp_inst, obj, unit, opts, val) {
+        if (typeof (opts) === 'string' && val !== undefined)
+            return obj.find('.ui-timepicker-input').spinner(opts, val);
+        return obj.find('.ui-timepicker-input').spinner(opts);
+    },
+    value: function (tp_inst, obj, unit, val) {
+        if (val !== undefined)
+            return obj.find('.ui-timepicker-input').spinner('value', val);
+        return obj.find('.ui-timepicker-input').spinner('value');
+    }
+};
+
+jlab.util.initDateTimePickers = function () {
+    $('.datetime-picker').datetimepicker({
+        controlType: jlab.util.dateTimePickerControl,
+        dateFormat: 'yy-mm-dd',
+        timeFormat: 'HH:mm:ss'
+    });
 };
