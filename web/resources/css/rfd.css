@@ -880,14 +880,14 @@ table.comments-table{
     border: 1px solid #ddd;
     border-collapse: collapse;
 }
-.update-history-dialog th, .update-history-dialog td, .update-history-dialog tr{
+table.comments-table th, table.comments-table td, table.comments-table tr{
     padding: 0.5em;
     border: 1px solid #aaa;
 }
-.update-history-dialog tbody tr:nth-child(odd) {
+table.comments-table tbody tr:nth-child(odd) {
     background-color: #efefef;
 }
-.update-history-dialog tbody tr:nth-child(even){
+table.comments-table tbody tr:nth-child(even){
     background-color: #dfdfdf;
 }
 .btn-group .btn.download, .btn-group .btn.dropdown-toggle {
