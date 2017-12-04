@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.jlab.rfd.business.filter.CommentFilter;
 import org.jlab.rfd.business.service.CommentService;
 import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.business.util.SessionUtil;
@@ -122,16 +123,27 @@ public class CommentsAjax extends HttpServlet {
         String s = request.getParameter("start");
         String e = request.getParameter("end");
         String l = request.getParameter("limit");
+        String o = request.getParameter("offset");
         String b = request.getParameter("by");
         Date start = null;
         Date end = null;
-        Integer limit = null;
+        int limit = -1;
+        int offset = -1;
         String by = null;
         if (l != null) {
             try {
                 limit = Integer.parseInt(l);
             } catch (NumberFormatException ex) {
                 LOGGER.log(Level.INFO, "Unable to process limit parameter");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                error = "{\"error\": \"unable to parse 'limit'\"}";
+            }
+        }
+        if (o != null) {
+            try {
+                offset = Integer.parseInt(o);
+            } catch (NumberFormatException ex) {
+                LOGGER.log(Level.INFO, "Unable to process offset parameter");
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 error = "{\"error\": \"unable to parse 'limit'\"}";
             }
@@ -158,7 +170,6 @@ public class CommentsAjax extends HttpServlet {
         try {
             if (s != null) {
                 start = DateUtil.parseDateStringYMDHMS(s);
-
             }
             if (e != null) {
                 end = DateUtil.parseDateStringYMDHMS(e);
@@ -183,13 +194,15 @@ public class CommentsAjax extends HttpServlet {
                 if (userParam == null) {
                     excludeUsers = (List<String>) request.getSession().getAttribute("CommentExcludeFilter");
                 }
+                
+                CommentFilter filter = new CommentFilter(users, excludeUsers, topics, start, end);
 
                 // by shouldn't be null since it gets assigned based on 'b' being null or not
                 switch (by) {
                     case "timestamp":
 
                         SortedSet<Comment> commentSet = null;  // null value used in a check below
-                        commentSet = cs.getComments(users, excludeUsers, topics, start, end, limit);
+                        commentSet = cs.getComments(filter, limit, offset);
 
                         top = Json.createObjectBuilder();
                         JsonArrayBuilder jab = Json.createArrayBuilder();
@@ -203,7 +216,7 @@ public class CommentsAjax extends HttpServlet {
 
                     case "topic":
                         Map<String, SortedSet<Comment>> commentMap = null;
-                        commentMap = cs.getCommentsByTopic(users, excludeUsers, topics, start, end, limit);
+                        commentMap = cs.getCommentsByTopic(filter, limit, offset);
                         for (String topicKey : commentMap.keySet()) {
                             JsonArrayBuilder topicComments = Json.createArrayBuilder();
                             for (Comment com : commentMap.get(topicKey)) {
