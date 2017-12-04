@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,6 +25,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import org.jlab.rfd.business.filter.CommentFilter;
 import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.model.CavityDataPoint;
 import org.jlab.rfd.model.CavityDataSpan;
@@ -48,13 +50,35 @@ public class CavityService {
     // Caches getCavityData output.  The cached HashSets should be inserted with Collecitons.unmodifiableMap() to be safe.
     private static final ConcurrentHashMap<String, Set<CavityDataPoint>> CAVITY_CACHE = new ConcurrentHashMap<>();
 
+    public SortedSet<String> getCavityNames() throws IOException {
+        SortedSet<String> names = new TreeSet<>();
+
+        String urlString = CED_INVENTORY_URL + "?t=Cryocavity&p=&out=json";
+        URL url = new URL(urlString);
+        InputStream is = url.openStream();
+        try (JsonReader reader = Json.createReader(is)) {
+            JsonObject json = reader.readObject();
+            String status = json.getString("stat");
+            if (!"ok".equals(status)) {
+                throw new IOException("unable to lookup Cavity Data from CED: response stat: " + status);
+            }
+            JsonObject inventory = json.getJsonObject("Inventory");
+            JsonArray elements = inventory.getJsonArray("elements");
+            for(JsonObject elem : elements.getValuesAs(JsonObject.class)) {
+                names.add(elem.getString("name"));
+            }
+        }
+        return names;
+    }
+
     public Set<CavityResponse> getCavityData(Date timestamp) throws IOException, ParseException, SQLException {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         // Get the comments up through the end of the day of the specified date.  Then attach the comments to the cached
         // cavity data points later on.
         CommentService cs = new CommentService();
-        Map<String, SortedSet<Comment>> comments = cs.getCommentsByTopic(null, null, null, null, DateUtil.getEndOfDay(timestamp), null);
+        CommentFilter filter = new CommentFilter(null, null, null, null, DateUtil.getEndOfDay(timestamp));
+        Map<String, SortedSet<Comment>> comments = cs.getCommentsByTopic(filter);
 
         if (timestamp.after(new Date())) {
             return null;
