@@ -35,9 +35,9 @@ public class DateUtil {
         if (d1 != null) {
             if (d1.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d$")) {
                 date = parseDateStringYMD(d1);
-            } else if (d1.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\dd$")) {
+            } else if (d1.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d$")) {
                 date = parseDateStringYMDHM(d1);
-            } else if (d1.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\dd:\\d$")) {
+            } else if (d1.matches("^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d$")) {
                 date = parseDateStringYMDHMS(d1);
             } else {
                 throw new ParseException("Unable to parse supplied date format.", -1);
