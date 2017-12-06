@@ -908,6 +908,7 @@ table.comments-table tbody tr:nth-child(even){
 .cavity-comment-icon {
     position: absolute;
     right: 0px;
+    bottom: 0px;
 }
 #comment-field {
     width: 35em;  
