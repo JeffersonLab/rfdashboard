@@ -126,7 +126,7 @@ public class CommentHistory extends HttpServlet {
                     redirectUrl += "&topic=" + URLEncoder.encode(topic, "UTF-8");
                 }
             }
-            System.out.println("Redirecting to " + redirectUrl);
+
             response.sendRedirect(response.encodeRedirectURL(redirectUrl));
             return;
         }

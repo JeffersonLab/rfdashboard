@@ -161,7 +161,6 @@ public class CommentService {
             SqlUtil.close(pstmt, rs, conn);
         }
         
-        System.out.println(comments.size());
         return comments;
     }
 
