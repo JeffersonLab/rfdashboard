@@ -923,3 +923,12 @@ table.comments-table tbody tr:nth-child(even){
 .comment-form .li-value{
     width: 100%;
 }
+/*Make internal "now" button fully opaque for datetimepickers*/
+.ui-datepicker-current {
+    opacity: 1 !important;
+}
+/*Hide time input labels*/
+.ui_tpicker_time_label,
+.ui_tpicker_time {
+    display: none;
+}

@@ -337,12 +337,12 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
 
 jlab.cavity.formatCavityComment = function (cavity) {
     var commentString;
-    var commentIcon = "<span class='ui-icon ui-icon-comment comment-dialog cavity-comment-icon' data-jlab-cavity='" + cavity.name
-            + "' data-jlab-cav-property='comments'></span>";
     
+    var commentIcon = "<a class=cell-link href='" + jlab.util.newCommentUrl + "?topic=" + cavity.name.encodeXml() + "' ><span title='Add Comment' class='ui-icon ui-icon-extlink cavity-comment-icon'></span></a>";
+ 
     if (cavity.hasOwnProperty("comment")) {
         commentString = "<div class='nobr cavity-comment-header'>" + cavity.comment.timestamp + "  --  " + cavity.comment.username
-                + commentIcon + "</div><div class=pre-wrap>" + cavity.comment.content.encodeXml() + "</div>";        
+                + commentIcon + "</div><div class=pre-wrap>" + cavity.comment.content.encodeXml() + "</div>";
     } else {
         commentString = "<div class='nobr cavity-comment-header'>" + commentIcon + "</div>";
     }

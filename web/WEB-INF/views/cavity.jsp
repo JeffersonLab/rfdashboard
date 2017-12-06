@@ -425,69 +425,18 @@
             <hr>
         </div>
         <t:tablesorter tableTitle="Cavity Properties (${requestScope.start} vs ${requestScope.end})" widgetId="details-table" filename="${requestScope.start}_${requestScope.end}_cavProps.csv"></t:tablesorter>
-
-        <%-- 
-            Pre populated a bunch of comment forms that are either links to login or a functioning comment form.
-            Seemed safer/easier to make the "if logged in" determination on the server side, but the server side also
-            checks when you submit.
-        --%>
-        <c:forEach var="name" items="${requestScope.cavityNames}">
-            <div id="${name}-comments-dialog" class="dialog update-history-dialog" title="${name} RFD Comments">
-                <div class="comment-form">
-                    <c:choose>
-                        <c:when test="${pageContext.request.userPrincipal ne null}">
-                                <form method="post" action='<c:url value="/ajax/comments" context="${pageContext.request.contextPath}"></c:url>'>
-                                    <input type="text" value="${name}" name="topic" style="display: none;" disabled>
-                                    <div class="li-key">New Comment:<br><button type="button" id="${name}-comment-button">Submit</button></div>
-                                    <div class="li-value"><textarea class="comment-input" draggable="true" name="content"></textarea></div>
-                                </form>
-                        </c:when>
-                        <c:otherwise>
-                            <div class="message-box">
-                                <a href="<c:url value='/login'><c:param name = 'returnUrl' value = '${domainRelativeReturnUrl}'/></c:url>">Login To Comment</a>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-                <div class="comment-filter-form">
-                    <form method ="post" action="'<c:url value="/ajax/comment-filter" context="${pageContext.request.contextPath}"></c:url>'">
-                        <fieldset>
-                            Include Authors:<select class="include-select" name="include" multiple>
-                                <option value="adamc">adamc</option>
-                                <option value="testuser">testuser</option>
-                                <option value="testuser1">testuser1</option>
-                                <option value="testuser2">testuser2</option>
-                                <option value="testuser3">testuser3</option>
-                                <option value="testuser123">testuser123</option>
-                            </select>
-                            Exclude Authors:<select class="exclude-select" name="exclude" multiple>
-                                <option value="adamc">adamc</option>
-                                <option value="testuser">testuser</option>
-                                <option value="testuser1">testuser1</option>
-                                <option value="testuser2">testuser2</option>
-                                <option value="testuser3">testuser3</option>
-                                <option value="testuser123">testuser123</option>
-                            </select>
-                            <button type="button" class="comment-filter-button">Filter</button>
-                        </fieldset>
-                    </form>
-                </div>
-                <div class="history-panel"></div>
-            </div>
-        </c:forEach>
         <script>
-
             // Not terribly elegant, but need to get request parameters into javascript for further use.
             var jlab = jlab || {};
             jlab.start = "${requestScope.start}";
             jlab.end = "${requestScope.end}";
             jlab.properties = new Array();
             <c:forEach var="prop" items="${properties}">jlab.properties.push("${prop.key}");</c:forEach>
-            jlab.linacs = new Array();
+                jlab.linacs = new Array();
             <c:forEach var="linac" items="${linacs}">jlab.linacs.push("${linac.key}");</c:forEach>
-            jlab.cmtypes = new Array();
+                jlab.cmtypes = new Array();
             <c:forEach var="cmtype" items="${cmtypes}">jlab.cmtypes.push("${cmtype.key}");</c:forEach>
-            jlab.cavityData = ${requestScope.cavityData};
+                jlab.cavityData = ${requestScope.cavityData};
         </script>
     </jsp:body>
 </t:page>

@@ -14,6 +14,7 @@ jlab.util.cavityAjaxUrl = jlab.contextPath + "/ajax/cavity";
 jlab.util.cedUpdateHistoryAjaxUrl = jlab.contextPath + "/ajax/ced-update-history";
 jlab.util.commentsAjaxUrl = jlab.contextPath + "/ajax/comments";
 jlab.util.commentFilterAjaxUrl = jlab.contextPath + "/ajax/comment-filter";
+jlab.util.newCommentUrl = jlab.contextPath + "/comments/new-comment";
 
 /* globally enchance String object */
 if (!String.prototype.encodeXml) {
