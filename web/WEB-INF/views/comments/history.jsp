@@ -104,16 +104,7 @@
                     <input type="submit">
                 </fieldset>
             </form>
-            <table class="comments-table">
-                <thead >
-                    <tr><th>Timestamp</th><th>Device</th><th>Author</th><th>Comment</th></tr>
-                </thead>
-                <tbody>
-                    <c:forEach var="comment" items="${comments}">
-                        <tr><td>${comment.timestamp}</td><td>${comment.topic}</td><td>${comment.username}</td><td><c:out value="${comment.content}" escapeXml="true"></c:out></td></tr>
-                    </c:forEach>
-                </tbody>
-            </table>
+            <t:comments-table comments="${comments}"></t:comments-table>
         </section>
     </jsp:body>         
 </t:comments-page>
