@@ -70,7 +70,7 @@ public class CommentService {
      */
     public int countList(CommentFilter filter) throws SQLException {
         int count = 0;
-        String sql = "select comment_id, comment_time, username, topic, comment_string from rfd_comments " + filter.getSqlWhereClause();
+        String sql = "select count(comment_id) from rfd_comments " + filter.getSqlWhereClause();
 
         Connection conn = null;
         PreparedStatement pstmt = null;
