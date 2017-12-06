@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- *
+ * This class is used to apply filtering logic to SQL queries to the comment database. 
  * @author adamc
  */
 public class CommentFilter {
@@ -99,7 +99,7 @@ public class CommentFilter {
         }
 
         if (excludeUsers != null) {
-            for (String user : users) {
+            for (String user : excludeUsers) {
                 stmt.setString(i++, user);
             }
         }

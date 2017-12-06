@@ -17,12 +17,14 @@ public class Comment implements Comparable<Comment> {
     private final Date timestamp;
     private final String topic;
     private final String content;
+    private final long comment_id;
 
-    public Comment(String username, Date timestamp, String topic, String content) {
+    public Comment(String username, Date timestamp, String topic, String content, long comment_id) {
         this.username = username;
         this.timestamp = timestamp;
         this.topic = topic;
         this.content = content;
+        this.comment_id = comment_id;
     }
 
     public String getUsername() {

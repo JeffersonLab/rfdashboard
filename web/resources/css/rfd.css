@@ -909,13 +909,8 @@ table.comments-table tbody tr:nth-child(even){
     position: absolute;
     right: 0px;
 }
-/* 
-The comment-input textarea sizes a little weird.  The 99.8% looks right on my box,
-but there isn't a garuantee on others.  Either way, this gets the look very close.
-*/
-textarea.comment-input {
-    width: 99.8%;  
-    height: 100%;
+#comment-field {
+    width: 35em;  
 }
 .update-history-dialog .comment-form .comment-filter-form {
     width: 100%;
