@@ -43,7 +43,6 @@ public class NewComment extends HttpServlet {
         boolean redirectNeeded = false;
 
         String topic = request.getParameter("topic");
-        System.out.println("Topic: " + topic);
         String l = request.getParameter("limit");
         String o = request.getParameter("offset");
         int limit;
@@ -76,7 +75,6 @@ public class NewComment extends HttpServlet {
             }
             redirectUrl += "&offset=" + URLEncoder.encode(String.valueOf(offset), "UTF-8");
 
-            System.out.println("Redirecting to " + redirectUrl);
             response.sendRedirect(response.encodeRedirectURL(redirectUrl));
             return;
         }
