@@ -22,17 +22,22 @@
                 $('.multi-select').select2({
                     width: 290
                 });
+
+                $(document).on("click", "#next-button, #previous-button", function () {
+                    $("#offset-input").val($(this).attr("data-offset"));
+                    $("#filter-form").submit();
+                });
             });
         </script>        
     </jsp:attribute>        
     <jsp:body>
         <section>
             <h2><c:out value="${title}"/></h2>
-            <!--<h3>Comment History</h3>-->
-            <form method="GET" action="${pageContext.request.contextPath}/comments/history">
+            <form id="filter-form" method="GET" action="${pageContext.request.contextPath}/comments/history">
                 <fieldset>
                     <legend>Filters</legend>
-                    <input type="number" name="limit" value="${limit}"  hidden>
+                    <input id="limit-input" type="number" name="limit" value="${limit}"  hidden>
+                    <input id="offset-input" type="number" name="offset" value="0"  hidden>
                     <ul class="key-value-list">
                         <li>
                             <div class="li-key">Start Time:</div>
@@ -85,7 +90,14 @@
                     <input type="submit">
                 </fieldset>
             </form>
+            ${selectionMessage}
             <t:comments-table comments="${comments}"></t:comments-table>
+            <c:if test="${fn:length(comments) > 0}"> 
+                <div class="event-controls">
+                    <button id="previous-button" type="button" data-offset="${paginator.previousOffset}" value="Previous"${paginator.previous ? '' : ' disabled="disabled"'}>Previous</button>                        
+                    <button id="next-button" type="button" data-offset="${paginator.nextOffset}" value="Next"${paginator.next ? '' : ' disabled="disabled"'}>Next</button>                 
+                </div>
+            </c:if>
         </section>
     </jsp:body>         
 </t:comments-page>

@@ -134,6 +134,10 @@ public class CommentService {
                 // limit number of count (pagination) if offset and limit are valid
                 sql = "select * from (select z.*, ROWNUM rnum from ("
                         + sql + ") z where ROWNUM <= " + (offset + limit) + ") where rnum > " + offset;
+            } else if (limit > 0) {
+                sql = "select *  from (" + sql + ") where ROWNUM <= " + limit;
+            } else if (offset > 0 ) {                
+                sql = "select * from (select z.*, ROWNUM rnum from (" + sql + ") z where rnum > " + offset;
             }
             LOGGER.log(Level.FINEST, "SQL query used: {0}", sql);
 
@@ -156,6 +160,8 @@ public class CommentService {
         } finally {
             SqlUtil.close(pstmt, rs, conn);
         }
+        
+        System.out.println(comments.size());
         return comments;
     }
 

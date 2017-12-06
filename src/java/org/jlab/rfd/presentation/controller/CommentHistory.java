@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.jlab.rfd.business.service.CommentService;
 import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.model.Comment;
 import org.jlab.rfd.presentation.util.DataFormatter;
+import org.jlab.rfd.presentation.util.Paginator;
 import org.jlab.rfd.presentation.util.RequestParamUtil;
 
 /**
@@ -131,21 +133,32 @@ public class CommentHistory extends HttpServlet {
 
         CommentService cs = new CommentService();
         CommentFilter filter = new CommentFilter(includeUsers, excludeUsers, topics, start, end);
-
+        int totalRecords;
+        SortedSet<Comment> comments;
+        SortedSet<String> validTopics;
+        SortedSet<String> authors;
         try {
-            SortedSet<Comment> comments = cs.getComments(filter, limit, offset);
-            SortedSet<String> validTopics = cs.getValidTopics();
-            SortedSet<String> authors = cs.getCurrnetAuthors();
-            
-            request.setAttribute("comments", comments);
-            request.setAttribute("validTopics", validTopics);
-            request.setAttribute("authors", authors);
-            
-            request.getRequestDispatcher("/WEB-INF/views/comments/history.jsp").forward(request, response);
+            comments = cs.getComments(filter, limit, offset);
+            validTopics = cs.getValidTopics();
+            authors = cs.getCurrnetAuthors();
+            totalRecords = cs.countList(filter);
+
         } catch (SQLException | ParseException ex) {
             LOGGER.log(Level.WARNING, "Error querying comments database - {0}", ex);
             throw new ServletException("Error querying comments database");
         }
+
+        Paginator paginator = new Paginator(totalRecords, offset, limit);
+        DecimalFormat formatter = new DecimalFormat("###,###");
+        String selectionMessage = " Showing " + paginator.getStartNumber() + " - " + paginator.getEndNumber() + " of " + formatter.format(totalRecords);
+        request.setAttribute("paginator", paginator);
+        request.setAttribute("selectionMessage", selectionMessage);
+        request.setAttribute("comments", comments);
+        request.setAttribute("validTopics", validTopics);
+        request.setAttribute("authors", authors);
+
+        request.getRequestDispatcher("/WEB-INF/views/comments/history.jsp").forward(request, response);
+
     }
 
 }

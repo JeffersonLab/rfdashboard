@@ -3,6 +3,7 @@ package org.jlab.rfd.presentation.controller;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jlab.rfd.business.filter.CommentFilter;
 import org.jlab.rfd.business.service.CommentService;
 import org.jlab.rfd.model.Comment;
+import org.jlab.rfd.presentation.util.Paginator;
 
 /**
  *
@@ -79,24 +81,29 @@ public class NewComment extends HttpServlet {
             return;
         }
 
+        List<String> topics = null;
+        if (topic != null) {
+            topics = new ArrayList<>();
+            topics.add(topic);
+        }
+        int totalRecords;
+        SortedSet<Comment> comments;
+        SortedSet<String> validTopics;
+
         CommentService cs = new CommentService();
         try {
-            List<String> topics = null;
-            if (topic != null) {
-                topics = new ArrayList<>();
-                topics.add(topic);
-            }
             CommentFilter filter = new CommentFilter(null, null, topics, null, null);
-            SortedSet<Comment> comments = cs.getComments(filter, limit, offset);
-            request.setAttribute("comments", comments);
-
-            SortedSet<String> validTopics = cs.getValidTopics();
-            request.setAttribute("validTopics", validTopics);
+            comments = cs.getComments(filter, limit, offset);
+            totalRecords = cs.countList(filter);
+            validTopics = cs.getValidTopics();
         } catch (SQLException | ParseException ex) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             LOGGER.log(Level.WARNING, "Error querying comment database\n{0}", ex);
             throw new ServletException("Erorr querying comment database");
         }
+
+        request.setAttribute("comments", comments);
+        request.setAttribute("validTopics", validTopics);
 
         request.getRequestDispatcher("/WEB-INF/views/comments/new-comment.jsp").forward(request, response);
     }
