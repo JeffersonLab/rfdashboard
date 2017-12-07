@@ -8,16 +8,23 @@ package org.jlab.rfd.presentation.controller;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.jlab.rfd.business.service.CavityService;
+import org.jlab.rfd.model.TimeUnit;
+import org.jlab.rfd.presentation.util.DataFormatter;
 import org.jlab.rfd.presentation.util.ParamChecker;
 
 /**
@@ -82,7 +89,7 @@ public class Bypassed extends HttpServlet {
             }
         }
         // Throws a RuntimeException if invalid
-        if ( start != null && end != null) {
+        if (start != null && end != null) {
             ParamChecker.validateStartEnd(start, end);
         }
 
@@ -104,6 +111,7 @@ public class Bypassed extends HttpServlet {
         }
         ParamChecker.validateDate(tableDate);
 
+        TimeUnit tu = TimeUnit.WEEK;
         if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
             // Default to week
             LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
@@ -114,10 +122,15 @@ public class Bypassed extends HttpServlet {
             switch (request.getParameter("timeUnit")) {
                 case "day":
                     timeUnit = "day";
+                    tu = TimeUnit.DAY;
                     break;
                 case "week":
+                    timeUnit = "week";
+                    tu = TimeUnit.WEEK;
+                    break;
                 default:
                     timeUnit = "week";
+                    tu = TimeUnit.WEEK;
             }
             request.setAttribute("timeUnit", timeUnit);
         }
@@ -143,6 +156,24 @@ public class Bypassed extends HttpServlet {
             return;
         }
 
-            request.getRequestDispatcher ("/WEB-INF/views/bypassed.jsp").forward(request, response);
+        CavityService cs = new CavityService();
+        JsonObject bypassedCMType, bypassedLinac, tableData;
+        
+        List<Date> date = new ArrayList<>();
+        date.add(tableDate);
+        try {
+            bypassedCMType = DataFormatter.toFlotFromDateMap(cs.getCavityDataSpan(start, end, tu).getBypassedCountByCMType());
+            bypassedLinac = DataFormatter.toFlotFromDateMap(cs.getCavityDataSpan(start, end, tu).getBypassedCountByLinac());
+            tableData = cs.getCavityDataSpan(date).toJson();
+        } catch (ParseException | SQLException ex) {
+            LOGGER.log(Level.WARNING, "Error querying cavity data", ex);
+            throw new ServletException("Error querying cavity data");
+        }
+
+        request.setAttribute("bypassedCMType", bypassedCMType.toString());
+        request.setAttribute("bypassedLinac", bypassedLinac.toString());
+        request.setAttribute("tableData", tableData.toString());
+        
+        request.getRequestDispatcher("/WEB-INF/views/bypassed.jsp").forward(request, response);
     }
 }

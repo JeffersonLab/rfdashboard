@@ -110,6 +110,9 @@
                 jlab.end = "${requestScope.end}";
                 jlab.timeUnit = "${requestScope.timeUnit}";
                 jlab.tableDate = "${requestScope.tableDate}";
+                jlab.tableData = ${requestScope.tableData};
+                jlab.bypassedCMType = ${requestScope.bypassedCMType};
+                jlab.bypassedLinac = ${requestScope.bypassedLinac};
         </script>
     </jsp:body>
 </t:page>
