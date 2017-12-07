@@ -8,100 +8,85 @@ var jlab = jlab || {};
 jlab.energyReach = jlab.energyReach || {};
 
 // Create and show the single day, lem-scan trip curve plot
-jlab.energyReach.loadLemScanChart = function (chartId, date, url) {
+jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
 
     jlab.showChartLoading(chartId);
-    var lemScan = $.getJSON(url, {type: "day-scan", date: date, out: "flot"});
-    lemScan.done(function (json) {
-        var settings = {
-            colors: jlab.colors.linacs.slice(1, 4), // Grab the North, South, and Total colors
-            labels: json.labels,
-            timeUnit: "day",
-            title: "<strong>LEM Estimated Trip Rates</strong><br/><div style='font-size:smaller'>" + date + "</div>",
-            tooltips: true,
-            tooltipX: "Energy",
-            tooltipY: "Trips/Hr",
-            legend: false
-        };
-        var flotOptions = {
-            xaxis: {axisLabel: "Linac Energy (MeV)", mode: null, min: 1000, max: 1190},
-            yaxis: {axisLabel: "Trips / Hour", min: 0, max: 15},
-            grid: {clickable: false, markings: [{yaxis: {from: 8, to: 8}, color: "#000000"}, {yaxis: {from: 4, to: 4}, color: "#000000"}]}
-        };
+    var settings = {
+        colors: jlab.colors.linacs.slice(1, 4), // Grab the North, South, and Total colors
+        labels: scanData.labels,
+        timeUnit: "day",
+        title: "<strong>LEM Estimated Trip Rates</strong><br/><div style='font-size:smaller'>" + date + "</div>",
+        tooltips: true,
+        tooltipX: "Energy",
+        tooltipY: "Trips/Hr",
+        legend: false
+    };
+    var flotOptions = {
+        xaxis: {axisLabel: "Linac Energy (MeV)", mode: null, min: 1000, max: 1190},
+        yaxis: {axisLabel: "Trips / Hour", min: 0, max: 15},
+        grid: {clickable: false, markings: [{yaxis: {from: 8, to: 8}, color: "#000000"}, {yaxis: {from: 4, to: 4}, color: "#000000"}]}
+    };
 
-        var flotData = [];
-        for (i = 0; i < json.data.length; i++) {
-            flotData[i] = {data: json.data[i], points: {show: false}, lines: {show: true}};
-        }
+    var flotData = [];
+    for (i = 0; i < scanData.data.length; i++) {
+        flotData[i] = {data: scanData.data[i], points: {show: false}, lines: {show: true}};
+    }
 
-        jlab.hideChartLoading(chartId);
-        var plot = jlab.flotCharts.drawChart(chartId, flotData, flotOptions, settings);
+    jlab.hideChartLoading(chartId);
+    var plot = jlab.flotCharts.drawChart(chartId, flotData, flotOptions, settings);
 
-        // Add a caption that lists the energy reach of North, South, and Total
-        var reaches = jlab.energyReach.getEnergyReach(json);
-        // Add a custom legend off to the side
-        jlab.energyReach.addLegend(chartId, settings.colors, json.labels, reaches);
+    // Add a caption that lists the energy reach of North, South, and Total
+    var reaches = jlab.energyReach.getEnergyReach(scanData);
+    // Add a custom legend off to the side
+    jlab.energyReach.addLegend(chartId, settings.colors, scanData.labels, reaches);
 
-        // Add the horizontal lines for 4 and 8 trips/hr with annotations
-        var p8 = plot.pointOffset({x: 1010, y: 8});
-        var p4 = plot.pointOffset({x: 1010, y: 4});
-        $("#" + chartId).append("<div style='position:absolute;left:" + p8.left + "px;top:" + (p8.top - 17) + "px; color:#666;font-size:smaller'>8 trips/hr</div>");
-        $("#" + chartId).append("<div style='position:absolute;left:" + p4.left + "px;top:" + (p4.top - 17) + "px; color:#666;font-size:smaller'>4 trips/hr</div>");
-
-    }).fail(function (jqXHR, textStatus, errorThrown) {
-        jlab.hideChartLoading(chartId, "Error querying data");
-        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
-        ;
-    });
+    // Add the horizontal lines for 4 and 8 trips/hr with annotations
+    var p8 = plot.pointOffset({x: 1010, y: 8});
+    var p4 = plot.pointOffset({x: 1010, y: 4});
+    $("#" + chartId).append("<div style='position:absolute;left:" + p8.left + "px;top:" + (p8.top - 17) + "px; color:#666;font-size:smaller'>8 trips/hr</div>");
+    $("#" + chartId).append("<div style='position:absolute;left:" + p4.left + "px;top:" + (p4.top - 17) + "px; color:#666;font-size:smaller'>4 trips/hr</div>");
 };
 
 // The creates and shows the energy reach barchart
-jlab.energyReach.loadEnergyReachChart = function (chartId, start, end, url) {
+jlab.energyReach.loadEnergyReachChart = function (chartId, start, end, reachData) {
     var timeUnit = "day";
-    var energyReach = $.getJSON(url, {start: start, end: end, timeUnit: timeUnit, type: "reach-scan"});
-    energyReach.done(function (json) {
-        var settings = {
-            colors: jlab.colors.energyReach,
-            labels: json.labels,
-            timeUnit: timeUnit,
-            title: "<strong>Linac Energy Reach</strong><br/><div style='font-size:smaller'>" + start + " to " + end + "</div>",
-            tooltips: true,
-            tooltipX: "Date",
-            tooltipY: "Energy",
-            legend: true,
-            chartType: "bar"
-        };
+    var settings = {
+        colors: jlab.colors.energyReach,
+        labels: reachData.labels,
+        timeUnit: timeUnit,
+        title: "<strong>Linac Energy Reach</strong><br/><div style='font-size:smaller'>" + start + " to " + end + "</div>",
+        tooltips: true,
+        tooltipX: "Date",
+        tooltipY: "Energy",
+        legend: true,
+        chartType: "bar"
+    };
 
-        // Flot wants times in milliseconds from UTC
-        var xmin = new Date(start).getTime();
-        var xmax = new Date(end).getTime();
-        var flotOptions = {
-            xaxis: {mode: "time", min: xmin, max: xmax},
-            yaxis: {axisLabel: "Linac Energy (MeV)", min: 1000, max: 1190},
-            grid: {clickable: true}
-        };
+    // Flot wants times in milliseconds from UTC
+    var xmin = new Date(start).getTime();
+    var xmax = new Date(end).getTime();
+    var flotOptions = {
+        xaxis: {mode: "time", min: xmin, max: xmax},
+        yaxis: {axisLabel: "Linac Energy (MeV)", min: 1000, max: 1190},
+        grid: {clickable: true}
+    };
 
-        var flotData = [];
-        for (i = 0; i < json.data.length; i++) {
-            flotData[i] = {data: json.data[i], points: {show: false}};
+    var flotData = [];
+    for (i = 0; i < reachData.data.length; i++) {
+        flotData[i] = {data: reachData.data[i], points: {show: false}};
+    }
+
+    jlab.hideChartLoading(chartId);
+    var plot = jlab.flotCharts.drawChart(chartId, flotData, flotOptions, settings);
+
+    $('#energy-reach').bind("plotclick", function (event, pos, item) {
+        if (item) {
+            var timestamp = item.series.data[item.dataIndex][0];
+            var dateString = jlab.millisToDate(timestamp);
+            var url = jlab.contextPath + "/energy-reach?start=" + start + "&end=" + end + "&diffStart=" +
+                    jlab.addDays(dateString, -1) + "&diffEnd=" + dateString;
+            window.location.href = url;
         }
-
-        jlab.hideChartLoading(chartId);
-        var plot = jlab.flotCharts.drawChart(chartId, flotData, flotOptions, settings);
-
-        $('#energy-reach').bind("plotclick", function (event, pos, item) {
-            if (item) {
-                var timestamp = item.series.data[item.dataIndex][0];
-                var dateString = jlab.millisToDate(timestamp);
-                var url = jlab.contextPath + "/energy-reach?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
-                        jlab.addDays(dateString, -1) + "&diffEnd=" + dateString;
-                window.location.href = url;
-            }
-        });
-
-    }).fail(function (jqXHR, textStatus, errorThrown) {
-        jlab.hideChartLoading(chartId, "Error querying data");
-        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
     });
 };
 
@@ -184,7 +169,7 @@ $(function () {
         dateFormat: "yy-mm-dd"
     });
 
-    jlab.cavity.createCavitySetPointTables("#diff-table-basic", "#diff-table-advanced", "#summary-table", jlab.diffStart, jlab.diffEnd);
-    jlab.energyReach.loadLemScanChart("lem-scan", jlab.diffEnd, jlab.util.energyReachUrl);
-    jlab.energyReach.loadEnergyReachChart("energy-reach", jlab.start, jlab.end, jlab.util.energyReachUrl);
+    jlab.energyReach.loadLemScanChart("lem-scan", jlab.diffEnd, jlab.dayScanData);
+    jlab.energyReach.loadEnergyReachChart("energy-reach", jlab.start, jlab.end, jlab.energyReachData);
+    jlab.cavity.createCavitySetPointTables("#diff-table-basic", "#diff-table-advanced", "#summary-table", jlab.cavityData, jlab.diffStart, jlab.diffEnd);
 });

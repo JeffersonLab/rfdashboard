@@ -7,17 +7,30 @@ package org.jlab.rfd.presentation.controller;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.jlab.rfd.business.service.CavityService;
+import org.jlab.rfd.business.service.LemService;
+import org.jlab.rfd.business.util.DateUtil;
+import org.jlab.rfd.model.CavityDataSpan;
+import org.jlab.rfd.model.LemSpan;
+import org.jlab.rfd.model.TimeUnit;
+import org.jlab.rfd.presentation.util.DataFormatter;
 import org.jlab.rfd.presentation.util.ParamChecker;
 
 /**
@@ -46,7 +59,7 @@ public class EnergyReach extends HttpServlet {
         Date end, start;
         boolean redirectNeeded = false;
 
-        LOGGER.log(Level.FINEST, "EnergyReach controler with received parameters: {0}", request.getParameterMap());        
+        LOGGER.log(Level.FINEST, "EnergyReach controler with received parameters: {0}", request.getParameterMap());
         if (request.getParameter("end") == null || request.getParameter("end").equals("")) {
             LOGGER.log(Level.FINEST, "No end parameter supplied.  Defaulting to today.");
             end = new Date();
@@ -63,8 +76,8 @@ public class EnergyReach extends HttpServlet {
                 redirectNeeded = true;
             }
         }
-        
-        if (request.getParameter("start") == null || request.getParameter("start").equals("") ) {
+
+        if (request.getParameter("start") == null || request.getParameter("start").equals("")) {
             // Default to end - four weeks
             start = new Date(end.getTime() - 60 * 60 * 24 * 1000L * 7 * 4);
             request.setAttribute("start", sdf.format(start));
@@ -81,12 +94,12 @@ public class EnergyReach extends HttpServlet {
             }
         }
 
-                // Throws a RuntimeException if invalid
-        if ( start != null && end != null) {
+        // Throws a RuntimeException if invalid
+        if (start != null && end != null) {
             ParamChecker.validateStartEnd(start, end);
         }
 
-        
+        TimeUnit tu = TimeUnit.DAY;
         if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
             // Default to week
             LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
@@ -97,16 +110,19 @@ public class EnergyReach extends HttpServlet {
             switch (request.getParameter("timeUnit")) {
                 case "day":
                     timeUnit = "day";
+                    tu = TimeUnit.DAY;
                     break;
                 case "week":
                     timeUnit = "week";
+                    tu = TimeUnit.WEEK;
                     break;
                 default:
                     timeUnit = "day";
+                    tu = TimeUnit.DAY;
             }
             request.setAttribute("timeUnit", timeUnit);
         }
-        
+
         Date diffStart, diffEnd;
         if (request.getParameter("diffStart") == null || request.getParameter("diffStart").equals("")) {
             diffStart = start;
@@ -140,12 +156,10 @@ public class EnergyReach extends HttpServlet {
             }
         }
         // Throws a RuntimeException if invalid
-        if ( diffStart != null && diffEnd != null) {
+        if (diffStart != null && diffEnd != null) {
             ParamChecker.validateStartEnd(diffStart, diffEnd);
         }
 
-
-        
         LOGGER.log(Level.FINEST, "Start: {0} - End: {1}", new Object[]{request.getAttribute("start"), request.getAttribute("end")});
 
         if (redirectNeeded) {
@@ -163,6 +177,34 @@ public class EnergyReach extends HttpServlet {
             response.sendRedirect(response.encodeRedirectURL(redirectUrl));
             return;
         }
+
+        LemService ls = new LemService();
+        JsonObject energyReach;
+        JsonObject dayScan;
+        try {
+            SortedMap<Date, SortedMap<String, BigDecimal>> reach = ls.getLemSpan(start, end).getEnergyReach();
+            energyReach = DataFormatter.toFlotFromDateMap(reach);
+            SortedMap<Integer, SortedMap<String, BigDecimal>> tripRates = ls.getLemSpan(diffEnd, DateUtil.getNextDay(diffEnd)).getTripRateCurve(diffEnd);
+            dayScan = DataFormatter.toFlotFromIntMap(tripRates);
+        } catch (ParseException | SQLException ex) {
+            LOGGER.log(Level.WARNING, "Error querying LEM scan database", ex);
+            throw new ServletException("Error querying LEM scan database");
+        }
+        request.setAttribute("energyReach", energyReach.toString());
+        request.setAttribute("dayScan", dayScan.toString());
+
+        CavityService cs = new CavityService();
+        JsonObject cavityData;
+        List<Date> dates = new ArrayList<>();
+        dates.add(diffStart);
+        dates.add(diffEnd);
+        try {
+            cavityData = cs.getCavityDataSpan(dates).toJson();
+        } catch (SQLException | ParseException ex) {
+            LOGGER.log(Level.WARNING, "Error querying cavity datasources", ex);
+            throw new ServletException("Error querying cavity datasources");
+        }
+        request.setAttribute("cavityData", cavityData.toString());
 
         request.getRequestDispatcher("/WEB-INF/views/energy-reach.jsp").forward(request, response);
     }

@@ -337,9 +337,9 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
 
 jlab.cavity.formatCavityComment = function (cavity) {
     var commentString;
-    
+
     var commentIcon = "<a class=cell-link href='" + jlab.util.newCommentUrl + "?topic=" + cavity.name.encodeXml() + "' ><span title='Add Comment' class='ui-icon ui-icon-extlink cavity-comment-icon'></span></a>";
- 
+
     if (cavity.hasOwnProperty("comment")) {
         commentString = "<div class='nobr cavity-comment-header'>" + cavity.comment.timestamp + "  --  " + cavity.comment.username
                 + commentIcon + "</div><div class=pre-wrap>" + cavity.comment.content.encodeXml() + "</div>";
@@ -493,54 +493,90 @@ jlab.cavity.getTotalsByCMType = function (startMap, endMap) {
 };
 
 
-jlab.cavity.createCavitySetPointTables = function (basicId, advId, summaryId, start, end) {
+jlab.cavity.createCavitySetPointTables = function (basicId, advId, summaryId, cavityData, start, end) {
     var linacs = ["north", "south", "injector"];
     var cmtypes = ["C25", "C50", "C100", "QTR"];
     var basicProps = ["cmtype", "gset", "odvh"];
     var advProps = ["cmtype", "modAnode", "gset", "odvh"];
-    jlab.util.showTableLoading(basicId);
-    jlab.util.showTableLoading(summaryId);
-    var cavityData = $.ajax({
-        traditional: true,
-        url: jlab.util.cavityAjaxUrl,
-        data: {
-            date: [start, end],
-            out: "json"
-        },
-        dataType: "json"
-    });
-    cavityData.done(function (json) {
-        jlab.util.hideTableLoading(basicId);
-        jlab.util.hideTableLoading(summaryId);
-        var startMap, endMap;
-        var maps = jlab.cavity.getStartEndMaps(json, start, end);
-        if (maps === null) {
-            jlab.util.hideTableLoading(basicId, "Error querying data");
-            jlab.util.hideTableLoading(summaryId, "Error querying data");
-            console.log("Error: received unexpected AJAX cavity service repsonse", json);
-            return;
-        } else {
-            startMap = maps[0];
-            endMap = maps[1];
-        }
 
-        var summaryArray = jlab.cavity.getTotalsByCMType(startMap, endMap);
-        jlab.util.createTableSorterTable(summaryId, {data: summaryArray});
-
-        var basicTableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, basicProps);
-        var advTableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, advProps);
-
-        jlab.util.createTableSorterTable(basicId, {data: basicTableArray});
-
-        // The tablesorter plugin has issues initializing style to elements with display: none.  IDK... this happens fast enough that
-        // users won't notice.
-        $(advId).show();
-        jlab.util.createTableSorterTable(advId, {data: advTableArray});
-        $(advId).hide();
-
-    }).fail(function (jqXHR, textStatus, errorThrown) {
+    jlab.util.hideTableLoading(basicId);
+    jlab.util.hideTableLoading(summaryId);
+    var startMap, endMap;
+    var maps = jlab.cavity.getStartEndMaps(cavityData, start, end);
+    if (maps === null) {
         jlab.util.hideTableLoading(basicId, "Error querying data");
-        jlab.util.hideTableLoading(advId, "Error querying data");
-        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
-    });
+        jlab.util.hideTableLoading(summaryId, "Error querying data");
+        console.log("Error: received unexpected AJAX cavity service repsonse", json);
+        return;
+    } else {
+        startMap = maps[0];
+        endMap = maps[1];
+    }
+
+    var summaryArray = jlab.cavity.getTotalsByCMType(startMap, endMap);
+    jlab.util.createTableSorterTable(summaryId, {data: summaryArray});
+
+    var basicTableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, basicProps);
+    var advTableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, advProps);
+
+    jlab.util.createTableSorterTable(basicId, {data: basicTableArray});
+
+    // The tablesorter plugin has issues initializing style to elements with display: none.  IDK... this happens fast enough that
+    // users won't notice.
+    $(advId).show();
+    jlab.util.createTableSorterTable(advId, {data: advTableArray});
+    $(advId).hide();
+
 };
+
+//jlab.cavity.createCavitySetPointTables = function (basicId, advId, summaryId, start, end) {
+//    var linacs = ["north", "south", "injector"];
+//    var cmtypes = ["C25", "C50", "C100", "QTR"];
+//    var basicProps = ["cmtype", "gset", "odvh"];
+//    var advProps = ["cmtype", "modAnode", "gset", "odvh"];
+//    jlab.util.showTableLoading(basicId);
+//    jlab.util.showTableLoading(summaryId);
+//    var cavityData = $.ajax({
+//        traditional: true,
+//        url: jlab.util.cavityAjaxUrl,
+//        data: {
+//            date: [start, end],
+//            out: "json"
+//        },
+//        dataType: "json"
+//    });
+//    cavityData.done(function (json) {
+//        jlab.util.hideTableLoading(basicId);
+//        jlab.util.hideTableLoading(summaryId);
+//        var startMap, endMap;
+//        var maps = jlab.cavity.getStartEndMaps(json, start, end);
+//        if (maps === null) {
+//            jlab.util.hideTableLoading(basicId, "Error querying data");
+//            jlab.util.hideTableLoading(summaryId, "Error querying data");
+//            console.log("Error: received unexpected AJAX cavity service repsonse", json);
+//            return;
+//        } else {
+//            startMap = maps[0];
+//            endMap = maps[1];
+//        }
+//
+//        var summaryArray = jlab.cavity.getTotalsByCMType(startMap, endMap);
+//        jlab.util.createTableSorterTable(summaryId, {data: summaryArray});
+//
+//        var basicTableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, basicProps);
+//        var advTableArray = jlab.cavity.cavityMapsToTableArray(startMap, endMap, linacs, cmtypes, advProps);
+//
+//        jlab.util.createTableSorterTable(basicId, {data: basicTableArray});
+//
+//        // The tablesorter plugin has issues initializing style to elements with display: none.  IDK... this happens fast enough that
+//        // users won't notice.
+//        $(advId).show();
+//        jlab.util.createTableSorterTable(advId, {data: advTableArray});
+//        $(advId).hide();
+//
+//    }).fail(function (jqXHR, textStatus, errorThrown) {
+//        jlab.util.hideTableLoading(basicId, "Error querying data");
+//        jlab.util.hideTableLoading(advId, "Error querying data");
+//        console.log("Error querying data.\n  textStatus: " + textStatus + "\n  errorThrown: " + errorThrown);
+//    });
+//};

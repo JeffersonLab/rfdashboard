@@ -118,6 +118,9 @@
                 jlab.diffStart = "${requestScope.diffStart}";
                 jlab.diffEnd = "${requestScope.diffEnd}";
                 jlab.timeUnit = "${requestScope.timeUnit}";
+                jlab.energyReachData = ${requestScope.energyReach};
+                jlab.dayScanData = ${requestScope.dayScan};
+                jlab.cavityData = ${requestScope.cavityData};
         </script>
     </jsp:body>
 </t:page>
