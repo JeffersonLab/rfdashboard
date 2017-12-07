@@ -10,12 +10,17 @@ jlab.energyReach = jlab.energyReach || {};
 // Create and show the single day, lem-scan trip curve plot
 jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
 
-    jlab.showChartLoading(chartId);
+    var title = "<strong>LEM Estimated Trip Rates</strong><br/><div style='font-size:smaller'>" + date + "</div>";
+    if (typeof scanData === "undefined") {
+        $("#" + chartId).append(title + "<br>No data available");
+        return;
+    }
+
     var settings = {
         colors: jlab.colors.linacs.slice(1, 4), // Grab the North, South, and Total colors
         labels: scanData.labels,
         timeUnit: "day",
-        title: "<strong>LEM Estimated Trip Rates</strong><br/><div style='font-size:smaller'>" + date + "</div>",
+        title: title,
         tooltips: true,
         tooltipX: "Energy",
         tooltipY: "Trips/Hr",
@@ -32,7 +37,6 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
         flotData[i] = {data: scanData.data[i], points: {show: false}, lines: {show: true}};
     }
 
-    jlab.hideChartLoading(chartId);
     var plot = jlab.flotCharts.drawChart(chartId, flotData, flotOptions, settings);
 
     // Add a caption that lists the energy reach of North, South, and Total
@@ -49,12 +53,21 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
 
 // The creates and shows the energy reach barchart
 jlab.energyReach.loadEnergyReachChart = function (chartId, start, end, reachData) {
+
+    var title = "<strong>Linac Energy Reach</strong><br/><div style='font-size:smaller'>" + start + " to " + end + "</div>";
+    if (typeof reachData === "undefined") {
+        console.log(chartId);
+        $("#" + chartId).append("<br>" + title + "<br>No data available");
+        return;
+    }
+
+
     var timeUnit = "day";
     var settings = {
         colors: jlab.colors.energyReach,
         labels: reachData.labels,
         timeUnit: timeUnit,
-        title: "<strong>Linac Energy Reach</strong><br/><div style='font-size:smaller'>" + start + " to " + end + "</div>",
+        title: title,
         tooltips: true,
         tooltipX: "Date",
         tooltipY: "Energy",

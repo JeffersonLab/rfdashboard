@@ -184,14 +184,17 @@ public class EnergyReach extends HttpServlet {
         try {
             SortedMap<Date, SortedMap<String, BigDecimal>> reach = ls.getLemSpan(start, end).getEnergyReach();
             energyReach = DataFormatter.toFlotFromDateMap(reach);
-            SortedMap<Integer, SortedMap<String, BigDecimal>> tripRates = ls.getLemSpan(diffEnd, DateUtil.getNextDay(diffEnd)).getTripRateCurve(diffEnd);
+            LemSpan lemSpan = ls.getLemSpan(diffEnd, DateUtil.getNextDay(diffEnd));
+            SortedMap<Integer, SortedMap<String, BigDecimal>> tripRates = lemSpan.getTripRateCurve(diffEnd);
             dayScan = DataFormatter.toFlotFromIntMap(tripRates);
         } catch (ParseException | SQLException ex) {
             LOGGER.log(Level.WARNING, "Error querying LEM scan database", ex);
             throw new ServletException("Error querying LEM scan database");
         }
-        request.setAttribute("energyReach", energyReach.toString());
-        request.setAttribute("dayScan", dayScan.toString());
+        
+        // This is a little hacky, but there was already lots of client code written to manage the JSON objects
+        request.setAttribute("energyReach", energyReach == null ? "undefined" : energyReach.toString());
+        request.setAttribute("dayScan", dayScan == null ? "undefined" : dayScan.toString());
 
         CavityService cs = new CavityService();
         JsonObject cavityData;
