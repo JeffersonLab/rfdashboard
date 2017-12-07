@@ -93,6 +93,10 @@ public class DataFormatter {
 
     public static JsonObject toFlotFromDateMap(SortedMap<Date, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
 
+        if (data == null) {
+            return null;
+        }
+        
         // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
         Map<String, BigDecimal> temp;
         // The tree map keeps the series sorted in a reliable fashion.  Needed to coordinate the alignment of labels and data... well maybe not...
@@ -128,6 +132,10 @@ public class DataFormatter {
     
     public static JsonObject toFlotFromIntMap(SortedMap<Integer, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
 
+        if (data == null) {
+            return null;
+        }
+        
         // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
         Map<String, BigDecimal> temp;
         // The tree map keeps the series sorted in a reliable fashion.  Needed to coordinate the alignment of labels and data... well maybe not...
