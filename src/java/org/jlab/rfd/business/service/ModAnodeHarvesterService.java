@@ -134,9 +134,15 @@ public class ModAnodeHarvesterService {
                 Map<LinacName, LinacRecord> records1090 = new HashMap<>();
                 while( rs.next() ) {
                     LinacName linac = LinacName.valueOf(rs.getString("LINAC"));
-                    BigDecimal energy = new BigDecimal(rs.getDouble("ENERGY_MEV"));
-                    BigDecimal trips = new  BigDecimal(rs.getDouble("TRIPS_PER_HOUR")).setScale(6, RoundingMode.HALF_UP);
-                    BigDecimal tripsNoMav = new  BigDecimal(rs.getDouble("TRIPS_PER_HOUR_NO_MAV")).setScale(6, RoundingMode.HALF_UP);
+                    BigDecimal energy = rs.getBigDecimal("ENERGY_MEV");
+                    BigDecimal trips = rs.getBigDecimal("TRIPS_PER_HOUR");
+                    if ( trips != null ) {
+                        trips.setScale(6, RoundingMode.HALF_UP);
+                    }
+                    BigDecimal tripsNoMav = rs.getBigDecimal("TRIPS_PER_HOUR_NO_MAV");
+                    if ( tripsNoMav != null ) {
+                        tripsNoMav.setScale(6, RoundingMode.HALF_UP);
+                    }
 
                     LinacRecord record = new LinacRecord(sr.getTimestamp(), sr.getEpicsDate(), linac, energy, trips, tripsNoMav);
                     switch (record.getEnergy().intValue()) {

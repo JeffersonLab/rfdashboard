@@ -7,17 +7,33 @@ package org.jlab.rfd.presentation.controller;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.jlab.rfd.business.service.CavityService;
+import org.jlab.rfd.business.service.ModAnodeHarvesterService;
+import org.jlab.rfd.model.CavityDataSpan;
+import org.jlab.rfd.model.ModAnodeHarvester.LinacDataSpan;
+import org.jlab.rfd.model.TimeUnit;
+import org.jlab.rfd.presentation.util.DataFormatter;
 import org.jlab.rfd.presentation.util.ParamChecker;
 
 /**
@@ -28,7 +44,8 @@ import org.jlab.rfd.presentation.util.ParamChecker;
 public class ModAnode extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(ModAnode.class.getName());
-    
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         LOGGER.log(Level.FINEST, "Starting ModAnode processRequest method");
@@ -73,10 +90,10 @@ public class ModAnode extends HttpServlet {
             }
         }
         // Throws a RuntimeException if invalid
-        if ( start != null && end != null) {
+        if (start != null && end != null) {
             ParamChecker.validateStartEnd(start, end);
         }
-        
+
         if (request.getParameter("tableDate") == null || request.getParameter("tableDate").equals("")) {
             // Default to end - four weeks
             tableDate = end;
@@ -94,7 +111,8 @@ public class ModAnode extends HttpServlet {
             }
         }
         ParamChecker.validateDate(tableDate);
-        
+
+        TimeUnit tu = TimeUnit.WEEK;
         if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
             // Default to week
             LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
@@ -105,19 +123,19 @@ public class ModAnode extends HttpServlet {
             switch (request.getParameter("timeUnit")) {
                 case "day":
                     timeUnit = "day";
+                    tu = TimeUnit.DAY;
                     break;
                 case "week":
+                    timeUnit = "week";
+                    tu = TimeUnit.WEEK;
+                    break;
                 default:
                     timeUnit = "week";
+                    tu = TimeUnit.WEEK;
             }
             request.setAttribute("timeUnit", timeUnit);
         }
 
-//        LOGGER.log(Level.FINEST,
-//                "Start: {0} - End: {1}", new Object[]{request.getAttribute("start"),
-//                     request.getAttribute("end")
-//                }
-//        );
         if (redirectNeeded) {
             String redirectUrl;
             try {
@@ -132,6 +150,41 @@ public class ModAnode extends HttpServlet {
             response.sendRedirect(response.encodeRedirectURL(redirectUrl));
             return;
         }
+
+        CavityService cs = new CavityService();
+        JsonObject MAVCountLinac, MAVCountCMType, tableData;
+        try {
+            CavityDataSpan s1 = cs.getCavityDataSpan(start, end, tu);
+            MAVCountCMType = DataFormatter.toFlotFromDateMap(s1.getModAnodeCountByCMType());
+            MAVCountLinac = DataFormatter.toFlotFromDateMap(s1.getModAnodeCountByLinac());
+
+            List<Date> date = new ArrayList<>();
+            date.add(tableDate);
+            CavityDataSpan s2 = cs.getCavityDataSpan(date);
+            tableData = s2.toJson();
+        } catch (ParseException | SQLException ex) {
+            LOGGER.log(Level.WARNING, "Error querying cavity data");
+            throw new ServletException("Error querying cavity data");
+        }
+
+        request.setAttribute("MAVCountCMType", MAVCountCMType == null ? "undefined" : MAVCountCMType.toString());
+        request.setAttribute("MAVCountLinac", MAVCountLinac == null ? "undefined" : MAVCountLinac.toString());
+        request.setAttribute("tableData", tableData == null ? "undefined" : tableData.toString());
+
+        ModAnodeHarvesterService mahs = new ModAnodeHarvesterService();
+        JsonObject mahChartData;
+        try {
+            LinacDataSpan lds = mahs.getLinacDataSpan(start, end, tu);
+            mahChartData = DataFormatter.toFlotFromDateMap(lds.getTripRates());
+            if (mahChartData != null) {
+                System.out.println("HERE mahChartData: " + mahChartData.toString());
+            }
+        } catch (ParseException | SQLException ex) {
+            LOGGER.log(Level.WARNING, "Error querying MAH data");
+            throw new ServletException("Error querying MAH data");
+        }
+
+        request.setAttribute("mahChartData", mahChartData == null ? "undefined" : mahChartData.toString());
 
         request.getRequestDispatcher("/WEB-INF/views/mod-anode.jsp").forward(request, response);
     }

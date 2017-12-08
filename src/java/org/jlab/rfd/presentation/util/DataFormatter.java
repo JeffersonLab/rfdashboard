@@ -111,7 +111,8 @@ public class DataFormatter {
                 seriesBuilders.get(seriesName)
                         .add(Json.createArrayBuilder()
                                 .add(curr.getTime())
-                                .add((temp.get(seriesName) != null) ? temp.get(seriesName).toString() : "null"));
+//                                .add((temp.get(seriesName) != null) ? temp.get(seriesName).toString() : "null"));
+                                .add((temp.get(seriesName) != null) ? temp.get(seriesName).toString() : ""));
             }
         }
 

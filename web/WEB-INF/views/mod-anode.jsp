@@ -124,6 +124,10 @@
             jlab.end = "${requestScope.end}";
             jlab.timeUnit = "${requestScope.timeUnit}";
             jlab.tableDate = "${requestScope.tableDate}";
+            jlab.tableData = ${requestScope.tableData};
+            jlab.MAVCountCMType = ${requestScope.MAVCountCMType};
+            jlab.MAVCountLinac = ${requestScope.MAVCountLinac};
+            jlab.mahChartData = ${requestScope.mahChartData};
         </script>
     </jsp:body>
 </t:page>
