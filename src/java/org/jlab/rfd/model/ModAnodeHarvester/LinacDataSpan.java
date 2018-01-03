@@ -110,8 +110,6 @@ public class LinacDataSpan {
             BigDecimal t1090 = BigDecimal.ZERO;
 
             for (LinacDataPoint ldp : dataSpan.get(d)) {
-                System.out.println(d.toString());
-                System.out.println(ldp.getTripsNoMav1050() + " " + ldp.getTripsNoMav1090() + " " + ldp.getTrips1050() + " " + ldp.getTrips1090());
 
                 // Need to make sure that both Linacs had non-null trip rates.  This indicates that both could be run at this energy and
                 // is a combined trip rate for CEBAF.

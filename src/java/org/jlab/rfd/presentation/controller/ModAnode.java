@@ -14,14 +14,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -176,9 +171,6 @@ public class ModAnode extends HttpServlet {
         try {
             LinacDataSpan lds = mahs.getLinacDataSpan(start, end, tu);
             mahChartData = DataFormatter.toFlotFromDateMap(lds.getTripRates());
-            if (mahChartData != null) {
-                System.out.println("HERE mahChartData: " + mahChartData.toString());
-            }
         } catch (ParseException | SQLException ex) {
             LOGGER.log(Level.WARNING, "Error querying MAH data");
             throw new ServletException("Error querying MAH data");
