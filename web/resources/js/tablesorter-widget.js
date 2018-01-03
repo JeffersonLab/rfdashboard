@@ -12,6 +12,17 @@ jlab.tableSorter.dialogTracker = jlab.tableSorter.dialogTracker || {};
 jlab.tableSorter.initTable = function (widgetId) {
 
     $table = $(widgetId + " table");
+    var numRows = $(widgetId + " table tbody tr").length;
+    console.log(numRows);
+    if (numRows < 1) {
+        var title = $(widgetId + " .table-title").contents();
+        $(widgetId).prepend("<div><br><br><center>No Data Available</center><br></div>");
+        $(widgetId).prepend(title);
+        $(widgetId + " .ui-icon").css("display", "inline-block");
+        $(widgetId).css("height", 200);
+        $(widgetId + ' .table-wrap').hide();
+    }
+    
     var pagerOptions = {
         // target the pager markup - see the HTML block below
         container: $(widgetId + " .pager"),
