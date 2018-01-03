@@ -143,6 +143,7 @@
                 jlab.timeUnit = "${requestScope.timeUnit}";
                 jlab.diffStart = "${requestScope.diffStart}";
                 jlab.diffEnd = "${requestScope.diffEnd}";
+                jlab.cavityData = ${requestScope.cavityData};
         </script>
     </jsp:body>
 </t:page>

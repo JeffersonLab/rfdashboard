@@ -296,7 +296,7 @@ $(function () {
         dateFormat: "yy-mm-dd"
     });
 
-    jlab.cavity.createCavitySetPointTables("#diff-table-basic", "#diff-table-advanced", "#summary-table", jlab.diffStart, jlab.diffEnd);
+    jlab.cavity.createCavitySetPointTables("#diff-table-basic", "#diff-table-advanced", "#summary-table", jlab.cavityData, jlab.diffStart, jlab.diffEnd);
     jlab.cryo.updateCryoPressureChart('cryo-linac-pressure', jlab.start, jlab.end, jlab.timeUnit);
 
 });

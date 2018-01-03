@@ -13,7 +13,6 @@ jlab.tableSorter.initTable = function (widgetId) {
 
     $table = $(widgetId + " table");
     var numRows = $(widgetId + " table tbody tr").length;
-    console.log(numRows);
     if (numRows < 1) {
         var title = $(widgetId + " .table-title").contents();
         $(widgetId).prepend("<div><br><br><center>No Data Available</center><br></div>");
@@ -217,7 +216,6 @@ jlab.tableSorter.filterComments = function (dialogId, topic) {
     var include = $("#" + dialogId + " .include-select").val();
     var exclude = $("#" + dialogId + " .exclude-select").val();
 
-    console.log(include, exclude);
     var data = {};
 
     // Some versions of jQuery return null if nothing is selected, others return null
@@ -238,7 +236,6 @@ jlab.tableSorter.filterComments = function (dialogId, topic) {
 
     // If it works, then the user now has a session with a comment filters.  Refresh the comment history to reflect.
     filter.done(function (data, textStatus, jqXHR) {
-        window.console && console.log(data);
         jlab.tableSorter.refreshRFDCommentHistory(dialogId, topic);
     });
 

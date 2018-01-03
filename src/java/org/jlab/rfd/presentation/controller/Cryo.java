@@ -8,16 +8,21 @@ package org.jlab.rfd.presentation.controller;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.jlab.rfd.business.service.CavityService;
 import org.jlab.rfd.presentation.util.ParamChecker;
 
 /**
@@ -82,7 +87,7 @@ public class Cryo extends HttpServlet {
             }
         }
         // Throws a RuntimeException if invalid
-        if ( start != null && end != null) {
+        if (start != null && end != null) {
             ParamChecker.validateStartEnd(start, end);
         }
 
@@ -137,10 +142,10 @@ public class Cryo extends HttpServlet {
             }
         }
         // Throws a RuntimeException if invalid
-        if ( diffStart != null && diffEnd != null) {
+        if (diffStart != null && diffEnd != null) {
             ParamChecker.validateStartEnd(diffStart, diffEnd);
         }
-        
+
         LOGGER.log(Level.FINEST, "Start: {0} - End: {1}", new Object[]{request.getAttribute("start"), request.getAttribute("end")});
 
         if (redirectNeeded) {
@@ -159,6 +164,20 @@ public class Cryo extends HttpServlet {
             return;
         }
 
-            request.getRequestDispatcher ("/WEB-INF/views/cryo.jsp").forward(request, response);
+        CavityService cs = new CavityService();
+        JsonObject cavityData;
+        List<Date> tableDates = new ArrayList<>();
+        tableDates.add(diffStart);
+        tableDates.add(diffEnd);
+        try {
+            cavityData = cs.getCavityDataSpan(tableDates).toJson();
+        } catch (ParseException | SQLException ex) {
+            LOGGER.log(Level.WARNING, "Error querying cavity datasources");
+            throw new ServletException("Error querying cavity datasources");
+        }
+
+        request.setAttribute("cavityData", cavityData);
+
+        request.getRequestDispatcher("/WEB-INF/views/cryo.jsp").forward(request, response);
     }
 }

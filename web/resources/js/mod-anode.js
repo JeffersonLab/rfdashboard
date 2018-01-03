@@ -143,7 +143,6 @@ jlab.mod_anode.createModAnodeHarvesterTable = function (widgetId, tableData) {
         "GSET (1090 MeV)", "GSET No M.A.V. (1090 MeV)", "Delta GSET (1090 MeV)"
     ]);
 
-console.log(tableData);
     for (var i = 0; i < data.length; i++) {
         let rowArray = new Array();
         var cavities = data[i].cavities;

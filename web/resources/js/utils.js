@@ -149,8 +149,6 @@ jlab.millisToDate = function (time) {
     // All of our server-side dates are handled as UTC and are truncated to the day.  Using methods like getDate()
     // return the date in local time which would be off by a day when we do the -4/5 hours for EDT/EST.
     var out = date.getUTCFullYear() + "-" + pad(date.getUTCMonth() + 1) + "-" + pad(date.getUTCDate());
-    console.log(out);
-    console.log(date.toISOString());
     return out;
 };
 
