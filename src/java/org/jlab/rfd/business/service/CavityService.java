@@ -64,7 +64,7 @@ public class CavityService {
             }
             JsonObject inventory = json.getJsonObject("Inventory");
             JsonArray elements = inventory.getJsonArray("elements");
-            for(JsonObject elem : elements.getValuesAs(JsonObject.class)) {
+            for (JsonObject elem : elements.getValuesAs(JsonObject.class)) {
                 names.add(elem.getString("name"));
             }
         }
@@ -140,6 +140,24 @@ public class CavityService {
                 ModAnodeHarvesterService mahs = new ModAnodeHarvesterService();
                 Map<String, CavityGsetData> cgds = mahs.getCavityGsetData(timestamp);
 
+                // If we got back ModAnodeHarvester data for this timestamp, make sure that we have data for every cavity.
+                // We either need a whole data set or throw an error.  Except that we expect this behavior for injector cavities
+                // since ModAnodeHarvester only runs against the North and South Linacs.  It's also possible (but should be
+                // checked for in the data harvester) that the database has an incomplete set of cavities.  We only want to include
+                // the data if all of the cavities are present.
+                boolean useMAH = true;
+                if (cgds == null) {
+                    useMAH = false;
+                } else {
+                    for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
+                        String eName = element.getJsonObject("properties").getString("EPICSName");
+                        if (cgds.get(eName) == null && (!Pattern.matches("^R0..", eName))) {
+                            useMAH = false;
+                            LOGGER.log(Level.WARNING, "ModAnodeHarvester data missing for {0} on {1}.  MAH data will not be included in response", new Object[]{eName, timestamp});
+                        }
+                    }
+                }
+
                 for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
                     // Optional in CED - objects initialized to null are not required to be displayed on dashboard
                     BigDecimal mav = new BigDecimal(0);  // No ModAnode property indicates a zero modulating anode voltage is applied
@@ -200,21 +218,15 @@ public class CavityService {
                         odvh = opsGsetMax;
                     }
 
-                    // If we got back ModAnodeHarvester data for this timestamp, make sure that we have data for every cavity.
-                    // We either need a whole data set or throw an error.  Except that we expect this behavior for injector cavities
-                    // since ModAnodeHarvester only runs against the North and South Linacs... ugh ...
-                    if (cgds != null && cgds.get(epicsName) == null && (!Pattern.matches("^R0..", epicsName))) {
-                        throw new RuntimeException("ModAnodeHarvester data missing for " + epicsName + " on '" + timestamp);
-                    }
-                    if (cgds == null) {
-                        data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
-                                odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
-                                length, null, bypassed, tunerBad));
-
-                    } else {
+                    //  useMAH should cover the case that cgds is null
+                    if (useMAH) {
                         data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
                                 odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
                                 length, cgds.get(epicsName), bypassed, tunerBad));
+                    } else {
+                        data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
+                                odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
+                                length, null, bypassed, tunerBad));
                     }
                 }
             }
