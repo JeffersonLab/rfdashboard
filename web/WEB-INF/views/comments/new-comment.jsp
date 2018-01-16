@@ -69,7 +69,7 @@
                 }).fail(function (jqXHR, textStatus, errorThrown) {
                     console.log("Comment submission failed: " + textStatus + " - " + errorThrown);
                     console.log("Response text: " + jqXHR.responseText);
-                    alert("Comment submission failed.");
+                    alert("Comment submission failed.\nError: " + errorThrown);
                 }).always(function () {
                     jlab.requestEnd();
                 });

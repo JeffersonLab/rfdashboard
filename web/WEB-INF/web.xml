@@ -30,7 +30,7 @@
     </context-param>
     <context-param>
         <param-name>releaseNumber</param-name>
-        <param-value>1.5.3</param-value>
+        <param-value>1.5.4</param-value>
     </context-param>
     <context-param>
         <param-name>releaseDate</param-name>

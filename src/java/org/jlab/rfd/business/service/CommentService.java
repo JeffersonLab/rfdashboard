@@ -164,7 +164,13 @@ public class CommentService {
         return comments;
     }
 
-    public void makeComment(String username, String topic, Date timestamp, String content) throws SQLException {
+    public void makeComment(String username, String topic, Date timestamp, String content) throws SQLException, IOException {
+        
+        SortedSet<String> topics = getValidTopics();
+        if (!topics.contains(topic)) {
+            throw new RuntimeException("Invalid topic " + topic);
+        }
+        
         Connection conn = null;
         PreparedStatement pstmt = null;
 
