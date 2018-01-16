@@ -179,10 +179,15 @@ $(function () {
         $('#diff-table-advanced').toggle();
     });
     $(".date-field").datepicker({
-        dateFormat: "yy-mm-dd"
+        dateFormat: "yy-mm-dd",
+        showButtonPanel: true
     });
 
     jlab.energyReach.loadLemScanChart("lem-scan", jlab.diffEnd, jlab.dayScanData);
     jlab.energyReach.loadEnergyReachChart("energy-reach", jlab.start, jlab.end, jlab.energyReachData);
     jlab.cavity.createCavitySetPointTables("#diff-table-basic", "#diff-table-advanced", "#summary-table", jlab.cavityData, jlab.diffStart, jlab.diffEnd);
+    
+    jlab.util.initCalendarStartEnd("#main-calendar");
+    jlab.util.initCalendarStartEnd("#delta-calendar");
+    
 });

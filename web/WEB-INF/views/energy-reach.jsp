@@ -29,6 +29,11 @@
 
     </jsp:attribute>
     <jsp:body>
+        <style>
+            .li-value button {
+                display: inline-block
+            }
+        </style>
         <div class="page-title-bar">
             <h2 id="page-header-title"><c:out value="${title}"/></h2>
             (<a href="#" id="page-details-opener" title="Page Details">Details</a>)
@@ -73,32 +78,8 @@
         <div id="control-form">
             <form action="${pageContext.request.contextPath}/energy-reach" method="get">
                 <fieldset>
-                    <div class="li-key">
-                        <label class="required-field" for="start">Start Date</label>
-                        <div class="date-note">(Inclusive)</div>
-                    </div>
-                    <div class="li-value">
-                        <input type="text" class="date-field" id="start" name="start" placeholder="YYYY-MM-DD" value="${requestScope.start}"/>
-                    </div>
-                    <div class="li-key">
-                        <label class="required-field" for="end">End Date</label>
-                        <div class="date-note">(Inclusive)</div>
-                    </div>
-                    <div class="li-value">
-                        <input type="text" class="date-field nowable-field" id="end" name="end" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
-                    </div>
-                    <div class="li-key">
-                        <label class="required-field" for="diffStart" title="">Delta Start</label>
-                    </div>
-                    <div class="li-value">
-                        <input type="text" class="date-field" id="diffStart" name="diffStart" placeholder="YYYY-MM-DD" value="${requestScope.diffStart}"/>
-                    </div>
-                    <div class="li-key">
-                        <label class="required-field" for="diffEnd" title="">Delta End</label>
-                    </div>
-                    <div class="li-value">
-                        <input type="text" class="date-field nowable-field" id="diffEnd" name="diffEnd" placeholder="YYYY-MM-DD" value="${requestScope.diffEnd}"/>
-                    </div>
+                    <t:calendar-start-end id="main-calendar" start="${requestScope.start}" end="${requestScope.end}" startLabel="Start Date" endLabel="End Date"></t:calendar-start-end>
+                    <t:calendar-start-end id="delta-calendar" start="${requestScope.diffStart}" end="${requestScope.diffEnd}" startLabel="Delta Start" endLabel="Delta End"></t:calendar-start-end>
                     <input type="submit" value="Submit" />
                 </fieldset>
             </form>
@@ -107,7 +88,7 @@
             <br><hr><br>
         <t:chart-widget placeholderId="lem-scan"></t:chart-widget>
             <hr><br>
-        <button id="menu-toggle">Basic/Advanced</button>
+            <button id="menu-toggle">Basic/Advanced</button>
         <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-basic" filename="${requestScope.start}_${requestScope.end}_cavBasic.csv"></t:tablesorter>
         <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-advanced" filename="${requestScope.start}_${requestScope.end}_cavAdv.csv"></t:tablesorter>
         <t:tablesorter tableTitle="Cavity Set Point Summary (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="summary-table" filename="${requestScope.start}_${requestScope.end}_cavSummary.csv"></t:tablesorter>
@@ -121,6 +102,8 @@
                 jlab.energyReachData = ${requestScope.energyReach};
                 jlab.dayScanData = ${requestScope.dayScan};
                 jlab.cavityData = ${requestScope.cavityData};
+
+
         </script>
     </jsp:body>
 </t:page>

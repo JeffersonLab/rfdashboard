@@ -77,7 +77,8 @@ $(function () {
     jlab.bypassed.loadBypassedCountByFactorChart("bypassed-count-by-cmtype", jlab.start, jlab.end, jlab.bypassedCMType, jlab.timeUnit, "cmtype");
 
     $(".date-field").datepicker({
-        dateFormat: "yy-mm-dd"
+        dateFormat: "yy-mm-dd",
+        showButtonPanel: true
     });
 
     $("#page-details-dialog").dialog(jlab.dialogProperties);
@@ -85,4 +86,5 @@ $(function () {
         $("#page-details-dialog").dialog("open");
     });
 
+    jlab.util.initCalendarStartEnd("#main-calendar");
 });

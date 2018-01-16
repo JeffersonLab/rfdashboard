@@ -932,3 +932,15 @@ table.comments-table tbody tr:nth-child(even){
 .ui_tpicker_time {
     display: none;
 }
+/* calendar-start-end widget */
+.calendar-start-end {
+    display: table-cell;
+}
+.calendar-start-end .calendar-presets {
+    font-size: 80%;
+    text-align: center;
+}
+.calendar-start-end .calendar-presets button {
+    display: inline-block;
+    font-size: 90%;
+}

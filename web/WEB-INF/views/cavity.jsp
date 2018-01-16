@@ -61,20 +61,7 @@
                         <div class="fieldset-cell">
                             <div class="fieldset-label">Date Range</div>
                             <div class="input-elem">
-                                <div class="li-key">
-                                    <label class="required-field" for="start">Start Date</label>
-                                </div>
-                                <div class="li-value">
-                                    <input type="text" class="date-field" id="start" name="start" placeholder="YYYY-MM-DD" value="${requestScope.start}"/>
-                                </div>
-                            </div>
-                            <div class="input-elem">
-                                <div class="li-key">
-                                    <label class="required-field" for="end" >End Date</label>
-                                </div>
-                                <div class="li-value">
-                                    <input type="text" class="date-field nowable-field" id="end" name="end" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
-                                </div>
+                                <t:calendar-start-end id="main-calendar" start="${requestScope.start}" end="${requestScope.end}" startLabel="Start Date" endLabel="End Date"></t:calendar-start-end>
                             </div>
                         </div>
                         <div class="fieldset-cell">
@@ -425,12 +412,12 @@
             <hr>
         </div>
         <t:tablesorter tableTitle="Cavity Properties (${requestScope.start} vs ${requestScope.end})" widgetId="details-table" filename="${requestScope.start}_${requestScope.end}_cavProps.csv"></t:tablesorter>
-        <script>
-            // Not terribly elegant, but need to get request parameters into javascript for further use.
-            var jlab = jlab || {};
-            jlab.start = "${requestScope.start}";
-            jlab.end = "${requestScope.end}";
-            jlab.properties = new Array();
+            <script>
+                // Not terribly elegant, but need to get request parameters into javascript for further use.
+                var jlab = jlab || {};
+                jlab.start = "${requestScope.start}";
+                jlab.end = "${requestScope.end}";
+                jlab.properties = new Array();
             <c:forEach var="prop" items="${properties}">jlab.properties.push("${prop.key}");</c:forEach>
                 jlab.linacs = new Array();
             <c:forEach var="linac" items="${linacs}">jlab.linacs.push("${linac.key}");</c:forEach>

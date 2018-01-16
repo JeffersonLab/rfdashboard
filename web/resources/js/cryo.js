@@ -293,10 +293,13 @@ $(function () {
     });
 
     $(".date-field").datepicker({
-        dateFormat: "yy-mm-dd"
+        dateFormat: "yy-mm-dd",
+        showButtonPanel: true
     });
 
     jlab.cavity.createCavitySetPointTables("#diff-table-basic", "#diff-table-advanced", "#summary-table", jlab.cavityData, jlab.diffStart, jlab.diffEnd);
     jlab.cryo.updateCryoPressureChart('cryo-linac-pressure', jlab.start, jlab.end, jlab.timeUnit);
 
+    jlab.util.initCalendarStartEnd("#main-calendar");
+    jlab.util.initCalendarStartEnd("#delta-calendar");
 });

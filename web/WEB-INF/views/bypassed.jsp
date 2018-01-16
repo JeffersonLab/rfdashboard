@@ -66,20 +66,7 @@
         <div id="control-form">
             <form action="${pageContext.request.contextPath}/bypassed" method="get">
                 <fieldset>
-                    <div class="li-key">
-                        <label class="required-field" for="start">Start Date</label>
-                        <div class="date-note">(Inclusive)</div>
-                    </div>
-                    <div class="li-value">
-                        <input type="text" class="date-field" id="start" name="start" placeholder="YYYY-MM-DD" value="${requestScope.start}"/>
-                    </div>
-                    <div class="li-key">
-                        <label class="required-field" for="end">End Date</label>
-                        <div class="date-note">(Inclusive)</div>
-                    </div>
-                    <div class="li-value">
-                        <input type="text" class="date-field nowable-field" id="end" name="end" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
-                    </div>
+                    <t:calendar-start-end id="main-calendar" start="${requestScope.start}" end="${requestScope.end}" startLabel="Start Date" endLabel="End Date"></t:calendar-start-end>
                     <div class="li-key">
                         <label class="required-field" for="tableDate">Table Date</label>
                     </div>

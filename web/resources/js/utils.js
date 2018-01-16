@@ -116,12 +116,37 @@ jlab.showTooltip = function (x, y, contents, z) {
 // date: a yyyy-mm-dd formated string
 // numDays: number of days to add
 jlab.addDays = function (date, numDays) {
+    return jlab.addTime(date, "day", numDays);
+};
+
+
+// This function takes a formatted date string, and adds the specified number of unit time units to it.
+// Returns the updated date string.
+// date: yyyy-mm-dd formated date string
+// unit: 'day', 'month', or 'year'
+// number: the number of time units to increment the date parameter
+jlab.addTime = function(date, unit, number) {
     var dateParts = date.split('-');
     var y = parseInt(dateParts[0], 10);
     var m = parseInt(dateParts[1], 10);
     var d = parseInt(dateParts[2], 10);
 
-    var nDate = new Date(y, m - 1, d + numDays);
+    switch (unit) {
+        case 'day':
+            d = d + number;
+            break;
+        case 'month':
+            m = m + number;
+            break;
+        case 'year':
+            y = y + number;
+            break;
+        default:
+            console.log("Error in jlab.addTime():  Unrecognized time unit");
+            return null;
+    }
+
+    var nDate = new Date(y, m - 1, d);
     var ny = nDate.getFullYear();
     var nm = nDate.getMonth() + 1;
     if (nm < 10) {
@@ -384,5 +409,30 @@ jlab.util.initDateTimePickers = function () {
         controlType: jlab.util.dateTimePickerControl,
         dateFormat: 'yy-mm-dd',
         timeFormat: 'HH:mm:ss'
+    });
+};
+
+/* calendar-start-end functions */
+jlab.util.initCalendarStartEnd = function(widgetId) {
+    var startCal = $(widgetId + " #start");
+    var endCal = $(widgetId + " #end");
+    var today = jlab.millisToDate(Date.now());
+
+    // Year to date
+    $(widgetId + " .year-button").on("click", function() {
+        startCal.datepicker("setDate", jlab.addTime(today, "year", -1));
+        endCal.datepicker("setDate", today);
+    });
+
+    // Month to date
+    $(widgetId + " .month-button").on("click", function() {
+        startCal.datepicker("setDate", jlab.addTime(today, "month", -1));
+        endCal.datepicker("setDate", today);
+    });
+
+    // Week to date
+    $(widgetId + " .week-button").on("click", function() {
+        startCal.datepicker("setDate", jlab.addTime(today, "day", -7));
+        endCal.datepicker("setDate", today);
     });
 };

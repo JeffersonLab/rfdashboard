@@ -179,7 +179,8 @@ $(function () {
 
     // Setup the date picker(s)
     $(".date-field").datepicker({
-        dateFormat: "yy-mm-dd"
+        dateFormat: "yy-mm-dd",
+        showButtonPanel: true
     });
 
     $("#page-details-dialog").dialog(jlab.dialogProperties);
@@ -187,4 +188,5 @@ $(function () {
         $("#page-details-dialog").dialog("open");
     });
 
+    jlab.util.initCalendarStartEnd("#main-calendar");
 });

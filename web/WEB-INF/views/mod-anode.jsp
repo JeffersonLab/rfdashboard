@@ -76,20 +76,7 @@
         <div id="control-form">
             <form action="${pageContext.request.contextPath}/mod-anode" method="get">
                 <fieldset>
-                    <div class="li-key">
-                        <label class="required-field" for="start">Start Date</label>
-                        <div class="date-note">(Inclusive)</div>
-                    </div>
-                    <div class="li-value">
-                        <input type="text" class="date-field" id="start" name="start" placeholder="YYYY-MM-DD" value="${requestScope.start}"/>
-                    </div>
-                    <div class="li-key">
-                        <label class="required-field" for="end">End Date</label>
-                        <div class="date-note">(Inclusive)</div>
-                    </div>
-                    <div class="li-value">
-                        <input type="text" class="date-field nowable-field" id="end" name="end" placeholder="YYYY-MM-DD" value="${requestScope.end}"/>
-                    </div>
+                    <t:calendar-start-end id="main-calendar" start="${requestScope.start}" end="${requestScope.end}" startLabel="Start Date" endLabel="End Date"></t:calendar-start-end>
                     <div class="li-key">
                         <label class="required-field" for="tableDate">Table Date</label>
                     </div>
@@ -110,24 +97,24 @@
             </form>
         </div>
         <t:chart-widget placeholderId="mav-mah-trip-impact"></t:chart-widget>
-        <hr><br>
+            <hr><br>
         <t:tablesorter tableTitle="LEMSim-Based Mod Anode Voltage Affects (${requestScope.tableDate})" widgetId="mav-mah-table" filename="${requestScope.tableDate}_LEMSim_MAV.csv"></t:tablesorter>
-        <hr><br>
+            <hr><br>
         <t:chart-widget placeholderId="mav-count-by-linac"></t:chart-widget>
-        <hr><br>
+            <hr><br>
         <t:chart-widget placeholderId="mav-count-by-cmtype"></t:chart-widget>
-        <hr><br>
+            <hr><br>
         <t:tablesorter tableTitle="Mod Anode Voltage By Cavities (${requestScope.tableDate})" widgetId="mav-table" filename="${requestScope.tableDate}_MAV.csv"></t:tablesorter>
-        <script>
-            var jlab = jlab || {};
-            jlab.start = "${requestScope.start}";
-            jlab.end = "${requestScope.end}";
-            jlab.timeUnit = "${requestScope.timeUnit}";
-            jlab.tableDate = "${requestScope.tableDate}";
-            jlab.tableData = ${requestScope.tableData};
-            jlab.MAVCountCMType = ${requestScope.MAVCountCMType};
-            jlab.MAVCountLinac = ${requestScope.MAVCountLinac};
-            jlab.mahChartData = ${requestScope.mahChartData};
+            <script>
+                var jlab = jlab || {};
+                jlab.start = "${requestScope.start}";
+                jlab.end = "${requestScope.end}";
+                jlab.timeUnit = "${requestScope.timeUnit}";
+                jlab.tableDate = "${requestScope.tableDate}";
+                jlab.tableData = ${requestScope.tableData};
+                jlab.MAVCountCMType = ${requestScope.MAVCountCMType};
+                jlab.MAVCountLinac = ${requestScope.MAVCountLinac};
+                jlab.mahChartData = ${requestScope.mahChartData};
         </script>
     </jsp:body>
 </t:page>
