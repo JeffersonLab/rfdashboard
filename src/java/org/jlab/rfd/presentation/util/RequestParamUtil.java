@@ -99,14 +99,14 @@ public class RequestParamUtil {
         String eString = request.getParameter("end");
         String sString = request.getParameter("start");
 
-        if (eString != null) {
+        if (eString != null && !eString.isEmpty()) {
             end = DateUtil.parseDateStringYMD(eString);
         } else {
             // Default to "now"
             end = DateUtil.truncateToDays(new Date());
         }
 
-        if (sString != null) {
+        if (sString != null && !sString.isEmpty()) {
             start = DateUtil.parseDateStringYMD(sString);
         } else {
             Calendar cal = Calendar.getInstance();

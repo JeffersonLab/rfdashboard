@@ -1,4 +1,4 @@
-package org.jlab.rfd.presentation.controller;
+package org.jlab.rfd.presentation.controller.reports;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -31,7 +31,7 @@ import org.jlab.rfd.presentation.util.RequestParamUtil;
  *
  * @author adamc
  */
-@WebServlet(name = "Cavity", urlPatterns = {"/cavity"})
+@WebServlet(name = "Cavity", urlPatterns = {"/reports/cavity"})
 public class Cavity extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(Cavity.class.getName());
@@ -66,6 +66,8 @@ public class Cavity extends HttpServlet {
             startEnd = RequestParamUtil.processStartEnd(request, TimeUnit.WEEK, 4);
             start = startEnd.get("start");
             end = startEnd.get("end");
+            System.out.println(start);
+            System.out.println(end);
             dates.add(start);
             dates.add(end);
             request.setAttribute("start", sdf.format(start));
@@ -105,7 +107,7 @@ public class Cavity extends HttpServlet {
             String redirectUrl;
             try {
                 redirectUrl = request.getContextPath()
-                        + "/cavity?start=" + URLEncoder.encode((String) request.getAttribute("start"), "UTF-8")
+                        + "/reports/cavity?start=" + URLEncoder.encode((String) request.getAttribute("start"), "UTF-8")
                         + "&end=" + URLEncoder.encode((String) request.getAttribute("end"), "UTF-8");
                 for (String linac : linacs) {
                     redirectUrl = redirectUrl + "&linacs=" + URLEncoder.encode(linac, "UTF-8");
@@ -147,6 +149,6 @@ public class Cavity extends HttpServlet {
             throw new ServletException("Error querying cavity data");
         }
 
-        request.getRequestDispatcher("/WEB-INF/views/cavity.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/reports/cavity.jsp").forward(request, response);
     }
 }

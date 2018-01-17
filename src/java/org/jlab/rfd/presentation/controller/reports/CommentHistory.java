@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.rfd.presentation.controller;
+package org.jlab.rfd.presentation.controller.reports;
 
 import java.io.IOException;
 import java.net.URLDecoder;

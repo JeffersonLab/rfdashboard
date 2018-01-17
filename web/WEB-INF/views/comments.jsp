@@ -9,7 +9,7 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags"%> 
 <c:set var="title" value="Comment"/>
-<t:comments-page title="${title}">
+<t:reports-page title="${title}">
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet" href="${initParam.cdnContextPath}/jquery-plugins/select2/3.5.2/select2.css"/>
         <link rel="stylesheet" href="${initParam.cdnContextPath}/jquery-plugins/timepicker/jquery-ui-timepicker-1.3.1.css"/>
@@ -180,4 +180,4 @@
             </table>
         </section>
     </jsp:body>         
-</t:comments-page>
+</t:reports-page>

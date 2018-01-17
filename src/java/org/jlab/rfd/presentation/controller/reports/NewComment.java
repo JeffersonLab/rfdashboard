@@ -1,4 +1,4 @@
-package org.jlab.rfd.presentation.controller;
+package org.jlab.rfd.presentation.controller.reports;
 
 import java.io.IOException;
 import java.net.URLEncoder;

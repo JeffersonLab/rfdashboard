@@ -8,8 +8,8 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<c:set var="title" value="Cavity Details" />
-<t:page title="${title}" pageStart="${requestScope.start}" pageEnd="${requestScope.end}"> 
+<c:set var="title" value="Cavity Data" />
+<t:reports-page title="${title}" pageStart="${requestScope.start}" pageEnd="${requestScope.end}"> 
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/cavity.css"/>
     </jsp:attribute>
@@ -55,22 +55,22 @@
             The data can be output in a number of different formats using the 'Output' button and 'Output Options' dropdown menu.
         </div>
         <div id="control-form">
-            <form action="${pageContext.request.contextPath}/cavity" method="get">
+            <form action="${pageContext.request.contextPath}/reports/cavity" method="get">
                 <div class="fieldset-container">
                     <div class="fieldset-row">
                         <div class="fieldset-cell">
                             <div class="fieldset-label">Date Range</div>
                             <div class="input-elem">
                                 <t:calendar-start-end id="main-calendar" start="${requestScope.start}" end="${requestScope.end}" startLabel="Start Date" endLabel="End Date"></t:calendar-start-end>
-                            </div>
-                        </div>
-                        <div class="fieldset-cell">
-                            <div class="fieldset-label">Cryomodule Type</div>
-                            <div class="input-elem">
-                                <div class="li-key">
-                                    <label for="QTR">QTR</label>
                                 </div>
-                                <div class="li-value">
+                            </div>
+                            <div class="fieldset-cell">
+                                <div class="fieldset-label">Cryomodule Type</div>
+                                <div class="input-elem">
+                                    <div class="li-key">
+                                        <label for="QTR">QTR</label>
+                                    </div>
+                                    <div class="li-value">
                                     <c:choose>
                                         <c:when test="${cmtypes.containsKey('QTR')}">
                                             <input type="checkbox" id="QTR" name="cmtypes" value="QTR" checked/>
@@ -426,4 +426,4 @@
                 jlab.cavityData = ${requestScope.cavityData};
         </script>
     </jsp:body>
-</t:page>
+</t:reports-page>
