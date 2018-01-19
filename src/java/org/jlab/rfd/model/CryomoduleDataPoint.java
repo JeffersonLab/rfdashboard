@@ -65,12 +65,17 @@ public class CryomoduleDataPoint {
      * Calculates the energy of the Cryomodule using a simple formula
      * SUM_cav(GSET*Length)
      *
-     * @return
+     * @return The energy gain or null if there was a problem with the data
      */
-    public double getEgain() {
+    public Double getEGain() {
         double energy = 0;
         for (int i = 0; i < 8; i++) {
+            if (gsets[i] != null && lengths[i] != null) {
             energy += gsets[i] * lengths[i];
+            } else {
+                energy = Double.NaN;
+                return energy;
+            }
         }
         return energy;
     }
