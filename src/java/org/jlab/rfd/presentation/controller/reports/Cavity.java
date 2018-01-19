@@ -66,8 +66,6 @@ public class Cavity extends HttpServlet {
             startEnd = RequestParamUtil.processStartEnd(request, TimeUnit.WEEK, 4);
             start = startEnd.get("start");
             end = startEnd.get("end");
-            System.out.println(start);
-            System.out.println(end);
             dates.add(start);
             dates.add(end);
             request.setAttribute("start", sdf.format(start));

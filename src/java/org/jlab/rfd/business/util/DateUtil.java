@@ -26,6 +26,19 @@ public class DateUtil {
     private static final SimpleDateFormat YMD_HM_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     private static final SimpleDateFormat YMD_HMS_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    public static Date truncateToDate(Date d1) throws ParseException {
+        return YMD_DATE_FORMATTER.parse(YMD_DATE_FORMATTER.format(d1));
+    }
+    
+    /**
+     * Get a yyyy-MM-dd formatted string based on the supplied date
+     * @param d1 The Date object to format
+     * @return The formatted string.
+     */
+    public static String formatDateYMD(Date d1) {
+        return YMD_DATE_FORMATTER.format(d1);
+    }
+    
     public static String formatDateYMDHMS(Date d1) {
         return YMD_HMS_DATE_FORMATTER.format(d1);
     }

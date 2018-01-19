@@ -8,24 +8,36 @@ package org.jlab.rfd.business.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import org.jlab.rfd.business.util.CebafNames;
+import org.jlab.rfd.model.CavityResponse;
+import org.jlab.rfd.model.CryomoduleDataPoint;
 import org.jlab.rfd.model.CryomoduleType;
+import org.jlab.rfd.model.LinacName;
 
 /**
  * Service used to query the CED about Cryomodule information.
+ *
  * @author adamc
  */
 public class CryomoduleService {
 
     private static final Logger LOGGER = Logger.getLogger(CryomoduleService.class.getName());
+    private static final String LEM_PV_HEAT_SUFFIX = "XHTPLEM";
     private static final String CED_INVENTORY_URL = "http://ced.acc.jlab.org/inventory";
 
     /**
@@ -37,13 +49,14 @@ public class CryomoduleService {
      * etc.). Returns null if timestamp is for future date.
      *
      * @param timestamp The date for which we query the CED history workspace
-     * @return A map of Cavity EPICS name to it parent CryoModule ModuleType on the requested date
+     * @return A map of Cavity EPICS name to it parent CryoModule ModuleType on
+     * the requested date
      * @throws java.text.ParseException
      * @throws java.io.IOException
      */
     public HashMap<String, CryomoduleType> getCryoModuleTypes(Date timestamp) throws ParseException, IOException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        if ( timestamp.after(new Date()) ) {
+        if (timestamp.after(new Date())) {
             return null;
         }
 
@@ -71,5 +84,73 @@ public class CryomoduleService {
             }
         }
         return cmTypes;
+    }
+
+    /**
+     * This builds a List of CryomoduleDataPoints describing CEBAF at a point in
+     * time.
+     *
+     * @param date The time of interest. Note: May be truncated to day precision
+     * for caching purposes
+     * @return A List of CryomoduleDataPoints describing CEBAF cryomodules on
+     * date.
+     */
+    public List<CryomoduleDataPoint> getCryomoduleDataPoints(Date date) throws IOException, ParseException, SQLException {
+        List<CryomoduleDataPoint> cmList = new ArrayList<>();
+
+        CavityService cs = new CavityService();
+        Set<CavityResponse> cavList = cs.getCavityData(date);
+
+        // Mapped on EPICSName
+        Map<String, Double[]> gsets = new HashMap<>();
+        Map<String, Double[]> lengths = new HashMap<>();
+        Map<String, LinacName> linacs = new HashMap<>();
+        Map<String, CryomoduleType> cmTypes = new HashMap<>();
+
+        // Iterate through the list picking off the gset and length information
+        for (CavityResponse cr : cavList) {
+            String cavName = cr.getEpicsName();
+            String epicsName = cavName.substring(0, 3);
+            int position = Integer.parseInt(cavName.substring(3, 4)) - 1;
+            double gset = cr.getGset().doubleValue();
+            double length = cr.getLength().doubleValue();
+
+            if (!gsets.containsKey(epicsName)) {
+                gsets.put(epicsName, new Double[8]);
+            }
+            if (!lengths.containsKey(epicsName)) {
+                lengths.put(epicsName, new Double[8]);
+            }
+
+            gsets.get(epicsName)[position] = gset;
+            lengths.get(epicsName)[position] = length;
+            linacs.put(epicsName, cr.getLinacName());
+            cmTypes.put(epicsName, cr.getCryomoduleType());
+        }
+
+        List<String> pvs = new ArrayList<>();
+        for (String epicsName : gsets.keySet()) {
+            pvs.add(epicsName + LEM_PV_HEAT_SUFFIX);
+        }
+        MyaService ms = new MyaService();
+        Map<String, String> heats = ms.mySampler(pvs, date);
+        for (String epicsName : gsets.keySet()) {
+            Double heat = null;
+            if (heats != null) {
+                String pv = epicsName + LEM_PV_HEAT_SUFFIX;
+                try {
+                    heat = Double.parseDouble(heats.get(pv));
+                } catch (NumberFormatException e) {
+                    LOGGER.log(Level.INFO, "Error parsing number from mySampler response for {0}={1}", new Object[]{pv, heats.get(pv)});
+                }
+            }
+            String name = CebafNames.epicsZoneToCedZone(epicsName);
+            CryomoduleDataPoint cdp = new CryomoduleDataPoint(name, epicsName, linacs.get(epicsName),
+                    cmTypes.get(epicsName), gsets.get(epicsName), lengths.get(epicsName), heat);
+
+            cmList.add(cdp);
+        }
+
+        return cmList;
     }
 }
