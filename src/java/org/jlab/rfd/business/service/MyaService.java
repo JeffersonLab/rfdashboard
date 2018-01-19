@@ -8,11 +8,13 @@ package org.jlab.rfd.business.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap; 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -21,6 +23,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import org.jlab.rfd.business.util.DateUtil;
 
 /**
  *
@@ -30,7 +33,6 @@ public class MyaService {
 
     private static final Logger LOGGER = Logger.getLogger(MyaService.class.getName());
     public static final String MYSAMPLER_URL = "https://myaweb.acc.jlab.org/mySampler/data";
-
 
     /*
     * returns null if timestamp is for future date
@@ -92,4 +94,60 @@ public class MyaService {
         return gsetData;
     }
 
+    /**
+     * Runs a query against the myaweb mySampler service.  This simplified version hands back a single sample for the specified
+     * date
+     * @param channels A list of PVs
+     * @param date The date to sample on
+     * @return A map of PVs to response
+     * @throws java.io.IOException Propogated up or thrown directly if the JSON resonse contains an error key
+     */
+    public Map<String, String> mySampler(List<String> channels, Date date) throws IOException {
+        
+        Map<String, String> out = new HashMap<>();
+        JsonObject response = mySampler(channels, date, 1, 1, "ops");
+
+        if ( response.containsKey("error") ) {
+            throw new IOException("Mya Error: " +  response.getString("error"));
+        }
+        
+        JsonArray data = response.getJsonArray("data");
+        JsonArray values = data.getJsonObject(0).getJsonArray("values");
+        
+        // The values array contains objects with a single PVName: Value pair.
+        for(JsonObject pv : values.getValuesAs(JsonObject.class)) {
+            String[] names = pv.keySet().toArray(new String[pv.size()]);
+            out.put(names[0], pv.getString(names[0]));
+        }
+        
+        return out;
+    }
+    
+    /**
+     * Runs a query against the myaweb mySampler service.  You probably want to use the simpler two parameter version
+     * @param channels A list of PVs
+     * @param date The start date
+     * @param stepSize mySampler s param
+     * @param numSteps mySampler n param
+     * @param deployment mySampler m param
+     * @return The services JSON response
+     * @throws IOException Thrown if issue with URL connection to mySampler service
+     */
+    public JsonObject mySampler(List<String> channels, Date date, int stepSize, int numSteps, String deployment) throws IOException {
+        
+        String pvs = String.join("+", channels);
+        
+        String query = "?b=" + DateUtil.formatDateYMD(date) + "&n=" + numSteps + "&s=" + stepSize + "&m=" + deployment 
+                + "&channels=" + pvs;
+                        
+        URL url = new URL(MYSAMPLER_URL + query);
+        InputStream in = url.openStream();
+        JsonObject out = null;
+        try(JsonReader reader = Json.createReader(in)) {
+            out = reader.readObject();
+        }
+        
+        return out;
+    }
+    
 }
