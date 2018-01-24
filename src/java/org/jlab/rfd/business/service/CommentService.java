@@ -59,7 +59,14 @@ public class CommentService {
      */
     public SortedSet<String> getValidTopics() throws IOException {
         CavityService cs = new CavityService();
-        return cs.getCavityNames();
+        SortedSet<String> cavs = cs.getCavityNames();
+        SortedSet<String> topics = new TreeSet<>();
+        // We also want cryomodule/zones as topics.  Just strip off the '-#' and add
+        for(String cav : cavs) {
+            topics.add(cav);
+            topics.add(cav.substring(0, 4));
+        }
+        return topics;
     }
 
     /**
@@ -107,8 +114,8 @@ public class CommentService {
      * using limit and offset parameters
      *
      * @param filter Contains any filtering parameters to be used
-     * @param limit Return at most this many responses. Null implies no limit
-     * @param offset Start the result set after the "offset" most recent
+     * @param limit Return at most this many responses. Less than one implies no limit
+     * @param offset Start the result set after the "offset" most recent.  Less than one implies no offset 
      * comments.
      * @return Collection of user comments
      * @throws SQLException Database query error
@@ -202,14 +209,35 @@ public class CommentService {
         return getCommentsByTopic(filter, -1, -1);
     }
 
+    /**
+     * Return a map keyed on topics with values being a sortedset (chonological order) of comments for that topic.  Limit and 
+     * offset apply on a per topic basis.
+     * @param filter CommentFilter object
+     * @param limit  Max number of comments per topic.  Less than one implies no limit.
+     * @param offset  How many of the initial comments to skip.  Less than one implies no offset.
+     * @return
+     * @throws SQLException
+     * @throws ParseException 
+     */
     public Map<String, SortedSet<Comment>> getCommentsByTopic(CommentFilter filter, int limit, int offset) throws SQLException, ParseException {
+        
+        int l = limit < 1 ? Integer.MAX_VALUE : limit;
+        int o = offset < 1 ? 0 : offset;
         Map<String, SortedSet<Comment>> sorted = new HashMap<>();
-        SortedSet<Comment> comments = this.getComments(filter, limit, offset);
+        SortedSet<Comment> comments = this.getComments(filter, -1, -1);
+        Map<String, Integer> indexes = new HashMap<>();
         for (Comment c : comments) {
             if (!sorted.containsKey(c.getTopic())) {
                 sorted.put(c.getTopic(), new TreeSet<>());
+                indexes.put(c.getTopic(), 1);
             }
-            sorted.get(c.getTopic()).add(c);
+                       
+            // Check against limit and offset
+            int i = indexes.get(c.getTopic());            
+            if (i > o && i <= (o + l)) {
+                sorted.get(c.getTopic()).add(c);
+            }
+            indexes.put(c.getTopic(), i + 1);
         }
         return sorted;
     }
