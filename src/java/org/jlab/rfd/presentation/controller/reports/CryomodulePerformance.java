@@ -138,7 +138,7 @@ public class CryomodulePerformance extends HttpServlet {
         CommentFilter cf = new CommentFilter(null, null, null, null, null);
         Map<String, SortedSet<Comment>> comments;
         try {
-            comments = comms.getCommentsByTopic(cf, 10, 0);
+            comments = comms.getCommentsByTopic(cf, 0, 0);
         } catch (SQLException | ParseException ex) {
             LOGGER.log(Level.WARNING, "Error querying comment database: {0}", ex.toString());
             throw new ServletException("Error querying comment database");
