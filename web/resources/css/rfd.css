@@ -944,3 +944,42 @@ table.comments-table tbody tr:nth-child(even){
     display: inline-block;
     font-size: 90%;
 }
+/* jQuery accordion related elements */
+.accordion-title-wrap {
+    text-align: center;
+}
+.accordion-title {
+    font-size: 14pt;
+    font-weight: bold;
+}
+.accordion-subtitle {
+    display: inline-block;
+}
+/* "meta" table related stylings */
+.table-panel {
+/*    text-align: left;
+    display: block;
+    padding: 0.25em;
+    position: relative;
+    max-height: 500px;
+    min-height: 100px;
+    width: 99%;
+    padding-top: 6px;
+    overflow: auto;
+    border: 1px solid gray;*/
+}
+.table-wrap {
+    /*padding: 0.5em;*/
+}
+.table-title {
+    max-width: 99%;
+    /*display: inline-block;*/
+    text-align: left;
+    font-weight: bold;
+}
+.table-links {
+    float: right;
+}
+.ui-widget-content a {
+    color: blue;
+}
