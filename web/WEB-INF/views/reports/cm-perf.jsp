@@ -10,7 +10,7 @@
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <c:set var="title" value="Cryomodule Performance"></c:set>
-<t:reports-page title="${title}}">
+<t:reports-page title="${title}">
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/cm-perf.css"/>
         <style>
