@@ -130,23 +130,18 @@ public class CryomodulePerformance extends HttpServlet {
         }
         request.setAttribute("cmList", cmList);
 
-        List<String> topics = new ArrayList<>();
-        for (CryomoduleDataPoint cm : cmList) {
-            topics.add(cm.getName());
-        }
         CommentService comms = new CommentService();
         CommentFilter cf = new CommentFilter(null, null, null, null, null);
         Map<String, SortedSet<Comment>> comments;
         try {
-            comments = comms.getCommentsByTopic(cf, 0, 0);
+            comments = comms.getCommentsByTopic(cf,10, 0);
         } catch (SQLException | ParseException ex) {
             LOGGER.log(Level.WARNING, "Error querying comment database: {0}", ex.toString());
             throw new ServletException("Error querying comment database");
         }
+        System.out.println(comments);
         request.setAttribute("commentMap", comments);
-        java.util.SortedSet<org.jlab.rfd.model.Comment> test = new java.util.TreeSet<>();
-        request.setAttribute("test", test);
-
+        
         request.getRequestDispatcher("/WEB-INF/views/reports/cm-perf.jsp").forward(request, response);
     }
 }

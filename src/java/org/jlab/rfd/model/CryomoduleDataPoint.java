@@ -110,4 +110,8 @@ public class CryomoduleDataPoint {
         
         return energy;
     }
+    
+    public double getEGainPerformance() {
+        return getEGain() / getNominalEGain() * 100.;
+    }
 }
