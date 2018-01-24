@@ -10,11 +10,16 @@ jlab.energyReach = jlab.energyReach || {};
 // Create and show the single day, lem-scan trip curve plot
 jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
 
+
     var title = "<strong>LEM Estimated Trip Rates</strong><br/><div style='font-size:smaller'>" + date + "</div>";
     if (typeof scanData === "undefined") {
         $("#" + chartId).append(title + "<br>No data available");
         return;
     }
+
+    var reachRates = jlab.energyReach.getReachTripRates(new Date(date));
+    var linacRate = reachRates[0];
+    var totalRate = reachRates[1];
 
     var settings = {
         colors: jlab.colors.linacs.slice(1, 4), // Grab the North, South, and Total colors
@@ -29,7 +34,7 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
     var flotOptions = {
         xaxis: {axisLabel: "Linac Energy (MeV)", mode: null, min: 1000, max: 1190},
         yaxis: {axisLabel: "Trips / Hour", min: 0, max: 15},
-        grid: {clickable: false, markings: [{yaxis: {from: 8, to: 8}, color: "#000000"}, {yaxis: {from: 4, to: 4}, color: "#000000"}]}
+        grid: {clickable: false, markings: [{yaxis: {from: totalRate, to: totalRate}, color: "#000000"}, {yaxis: {from: linacRate, to: linacRate}, color: "#000000"}]}
     };
 
     var flotData = [];
@@ -45,10 +50,10 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
     jlab.energyReach.addLegend(chartId, settings.colors, scanData.labels, reaches);
 
     // Add the horizontal lines for 4 and 8 trips/hr with annotations
-    var p8 = plot.pointOffset({x: 1010, y: 8});
-    var p4 = plot.pointOffset({x: 1010, y: 4});
-    $("#" + chartId).append("<div style='position:absolute;left:" + p8.left + "px;top:" + (p8.top - 17) + "px; color:#666;font-size:smaller'>8 trips/hr</div>");
-    $("#" + chartId).append("<div style='position:absolute;left:" + p4.left + "px;top:" + (p4.top - 17) + "px; color:#666;font-size:smaller'>4 trips/hr</div>");
+    var pTot = plot.pointOffset({x: 1010, y: totalRate});
+    var pLin = plot.pointOffset({x: 1010, y: linacRate});
+    $("#" + chartId).append("<div style='position:absolute;left:" + pTot.left + "px;top:" + (pTot.top - 17) + "px; color:#666;font-size:smaller'>" + totalRate +" trips/hr</div>");
+    $("#" + chartId).append("<div style='position:absolute;left:" + pLin.left + "px;top:" + (pLin.top - 17) + "px; color:#666;font-size:smaller'>" + linacRate + " trips/hr</div>");
 };
 
 // The creates and shows the energy reach barchart
@@ -60,7 +65,6 @@ jlab.energyReach.loadEnergyReachChart = function (chartId, start, end, reachData
         $("#" + chartId).append("<br>" + title + "<br>No data available");
         return;
     }
-
 
     var timeUnit = "day";
     var settings = {
@@ -103,10 +107,15 @@ jlab.energyReach.loadEnergyReachChart = function (chartId, start, end, reachData
     });
 };
 
-// This returns an array of energy reaches for the machine and linac defined as the energy where each linac or the whole machine
-// experience 8 C25 trips/hour.  Data is the JSON object returned by the ajax request to /ajax/lem-scan?type=day-scan&...
-// results rounded to one decimal place.
-jlab.energyReach.getEnergyReach = function (jsonData) {
+
+/*
+ * jsonData - ajax response from energy-reach end point
+ * date - Date object for which we calculate the energy reach (reflects changes in LEM modeling of C100)
+ * Note: This returns an array of energy reaches for the machine and linac defined as the energy where each linac or the whole machine
+ * experience 8 C25 trips/hour.  Data is the JSON object returned by the ajax request to /ajax/lem-scan?type=day-scan&...
+ * results rounded to one decimal place.
+ */
+jlab.energyReach.getEnergyReach = function (jsonData, date) {
     var tripData = {
         north: {energy: [], tripRate: []},
         south: {energy: [], tripRate: []},
@@ -126,27 +135,51 @@ jlab.energyReach.getEnergyReach = function (jsonData) {
             }
         }
     }
+    
+    var rates = jlab.energyReach.getReachTripRates(date);
+    var linacRate = rates[0];
+    var totalRate = rates[1];
 
     // Everpolate should already exist - needs everpolate library to be included in the calling jsp
     var reaches = [];
     if (tripData.north.tripRate.length > 2) {
-        reaches[0] = everpolate.linear([8], tripData.north.tripRate, tripData.north.energy)[0].toFixed(1);
+        reaches[0] = everpolate.linear([linacRate], tripData.north.tripRate, tripData.north.energy)[0].toFixed(1);
     } else {
         reaches[0] = "N/A";
     }
     if (tripData.south.tripRate.length > 2) {
-        reaches[1] = everpolate.linear([8], tripData.south.tripRate, tripData.south.energy)[0].toFixed(1);
+        reaches[1] = everpolate.linear([linacRate], tripData.south.tripRate, tripData.south.energy)[0].toFixed(1);
     } else {
         reaches[1] = "N/A";
     }
     if (tripData.total.tripRate.length > 2) {
-        reaches[2] = everpolate.linear([8], tripData.total.tripRate, tripData.total.energy)[0].toFixed(1);
+        reaches[2] = everpolate.linear([totalRate], tripData.total.tripRate, tripData.total.energy)[0].toFixed(1);
     } else {
         reaches[2] = "N/A";
     }
 
     return reaches;
 };
+
+
+// "Target" trip rates.  The most we want is 10 total trips / hour.  The reach trip rate changes over time depending on what
+// is modeled in LEM.  Before 2018, C100s were not in LEM and accounted for about 2 trips / hour, leaving 8 total/hr for LEM.
+// Starting 2018, most C100s had trip models in LEM, and LEM appears to be doing a good job of accounting for most RF trips.
+// date - date object for which to return the trip rates
+jlab.energyReach.getReachTripRates = function (date) {
+    var linacRate = 4;
+    var totalRate = 8;
+    if (typeof date !== "undefined") {
+        var c100Date = new Date(2018, 0, 1);
+        if (date > c100Date) {
+            linacRate = 5;
+            totalRate = 10;
+        }
+    }
+    return [linacRate, totalRate];
+};
+
+
 
 jlab.energyReach.addLegend = function (chartId, colors, labels, reaches) {
     var legendString = '<div class="chart-legend" id=' + chartId + '-chart-legend">\n';
@@ -186,8 +219,8 @@ $(function () {
     jlab.energyReach.loadLemScanChart("lem-scan", jlab.diffEnd, jlab.dayScanData);
     jlab.energyReach.loadEnergyReachChart("energy-reach", jlab.start, jlab.end, jlab.energyReachData);
     jlab.cavity.createCavitySetPointTables("#diff-table-basic", "#diff-table-advanced", "#summary-table", jlab.cavityData, jlab.diffStart, jlab.diffEnd);
-    
+
     jlab.util.initCalendarStartEnd("#main-calendar");
     jlab.util.initCalendarStartEnd("#delta-calendar");
-    
+
 });
