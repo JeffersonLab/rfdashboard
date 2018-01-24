@@ -234,8 +234,8 @@ th.scrollbar-header {
 }
 /*Input Form*/
 .fieldset-container {
-   display: table;
-   width:100%;
+    display: table;
+    width:100%;
 }
 .fieldset-row {
     display: table-row;
@@ -820,7 +820,7 @@ tablesorter tag styles
 }
 /* Toggle Buttons */
 .rfd-tablesorter-widget .table-controls .btn-group.toggles input:checked + label {
-        background: linear-gradient(lightgray,gray);
+    background: linear-gradient(lightgray,gray);
 }
 .rfd-tablesorter-widget .table-controls .btn-group.toggles label {
     float: left;
@@ -879,10 +879,13 @@ table.comments-table{
     font-size: 75%;
     border: 1px solid #ddd;
     border-collapse: collapse;
+    word-break: break-all;
+    white-space: pre-line;
 }
 table.comments-table th, table.comments-table td, table.comments-table tr{
     padding: 0.5em;
     border: 1px solid #aaa;
+    min-width: 5em;
 }
 table.comments-table tbody tr:nth-child(odd) {
     background-color: #efefef;
@@ -957,16 +960,16 @@ table.comments-table tbody tr:nth-child(even){
 }
 /* "meta" table related stylings */
 .table-panel {
-/*    text-align: left;
-    display: block;
-    padding: 0.25em;
-    position: relative;
-    max-height: 500px;
-    min-height: 100px;
-    width: 99%;
-    padding-top: 6px;
-    overflow: auto;
-    border: 1px solid gray;*/
+    /*    text-align: left;
+        display: block;
+        padding: 0.25em;
+        position: relative;
+        max-height: 500px;
+        min-height: 100px;
+        width: 99%;
+        padding-top: 6px;
+        overflow: auto;
+        border: 1px solid gray;*/
 }
 .table-wrap {
     /*padding: 0.5em;*/
