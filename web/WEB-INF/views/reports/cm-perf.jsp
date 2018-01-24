@@ -14,9 +14,6 @@
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/cm-perf.css"/>
         <style>
-            .comments-table{
-                /*margin: 2px;*/
-            }
             .accordion-header, .ui-accordion-header {
                 align-content: center;
                 padding-top: 1em;
@@ -82,7 +79,8 @@
                 $("#accordion").accordion({
                     header: ".accordion-header",
                     collapsible: true,
-                    active: false
+                    active: false,
+                    heightStyle: "content"
                 });
 
                 var labels = ["C100", "C25", "C50", "Unknown"];

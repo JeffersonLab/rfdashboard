@@ -19,6 +19,7 @@
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cavity.js"></script>
     </jsp:attribute>
     <jsp:body>
+        <section>
         <div class="page-title-bar">
             <h2 id="page-header-title"><c:out value="${title}"/></h2>
             (<a href="#" id="page-details-opener" title="Page Details">Details</a>)
@@ -412,6 +413,7 @@
             <hr>
         </div>
         <t:tablesorter tableTitle="Cavity Properties (${requestScope.start} vs ${requestScope.end})" widgetId="details-table" filename="${requestScope.start}_${requestScope.end}_cavProps.csv"></t:tablesorter>
+        </section>
             <script>
                 // Not terribly elegant, but need to get request parameters into javascript for further use.
                 var jlab = jlab || {};
