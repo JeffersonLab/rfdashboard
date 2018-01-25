@@ -97,7 +97,12 @@ public class CryomodulePerformance extends HttpServlet {
             cmList = cs.getCryomoduleDataPoints(date);
             switch ((String) request.getAttribute("sortBy")) {
                 case "name":
-                    Collections.sort(cmList, (CryomoduleDataPoint c1, CryomoduleDataPoint c2) -> c1.getName().compareTo(c2.getName()));
+                    Collections.sort(cmList, new Comparator<CryomoduleDataPoint>() {
+                        @Override
+                        public int compare(CryomoduleDataPoint c1, CryomoduleDataPoint c2) {
+                            return c1.getName().compareTo(c2.getName());
+                        }
+                    });
                     break;
                 case "perf":
                     Collections.sort(cmList, new Comparator<CryomoduleDataPoint>() {
@@ -134,14 +139,13 @@ public class CryomodulePerformance extends HttpServlet {
         CommentFilter cf = new CommentFilter(null, null, null, null, null);
         Map<String, SortedSet<Comment>> comments;
         try {
-            comments = comms.getCommentsByTopic(cf,10, 0);
+            comments = comms.getCommentsByTopic(cf, 10, 0);
         } catch (SQLException | ParseException ex) {
             LOGGER.log(Level.WARNING, "Error querying comment database: {0}", ex.toString());
             throw new ServletException("Error querying comment database");
         }
-        System.out.println(comments);
         request.setAttribute("commentMap", comments);
-        
+
         request.getRequestDispatcher("/WEB-INF/views/reports/cm-perf.jsp").forward(request, response);
     }
 }
