@@ -456,7 +456,5 @@ jlab.util.addLegend = function (id, colors, labels) {
     legendString += '</tr>';
 
     legendString += '</table></div>';
-    console.log("#"+ id);
-    console.log(legendString);
     $("#" + id).prepend(legendString);
 };
