@@ -56,7 +56,7 @@ public class DataFormatter {
      * @return A map where keys are equal to value
      */
     public static Map<String, String> listToMap(List<String> list) {
-        Map out = new HashMap<>();
+        Map<String, String> out = new HashMap<>();
         if (list != null) {
             for (String item : list) {
                 if (item != null) {
@@ -68,7 +68,7 @@ public class DataFormatter {
     }
     
     public static Map<String,String> setToMap(Set<String> set) {
-        Map out = new HashMap<>();
+        Map<String,String> out = new HashMap<>();
         if (set != null) {
             for (String item : set) {
                 if (item != null) {
