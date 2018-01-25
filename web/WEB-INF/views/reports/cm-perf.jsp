@@ -14,9 +14,9 @@
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/cm-perf.css"/>
         <style>
-            .accordion-header, .ui-accordion-header {
+            .accordion-header, .ui-accordion .ui-accordion-header {
                 align-content: center;
-                padding-top: 1em;
+                padding-top: 0.6em;
                 padding-bottom: 0em;
             }
             .accordion-label {
@@ -57,7 +57,7 @@
                             color = jlab.colors.cmtypes[2];
                             break;
                         default:
-                            color = jlab.colors.cmtypes[4]; //Unknown                            
+                            color = "#A9A9A9"; //A different type of unknown. I don't want to include in the legend and this looks different enough to avoid confusion.
                     }
 
                     var data = [[perc, 0]];
@@ -83,9 +83,9 @@
                     heightStyle: "content"
                 });
 
-                var labels = ["C100", "C25", "C50", "Unknown"];
+                var labels = ["C100", "C25", "C50"];
                 var jcc = jlab.colors.cmtypes;
-                var colors = [jcc[0], jcc[1], jcc[2], jcc[4]];
+                var colors = [jcc[0], jcc[1], jcc[2]];
                 jlab.util.addLegend('cm-perf-legend', colors, labels);
 
                 $(".date-field").datepicker({
