@@ -702,7 +702,8 @@ th.scrollbar-header {
 tablesorter tag styles
 **********/
 .rfd-tablesorter-widget {
-    max-width: 100%
+    max-width: 100%;
+    padding-top: 0.5em;
 }
 .rfd-tablesorter-widget .table-panel {
     padding: 0.25em;
@@ -721,18 +722,32 @@ tablesorter tag styles
     display: inline-block;
     width: 100%;
     vertical-align: bottom;
+
+    position: relative;
+    padding-top: 0.25em;
+    min-height: 1.5em;
 }
 .rfd-tablesorter-widget .table-title {
-    max-width: 50%;
-    display: inline-block;
-    text-align: left;
-    float: left;
+    /*max-width: 50%;*/
+    /*    display: inline-block;
+        text-align: left;
+        float: left;*/
+
+    max-width: 34%;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
 }
 .rfd-tablesorter-widget .table-controls{
-    display: inline;
-    vertical-align: bottom;
-    width: 49%;
-    float: right;
+    /*    display: inline;
+        vertical-align: bottom;
+        width: 49%;
+        float: right;*/
+
+    max-width: 65%;
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
 }
 /* Table control elements */
 .rfd-tablesorter-widget .table-controls .output-group {
