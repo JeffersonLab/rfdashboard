@@ -22,7 +22,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import org.jlab.rfd.business.filter.CommentFilter;
 import org.jlab.rfd.business.service.CommentService;
 import org.jlab.rfd.business.util.DateUtil;
@@ -110,10 +109,14 @@ public class CommentsAjax extends HttpServlet {
         String userParam = request.getParameter("user");
         if (userParam != null) {
             users = Arrays.asList(userParam.split(","));
-        } else {
-            HttpSession session = request.getSession();
-            users = (List<String>) session.getAttribute("CommentIncludeFilter");
         }
+        
+        List<String> excludeUsers = null;
+        String eUserParam = request.getParameter("excludeUsers");
+        if (eUserParam != null) {
+            excludeUsers = Arrays.asList(eUserParam.split(","));
+        }        
+        
         List<String> topics = null;
         String topic = request.getParameter("topic");
         if (topic != null) {
@@ -188,13 +191,7 @@ public class CommentsAjax extends HttpServlet {
             try {
                 CommentService cs = new CommentService();
                 JsonObjectBuilder top = Json.createObjectBuilder();
-
-                // Use the session exclude filter if users were not specifically requested
-                List<String> excludeUsers = null;
-                if (userParam == null) {
-                    excludeUsers = (List<String>) request.getSession().getAttribute("CommentExcludeFilter");
-                }
-                
+               
                 CommentFilter filter = new CommentFilter(users, excludeUsers, topics, start, end);
 
                 // by shouldn't be null since it gets assigned based on 'b' being null or not
@@ -238,7 +235,7 @@ public class CommentsAjax extends HttpServlet {
                 error = "{\"error\": 'Error querying database for comments'}";
             }
         }
-
+        
         // See if we have an error. If not, respond with the real output
         PrintWriter pw = response.getWriter();
         if (error != null) {
@@ -248,6 +245,7 @@ public class CommentsAjax extends HttpServlet {
             if (out != null) {
                 JsonWriter jw = Json.createWriter(pw);
                 jw.writeObject(out);
+                jw.close();
             } else {
                 LOGGER.log(Level.SEVERE, "Unexpected error querying database for comments");
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
