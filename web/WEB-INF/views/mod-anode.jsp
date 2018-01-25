@@ -104,7 +104,7 @@
             <hr><br>
         <t:chart-widget placeholderId="mav-count-by-cmtype"></t:chart-widget>
             <hr><br>
-        <t:tablesorter tableTitle="Mod Anode Voltage By Cavities (${requestScope.tableDate})" widgetId="mav-table" filename="${requestScope.tableDate}_MAV.csv"></t:tablesorter>
+        <t:tablesorter tableTitle="Mod Anode Voltage By Cavities</br>(${requestScope.tableDate})" widgetId="mav-table" filename="${requestScope.tableDate}_MAV.csv"></t:tablesorter>
             <script>
                 var jlab = jlab || {};
                 jlab.start = "${requestScope.start}";

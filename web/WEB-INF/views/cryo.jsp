@@ -104,9 +104,9 @@
         <t:chart-widget placeholderId="cryo-linac-pressure"></t:chart-widget>
             <hr></hr><br></br>
             <button id="menu-toggle">Basic/Advanced</button>
-        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-basic" filename="${requestScope.start}_${requestScope.end}_cavBasic.csv"></t:tablesorter>
-        <t:tablesorter tableTitle="Cavity Set Point Deltas (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-advanced" filename="${requestScope.start}_${requestScope.end}_cavAdv.csv"></t:tablesorter>
-        <t:tablesorter tableTitle="Cavity Set Point Totals (${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="summary-table" filename="${requestScope.start}_${requestScope.end}_cavSummary.csv"></t:tablesorter>
+        <t:tablesorter tableTitle="Cavity Set Point Deltas<br/>(${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-basic" filename="${requestScope.start}_${requestScope.end}_cavBasic.csv"></t:tablesorter>
+        <t:tablesorter tableTitle="Cavity Set Point Deltas<br/>(${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-advanced" filename="${requestScope.start}_${requestScope.end}_cavAdv.csv"></t:tablesorter>
+        <t:tablesorter tableTitle="Cavity Set Point Totals<br/>(${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="summary-table" filename="${requestScope.start}_${requestScope.end}_cavSummary.csv"></t:tablesorter>
 
             <script>
                 var jlab = jlab || {};
