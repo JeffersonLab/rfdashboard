@@ -33,7 +33,7 @@ jlab.mod_anode.loadLEMSimChart = function (chartId, start, end, chartData, timeU
     };
     var flotOptions = {
         xaxis: {mode: "time"},
-        yaxis: {axisLabel: "Trips / Hour"},
+        yaxis: {axisLabel: "Trips / Hour", min:0, max:50},
         grid: {clickable: true}
     };
 
