@@ -45,7 +45,7 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
     var plot = jlab.flotCharts.drawChart(chartId, flotData, flotOptions, settings);
 
     // Add a caption that lists the energy reach of North, South, and Total
-    var reaches = jlab.energyReach.getEnergyReach(scanData);
+    var reaches = jlab.energyReach.getEnergyReach(scanData, new Date(date));
     // Add a custom legend off to the side
     jlab.energyReach.addLegend(chartId, settings.colors, scanData.labels, reaches);
 
@@ -61,7 +61,6 @@ jlab.energyReach.loadEnergyReachChart = function (chartId, start, end, reachData
 
     var title = "<strong>Linac Energy Reach</strong><br/><div style='font-size:smaller'>" + start + " to " + end + "</div>";
     if (typeof reachData === "undefined") {
-        console.log(chartId);
         $("#" + chartId).append("<br>" + title + "<br>No data available");
         return;
     }
