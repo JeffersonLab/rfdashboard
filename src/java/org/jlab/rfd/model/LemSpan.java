@@ -14,6 +14,10 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.business.util.MathUtil;
 
 /**
@@ -186,5 +190,26 @@ public class LemSpan {
             }
         }
         return data;
+    }
+
+    /**
+     * This returns a json object representing the LemSpan. It should have the
+     * following format. { "timestamp1" : { North :{ LemRecord.toJson() output
+     * }, South :{ LemRecord.toJson() output } }, "timestamp2" : { ... }, ... }
+     *
+     * @return
+     */
+    public JsonObject toJson() {
+        JsonObjectBuilder job = Json.createObjectBuilder();
+        for (Date d : dataSpan.keySet()) {
+            SortedMap<LinacName, LemRecord> temp = dataSpan.get(d);
+            JsonObjectBuilder jDate = Json.createObjectBuilder();
+            for (LinacName linac : temp.keySet()) {
+                jDate.add(linac.toString(), temp.get(linac).toJson());
+            }
+            job.add(DateUtil.formatDateYMDHMS(d), jDate.build());
+        }
+
+        return job.build();
     }
 }

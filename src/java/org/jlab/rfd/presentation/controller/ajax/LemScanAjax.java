@@ -51,7 +51,7 @@ public class LemScanAjax extends HttpServlet {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date start, end;
-        
+
         String type = request.getParameter("type");
         if (type == null) {
             LOGGER.log(Level.WARNING, "type parameter is required.  Supported options are day-scan, reach-scan");
@@ -97,27 +97,37 @@ public class LemScanAjax extends HttpServlet {
 
             // The Lem service in start include and end exclusive.  Decrement end by one day to show the last day of data
             LOGGER.log(Level.FINEST, "Start: {0}, End: {1}", new Object[]{start, end});
-            SortedMap<Integer, SortedMap<String, BigDecimal>> tripRates = span.getTripRateCurve(start);
             PrintWriter pw = response.getWriter();
             try {
-                if (out.equals("flot")) {
-                    JsonObject json = DataFormatter.toFlotFromIntMap(tripRates);
-                    response.setContentType("application/json");
-                    pw.write(json.toString());
-                } else {
-                    LOGGER.log(Level.WARNING, "Unsupported out format requested - {0}", out);
-                    throw new ServletException("Unsupported out format requested");
+                switch (out) {
+                    case "flot": {
+                        SortedMap<Integer, SortedMap<String, BigDecimal>> tripRates = span.getTripRateCurve(start);
+                        JsonObject json = DataFormatter.toFlotFromIntMap(tripRates);
+                        response.setContentType("application/json");
+                        pw.write(json.toString());
+                        pw.close();
+                        break;
+                    }
+                    case "json": {
+                        JsonObject json = span.toJson();
+                        response.setContentType("application/json");
+                        pw.write(json.toString());
+                        pw.close();
+                        break;
+                    }
+                    default:
+                        LOGGER.log(Level.WARNING, "Unsupported out format requested - {0}", out);
+                        throw new ServletException("Unsupported out format requested");
                 }
             } catch (ParseException ex) {
                 throw new ServletException("Error formatting data", ex);
             }
-            
-            
-        // reach-scan type request
+
+            // reach-scan type request
         } else if (type.equals("reach-scan")) {
             Date last;
             Map<String, Date> startEnd;
-            
+
             try {
                 startEnd = RequestParamUtil.processStartEnd(request, TimeUnit.DAY, 7);
                 start = startEnd.get("start");
@@ -127,7 +137,7 @@ public class LemScanAjax extends HttpServlet {
                 throw new ServletException("Error parseing start/end", ex);
             }
 
-            String[] valid = {"flot"};
+            String[] valid = {"flot", "json"};
             String out = RequestParamUtil.processOut(request, valid, "flot");
             if (out == null) {
                 LOGGER.log(Level.SEVERE, "Error parsing out parameter");
@@ -143,17 +153,27 @@ public class LemScanAjax extends HttpServlet {
                 throw new ServletException("Error querying RF Gradient Team database", ex);
             }
 
-            // The Lem service in start include and end exclusive.  Decrement end by one day to show the last day of data
-            SortedMap<Date, SortedMap<String, BigDecimal>> reach = span.getEnergyReach();
             PrintWriter pw = response.getWriter();
             try {
-                if (out.equals("flot")) {
-                    JsonObject json = DataFormatter.toFlotFromDateMap(reach);
-                    response.setContentType("application/json");
-                    pw.write(json.toString());
-                } else {
-                    LOGGER.log(Level.WARNING, "Unsupported out format requested - {0}", out);
-                    throw new ServletException("Unsupported out format requested");
+                switch (out) {
+                    case "flot": {
+                        SortedMap<Date, SortedMap<String, BigDecimal>> reach = span.getEnergyReach();
+                        JsonObject json = DataFormatter.toFlotFromDateMap(reach);
+                        response.setContentType("application/json");
+                        pw.write(json.toString());
+                        pw.close();
+                        break;
+                    }
+                    case "json": {
+                        JsonObject json = span.toJson();
+                        response.setContentType("application/json");
+                        pw.write(json.toString());
+                        pw.close();
+                        break;
+                    }
+                    default:
+                        LOGGER.log(Level.WARNING, "Unsupported out format requested - {0}", out);
+                        throw new ServletException("Unsupported out format requested");
                 }
             } catch (ParseException ex) {
                 throw new ServletException("Error formatting data", ex);
