@@ -16,7 +16,9 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -90,9 +92,11 @@ public class LemScanAjax extends HttpServlet {
             }
 
             // Defaults to flot, anything else will throw an exception
-            String out = request.getParameter("out");
+            String[] valid = {"flot", "json"};
+            String out = RequestParamUtil.processOut(request, valid, "flot");
             if (out == null) {
-                out = "flot";
+                LOGGER.log(Level.SEVERE, "Error parsing out parameter");
+                throw new ServletException("Error parsing out parameter");
             }
 
             // The Lem service in start include and end exclusive.  Decrement end by one day to show the last day of data
@@ -110,8 +114,10 @@ public class LemScanAjax extends HttpServlet {
                     }
                     case "json": {
                         JsonObject json = span.toJson();
+                        JsonObjectBuilder job = Json.createObjectBuilder();
+                        job.add("data", json == null ? Json.createObjectBuilder().build() : json);
                         response.setContentType("application/json");
-                        pw.write(json.toString());
+                        pw.write(job.build().toString());
                         pw.close();
                         break;
                     }
@@ -125,6 +131,10 @@ public class LemScanAjax extends HttpServlet {
 
             // reach-scan type request
         } else if (type.equals("reach-scan")) {
+            if (request.getParameter("date") != null) {
+                LOGGER.log(Level.WARNING, "date parameter unsupported with type=reach-scan");
+                throw new ServletException("date parameter unsupported with type=reach-scan");
+            }
             Date last;
             Map<String, Date> startEnd;
 
@@ -166,8 +176,10 @@ public class LemScanAjax extends HttpServlet {
                     }
                     case "json": {
                         JsonObject json = span.toJson();
+                        JsonObjectBuilder job = Json.createObjectBuilder();
+                        job.add("data", json == null ? Json.createObjectBuilder().build() : json);
                         response.setContentType("application/json");
-                        pw.write(json.toString());
+                        pw.write(job.build().toString());
                         pw.close();
                         break;
                     }
