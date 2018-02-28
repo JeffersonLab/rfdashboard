@@ -9,12 +9,12 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,9 +24,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jlab.rfd.business.filter.CommentFilter;
+import org.jlab.rfd.business.service.CavityService;
 import org.jlab.rfd.business.service.CommentService;
 import org.jlab.rfd.business.service.CryomoduleService;
 import org.jlab.rfd.business.util.DateUtil;
+import org.jlab.rfd.model.CavityResponse;
 import org.jlab.rfd.model.Comment;
 import org.jlab.rfd.model.CryomoduleDataPoint;
 import org.jlab.rfd.presentation.util.RequestParamUtil;
@@ -146,6 +148,16 @@ public class CryomodulePerformance extends HttpServlet {
         }
         request.setAttribute("commentMap", comments);
 
+        CavityService cavService = new CavityService();
+        Map<String, CavityResponse> cavs;
+        try {
+            cavs = cavService.getCavityDataMap(date);
+        } catch (ParseException | SQLException ex) {
+            LOGGER.log(Level.WARNING, "Error querying cavity datasources: {0}", ex.toString());
+            throw new ServletException("Error querying comment database");
+        }
+        request.setAttribute("cavityMap", cavs);
+        
         request.getRequestDispatcher("/WEB-INF/views/reports/cm-perf.jsp").forward(request, response);
     }
 }

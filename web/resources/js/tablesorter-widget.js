@@ -21,7 +21,7 @@ jlab.tableSorter.initTable = function (widgetId) {
         $(widgetId).css("height", 200);
         $(widgetId + ' .table-wrap').hide();
     }
-    
+
     var pagerOptions = {
         // target the pager markup - see the HTML block below
         container: $(widgetId + " .pager"),
@@ -64,6 +64,7 @@ jlab.tableSorter.initTable = function (widgetId) {
     $(widgetId).tooltip();
 };
 
+// widgetId  - jQuery selector for narrowing the affected elements
 jlab.tableSorter.initCommentDialogs = function (widgetId) {
     $(widgetId + " span.comment-dialog").each(function () {
 
@@ -105,8 +106,13 @@ jlab.tableSorter.initCommentDialogs = function (widgetId) {
                     // If successful, add a table with the data
                     promise.done(function (json) {
                         var tableArray = jlab.tableSorter.updateHistoryToArray(json);
-                        $("#" + dialogId).append(jlab.util.createHTMLTable(tableArray));
-                        $("#" + dialogId + " " + "table").addClass("comments-table");
+                        console.log(tableArray);
+                        if (tableArray.length === 1) {
+                            $("#" + dialogId).append("No Updates Found");
+                        } else {
+                            $("#" + dialogId).append(jlab.util.createHTMLTable(tableArray));
+                            $("#" + dialogId + " " + "table").addClass("comments-table");
+                        }
                     });
 
                     // If it fails, add an error message

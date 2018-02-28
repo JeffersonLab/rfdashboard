@@ -1001,3 +1001,9 @@ table.comments-table tbody tr:nth-child(even){
 .ui-widget-content a {
     color: blue;
 }
+ /*We always want the comment dialog launcher icons to be clickable and sit of to the right*/
+.comment-dialog.ui-icon-comment {
+    cursor: pointer;
+    display: inline-block;
+    float: right;
+}
