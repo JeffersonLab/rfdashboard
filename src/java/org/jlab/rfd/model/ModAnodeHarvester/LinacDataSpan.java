@@ -65,12 +65,12 @@ public class LinacDataSpan {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         JsonArrayBuilder data = Json.createArrayBuilder();
         for (Date d : dataSpan.keySet()) {
+
             JsonObjectBuilder point = Json.createObjectBuilder();
             point.add("date", sdf.format(d));
 
             JsonObjectBuilder linacs = Json.createObjectBuilder();
             for (LinacDataPoint ldp : dataSpan.get(d)) {
-
                 if (ldp != null) {
                     linacs.add(ldp.getLinacName().toString(), Json.createObjectBuilder()
                             .add("mav", Json.createObjectBuilder()

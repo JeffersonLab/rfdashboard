@@ -103,5 +103,21 @@ public class LinacDataPoint {
     public BigDecimal getTripsNoMav1090() {
         return tripsNoMav1090;
     }
-
+    
+    
+    /**
+     * Returns a multi-line string representing values saved in the LinacDataPoint.  Mostly for debugging purposes.
+     * @return 
+     */
+    @Override
+    public String toString() {
+        String out = "\nName: " + getLinacName().toString();
+        out += "\nTimestamp: " + getTimestamp();
+        out += "\nEpicsDate: " + getEpicsDate();
+        out += "\nTrips1050: " + (getTrips1050() == null ? "null" : getTrips1050()); 
+        out += "\nTrips1090: " + (getTrips1090() == null ? "null" : getTrips1090());
+        out += "\nTripsNoMav1050: " + (getTripsNoMav1050() == null ? "null" : getTripsNoMav1050());
+        out += "\nTripsNoMav1090: " + (getTripsNoMav1090() == null ? "null" : getTripsNoMav1090());
+        return out;
+    }
 }
