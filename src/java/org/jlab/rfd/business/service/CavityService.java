@@ -240,6 +240,27 @@ public class CavityService {
     }
 
     /**
+     * Convenience function for returning data as a map keyed on cavity name
+     * instead of a set
+     *
+     * @param timestamp Timestamp to look up data for
+     * @return A Map of cavity names to cavity response objects
+     * @throws IOException
+     * @throws ParseException
+     * @throws SQLException
+     */
+    public Map<String, CavityResponse> getCavityDataMap(Date timestamp) throws IOException, ParseException, SQLException {
+        Set<CavityResponse> crs = getCavityData(timestamp);
+
+        Map<String, CavityResponse> cavMap = new HashMap<>();
+        for (CavityResponse cr : crs) {
+            cavMap.put(cr.getCavityName(), cr);
+        }
+
+        return cavMap;
+    }
+
+    /**
      * Utility function for creating a set of CavityResponse objects. Grabs the
      * latest comment for each comment and adds it to the CavityResponse. Note:
      * The CavityDataPoints and the Comments should be from the same date for
