@@ -62,7 +62,7 @@ jlab.dialogProperties = {
     maxHeight: 700,
     midWidth: 300,
     maxWidth: 1400,
-    width: 800,
+    width: 850,
     show: {
         effect: "blind",
         duration: 500

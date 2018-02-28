@@ -149,14 +149,14 @@ public class CryomodulePerformance extends HttpServlet {
         request.setAttribute("commentMap", comments);
 
         CavityService cavService = new CavityService();
-        Set<CavityResponse> cavs;
+        Map<String, CavityResponse> cavs;
         try {
-            cavs = cavService.getCavityData(date);
+            cavs = cavService.getCavityDataMap(date);
         } catch (ParseException | SQLException ex) {
             LOGGER.log(Level.WARNING, "Error querying cavity datasources: {0}", ex.toString());
             throw new ServletException("Error querying comment database");
         }
-        request.setAttribute("cavitySet", cavs);
+        request.setAttribute("cavityMap", cavs);
         
         request.getRequestDispatcher("/WEB-INF/views/reports/cm-perf.jsp").forward(request, response);
     }

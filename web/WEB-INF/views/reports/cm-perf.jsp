@@ -37,6 +37,7 @@
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.min.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.resize.min.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/tablesort-widget.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cm-perf.js"></script>
         <script>
             $(document).ready(function () {
@@ -93,6 +94,8 @@
                     showButtonPanel: true
                 });
             });
+            
+            jlab.tableSorter.initCommentDialogs(".table-panel");
         </script>
     </jsp:attribute>
     <jsp:body>
@@ -158,10 +161,28 @@
                                         </div>
                                     </div>
                                     <br/>
-                                    <div class="table-panel ">
-                                        <div class="table-title">Latest Comments:
-                                            <div class="table-links">
-                                                <a href="${pageContext.request.contextPath}/comments/new-comment?topic=${cm.name}">New Comment</a>&nbsp;
+                                    <div class="table-panel">
+                                        <div class="table-title">Cavity Data</div>
+                                        <div class="table-wrap">
+                                            <table class="comments-table">
+                                                <thead><tr><th>Name</th><th>GSET</th><th>ODVH</th><th>OpsGsetMax</th><th>Qext</th><th>Q0</th><th>Bypassed</th><th>TunerBad</th><tr></thead>
+                                                <tbody>
+                                                <c:forEach var="i" begin="1" end="8">
+                                                    <c:set var="cavName" value="${cm.name}-${i}"/>
+                                                    <c:set var="cav" value="${cavityMap[cavName]}"/>
+                                                    <tr>
+                                                        <td>${cav.cavityName}</td><td>${cav.gset}</td><td>${cav.odvh}</td><td>${cav.opsGsetMax}<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='${cav.cavityName}' data-jlab-cav-property='OpsGsetMax'></span></td><td>${cav.qExternal}</td><td>${cav.q0}</td><td>${cav.bypassed}<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='${cav.cavityName}' data-jlab-cav-property='Bypassed'></span></td><td>${cav.tunerBad}<span class='ui-icon ui-icon-comment comment-dialog' data-jlab-cavity='${cav.cavityName}' data-jlab-cav-property='TunerBad'></span></td>
+                                                        </tr>
+                                                </c:forEach>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="table-panel ">
+                                    <div class="table-title">Latest Comments:
+                                        <div class="table-links">
+                                            <a href="${pageContext.request.contextPath}/comments/new-comment?topic=${cm.name}">New Comment</a>&nbsp;
                                             <a href="${pageContext.request.contextPath}/comments/history?topic=${cm.name}">Full History</a>
                                         </div>
                                     </div>
