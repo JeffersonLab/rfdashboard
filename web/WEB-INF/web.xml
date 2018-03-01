@@ -26,15 +26,15 @@
     </context-param>
     <context-param>
         <param-name>resourceVersionNumber</param-name>
-        <param-value>28</param-value>
+        <param-value>29</param-value>
     </context-param>
     <context-param>
         <param-name>releaseNumber</param-name>
-        <param-value>1.6.5</param-value>
+        <param-value>1.6.6</param-value>
     </context-param>
     <context-param>
         <param-name>releaseDate</param-name>
-        <param-value>28 Feb 2018</param-value>
+        <param-value>01 Mar 2018</param-value>
     </context-param>
         <filter>
         <filter-name>UrlRewriteFilter</filter-name>

@@ -75,7 +75,7 @@ public class LinacDataSpan {
                     linacs.add(ldp.getLinacName().toString(), Json.createObjectBuilder()
                             .add("mav", Json.createObjectBuilder()
                                     .add("1050", ldp.getTrips1050())
-                                    .add("1090", ldp.getTrips1050())
+                                    .add("1090", ldp.getTrips1090())
                                     .build())
                             .add("no_mav", Json.createObjectBuilder()
                                     .add("1050", ldp.getTripsNoMav1050())
