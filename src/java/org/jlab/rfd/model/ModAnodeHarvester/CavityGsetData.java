@@ -39,9 +39,12 @@ public class CavityGsetData {
             LOGGER.log(Level.SEVERE, "Received null GsetRecord");
             throw new RuntimeException(errString);
         }
-        if (!r1050.getModAnodeVoltage().equals(r1090.getModAnodeVoltage())) {
-            LOGGER.log(Level.SEVERE, "GsetRecords do not have the same mod anode voltage");
-            throw new RuntimeException(errString);
+        // If we got valid runs at both energy levels, then make sure that both have the same Mod Anode Voltages
+        if (r1050.getModAnodeVoltage() != null && r1090.getModAnodeVoltage() != null) {
+            if (!r1050.getModAnodeVoltage().equals(r1090.getModAnodeVoltage())) {
+                LOGGER.log(Level.SEVERE, "GsetRecords for cavity {0} from {1} do not have the same mod anode voltage", new Object[]{r1050.getEpicsName(), r1050.getTimestamp()});
+                throw new RuntimeException(errString);
+            }
         }
         if (!r1050.getEpicsDate().equals(r1090.getEpicsDate())) {
             LOGGER.log(Level.SEVERE, "GsetRecords do not use the same EPICS date");
@@ -72,11 +75,11 @@ public class CavityGsetData {
         JsonObjectBuilder job = Json.createObjectBuilder();
         job.add("epicsName", epicsName)
                 .add("epicsDate", sdf.format(epicsDate))
-                .add("modAnodeVoltage_kv", mDF.format(modAnodeVoltage.doubleValue()))
-                .add("gset1050", gDF.format(gset1050))
-                .add("gset1090", gDF.format(gset1090))
-                .add("gsetNoMav1050", gDF.format(gsetNoMav1050))
-                .add("gsetNoMav1090", gDF.format(gsetNoMav1090));
+                .add("modAnodeVoltage_kv", modAnodeVoltage == null ? "" : mDF.format(modAnodeVoltage.doubleValue()))
+                .add("gset1050", gset1050 == null ? "" : gDF.format(gset1050))
+                .add("gset1090", gset1090 == null ? "" : gDF.format(gset1090))
+                .add("gsetNoMav1050", gsetNoMav1050 == null ? "" : gDF.format(gsetNoMav1050))
+                .add("gsetNoMav1090", gsetNoMav1090 == null ? "" : gDF.format(gsetNoMav1090));
         return job.build();
     }
 

@@ -221,10 +221,10 @@ public class ModAnodeHarvesterService {
                 rs = pstmt.executeQuery();
                 while (rs.next()) {
                     String epicsName = rs.getString("CAVITY_EPICS");
-                    BigDecimal energy = new BigDecimal(rs.getDouble("ENERGY_MEV"));
-                    BigDecimal gset = new BigDecimal(rs.getDouble("GSET_MVPM"));
-                    BigDecimal gsetNoMav = new BigDecimal(rs.getDouble("GSET_NO_MAV_MVPM"));
-                    BigDecimal modAnode = new BigDecimal(rs.getDouble("MOD_ANODE_KV"));
+                    BigDecimal energy = rs.getBigDecimal("ENERGY_MEV");
+                    BigDecimal gset = rs.getBigDecimal("GSET_MVPM");
+                    BigDecimal gsetNoMav = rs.getBigDecimal("GSET_NO_MAV_MVPM");
+                    BigDecimal modAnode = rs.getBigDecimal("MOD_ANODE_KV");
                     GsetRecord record = new GsetRecord(sr.getTimestamp(), sr.getEpicsDate(), modAnode, epicsName, energy, gset, gsetNoMav);
                     switch (record.getEnergy().intValue()) {
                         case 1050:
