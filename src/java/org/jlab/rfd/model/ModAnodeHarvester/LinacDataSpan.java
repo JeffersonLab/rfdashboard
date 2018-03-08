@@ -74,12 +74,12 @@ public class LinacDataSpan {
                 if (ldp != null) {
                     linacs.add(ldp.getLinacName().toString(), Json.createObjectBuilder()
                             .add("mav", Json.createObjectBuilder()
-                                    .add("1050", ldp.getTrips1050())
-                                    .add("1090", ldp.getTrips1090())
+                                    .add("1050", ldp.getTrips1050() == null ? "" : ldp.getTrips1050().toPlainString())
+                                    .add("1090", ldp.getTrips1090() == null ? "" : ldp.getTrips1090().toPlainString())
                                     .build())
                             .add("no_mav", Json.createObjectBuilder()
-                                    .add("1050", ldp.getTripsNoMav1050())
-                                    .add("1090", ldp.getTripsNoMav1090())
+                                    .add("1050", ldp.getTripsNoMav1050() == null ? "" : ldp.getTripsNoMav1050().toPlainString())
+                                    .add("1090", ldp.getTripsNoMav1090() == null ? "" : ldp.getTripsNoMav1090().toPlainString())
                                     .build())
                             .build());
                 }

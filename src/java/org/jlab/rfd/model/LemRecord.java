@@ -80,7 +80,7 @@ public class LemRecord {
         JsonObjectBuilder trBuilder = Json.createObjectBuilder();
         for (int i = 0; i < ENERGY.size(); i++) {
             if (tripRates.get(i) != null) {
-                trBuilder.add(ENERGY.get(i).toString(), tripRates.get(i));
+                trBuilder.add(ENERGY.get(i).toString(), tripRates.get(i).toPlainString());
             } else {
                 trBuilder.add(ENERGY.get(i).toString(), "");
             }
