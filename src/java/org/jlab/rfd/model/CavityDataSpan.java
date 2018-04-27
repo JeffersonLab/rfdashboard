@@ -34,6 +34,10 @@ public class CavityDataSpan {
         return dataSpan.size();
     }
 
+    public Set<Date> keySet() {
+        return dataSpan.keySet();
+    }
+    
     /**
      * Returns the set of CavityDataPoints for a given date
      *
