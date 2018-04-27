@@ -5,7 +5,6 @@
  */
 package org.jlab.rfd.model;
 
-import java.math.BigDecimal;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -16,13 +15,13 @@ import javax.json.JsonObjectBuilder;
  */
 public class CEDElementUpdate {
 
-    private String dateString;
-    private String value;
-    private String username;
-    private String comment;
-    private int index;
-    private int index1;
-    private int index2;
+    private final String dateString;
+    private final String value;
+    private final String username;
+    private final String comment;
+    private final int index;
+    private final int index1;
+    private final int index2;
 
     public CEDElementUpdate(String dateString, String value, String username, String comment, int index, int index1, int index2) {
         this.dateString = dateString;
