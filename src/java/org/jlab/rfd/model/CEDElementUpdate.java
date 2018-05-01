@@ -15,6 +15,8 @@ import javax.json.JsonObjectBuilder;
  */
 public class CEDElementUpdate {
 
+    private final String elementName;
+    private final String propertyName;
     private final String dateString;
     private final String value;
     private final String username;
@@ -23,7 +25,9 @@ public class CEDElementUpdate {
     private final int index1;
     private final int index2;
 
-    public CEDElementUpdate(String dateString, String value, String username, String comment, int index, int index1, int index2) {
+    public CEDElementUpdate(String elementName, String propertyName, String dateString, String value, String username, String comment, int index, int index1, int index2) {
+        this.elementName = elementName;
+        this.propertyName = propertyName;
         this.dateString = dateString;
         this.value = value;
         this.username = username;
@@ -31,6 +35,14 @@ public class CEDElementUpdate {
         this.index = index;
         this.index1 = index1;
         this.index2 = index2;
+    }
+
+    public String getElementName() {
+        return elementName;
+    }
+
+    public String getPropertyName() {
+        return propertyName;
     }
 
     public String getDateString() {
