@@ -24,6 +24,7 @@
                             <li${'/reports/cavity' eq currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/cavity?start=${pageStart}&end=${pageEnd}">Cavity Data</a></li>
                             <li${'/comments/history' eq currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/comments/history">Comment History</a></li>
                             <li${'/comments/new-comment' eq currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/comments/new-comment">New Comment</a></li>                     
+                            <li${'/reports/ced-prop-hist' eq currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/ced-prop-hist">RF Cavity History</a></li>                     
                         </ul>               
                     </nav>
                 </section>
