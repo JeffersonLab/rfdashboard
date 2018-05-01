@@ -24,7 +24,7 @@ public class CEDUpdateHistoryService {
     private static final Logger LOGGER = Logger.getLogger(CEDUpdateHistoryService.class.getName());
     private static final String CED_UPDATE_HISTORY_URL = "https://ced.acc.jlab.org/ajax/history/";
 
-    public CEDElementUpdateHistory getElementUpdateHistory(String elem, List<String> props) throws IOException, ParseException {
+    public CEDElementUpdateHistory getElementUpdateHistory(String elem, List<String> props, Date start, Date end) throws IOException, ParseException {
         CEDElementUpdateHistory updateHistory = new CEDElementUpdateHistory(elem);
         for(String prop : props) {
             String query = CED_UPDATE_HISTORY_URL + elem + "/" + prop + "?output=json";
@@ -48,12 +48,19 @@ public class CEDUpdateHistoryService {
                     int index = update.getInt("index");
                     int index1 = update.getInt("index1");
                     int index2 = update.getInt("index2");
+                    if ( (start == null || date.after(start)) && (end == null || date.before(end)) ) {
                      updateHistory.addUpdate(new CEDElementUpdate(dateString, value, username, comment, index, index1, index2),
                              date, prop);
+                    }
                 }
             }
         }
         
         return updateHistory;
     }
+    
+    public CEDElementUpdateHistory getElementUpdateHistory(String elem, List<String> props) throws IOException, ParseException {
+        return getElementUpdateHistory(elem, props, null, null);
+    }
+
 }
