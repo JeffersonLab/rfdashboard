@@ -33,6 +33,8 @@ public class CavityDataPoint implements Cloneable {
     private final Date timestamp;
     private final String cavityName;
     private final String epicsName;
+    private final String zoneName;
+    private final String epicsZoneName;
     private final BigDecimal modAnodeVoltage;
     private final CryomoduleType cryomoduleType;
     private final LinacName linacName;
@@ -73,6 +75,8 @@ public class CavityDataPoint implements Cloneable {
         this.modAnodeHarvesterGsetData = cdp.getModAnodeHarvesterGsetData();
         this.bypassed = cdp.isBypassed();
         this.tunerBad = cdp.isTunerBad();
+        this.epicsZoneName = cdp.getEpicsZoneName();
+        this.zoneName = cdp.getZoneName();
     }
 
     public CavityDataPoint(Date timestamp, String cavityName, CryomoduleType cryomoduleType,
@@ -87,10 +91,12 @@ public class CavityDataPoint implements Cloneable {
 
         this.timestamp = timestamp;
         this.cavityName = cavityName;
+        this.zoneName = cavityName.substring(0, 4);
         this.cryomoduleType = cryomoduleType;
         this.modAnodeVoltage = modAnodeVoltage;
         this.linacName = CebafNames.cedZoneToEnglishLinac(cavityName.substring(0, 4));
         this.epicsName = epicsName;
+        this.epicsZoneName = epicsName.substring(0, 3) + "X";
         this.gset = gset;
         this.odvh = odvh;
         this.q0 = q0;
@@ -103,6 +109,14 @@ public class CavityDataPoint implements Cloneable {
         this.modAnodeHarvesterGsetData = modAnodeHarvesterGsetData;
         this.bypassed = bypassed;
         this.tunerBad = tunerBad;
+    }
+
+    public String getZoneName() {
+        return zoneName;
+    }
+
+    public String getEpicsZoneName() {
+        return epicsZoneName;
     }
 
     public String getQ0() {
