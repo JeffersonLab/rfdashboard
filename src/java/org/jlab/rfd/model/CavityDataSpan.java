@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -37,7 +38,7 @@ public class CavityDataSpan {
     public Set<Date> keySet() {
         return dataSpan.keySet();
     }
-    
+
     /**
      * Returns the set of CavityDataPoints for a given date
      *
@@ -256,5 +257,28 @@ public class CavityDataSpan {
         }
         return data;
 
+    }
+
+    // Iterate through the dataSpan.  For each date, calculate the energy gain of each zone.  Then return a map, keyed on date,
+    // where each date is a map of zone to energy gain.  Optional zone filter.
+    public SortedMap<Date, SortedMap<String, BigDecimal>> getEnergyGainByZone(List<String> zones) {
+        SortedMap<Date, SortedMap<String, BigDecimal>> out = new TreeMap<>();
+        SortedMap<String, BigDecimal> byZone;
+
+        for (Date date : dataSpan.keySet()) {
+            byZone = new TreeMap<>();
+            for (CavityResponse cr : dataSpan.get(date)) {
+                String zone = cr.getZoneName();
+                if (zones == null || zones.isEmpty() || zones.contains(zone)) {
+                    if (!byZone.containsKey(zone)) {
+                        byZone.put(zone, BigDecimal.ZERO);
+                    }
+                    byZone.put(zone, byZone.get(zone).add(cr.getGset().multiply(cr.getLength())));
+                }
+            }
+            out.put(date, byZone);
+        }
+
+        return out;
     }
 }
