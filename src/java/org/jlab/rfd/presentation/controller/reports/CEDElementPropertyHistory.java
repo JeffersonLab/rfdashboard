@@ -14,10 +14,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -112,10 +110,12 @@ public class CEDElementPropertyHistory extends HttpServlet {
                             new Object[]{elem, props});
                     throw new ServletException("Erryr querying CED element update history");
                 }
-                Map<Date, CEDElementUpdate> eUpdates = eHist.getUpdateHistory(props.get(0));
-                if (eUpdates != null) {
-                    for (Date d : eUpdates.keySet()) {
-                        cedUpdates.add(eUpdates.get(d));
+                for (String prop : props) {
+                    Map<Date, CEDElementUpdate> eUpdates = eHist.getUpdateHistory(prop);
+                    if (eUpdates != null) {
+                        for (Date d : eUpdates.keySet()) {
+                            cedUpdates.add(eUpdates.get(d));
+                        }
                     }
                 }
             }
@@ -133,8 +133,8 @@ public class CEDElementPropertyHistory extends HttpServlet {
         // Get the list of cavity names that can be selected
         CavityService cs = new CavityService();
         SortedSet<String> cavNames = cs.getCavityNames();
-        List<String> cavProps = Arrays.asList(new String[] {"OpsGsetMax", "Bypassed", "TunerBad", "MaxGSET"});
-                
+        List<String> cavProps = Arrays.asList(new String[]{"OpsGsetMax", "Bypassed", "TunerBad", "MaxGSET"});
+
         request.setAttribute("elems", elems);
         request.setAttribute("props", props);
         request.setAttribute("cavNames", cavNames);
