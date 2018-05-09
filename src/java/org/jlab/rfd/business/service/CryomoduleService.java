@@ -208,8 +208,9 @@ public class CryomoduleService {
             String cavName = cr.getEpicsName();
             String epicsName = cavName.substring(0, 3);
             int position = Integer.parseInt(cavName.substring(3, 4)) - 1;
-            double gset = cr.getGset().doubleValue();
-            double length = cr.getLength().doubleValue();
+            
+            Double gset = (cr.getGset() == null) ? null : cr.getGset().doubleValue();
+            Double length = cr.getLength().doubleValue();
 
             if (!gsets.containsKey(epicsName)) {
                 gsets.put(epicsName, new Double[8]);
