@@ -29,7 +29,9 @@ public class DataFormatter {
     private static final Logger LOGGER = Logger.getLogger(DataFormatter.class.getName());
 
     /**
-     * Turns a list into a string where the values of the list are separated by commas (',')
+     * Turns a list into a string where the values of the list are separated by
+     * commas (',')
+     *
      * @param list
      * @return A string of comma separated values
      */
@@ -48,10 +50,12 @@ public class DataFormatter {
         }
         return out;
     }
-    
+
     /**
-     * This turns a list of Strings into a Map where each list value become a key/value pair in the string.  Useful for passing to
-     * JSP where existence of key is checked.
+     * This turns a list of Strings into a Map where each list value become a
+     * key/value pair in the string. Useful for passing to JSP where existence
+     * of key is checked.
+     *
      * @param list A list of strings
      * @return A map where keys are equal to value
      */
@@ -66,9 +70,9 @@ public class DataFormatter {
         }
         return out;
     }
-    
-    public static Map<String,String> setToMap(Set<String> set) {
-        Map<String,String> out = new HashMap<>();
+
+    public static Map<String, String> setToMap(Set<String> set) {
+        Map<String, String> out = new HashMap<>();
         if (set != null) {
             for (String item : set) {
                 if (item != null) {
@@ -78,7 +82,8 @@ public class DataFormatter {
         }
         return out;
     }
-    
+
+
     /**
      * This function is designed to format a "By Linac", time series data
      * structure as in JSON format.
@@ -90,13 +95,12 @@ public class DataFormatter {
      * @throws java.text.ParseException
      * @throws java.io.IOException
      */
-
     public static JsonObject toFlotFromDateMap(SortedMap<Date, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
 
         if (data == null) {
             return null;
         }
-        
+
         // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
         Map<String, BigDecimal> temp;
         // The tree map keeps the series sorted in a reliable fashion.  Needed to coordinate the alignment of labels and data... well maybe not...
@@ -111,7 +115,7 @@ public class DataFormatter {
                 seriesBuilders.get(seriesName)
                         .add(Json.createArrayBuilder()
                                 .add(curr.getTime())
-//                                .add((temp.get(seriesName) != null) ? temp.get(seriesName).toString() : "null"));
+                                //                                .add((temp.get(seriesName) != null) ? temp.get(seriesName).toString() : "null"));
                                 .add((temp.get(seriesName) != null) ? temp.get(seriesName).toString() : ""));
             }
         }
@@ -130,13 +134,13 @@ public class DataFormatter {
 
         return chartData;
     }
-    
+
     public static JsonObject toFlotFromIntMap(SortedMap<Integer, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
 
         if (data == null) {
             return null;
         }
-        
+
         // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
         Map<String, BigDecimal> temp;
         // The tree map keeps the series sorted in a reliable fashion.  Needed to coordinate the alignment of labels and data... well maybe not...
@@ -145,13 +149,13 @@ public class DataFormatter {
         for (Integer curr : (Set<Integer>) data.keySet()) {
             temp = data.get(curr);
             for (String seriesName : data.get(curr).keySet()) {
-                if ( ! seriesBuilders.containsKey(seriesName) ) {
+                if (!seriesBuilders.containsKey(seriesName)) {
                     seriesBuilders.put(seriesName, Json.createArrayBuilder());
                 }
                 seriesBuilders.get(seriesName)
                         .add(Json.createArrayBuilder()
                                 .add(curr.toString())
-                                .add( (temp.get(seriesName) != null) ? temp.get(seriesName).toString() : "null"));
+                                .add((temp.get(seriesName) != null) ? temp.get(seriesName).toString() : "null"));
             }
         }
 
@@ -168,5 +172,5 @@ public class DataFormatter {
                 .build();
 
         return chartData;
-    }    
+    }
 }
