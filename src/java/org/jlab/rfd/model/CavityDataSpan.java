@@ -259,8 +259,15 @@ public class CavityDataSpan {
 
     }
 
-    // Iterate through the dataSpan.  For each date, calculate the energy gain of each zone.  Then return a map, keyed on date,
-    // where each date is a map of zone to energy gain.  Optional zone filter.
+    /**
+     * Iterate through the dataSpan. For each date, calculate the energy gain of
+     * each zone.
+     *
+     * @param zones List of zone for which to return data. Return data on all
+     * zones if null.
+     * @return a map, keyed on date, where each date is a map of zone to energy
+     * gain
+     */
     public SortedMap<Date, SortedMap<String, BigDecimal>> getEnergyGainByZone(List<String> zones) {
         SortedMap<Date, SortedMap<String, BigDecimal>> out = new TreeMap<>();
         SortedMap<String, BigDecimal> byZone;
@@ -269,14 +276,106 @@ public class CavityDataSpan {
             byZone = new TreeMap<>();
             for (CavityResponse cr : dataSpan.get(date)) {
                 String zone = cr.getZoneName();
+
                 if (zones == null || zones.isEmpty() || zones.contains(zone)) {
                     if (!byZone.containsKey(zone)) {
                         byZone.put(zone, BigDecimal.ZERO);
                     }
-                    byZone.put(zone, byZone.get(zone).add(cr.getGset().multiply(cr.getLength())));
+
+                    // GSET could be null if the control system was down, but the CED _should_ always have a length.
+                    BigDecimal gset = cr.getGset();
+                    BigDecimal cavEGain;
+                    if (gset == null) {
+                        cavEGain = BigDecimal.ZERO;
+                    } else {
+                        cavEGain = gset.multiply(cr.getLength());
+                    }
+                    byZone.put(zone, byZone.get(zone).add(cavEGain));
                 }
             }
             out.put(date, byZone);
+        }
+
+        return out;
+    }
+
+    /**
+     * Iterate through the dataSpan. For each date, calculate the energy gain of
+     * each Cryomodule type.
+     *
+     * @param zones List of zone for which to return data. Return data on all
+     * zones if null.
+     * @return a map, keyed on date, where each date is a map of zone to energy
+     * gain
+     */
+    public SortedMap<Date, SortedMap<String, BigDecimal>> getEnergyGainByCMType(List<String> zones) {
+        SortedMap<Date, SortedMap<String, BigDecimal>> out = new TreeMap<>();
+        SortedMap<String, BigDecimal> byCMType;
+
+        for (Date date : dataSpan.keySet()) {
+            byCMType = new TreeMap<>();
+            for (CavityResponse cr : dataSpan.get(date)) {
+                String zone = cr.getZoneName();
+                String cmType = cr.getCryomoduleType().toString();
+
+                if (zones == null || zones.isEmpty() || zones.contains(zone)) {
+                    if (!byCMType.containsKey(cmType)) {
+                        byCMType.put(cmType, BigDecimal.ZERO);
+                    }
+
+                    // GSET could be null if the control system was down, but the CED _should_ always have a length.
+                    BigDecimal gset = cr.getGset();
+                    BigDecimal cavEGain;
+                    if (gset == null) {
+                        cavEGain = BigDecimal.ZERO;
+                    } else {
+                        cavEGain = gset.multiply(cr.getLength());
+                    }
+                    byCMType.put(cmType, byCMType.get(cmType).add(cavEGain));
+                }
+            }
+            out.put(date, byCMType);
+        }
+
+        return out;
+    }
+
+    /**
+     * Iterate through the dataSpan. For each date, calculate the energy gain of
+     * each cavity.
+     *
+     * @param zones List of zone for which to return data. Return data on all
+     * zones if null.
+     * @return a map, keyed on date, where each date is a map of zone to energy
+     * gain
+     */
+    public SortedMap<Date, SortedMap<String, BigDecimal>> getEnergyGainByCavity(List<String> zones) {
+        SortedMap<Date, SortedMap<String, BigDecimal>> out = new TreeMap<>();
+        SortedMap<String, BigDecimal> byCavity;
+
+        for (Date date : dataSpan.keySet()) {
+            byCavity = new TreeMap<>();
+            for (CavityResponse cr : dataSpan.get(date)) {
+                String zone = cr.getZoneName();
+                String cavity = cr.getCavityName();
+
+                if (zones == null || zones.isEmpty() || zones.contains(zone)) {
+                    if (!byCavity.containsKey(cavity)) {
+                        byCavity.put(cavity, BigDecimal.ZERO);
+                    }
+
+                    // GSET could be null if the control system was down, but the CED _should_ always have a length.
+                    BigDecimal gset = cr.getGset();
+                    BigDecimal cavEGain;
+                    if (gset == null) {
+                        cavEGain = BigDecimal.ZERO;
+                    } else {
+                        cavEGain = gset.multiply(cr.getLength());
+                    }
+                    byCavity.put(cavity, byCavity.get(cavity).add(cavEGain));
+                }
+            }
+            out.put(date, byCavity);
         }
 
         return out;
