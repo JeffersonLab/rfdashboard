@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
@@ -24,6 +26,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import org.jlab.rfd.business.util.CebafNames;
+import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.model.CavityResponse;
 import org.jlab.rfd.model.CryomoduleDataPoint;
 import org.jlab.rfd.model.CryomoduleType;
@@ -81,6 +84,99 @@ public class CryomoduleService {
                 JsonObject properties = element.getJsonObject("properties");
 
                 cmTypes.put(element.getString("name"), CryomoduleType.valueOf(properties.getString("ModuleType")));
+            }
+        }
+        return cmTypes;
+    }
+
+    /**
+     * Returns a map of cryomodule types to the zones that had that type on the
+     * date in question. Can limit responses to a list of specified zones (CED
+     * names)
+     *
+     * @param timestamp Used as the CED history workspace
+     * @param zones A list of
+     * @return
+     * @throws IOException
+     */
+    public SortedMap<CryomoduleType, List<String>> getZonesByCryomoduleType(Date timestamp, List<String> zones) throws IOException {
+        if (timestamp.after(new Date())) {
+            return null;
+        }
+
+        String wrkspc = DateUtil.formatDateYMDHMS(timestamp);
+        String cmQuery = "?t=Cryomodule&p=ModuleType&out=json&ced=history&wrkspc=" + wrkspc;
+
+        SortedMap<CryomoduleType, List<String>> cmTypes = new TreeMap<>();
+        for (CryomoduleType type : CryomoduleType.values()) {
+            cmTypes.put(type, new ArrayList<>());
+        }
+
+        URL url = new URL(CED_INVENTORY_URL + cmQuery);
+        InputStream in = url.openStream();
+
+        try (JsonReader reader = Json.createReader(in)) {
+            JsonObject json = reader.readObject();
+            String status = json.getString("stat");
+            if (!"ok".equals(status)) {
+                throw new IOException("unable to lookup Cavity Data from CED: response stat: " + status);
+            }
+            JsonObject inventory = json.getJsonObject("Inventory");
+            JsonArray elements = inventory.getJsonArray("elements");
+
+            for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
+                JsonObject properties = element.getJsonObject("properties");
+                String zoneName = element.getString("name");
+                if (zones == null || zones.isEmpty() || zones.contains(zoneName)) {
+                    cmTypes.get(CryomoduleType.valueOf(properties.getString("ModuleType"))).add(zoneName);
+                }
+            }
+        }
+        return cmTypes;
+    }
+
+    /**
+     * This queries the history CED for a listing of ModuleType for all
+     * CryoModules in the CED. It then creates a Map of Cryomodule CED name to
+     * ModuleType (e.g., C25 or C100). All queries are limited to date precision
+     * (no hours, minutes, etc.). Returns null if timestamp is for future date.
+     *
+     * @param timestamp The date for which we query the CED history workspace
+     * @param zones Limit the response to the specified set of zones. Return all
+     * zones if null.
+     * @return A map of CED Cryomodule names to CryoModule ModuleType on the
+     * requested date
+     * @throws java.text.ParseException
+     * @throws java.io.IOException
+     */
+    public SortedMap<String, CryomoduleType> getCryoModuleTypesByZone(Date timestamp, List<String> zones) throws ParseException, IOException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        if (timestamp.after(new Date())) {
+            return null;
+        }
+
+        String wrkspc = sdf.format(timestamp);
+        String cmQuery = "?t=Cryomodule&p=ModuleType&out=json&ced=history&wrkspc=" + wrkspc;
+
+        //LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cmQuery);
+        URL url = new URL(CED_INVENTORY_URL + cmQuery);
+        InputStream in = url.openStream();
+
+        SortedMap<String, CryomoduleType> cmTypes = new TreeMap<>();
+        try (JsonReader reader = Json.createReader(in)) {
+            JsonObject json = reader.readObject();
+            String status = json.getString("stat");
+            if (!"ok".equals(status)) {
+                throw new IOException("unable to lookup Cavity Data from CED: response stat: " + status);
+            }
+            JsonObject inventory = json.getJsonObject("Inventory");
+            JsonArray elements = inventory.getJsonArray("elements");
+
+            for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
+                if (zones == null || zones.isEmpty() || zones.contains(element.getString("name"))) {
+                    JsonObject properties = element.getJsonObject("properties");
+                    cmTypes.put(element.getString("name"), CryomoduleType.valueOf(properties.getString("ModuleType")));
+                }
             }
         }
         return cmTypes;
