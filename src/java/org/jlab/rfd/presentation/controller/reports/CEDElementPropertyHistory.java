@@ -131,12 +131,7 @@ public class CEDElementPropertyHistory extends HttpServlet {
         // Get the list of cavity names that can be selected
         CavityService cs = new CavityService();
         SortedSet<String> cavNames = cs.getCavityNames();
-        //List<String> cavProps = Arrays.asList(new String[]{"OpsGsetMax", "Bypassed", "TunerBad", "MaxGSET"});
-        List<String> cavProps = new ArrayList<>();
-        cavProps.add("OpsGsetMax");
-        cavProps.add("Bypassed");
-        cavProps.add("TunerBad");
-        cavProps.add("MaxGSET");
+        List<String> cavProps = Arrays.asList(new String[]{"OpsGsetMax", "Bypassed", "TunerBad", "MaxGSET"});
 
         request.setAttribute("elems", elems);
         request.setAttribute("props", props);
