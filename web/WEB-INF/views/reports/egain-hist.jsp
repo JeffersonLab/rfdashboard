@@ -8,6 +8,7 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib  prefix="t" tagdir="/WEB-INF/tags"%>
+<%@taglib  prefix="cf" uri="http://jlab.org/rfd/functions"%>
 
 <c:set var="title" value="Energy Gain History" />
 <t:reports-page title="${title}">
@@ -410,7 +411,8 @@
                                 <select id="zone-selector" class="multi-select" name="zone" multiple="multiple">
                                 <c:forEach var="zone" items="${requestScope.allZones}">
                                     <c:if test="${requestScope.cmTypesByZone[zone] != 'QTR'}">
-                                        <option value="${zone}" <c:if  test="${zones.contains(zone)}">selected="selected"</c:if>>${zone}</option>
+                                        <option value="${zone}" <c:if  test="${cf:inList(zones, zone)}">selected="selected"</c:if>>${zone}</option>
+                                        <%--<option value="${zone}" <c:if  test="${zones.contains(zone)}">selected="selected"</c:if>>${zone}</option>--%>
                                     </c:if>
                                 </c:forEach>
                             </select>

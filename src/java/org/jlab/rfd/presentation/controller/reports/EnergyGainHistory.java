@@ -144,7 +144,7 @@ public class EnergyGainHistory extends HttpServlet {
         try {
             cmTypesByZone = cms.getCryoModuleTypesByZone(end, zones);
             zonesByCMType = cms.getZonesByCryomoduleType(end, zones);
-             allZones = new ArrayList(cms.getCryoModuleTypes(end).keySet());
+             allZones = new ArrayList<>(cms.getCryoModuleTypes(end).keySet());
              Collections.sort(allZones);
         } catch (ParseException ex) {
             LOGGER.log(Level.SEVERE, "Error querying cryomodule data", ex);
@@ -200,7 +200,7 @@ public class EnergyGainHistory extends HttpServlet {
         
         // Data based on the parameters
         request.setAttribute("cmTypesByZone", cmTypesByZone);
-        request.setAttribute("cmTypeSet", new TreeSet(cmTypesByZone.values()));
+        request.setAttribute("cmTypeSet", new TreeSet<>(cmTypesByZone.values()));
         request.setAttribute("allZones", allZones);
         request.setAttribute("cmTypesByZoneJson", cmTypesByZoneJson.toString());
         request.setAttribute("zonesByCMTypeJson", zonesByCMTypeJson.toString());
