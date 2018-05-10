@@ -35,7 +35,11 @@ public class Functions {
 
     // shamelessly stolen from Ryan's smoothness template
     public static boolean inList(List<String> haystack, String needle) {
-        return (haystack.contains(needle));
+        boolean inList = false;
+        if (haystack != null && needle != null) {
+            inList = haystack.contains(needle);
+        }
+        return inList;
     }
 
 }
