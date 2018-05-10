@@ -295,13 +295,13 @@ jlab.flotCharts.addXYToolTip = function(chartId, xlabel, ylabel) {
                     }else {
                         x = item.series.data[item.dataIndex][0];
                     }
-                
+
                     var y = item.datapoint[1].toFixed(2);
                     var borderColor = item.series.color;
                     var content = "<b>Series:</b> " + item.series.label
                             + "<br /><b>" + xlabel + ":</b> " + x
                             + "<br /><b>" + ylabel + ":</b> " + y;
-                    jlab.showTooltip(item.pageX + 20, item.pageY - 20, content, borderColor);
+                    jlab.showTooltip(pos.pageX + 20, pos.pageY - 20, content, borderColor);
                 }
             } else {
                 $('#flot-tooltip').remove();
