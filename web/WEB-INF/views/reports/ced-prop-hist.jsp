@@ -7,10 +7,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="cf" uri="http://jlab.org/rfd/functions"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <t:reports-page title="CED Property Updates">
     <jsp:attribute name="stylesheets">
-        <!--<link rel="stylesheet" href="${initParam.cdnContextPath}/jquery-plugins/select2/3.5.2/select2.css"/>-->
         <link rel="stylesheet" href="${initParam.cdnContextPath}/jquery-plugins/select2/4.0.5/dist/css/select2.min.css"/>
         <style>
             .select2-selection {
@@ -21,7 +21,6 @@
     </jsp:attribute>
     <jsp:attribute name="scripts">
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
-        <!--<script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/select2/3.5.2/select2.min.js"></script>-->
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/select2/4.0.5/dist/js/select2.min.js"></script>
         <script type="text/javascript">
             $(document).ready(function () {
@@ -61,7 +60,7 @@
                             <select id="cav-selector" class="multi-select" name="e" multiple="multiple">
                                 <c:forEach var="cav" items="${cavNames}">
                                     <c:choose>
-                                        <c:when test="${elems.contains(cav)}">
+                                        <c:when test="${cf:inList(elems, cav)}">
                                             <option value="${cav}" selected="selected">${cav}</option>
                                         </c:when>
                                         <c:otherwise>
@@ -79,7 +78,7 @@
                             <select class="multi-select" name="props" multiple="multiple">
                                 <c:forEach var="prop" items="${cavProps}">
                                     <c:choose>
-                                        <c:when test="${props.contains(prop)}">
+                                        <c:when test="${cf:inList(props, prop)}">
                                             <option value="${prop}" selected="selected">${prop}</option>
                                         </c:when>
                                         <c:otherwise>
