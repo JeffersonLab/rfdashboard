@@ -121,11 +121,9 @@ public class CEDElementPropertyHistory extends HttpServlet {
             }
         }
         // Sort the updates by timestamp in descending order
-        Collections.sort(cedUpdates, new Comparator() {
+        Collections.sort(cedUpdates, new Comparator<CEDElementUpdate>() {
             @Override
-            public int compare(Object o1, Object o2) {
-                CEDElementUpdate c1 = (CEDElementUpdate) o1;
-                CEDElementUpdate c2 = (CEDElementUpdate) o2;
+            public int compare(CEDElementUpdate c1, CEDElementUpdate c2) {
                 return c2.getDateString().compareTo(c1.getDateString());
             }
         });
@@ -133,7 +131,12 @@ public class CEDElementPropertyHistory extends HttpServlet {
         // Get the list of cavity names that can be selected
         CavityService cs = new CavityService();
         SortedSet<String> cavNames = cs.getCavityNames();
-        List<String> cavProps = Arrays.asList(new String[]{"OpsGsetMax", "Bypassed", "TunerBad", "MaxGSET"});
+        //List<String> cavProps = Arrays.asList(new String[]{"OpsGsetMax", "Bypassed", "TunerBad", "MaxGSET"});
+        List<String> cavProps = new ArrayList<>();
+        cavProps.add("OpsGsetMax");
+        cavProps.add("Bypassed");
+        cavProps.add("TunerBad");
+        cavProps.add("MaxGSET");
 
         request.setAttribute("elems", elems);
         request.setAttribute("props", props);
