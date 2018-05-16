@@ -27,7 +27,8 @@
                 jlab.util.initDateTimePickers();
                 $('.multi-select').select2({
                     width: 290,
-                    closeOnSelect: false
+                    closeOnSelect: false,
+                    maximumSelectionLength: 50
                 });
             });
             $("#all-cavs-checkbox").click(function () {
