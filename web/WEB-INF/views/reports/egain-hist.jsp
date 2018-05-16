@@ -144,29 +144,7 @@
                                 // Put this back together in a way that flot will like
                                 var chartData = {labels: [cmType], data: [data]};
 
-                                // Setup a plotclick function that brings up the RF Cavity History Tool with the cavities in the zones shown
-                                // of the chart's cmType
-                                plotclick = function (event, pos, item) {
-                                    if (item) {
-                                        var cmType = item.series.label; // otherwise it references the last value cmType takes in the outside loop.
-                                        var timestamp = item.series.data[item.dataIndex][0];
-                                        var dateString = jlab.millisToDate(timestamp);
-                                        var zones = jlab.zonesByCMType[cmType];
-                                        var cavs = new Array(zones.length * 8);
-                                        var i = 0;
-                                        for (var j = 0; j < zones.length; j++) {
-                                            var zone = zones[j];
-                                            for (var k = 1; k <= 8; k++) {
-                                                cavs[i] = zone + '-' + k;
-                                                i++;
-                                            }
-                                        }
-                                        var url = jlab.contextPath + "/reports/ced-prop-hist?start=" + jlab.addDays(dateString, numDays)
-                                                + "&end=" + dateString + "&e=" + cavs.join("&e=") + "&props=OpsGsetMax&"
-                                                + "props=MaxGSET&props=TunerBad&props=Bypassed";
-                                        window.location.href = url;
-                                    }
-                                };
+                                // No plotclick function for by==cmtype since the IE11 can't handle a that long of a URL.
 
                                 // Draw the chart for this series
                                 jlab.egainHistory.loadHistoryChart(chartId, start, end, timeUnit, chartData, cmType, by, plotclick);
