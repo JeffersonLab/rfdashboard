@@ -27,20 +27,24 @@ public class DateUtil {
     private static final SimpleDateFormat YMD_HMS_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static Date truncateToDate(Date d1) throws ParseException {
-        return YMD_DATE_FORMATTER.parse(YMD_DATE_FORMATTER.format(d1));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.parse(sdf.format(d1));
     }
-    
+
     /**
      * Get a yyyy-MM-dd formatted string based on the supplied date
+     *
      * @param d1 The Date object to format
      * @return The formatted string.
      */
     public static String formatDateYMD(Date d1) {
-        return YMD_DATE_FORMATTER.format(d1);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(d1);
     }
-    
+
     public static String formatDateYMDHMS(Date d1) {
-        return YMD_HMS_DATE_FORMATTER.format(d1);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(d1);
     }
 
     public static Date parseDateString(String d1) throws ParseException {
@@ -60,9 +64,11 @@ public class DateUtil {
     }
 
     public static Date parseDateStringYMDHMS(String d1) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
         Date date;
         try {
-            date = YMD_HMS_DATE_FORMATTER.parse(d1);
+            date = sdf.parse(d1);
         } catch (ParseException ex) {
             LOGGER.log(Level.SEVERE, "Error parsing date {0}", d1);
             throw ex;
@@ -71,9 +77,11 @@ public class DateUtil {
     }
 
     public static Date parseDateStringYMDHM(String d1) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         Date date;
+
         try {
-            date = YMD_HM_DATE_FORMATTER.parse(d1);
+            date = sdf.parse(d1);
         } catch (ParseException ex) {
             LOGGER.log(Level.SEVERE, "Error parsing date {0}", d1);
             throw ex;
@@ -90,9 +98,10 @@ public class DateUtil {
      * @throws ParseException
      */
     public static Date truncateToDays(Date d1) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
         try {
-            date = YMD_DATE_FORMATTER.parse(YMD_DATE_FORMATTER.format(d1));
+            date = sdf.parse(sdf.format(d1));
         } catch (ParseException ex) {
             LOGGER.log(Level.SEVERE, "Error parse date {0}", d1);
             throw ex;
@@ -109,9 +118,10 @@ public class DateUtil {
      * @throws ParseException
      */
     public static Date parseDateStringYMD(String d1) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
         try {
-            date = YMD_DATE_FORMATTER.parse(d1);
+            date = sdf.parse(d1);
         } catch (ParseException ex) {
             LOGGER.log(Level.SEVERE, "Error parse date {0}", d1);
             throw ex;
