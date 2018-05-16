@@ -5,10 +5,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import static java.util.stream.Collectors.toList;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -24,8 +34,9 @@ import org.jlab.rfd.model.CEDElementUpdateHistory;
 public class CEDUpdateHistoryService {
 
     private static final Logger LOGGER = Logger.getLogger(CEDUpdateHistoryService.class.getName());
-    private static final String CED_UPDATE_HISTORY_URL = "https://ced.acc.jlab.org/ajax/history/";
+    private static final String CED_UPDATE_HISTORY_URL = "http://ced.acc.jlab.org/ajax/history/";
 
+    // Thread safe method called from public method getUpdateLIst
     public CEDElementUpdateHistory getElementUpdateHistory(String elem, List<String> props, Date start, Date end) throws IOException, ParseException {
         CEDElementUpdateHistory updateHistory = new CEDElementUpdateHistory(elem);
         for (String prop : props) {
@@ -69,6 +80,72 @@ public class CEDUpdateHistoryService {
 
     public CEDElementUpdateHistory getElementUpdateHistory(String elem, List<String> props) throws IOException, ParseException {
         return getElementUpdateHistory(elem, props, null, null);
+    }
+
+    private Callable<CEDElementUpdateHistory> callable(String elem, List<String> props, Date start, Date end) {
+        return () -> {
+            CEDElementUpdateHistory temp = getElementUpdateHistory(elem, props, start, end);
+            return temp;
+        };
+    }
+
+    // This returns a the list of CED element property updates for a set of elements during a time range.
+    // Function for requesting a large set of elements and properties.  All props must be defined for all elems and all elems
+    // must be defined or CED will throw an exception.  Runs multiple requests in parallel.
+    public List<CEDElementUpdate> getUpdateList(List<String> elems, List<String> props, Date start, Date end) throws InterruptedException {
+        List<Callable<CEDElementUpdateHistory>> callables = new ArrayList<>();
+        
+        if ( elems == null || elems.isEmpty()) {
+            return new ArrayList<>();
+        } else if ( props == null || props.isEmpty() ){
+            return new ArrayList<>();
+        }
+        for (String elem : elems) {
+            callables.add(callable(elem, props, start, end));
+        }
+        ExecutorService exec = Executors.newFixedThreadPool(10);
+
+        List<CEDElementUpdate> out = exec.invokeAll(callables)
+                .stream()
+                .map(future -> {
+                    try {
+                        CEDElementUpdateHistory hist = future.get();
+                        return hist;
+                    } catch (InterruptedException | ExecutionException ex) {
+                        throw new RuntimeException("Error querying CED history data", ex);
+                    }
+                })
+                .map(hist -> {
+                    List<CEDElementUpdate> updates = new ArrayList<>();
+                    for (String prop : props) {
+                        Map<Date, CEDElementUpdate> pUpdates = hist.getUpdateHistory(prop);
+                        if (pUpdates != null) {
+                            for (Date date : pUpdates.keySet()) {
+                                updates.add(pUpdates.get(date));
+                            }
+                        }
+                    }
+                    return updates;
+                })
+                .reduce(new ArrayList<>(), (List<CEDElementUpdate> a, List<CEDElementUpdate> b) -> {
+                    a.addAll(b);
+                    return a;
+                });
+
+        try {
+            exec.shutdown();
+            exec.awaitTermination(20, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            LOGGER.log(Level.SEVERE, "Error querying CED data.");
+            throw e;
+        } finally {
+            if (!exec.isTerminated()) {
+                exec.shutdownNow();
+                LOGGER.log(Level.SEVERE, "Executor service timed out before all request threads had completed");
+                throw new InterruptedException("CED data queries timed out.");
+            }
+        }
+        return out;
     }
 
 }

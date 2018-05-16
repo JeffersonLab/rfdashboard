@@ -98,35 +98,17 @@ public class CEDElementPropertyHistory extends HttpServlet {
             return;
         }
 
-        List<CEDElementUpdate> cedUpdates = new ArrayList<>();
         CEDUpdateHistoryService cuhs = new CEDUpdateHistoryService();
-        if (elems != null & props != null) {
-            for (String elem : elems) {
-                CEDElementUpdateHistory eHist;
-                try {
-                    eHist = cuhs.getElementUpdateHistory(elem, props, start, end);
-                } catch (ParseException ex) {
-                    LOGGER.log(Level.SEVERE, "Error querying CED element update history for elem={0}, props={1}",
-                            new Object[]{elem, props});
-                    throw new ServletException("Erryr querying CED element update history");
-                }
-                for (String prop : props) {
-                    Map<Date, CEDElementUpdate> eUpdates = eHist.getUpdateHistory(prop);
-                    if (eUpdates != null) {
-                        for (Date d : eUpdates.keySet()) {
-                            cedUpdates.add(eUpdates.get(d));
-                        }
-                    }
-                }
-            }
+        List<CEDElementUpdate> cedUpdates;
+        try {
+            cedUpdates = cuhs.getUpdateList(elems, props, start, end);
+        } catch (InterruptedException ex) {
+            LOGGER.log(Level.SEVERE, "Error querying CED data", ex);
+            throw new ServletException("Error querying CED data");
         }
-        // Sort the updates by timestamp in descending order
-        Collections.sort(cedUpdates, new Comparator<CEDElementUpdate>() {
-            @Override
-            public int compare(CEDElementUpdate c1, CEDElementUpdate c2) {
-                return c2.getDateString().compareTo(c1.getDateString());
-            }
-        });
+
+        // Sort the updates by timestamp in descending order - using a lambda for the comparator
+        Collections.sort(cedUpdates, (c1, c2) -> c2.getDateString().compareTo(c1.getDateString()));
 
         // Get the list of cavity names that can be selected
         CavityService cs = new CavityService();
