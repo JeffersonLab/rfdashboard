@@ -31,15 +31,6 @@
                     maximumSelectionLength: 50
                 });
             });
-            $("#all-cavs-checkbox").click(function () {
-                if ($("#all-cavs-checkbox").is(':checked')) {
-                    $("#cav-selector > option").prop("selected", "selected");
-                    $("#cav-selector").trigger("change");
-                } else {
-                    $("#cav-selector > option").removeAttr("selected");
-                    $("#cav-selector").trigger("change");
-                }
-            });
 
         </script>
     </jsp:attribute>
@@ -70,7 +61,6 @@
                                     </c:choose>
                                 </c:forEach>
                             </select>
-                            <input type="checkbox" id="all-cavs-checkbox">Select All</input>
                         </div>
                     </li>
                     <li>                    
