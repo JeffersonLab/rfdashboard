@@ -16,7 +16,6 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
-import org.jlab.rfd.model.LinacName;
 
 /**
  *
@@ -44,7 +43,7 @@ public class LinacDataSpan {
      */
     public boolean add(LinacDataPoint ldp) {
         if (!dataSpan.containsKey(ldp.getTimestamp())) {
-            dataSpan.put(ldp.getTimestamp(), new HashSet<>());
+            dataSpan.put(ldp.getTimestamp(), new HashSet<LinacDataPoint>());
         }
         return dataSpan.get(ldp.getTimestamp()).add(ldp);
     }

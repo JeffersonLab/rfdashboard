@@ -6,19 +6,19 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import static java.util.stream.Collectors.toList;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -83,21 +83,28 @@ public class CEDUpdateHistoryService {
     }
 
     private Callable<CEDElementUpdateHistory> callable(String elem, List<String> props, Date start, Date end) {
-        return () -> {
-            CEDElementUpdateHistory temp = getElementUpdateHistory(elem, props, start, end);
-            return temp;
+        // Create a local copy since this will almost certainly be used concurrently and someone could in theory change props
+        final List<String> p = new ArrayList<>(props);
+        final String el = elem;
+        final Date s = start;
+        final Date e = end;
+        return new Callable<CEDElementUpdateHistory>() {
+            @Override
+            public CEDElementUpdateHistory call() throws IOException, ParseException {
+                return getElementUpdateHistory(el, p, s, e);
+            }
         };
     }
 
     // This returns a the list of CED element property updates for a set of elements during a time range.
     // Function for requesting a large set of elements and properties.  All props must be defined for all elems and all elems
     // must be defined or CED will throw an exception.  Runs multiple requests in parallel.
-    public List<CEDElementUpdate> getUpdateList(List<String> elems, List<String> props, Date start, Date end) throws InterruptedException {
+    public List<CEDElementUpdate> getUpdateList(List<String> elems, List<String> props, Date start, Date end) throws InterruptedException, ExecutionException {
         List<Callable<CEDElementUpdateHistory>> callables = new ArrayList<>();
-        
-        if ( elems == null || elems.isEmpty()) {
+
+        if (elems == null || elems.isEmpty()) {
             return new ArrayList<>();
-        } else if ( props == null || props.isEmpty() ){
+        } else if (props == null || props.isEmpty()) {
             return new ArrayList<>();
         }
         for (String elem : elems) {
@@ -105,33 +112,25 @@ public class CEDUpdateHistoryService {
         }
         ExecutorService exec = Executors.newFixedThreadPool(10);
 
-        List<CEDElementUpdate> out = exec.invokeAll(callables)
-                .stream()
-                .map(future -> {
-                    try {
-                        CEDElementUpdateHistory hist = future.get();
-                        return hist;
-                    } catch (InterruptedException | ExecutionException ex) {
-                        throw new RuntimeException("Error querying CED history data", ex);
+        List<Future<CEDElementUpdateHistory>> futures = exec.invokeAll(callables);
+        List<CEDElementUpdate> updates = new ArrayList<>();
+        for (Future f : futures) {
+            CEDElementUpdateHistory hist = (CEDElementUpdateHistory) f.get();
+            for (String prop : props) {
+                Map<Date, CEDElementUpdate> pUpdates = hist.getUpdateHistory(prop);
+                if (pUpdates != null) {
+                    for (Date date : pUpdates.keySet()) {
+                        updates.add(pUpdates.get(date));
                     }
-                })
-                .map(hist -> {
-                    List<CEDElementUpdate> updates = new ArrayList<>();
-                    for (String prop : props) {
-                        Map<Date, CEDElementUpdate> pUpdates = hist.getUpdateHistory(prop);
-                        if (pUpdates != null) {
-                            for (Date date : pUpdates.keySet()) {
-                                updates.add(pUpdates.get(date));
-                            }
-                        }
-                    }
-                    return updates;
-                })
-                .reduce(new ArrayList<>(), (List<CEDElementUpdate> a, List<CEDElementUpdate> b) -> {
-                    a.addAll(b);
-                    return a;
-                });
-
+                }
+            }
+        }
+        Collections.sort(updates, new Comparator<CEDElementUpdate>() {
+            @Override
+            public int compare(CEDElementUpdate c1, CEDElementUpdate c2) {
+                return c2.getDateString().compareTo(c1.getDateString());
+            }
+        });
         try {
             exec.shutdown();
             exec.awaitTermination(20, TimeUnit.SECONDS);
@@ -145,7 +144,7 @@ public class CEDUpdateHistoryService {
                 throw new InterruptedException("CED data queries timed out.");
             }
         }
-        return out;
+        return updates;
     }
 
 }

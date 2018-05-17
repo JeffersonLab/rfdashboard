@@ -59,7 +59,7 @@ public class CavityDataSpan {
      */
     public Object add(CavityResponse dataPoint) {
         if (!dataSpan.containsKey(dataPoint.getTimestamp())) {
-            dataSpan.put(dataPoint.getTimestamp(), new HashSet<>());
+            dataSpan.put(dataPoint.getTimestamp(), new HashSet<CavityResponse>());
         }
         return dataSpan.get(dataPoint.getTimestamp()).add(dataPoint);
     }

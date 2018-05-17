@@ -38,7 +38,7 @@ public class CEDElementUpdateHistory {
 
         // Add it to the byProp structure
         if (!byProp.containsKey(property)) {
-            byProp.put(property, new HashMap<>());
+            byProp.put(property, new HashMap<Date, CEDElementUpdate>());
             byProp.get(property).put(date, ceu);
         } else {
             oldValue = byProp.get(property).put(date, ceu);
@@ -46,7 +46,7 @@ public class CEDElementUpdateHistory {
 
         // Add it to the byDate structure
         if (!byDate.containsKey(date)) {
-            byDate.put(date, new HashMap<>());
+            byDate.put(date, new HashMap<String, CEDElementUpdate>());
             byDate.get(date).put(property, ceu);
         } else {
             oldValue = byDate.get(date).put(property, ceu);

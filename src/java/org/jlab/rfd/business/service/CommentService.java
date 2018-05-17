@@ -9,7 +9,6 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -228,7 +227,7 @@ public class CommentService {
         Map<String, Integer> indexes = new HashMap<>();
         for (Comment c : comments) {
             if (!sorted.containsKey(c.getTopic())) {
-                sorted.put(c.getTopic(), new TreeSet<>());
+                sorted.put(c.getTopic(), new TreeSet<Comment>());
                 indexes.put(c.getTopic(), 1);
             }
                        

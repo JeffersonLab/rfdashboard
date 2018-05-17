@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -36,7 +37,7 @@ import org.jlab.rfd.presentation.util.RequestParamUtil;
  *
  * @author adamc
  */
-@WebServlet(name = "RFCavityHistory", urlPatterns = {"/reports/ced-prop-hist"})
+@WebServlet(name = "CEDElementPropertyHistory", urlPatterns = {"/reports/ced-prop-hist"})
 public class CEDElementPropertyHistory extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(CEDElementPropertyHistory.class.getName());
@@ -71,12 +72,20 @@ public class CEDElementPropertyHistory extends HttpServlet {
 
         List<String> elems = null;
         if (request.getParameter("e") != null) {
-            elems = Arrays.asList(request.getParameterValues("e"));
+//            elems = Arrays.asList(request.getParameterValues("e"));
+            elems = new ArrayList<>();
+            for (String e : request.getParameterValues("e")) {
+                elems.add(e);
+            }
         }
 
         List<String> props = null;
         if (request.getParameter("props") != null) {
-            props = Arrays.asList(request.getParameterValues("props"));
+//            props = Arrays.asList(request.getParameterValues("props"));
+            props = new ArrayList<>();
+            for (String prop : request.getParameterValues("props")) {
+                props.add(prop);
+            }
         }
 
         if (redirectNeeded) {
@@ -86,7 +95,7 @@ public class CEDElementPropertyHistory extends HttpServlet {
                         + "/reports/ced-prop-hist?start=" + URLEncoder.encode(DateUtil.formatDateYMDHMS(start), "UTF-8")
                         + "&end=" + URLEncoder.encode(DateUtil.formatDateYMDHMS(end), "UTF-8");
                 if (request.getParameter("e") != null) {
-                    redirectUrl += "&elems=" + URLEncoder.encode(request.getParameter("e"), "UTF-8");
+                    redirectUrl += "&e=" + URLEncoder.encode(request.getParameter("e"), "UTF-8");
                 }
                 if (request.getParameter("props") != null) {
                     redirectUrl += "&props=" + URLEncoder.encode(request.getParameter("props"), "UTF-8");
@@ -102,18 +111,23 @@ public class CEDElementPropertyHistory extends HttpServlet {
         List<CEDElementUpdate> cedUpdates;
         try {
             cedUpdates = cuhs.getUpdateList(elems, props, start, end);
-        } catch (InterruptedException ex) {
+        } catch (InterruptedException | ExecutionException ex) {
             LOGGER.log(Level.SEVERE, "Error querying CED data", ex);
             throw new ServletException("Error querying CED data");
         }
 
         // Sort the updates by timestamp in descending order - using a lambda for the comparator
-        Collections.sort(cedUpdates, (c1, c2) -> c2.getDateString().compareTo(c1.getDateString()));
+//        Collections.sort(cedUpdates, (c1, c2) -> c2.getDateString().compareTo(c1.getDateString()));
 
         // Get the list of cavity names that can be selected
         CavityService cs = new CavityService();
         SortedSet<String> cavNames = cs.getCavityNames();
-        List<String> cavProps = Arrays.asList(new String[]{"OpsGsetMax", "Bypassed", "TunerBad", "MaxGSET"});
+//        List<String> cavProps = Arrays.asList(new String[]{"OpsGsetMax", "Bypassed", "TunerBad", "MaxGSET"});
+        List<String> cavProps = new ArrayList<>();
+        cavProps.add("OpsGsetMax");
+        cavProps.add("Bypassed");
+        cavProps.add("TunerBad");
+        cavProps.add("MaxGSET");
 
         request.setAttribute("elems", elems);
         request.setAttribute("props", props);

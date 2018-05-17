@@ -47,7 +47,7 @@ public class LemSpan {
      */
     public Object add(LemRecord record) {
         if (!dataSpan.containsKey(record.getTimestamp())) {
-            dataSpan.put(record.getTimestamp(), new TreeMap<>());
+            dataSpan.put(record.getTimestamp(), new TreeMap<LinacName, LemRecord>());
         }
         return dataSpan.get(record.getTimestamp()).put(record.getLinac(), record);
     }

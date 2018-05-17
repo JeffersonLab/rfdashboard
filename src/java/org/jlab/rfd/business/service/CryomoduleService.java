@@ -109,7 +109,7 @@ public class CryomoduleService {
 
         SortedMap<CryomoduleType, List<String>> cmTypes = new TreeMap<>();
         for (CryomoduleType type : CryomoduleType.values()) {
-            cmTypes.put(type, new ArrayList<>());
+            cmTypes.put(type, new ArrayList<String>());
         }
 
         URL url = new URL(CED_INVENTORY_URL + cmQuery);
