@@ -17,7 +17,7 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
         return;
     }
 
-    var reachRates = jlab.energyReach.getReachTripRates(new Date(date));
+    var reachRates = jlab.energyReach.getReachTripRates();
     var linacRate = reachRates[0];
     var totalRate = reachRates[1];
 
@@ -135,7 +135,7 @@ jlab.energyReach.getEnergyReach = function (jsonData, date) {
         }
     }
     
-    var rates = jlab.energyReach.getReachTripRates(date);
+    var rates = jlab.energyReach.getReachTripRates();
     var linacRate = rates[0];
     var totalRate = rates[1];
 
@@ -161,20 +161,11 @@ jlab.energyReach.getEnergyReach = function (jsonData, date) {
 };
 
 
-// "Target" trip rates.  The most we want is 10 total trips / hour.  The reach trip rate changes over time depending on what
-// is modeled in LEM.  Before 2018, C100s were not in LEM and accounted for about 2 trips / hour, leaving 8 total/hr for LEM.
-// Starting 2018, most C100s had trip models in LEM, and LEM appears to be doing a good job of accounting for most RF trips.
-// date - date object for which to return the trip rates
-jlab.energyReach.getReachTripRates = function (date) {
+// This has been a bit of a moving target.  C100 models have been added and removed over time.  The decision was made
+//  to present the target Energy Reach trip rates at 4 per linac and 8 per linac for all time to make things consistent.
+jlab.energyReach.getReachTripRates = function () {
     var linacRate = 4;
     var totalRate = 8;
-    if (typeof date !== "undefined") {
-        var c100Date = new Date(2018, 0, 1);
-        if (date > c100Date) {
-            linacRate = 5;
-            totalRate = 10;
-        }
-    }
     return [linacRate, totalRate];
 };
 
