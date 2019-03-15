@@ -83,7 +83,7 @@ public class DataFormatter {
         return out;
     }
 
-
+    
     /**
      * This function is designed to format a "By Linac", time series data
      * structure as in JSON format.
