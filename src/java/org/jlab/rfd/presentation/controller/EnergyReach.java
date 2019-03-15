@@ -182,7 +182,11 @@ public class EnergyReach extends HttpServlet {
         JsonObject energyReach;
         JsonObject dayScan;
         try {
-            SortedMap<Date, SortedMap<String, BigDecimal>> reach = ls.getLemSpan(start, end).getEnergyReach();
+            // getLemSpan searches for energy reaches between the two dates, but requestors really want the number for the last day
+            // which was almost certainly not done at exactly midight the start of that day.
+            Date endEffective = DateUtil.getNextDay(end);
+            SortedMap<Date, SortedMap<String, BigDecimal>> reach = ls.getLemSpan(start, endEffective).getEnergyReach();
+
             energyReach = DataFormatter.toFlotFromDateMap(reach);
             LemSpan lemSpan = ls.getLemSpan(diffEnd, DateUtil.getNextDay(diffEnd));
             SortedMap<Integer, SortedMap<String, BigDecimal>> tripRates = lemSpan.getTripRateCurve(diffEnd);
