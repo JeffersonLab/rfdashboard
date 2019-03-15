@@ -10,6 +10,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -92,20 +93,21 @@ public class LemSpan {
 
         SortedMap<Integer, SortedMap<String, BigDecimal>> data = new TreeMap<>();
 
-        List<BigDecimal> north = dataSpan.get(timeStamp).get(LinacName.North).getTripRates();
-        List<BigDecimal> south = dataSpan.get(timeStamp).get(LinacName.South).getTripRates();
+        Map<Integer, BigDecimal> north = dataSpan.get(timeStamp).get(LinacName.North).getTripRates();
+        Map<Integer, BigDecimal> south = dataSpan.get(timeStamp).get(LinacName.South).getTripRates();
         List<Integer> energies = dataSpan.get(timeStamp).get(LinacName.North).getEnergy();
         SortedMap<String, BigDecimal> byLinac;
+
         for (int i = 0; i < energies.size(); i++) {
             byLinac = new TreeMap<>();
             BigDecimal total = null;
 
-            byLinac.put(LinacName.North.toString(), north.get(i));
-            byLinac.put(LinacName.South.toString(), south.get(i));
+            byLinac.put(LinacName.North.toString(), north.get(energies.get(i)));
+            byLinac.put(LinacName.South.toString(), south.get(energies.get(i)));
 
-            // Null means lem couldn't find valid solution for the linac at that energy.
-            if (north.get(i) != null && south.get(i) != null) {
-                total = south.get(i).add(north.get(i));
+            // Null means lem couldn't find valid solution for the linac at that energy or it wasn't scanned.
+            if (north.get(energies.get(i)) != null && south.get(energies.get(i)) != null) {
+                total = south.get(energies.get(i)).add(north.get(energies.get(i)));
             }
 
             byLinac.put("Total", total);
@@ -130,27 +132,28 @@ public class LemSpan {
         }
 
         SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
-        List<BigDecimal> north;
-        List<BigDecimal> south;
-        List<BigDecimal> energy = null;
+        Map<Integer, BigDecimal> north;
+        Map<Integer, BigDecimal> south;
+        List<Integer> energy;
         BigDecimal[] eight = {new BigDecimal(8).setScale(10, RoundingMode.HALF_UP)};
 
+        // Go through each date in the lem span
         for (Date timestamp : dataSpan.keySet()) {
+
             SortedMap<String, BigDecimal> reach = new TreeMap<>();
+
+            // Grab the trip rates, and the energies for the scans from that date
             north = dataSpan.get(timestamp).get(LinacName.North).getTripRates();
             south = dataSpan.get(timestamp).get(LinacName.South).getTripRates();
-            if (energy == null) {
-                energy = new ArrayList<>();
-                for (Integer e : dataSpan.get(timestamp).get(LinacName.North).getEnergy()) {
-                    energy.add(new BigDecimal(e).setScale(10, RoundingMode.HALF_UP));
-                }
-            }
+            energy = dataSpan.get(timestamp).get(LinacName.North).getEnergy();
 
+            // Make sure that we have scans for both and that they have the same number of entries (different energies imply something weird would have happened)
             if (north != null && south != null && north.size() == south.size()) {
+                // Calculate the total trip rate at each energy for that day
                 List<BigDecimal> total = new ArrayList<>();
                 for (int i = 0; i < north.size(); i++) {
-                    if (north.get(i) != null && south.get(i) != null) {
-                        total.add(north.get(i).add(south.get(i)).setScale(10, RoundingMode.HALF_UP));
+                    if (north.get(energy.get(i)) != null && south.get(energy.get(i)) != null) {
+                        total.add(north.get(energy.get(i)).add(south.get(energy.get(i))).setScale(10, RoundingMode.HALF_UP));
                     } else {
                         total.add(null);
                     }
@@ -162,12 +165,11 @@ public class LemSpan {
                 for (int i = 0; i < total.size(); i++) {
                     if (total.get(i) != null) {
                         tempT.add(total.get(i));
-                        tempE.add(energy.get(i));
+                        tempE.add(new BigDecimal(energy.get(i)));
                     }
                 }
                 BigDecimal[] totalArray = tempT.toArray(new BigDecimal[tempT.size()]);
                 BigDecimal[] energyArray = tempE.toArray(new BigDecimal[tempE.size()]);
-
                 if ((totalArray.length >= 2)
                         && (totalArray[0].doubleValue() < 8)
                         && (totalArray[totalArray.length - 1].doubleValue() > 8)
