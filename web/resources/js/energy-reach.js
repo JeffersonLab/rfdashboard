@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 
+var everpolate = everpolate || {};  // Should exist, but this stops false warnings.
 var jlab = jlab || {};
 jlab.energyReach = jlab.energyReach || {};
 
@@ -31,8 +32,25 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
         tooltipY: "Trips/Hr",
         legend: false
     };
+
+    // scanData should be formated {labels = ["north", "south", "total"], data = [[[energy, trips], [energy, trips], ...], [energy, trips], [energy, trips], ...], [energy, trips], [energy, trips], ...]]]
+    // Find the lowest energy for which we have trip data.
+    var maxX = 1190;
+    var minX = maxX;
+    for (var i = 0; i < scanData.data.length; i++) {
+        for (var j = 0; j < scanData.data[i].length; j++) {
+            var trips = parseInt(scanData.data[i][j][1]);
+            if (!isNaN(trips)) {
+                x = parseInt(scanData.data[i][j][0]);
+                if (x < minX) {
+                    minX = x;
+                }
+            }
+        }
+    }
+
     var flotOptions = {
-        xaxis: {axisLabel: "Linac Energy (MeV)", mode: null, min: 1000, max: 1190},
+        xaxis: {axisLabel: "Linac Energy (MeV)", mode: null, min: minX, max: maxX},
         yaxis: {axisLabel: "Trips / Hour", min: 0, max: 15},
         grid: {clickable: false, markings: [{yaxis: {from: totalRate, to: totalRate}, color: "#000000"}, {yaxis: {from: linacRate, to: linacRate}, color: "#000000"}]}
     };
@@ -46,13 +64,14 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
 
     // Add a caption that lists the energy reach of North, South, and Total
     var reaches = jlab.energyReach.getEnergyReach(scanData, new Date(date));
+
     // Add a custom legend off to the side
     jlab.energyReach.addLegend(chartId, settings.colors, scanData.labels, reaches);
 
     // Add the horizontal lines for 4 and 8 trips/hr with annotations
     var pTot = plot.pointOffset({x: 1010, y: totalRate});
     var pLin = plot.pointOffset({x: 1010, y: linacRate});
-    $("#" + chartId).append("<div style='position:absolute;left:" + pTot.left + "px;top:" + (pTot.top - 17) + "px; color:#666;font-size:smaller'>" + totalRate +" trips/hr</div>");
+    $("#" + chartId).append("<div style='position:absolute;left:" + pTot.left + "px;top:" + (pTot.top - 17) + "px; color:#666;font-size:smaller'>" + totalRate + " trips/hr</div>");
     $("#" + chartId).append("<div style='position:absolute;left:" + pLin.left + "px;top:" + (pLin.top - 17) + "px; color:#666;font-size:smaller'>" + linacRate + " trips/hr</div>");
 };
 
@@ -129,37 +148,58 @@ jlab.energyReach.getEnergyReach = function (jsonData, date) {
             var energy = data[i][j][0];
             var tripRate = data[i][j][1];
             if (tripRate !== "null") {
-                tripData[labels[i].toLowerCase()].energy[j] = Number(energy);
-                tripData[labels[i].toLowerCase()].tripRate[j] = Number(tripRate);
+                tripData[labels[i].toLowerCase()].energy.push(Number(energy));
+                tripData[labels[i].toLowerCase()].tripRate.push(Number(tripRate));
             }
         }
     }
-    
+
     var rates = jlab.energyReach.getReachTripRates();
     var linacRate = rates[0];
     var totalRate = rates[1];
 
-    // Everpolate should already exist - needs everpolate library to be included in the calling jsp
+    // Make sure that x is within the domain of the data
+    // x - the value to check
+    // data - an array of values, the range of which x should be in
+    var isWithinBounds = function (x, data) {
+        // The '...' causes data to be expanded from an array to a list of values
+        if (x > Math.max(...data) || x < Math.min(...data)) {
+            return false;
+        }
+        return true;
+    };
+
     var reaches = [];
-    if (tripData.north.tripRate.length > 2) {
-        reaches[0] = everpolate.linear([linacRate], tripData.north.tripRate, tripData.north.energy)[0].toFixed(1);
+    if (tripData.north.tripRate.length >= 2) {
+        if (isWithinBounds(linacRate, tripData.north.tripRate)) {
+            reaches[0] = everpolate.linear([linacRate], tripData.north.tripRate, tripData.north.energy)[0].toFixed(1);
+        } else {
+            reaches[0] = "N/A";
+        }
     } else {
         reaches[0] = "N/A";
     }
-    if (tripData.south.tripRate.length > 2) {
-        reaches[1] = everpolate.linear([linacRate], tripData.south.tripRate, tripData.south.energy)[0].toFixed(1);
+    if (tripData.south.tripRate.length >= 2) {
+        if (isWithinBounds(linacRate, tripData.south.tripRate)) {
+            reaches[1] = everpolate.linear([linacRate], tripData.south.tripRate, tripData.south.energy)[0].toFixed(1);
+        } else {
+            reaches[1] = "N/A";
+        }
     } else {
         reaches[1] = "N/A";
     }
-    if (tripData.total.tripRate.length > 2) {
-        reaches[2] = everpolate.linear([totalRate], tripData.total.tripRate, tripData.total.energy)[0].toFixed(1);
+    if (tripData.total.tripRate.length >= 2) {
+        if (isWithinBounds(totalRate, tripData.total.tripRate)) {
+            reaches[2] = everpolate.linear([totalRate], tripData.total.tripRate, tripData.total.energy)[0].toFixed(1);
+        } else {
+            reaches[2] = "N/A";
+        }
     } else {
         reaches[2] = "N/A";
     }
 
     return reaches;
 };
-
 
 // This has been a bit of a moving target.  C100 models have been added and removed over time.  The decision was made
 //  to present the target Energy Reach trip rates at 4 per linac and 8 per linac for all time to make things consistent.
