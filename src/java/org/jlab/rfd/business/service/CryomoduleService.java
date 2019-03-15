@@ -104,7 +104,7 @@ public class CryomoduleService {
             return null;
         }
 
-        String wrkspc = DateUtil.formatDateYMDHMS(timestamp);
+        String wrkspc = DateUtil.formatDateYMDHMS(timestamp).replace(" ", "+");
         String cmQuery = "?t=Cryomodule&p=ModuleType&out=json&ced=history&wrkspc=" + wrkspc;
 
         SortedMap<CryomoduleType, List<String>> cmTypes = new TreeMap<>();
