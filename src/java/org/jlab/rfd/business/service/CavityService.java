@@ -153,7 +153,7 @@ public class CavityService {
                         String eName = element.getJsonObject("properties").getString("EPICSName");
                         if (cgds.get(eName) == null && (!Pattern.matches("^R0..", eName))) {
                             useMAH = false;
-                            LOGGER.log(Level.INFO, "ModAnodeHarvester data missing for {0} on {1}.  MAH data will not be included in response", new Object[]{eName, timestamp});
+                            LOGGER.log(Level.FINEST, "ModAnodeHarvester data missing for {0} on {1}.  MAH data will not be included in response", new Object[]{eName, timestamp});
                         }
                     }
                 }
