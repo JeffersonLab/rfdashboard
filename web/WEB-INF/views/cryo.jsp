@@ -102,7 +102,7 @@
             </form>
         </div>
         <t:chart-widget placeholderId="cryo-linac-pressure"></t:chart-widget>
-            <hr></hr><br></br>
+        <hr/><br/>
             <button id="menu-toggle">Basic/Advanced</button>
         <t:tablesorter tableTitle="Cavity Set Point Deltas<br/>(${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-basic" filename="${requestScope.start}_${requestScope.end}_cavBasic.csv"></t:tablesorter>
         <t:tablesorter tableTitle="Cavity Set Point Deltas<br/>(${requestScope.diffStart} to ${requestScope.diffEnd})" widgetId="diff-table-advanced" filename="${requestScope.start}_${requestScope.end}_cavAdv.csv"></t:tablesorter>

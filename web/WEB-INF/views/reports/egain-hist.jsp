@@ -394,8 +394,8 @@
                                     </c:if>
                                 </c:forEach>
                             </select>
-                            <input type="checkbox" id="nl-checkbox">NL</input>
-                            <input type="checkbox" id="sl-checkbox">SL</input>
+                                <input type="checkbox" id="nl-checkbox"><label for="nl-checkbox">NL</label>
+                                <input type="checkbox" id="sl-checkbox"><label for="sl-checkbox">SL</label>
                         </div>
                     </li>
                 </ul>

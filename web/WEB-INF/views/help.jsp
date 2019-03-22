@@ -124,7 +124,7 @@
                 </c:when>
                 <c:otherwise>
                     <div class="message-box">
-                        <a href=<c:url value="/login?returnUrl=${pageContext.request.contextPath}/help"/>>Feedback Form</a>
+                        <a href="<c:url value="/login?returnUrl=${pageContext.request.contextPath}/help"/>">Feedback Form</a>
                     </div>
                 </c:otherwise>
             </c:choose>         
