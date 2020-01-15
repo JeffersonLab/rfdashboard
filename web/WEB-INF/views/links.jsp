@@ -37,7 +37,7 @@
             <h3>Tools</h3>
             <ul>
                 <li>
-                    <a href="https://opsweb.acc.jlab.org/rf/waveforms/view/rf">RF Waveform Viewer</a>
+                    <a href="https://accweb.acc.jlab.org/wfbrowser">RF Waveform Viewer</a>
                 </li>
                 <li>
                     <a href="https://accweb.acc.jlab.org/dtm/reports/fsd-summary">FSD Trip Summary</a>
