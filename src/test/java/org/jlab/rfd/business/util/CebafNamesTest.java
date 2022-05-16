@@ -39,9 +39,6 @@ public class CebafNamesTest {
     public void tearDown() {
     }
 
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
     @Test
     public void cedZoneToEnglishLinac_BasicUsage() {
         assertEquals(CebafNames.cedZoneToEnglishLinac("0L02"), LinacName.Injector);
