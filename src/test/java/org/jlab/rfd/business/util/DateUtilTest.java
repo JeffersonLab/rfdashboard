@@ -46,15 +46,15 @@ public class DateUtilTest {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         
         // Regular date range
-        assertTrue(DateUtil.getDifferenceInDays(sdf.parse("2017-01-01"), sdf.parse("2017-02-01")) == 31);
+        assertEquals(31, DateUtil.getDifferenceInDays(sdf.parse("2017-01-01"), sdf.parse("2017-02-01")));
         // Date range containing DST spring forward
-        assertTrue(DateUtil.getDifferenceInDays(sdf.parse("2017-03-01"), sdf.parse("2017-04-01")) == 31);
+        assertEquals(31, DateUtil.getDifferenceInDays(sdf.parse("2017-03-01"), sdf.parse("2017-04-01")));
         // Date range containing DST fall back
-        assertTrue(DateUtil.getDifferenceInDays(sdf.parse("2017-11-01"), sdf.parse("2017-12-01")) == 30);
+        assertEquals(30, DateUtil.getDifferenceInDays(sdf.parse("2017-11-01"), sdf.parse("2017-12-01")));
 
         // Single day range containing DST spring forward
-        assertTrue(DateUtil.getDifferenceInDays(sdf.parse("2017-03-12"), sdf.parse("2017-03-013")) == 1);
+        assertEquals(1, DateUtil.getDifferenceInDays(sdf.parse("2017-03-12"), sdf.parse("2017-03-013")));
         // Single day range containing DST fall back
-        assertTrue(DateUtil.getDifferenceInDays(sdf.parse("2017-11-05"), sdf.parse("2017-11-06")) == 1);
+        assertEquals(1, DateUtil.getDifferenceInDays(sdf.parse("2017-11-05"), sdf.parse("2017-11-06")));
     }
 }
