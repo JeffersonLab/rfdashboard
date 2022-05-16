@@ -1,0 +1,14 @@
+---
+version: '3.8'
+
+services:
+  rfd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "9990:9990"
+    volumes:
+      - ./dockerWarVolume:/opt/jboss/wildfly/standalone/deployments

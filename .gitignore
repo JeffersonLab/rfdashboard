@@ -5,3 +5,8 @@
 /dist/
 /build/
 /web/WEB-INF/glassfish-web-bak.xml
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
