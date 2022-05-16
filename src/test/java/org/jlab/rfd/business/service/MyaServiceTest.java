@@ -6,13 +6,11 @@
 package org.jlab.rfd.business.service;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import javax.json.JsonObject;
+
 import junit.framework.TestCase;
 
 /**
@@ -35,11 +33,11 @@ public class MyaServiceTest extends TestCase {
         channels.add("R12XHTPLEM");
         channels.add("R13XHTPLEM");
         Calendar cal = Calendar.getInstance();
-        cal.set(2018, 0, 1);
+        cal.set(2018, Calendar.JANUARY, 1);
         Date date = cal.getTime();
         int stepSize = 1;
         int numSteps = 1;
-        String deployment = "ops";
+        String deployment = "history";
 
         MyaService instance = new MyaService();
         String expResult = "{\"data\":[{\"date\":\"2018-01-01T00:00:00\",\"values\":[{\"R12XHTPLEM\":\"73.4588\"},{\"R13XHTPLEM\":\"86.6749\"}]}]}";
@@ -51,19 +49,19 @@ public class MyaServiceTest extends TestCase {
     /**
      * Test of mySampler method, of class MyaService.
      */
-    public void testMySampler_2arg() throws Exception {
-        System.out.println("mySampler 2args");
+    public void testMySampler_3arg() throws Exception {
+        System.out.println("mySampler 3args");
 
         List<String> channels = new ArrayList<>();
         channels.add("R12XHTPLEM");
         channels.add("R13XHTPLEM");
         Calendar cal = Calendar.getInstance();
-        cal.set(2018, 0, 1);
+        cal.set(2018, Calendar.JANUARY, 1);
         Date date = cal.getTime();
 
         MyaService instance = new MyaService();
         String expResult = "{R12XHTPLEM=73.4588, R13XHTPLEM=86.6749}";
-        String result = instance.mySampler(channels, date).toString();
+        String result = instance.mySampler(channels, date, "history").toString();
         assertEquals(expResult, result);
     }    
 }
