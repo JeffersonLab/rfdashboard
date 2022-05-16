@@ -53,7 +53,7 @@ public class CryomoduleServiceTest {
                 + "2L05=C25, 2L04=C50, 2L03=C25, 2L02=C25, 1L04=C50, 2L16=C50, 1L03=C25, 2L15=C50, 1L02=C25, "
                 + "2L14=C25, 2L13=C25, 2L12=C25, 2L11=C25, 2L10=C50, 2L09=C50, 2L08=C25, 2L07=C50, 2L06=C25";
         
-        HashMap<String, CryomoduleType> expTypes = new HashMap();
+        HashMap<String, CryomoduleType> expTypes = new HashMap<>();
         String[] pairs = expString.split(", ");
         for (String pair : pairs) {
             String[] keyValue = pair.split("=");
