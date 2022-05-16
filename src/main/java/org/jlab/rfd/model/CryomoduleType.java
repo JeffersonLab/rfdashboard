@@ -9,4 +9,4 @@ package org.jlab.rfd.model;
  *
  * @author adamc
  */
-public enum CryomoduleType {QTR, C25, C50, C100, Unknown}
+public enum CryomoduleType {P1R, QTR, C25, C50, C75, C100, Unknown}
