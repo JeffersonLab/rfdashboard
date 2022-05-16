@@ -1,6 +1,5 @@
 package org.jlab.rfd.model;
 
-import java.math.BigDecimal;
 import java.util.Map.Entry;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -35,7 +34,7 @@ public class CavityResponse extends CavityDataPoint {
     /**
      * Generate the JsonObject representation of this object
      *
-     * @return
+     * @return A JSON object describing the CavityResponse.
      */
     @Override
     public JsonObject toJson() {
