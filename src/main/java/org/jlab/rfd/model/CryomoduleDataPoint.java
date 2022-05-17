@@ -101,6 +101,18 @@ public class CryomoduleDataPoint {
             case C100:
                 energy = 100.;
                 break;
+            case C50T:
+                energy = 50.;
+                break;
+            case C75:
+                energy = 75.;
+                break;
+            case F100:
+                energy = 100.;
+                break;
+            case Booster:
+                energy = Double.NaN;
+                break;
             case QTR:
                 energy = Double.NaN;
                 break;
