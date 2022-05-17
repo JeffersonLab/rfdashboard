@@ -49,8 +49,8 @@ jlab.requestEnd = function () {
 jlab.colors = jlab.colors || {};
 // Inj, North, South, Total, Unknown
 jlab.colors.linacs = ["#FF0000", "#006400", "#273BE7", "#333333", "#ECAF2F"];
-// C100, C25, C50, Total, Unknown
-jlab.colors.cmtypes = ["#FFCE00", "#0375B4", "#007849", "#333333", "#ECAF2F"];
+// C100, C25, C50, Total, Unknown, C75, F100, C50T,
+jlab.colors.cmtypes = ["#FFCE00", "#0375B4", "#007849", "#333333", "#ECAF2F", "#34EBB1", "#EB34E5", "#239E23"];
 // Total 1050, Total 1050 No M.A.V, Total 1090, Total 1090 No M.A.V
 jlab.colors.modAnodeHarvester = ["#5e3c99", "#b2abd2", "#e66101", "#fdb863"];
 jlab.colors.energyReach = ["#666666"];
