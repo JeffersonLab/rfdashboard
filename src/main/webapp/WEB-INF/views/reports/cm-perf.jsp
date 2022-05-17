@@ -12,7 +12,6 @@
 <c:set var="title" value="Cryomodule Performance"></c:set>
 <t:reports-page title="${title}">
     <jsp:attribute name="stylesheets">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/cm-perf.css"/>
         <style>
             .accordion-header, .ui-accordion .ui-accordion-header {
                 align-content: center;
@@ -37,8 +36,6 @@
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.min.js"></script>
         <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.resize.min.js"></script>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/tablesort-widget.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cm-perf.js"></script>
         <script>
             $(document).ready(function () {
 
@@ -56,6 +53,15 @@
                             break;
                         case "C50":
                             color = jlab.colors.cmtypes[2];
+                            break;
+                        case "C75":
+                            color = jlab.colors.cmtypes[5];
+                            break;
+                        case "F100":
+                            color = jlab.colors.cmtypes[6];
+                            break;
+                        case "C50T":
+                            color = jlab.colors.cmtypes[7];
                             break;
                         default:
                             color = "#A9A9A9"; //A different type of unknown. I don't want to include in the legend and this looks different enough to avoid confusion.
@@ -84,9 +90,9 @@
                     heightStyle: "content"
                 });
 
-                var labels = ["C100", "C25", "C50"];
+                var labels = ["C100", "C25", "C50", "C75", "F100", "C50T"];
                 var jcc = jlab.colors.cmtypes;
-                var colors = [jcc[0], jcc[1], jcc[2]];
+                var colors = [jcc[0], jcc[1], jcc[2], jcc[5], jcc[6], jcc[7]];
                 jlab.util.addLegend('cm-perf-legend', colors, labels);
 
                 $(".date-field").datepicker({
