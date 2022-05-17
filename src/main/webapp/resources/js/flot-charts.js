@@ -110,7 +110,7 @@ jlab.flotCharts.drawChart = function (chartId, data, flotOptions, settings) {
         // Days / number of bars * (1-(%gap_between_datapoints/100))
         var numSeries = data.length;
         var dataPointWidth = jlab.flotCharts.getMinDataWidth(data);
-        var barWidth = dataPointWidth / numSeries * (1 - 0.2);
+        var barWidth = dataPointWidth / numSeries * (1 - 0.5);
         for (i = 0; i < data.length; i++) {
             plotData[i] = {
                 label: settings.labels[i],
