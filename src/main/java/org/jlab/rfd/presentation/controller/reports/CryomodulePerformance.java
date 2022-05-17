@@ -111,11 +111,11 @@ public class CryomodulePerformance extends HttpServlet {
                         @Override
                         public int compare(CryomoduleDataPoint c1, CryomoduleDataPoint c2) {
                             // How to handle NaN
-                            if (c1.getEGainPerformance() == Double.NaN && c2.getEGainPerformance() != Double.NaN) {
+                            if (Double.isNaN(c1.getEGainPerformance()) && !Double.isNaN(c2.getEGainPerformance())) {
                                 return -1;
-                            } else if (c1.getEGainPerformance() != Double.NaN && c2.getEGainPerformance() == Double.NaN) {
+                            } else if (!Double.isNaN(c1.getEGainPerformance()) && Double.isNaN(c2.getEGainPerformance())) {
                                 return 1;
-                            } else if (c1.getEGainPerformance() == Double.NaN && c2.getEGainPerformance() == Double.NaN) {
+                            } else if (Double.isNaN(c1.getEGainPerformance()) && Double.isNaN(c2.getEGainPerformance())) {
                                 return 0;
                             }
 
