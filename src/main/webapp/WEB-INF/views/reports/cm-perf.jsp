@@ -55,13 +55,13 @@
                             color = jlab.colors.cmtypes[2];
                             break;
                         case "C75":
-                            color = jlab.colors.cmtypes[5];
+                            color = jlab.colors.cmtypes[3];
                             break;
                         case "F100":
-                            color = jlab.colors.cmtypes[6];
+                            color = jlab.colors.cmtypes[4];
                             break;
                         case "C50T":
-                            color = jlab.colors.cmtypes[7];
+                            color = jlab.colors.cmtypes[5];
                             break;
                         default:
                             color = "#A9A9A9"; //A different type of unknown. I don't want to include in the legend and this looks different enough to avoid confusion.
