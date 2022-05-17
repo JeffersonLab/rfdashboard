@@ -78,8 +78,8 @@
         </user-data-constraint>
     </security-constraint>
     <login-config>
-        <auth-method>FORM</auth-method>
-        <realm-name>aceRealm</realm-name>
+        <auth-method>KEYCLOAK</auth-method>
+        <realm-name>jlab</realm-name>
         <form-login-config>
             <!--suppress WebProperties -->
             <form-login-page>/login</form-login-page>
