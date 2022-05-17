@@ -156,6 +156,9 @@ public class CavityDataSpan {
             byCMType.put(CryomoduleType.C100.toString(), new BigDecimal(0));
             byCMType.put(CryomoduleType.C50.toString(), new BigDecimal(0));
             byCMType.put(CryomoduleType.C25.toString(), new BigDecimal(0));
+            byCMType.put(CryomoduleType.F100.toString(), new BigDecimal(0));
+            byCMType.put(CryomoduleType.C75.toString(), new BigDecimal(0));
+            byCMType.put(CryomoduleType.C50T.toString(), new BigDecimal(0));
             total = 0;
             unknown = 0;
 
@@ -166,6 +169,9 @@ public class CavityDataSpan {
                 } else if (cDP.getModAnodeVoltage().doubleValue() > 0) {
                     if (cDP.getCryomoduleType().equals(CryomoduleType.C100)
                             || cDP.getCryomoduleType().equals(CryomoduleType.C50)
+                            || cDP.getCryomoduleType().equals(CryomoduleType.C50T)
+                            || cDP.getCryomoduleType().equals(CryomoduleType.C75)
+                            || cDP.getCryomoduleType().equals(CryomoduleType.F100)
                             || cDP.getCryomoduleType().equals(CryomoduleType.C25)) {
                         CMType = cDP.getCryomoduleType().toString();
                         byCMType.put(CMType, byCMType.get(CMType).add(new BigDecimal(1)));
@@ -206,6 +212,9 @@ public class CavityDataSpan {
             byCMType.put(CryomoduleType.C25.toString(), new BigDecimal(0));
             byCMType.put(CryomoduleType.C50.toString(), new BigDecimal(0));
             byCMType.put(CryomoduleType.C100.toString(), new BigDecimal(0));
+            byCMType.put(CryomoduleType.C50T.toString(), new BigDecimal(0));
+            byCMType.put(CryomoduleType.C75.toString(), new BigDecimal(0));
+            byCMType.put(CryomoduleType.F100.toString(), new BigDecimal(0));
             total = 0;
             unknown = 0;
 
@@ -215,6 +224,9 @@ public class CavityDataSpan {
                 } else if (cDP.getGset().doubleValue() == 0) {
                     if (cDP.getCryomoduleType().equals(CryomoduleType.C100)
                             || cDP.getCryomoduleType().equals(CryomoduleType.C50)
+                            || cDP.getCryomoduleType().equals(CryomoduleType.C50T)
+                            || cDP.getCryomoduleType().equals(CryomoduleType.C75)
+                            || cDP.getCryomoduleType().equals(CryomoduleType.F100)
                             || cDP.getCryomoduleType().equals(CryomoduleType.C25)) {
                         CMType = cDP.getCryomoduleType().toString();
                         byCMType.put(CMType, byCMType.get(CMType).add(new BigDecimal(1)));
