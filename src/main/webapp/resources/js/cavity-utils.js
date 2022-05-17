@@ -415,21 +415,33 @@ jlab.cavity.getTotalsByCMType = function (startMap, endMap) {
         QTR: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
         C25: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
         C50: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0}
+        C100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        C50T: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        C75: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        F100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        Booster: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0}
     };
     var endTotals = {
         Total: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
         QTR: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
         C25: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
         C50: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0}
+        C100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        C50T: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        C75: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        F100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        Booster: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0}
     };
     var diffTotals = {
         Total: {gset: 0, odvh: 0},
         QTR: {gset: 0, odvh: 0},
         C25: {gset: 0, odvh: 0},
         C50: {gset: 0, odvh: 0},
-        C100: {gset: 0, odvh: 0}
+        C100: {gset: 0, odvh: 0},
+        C50T: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        C75: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        F100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
+        Booster: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0}
     };
 
     startMap.forEach(function (value, key) {
