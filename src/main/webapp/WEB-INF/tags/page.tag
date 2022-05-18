@@ -1,9 +1,3 @@
-<%-- 
-    Document   : page
-    Created on : Apr 5, 2017, 9:00:09 AM
-    Author     : adamc
---%>
-
 <%@tag description="The basic RFDashboard page" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
@@ -39,12 +33,9 @@
                 <h1><span id="page-header-logo"></span><span id="page-header-text"><c:out value="${initParam.appName}" /></span></h1>
                 <div id="auth">
                     <c:choose>
-                        <c:when test="${fn:startsWith(currentPath, '/login')}">
-                            <%-- Don't show login/logout when on login page itself! --%>
-                        </c:when>
                         <c:when test="${pageContext.request.userPrincipal ne null}">
                             <div id="username-container">
-                                <c:out value="${pageContext.request.userPrincipal}"/>
+                                <c:out value="${requestScope.simpleRemoteUser}"/>
                             </div>
                             <form id="logout-form" action="${pageContext.request.contextPath}/logout" method="post">
                                 <button type="submit" value="Logout">Logout</button>
@@ -52,14 +43,17 @@
                             </form>
                         </c:when>
                         <c:otherwise>
-                            <c:url value="/login" var="loginUrl">
+                            <c:url value="/sso" var="loginUrl">
                                 <c:param name="returnUrl" value="${domainRelativeReturnUrl}"/>
                             </c:url>
-                            <a id="login-link" href="${loginUrl}">Login</a>
+                            <c:url value="/sso" var="suUrl">
+                                <c:param name="kc_idp_hint" value="kc_idp_hint=ace-su-keycloak-oidc"/>
+                                <c:param name="returnUrl" value="${domainRelativeReturnUrl}"/>
+                            </c:url>
+                            <a id="login-link" href="${loginUrl}">Login</a> (<a id="SU" href="${suUrl}">SU</a>)
                         </c:otherwise>
                     </c:choose>
                 </div>
-
                 <nav id="primary-nav">
                     <ul>
                         <li ${'/energy-reach' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/energy-reach?start=${pageStart}&end=${pageEnd}">Energy Reach</a></li>

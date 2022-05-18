@@ -65,26 +65,24 @@
         <tracking-mode>COOKIE</tracking-mode>
     </session-config>
     <security-constraint>
-        <display-name>Enforce SSL on login</display-name>
+        <display-name>Enforce Authenticated on SSO Redirect Page</display-name>
         <web-resource-collection>
-            <web-resource-name>Secure Login</web-resource-name>
-            <description/>
-            <url-pattern>/login</url-pattern>
-            <url-pattern>/login/*</url-pattern>
+            <web-resource-name>SSO Page</web-resource-name>
+            <url-pattern>/sso</url-pattern>
         </web-resource-collection>
+        <auth-constraint>
+            <role-name>ipausers</role-name>
+        </auth-constraint>
         <user-data-constraint>
-            <description/>
             <transport-guarantee>CONFIDENTIAL</transport-guarantee>
         </user-data-constraint>
     </security-constraint>
     <login-config>
         <auth-method>KEYCLOAK</auth-method>
         <realm-name>jlab</realm-name>
-        <form-login-config>
-            <!--suppress WebProperties -->
-            <form-login-page>/login</form-login-page>
-            <!--suppress WebProperties -->
-            <form-error-page>/login</form-error-page>
-        </form-login-config>
     </login-config>
+    <security-role>
+        <description>Every ACE user is a member of ipausers.</description>
+        <role-name>ipausers</role-name>
+    </security-role>
 </web-app>
