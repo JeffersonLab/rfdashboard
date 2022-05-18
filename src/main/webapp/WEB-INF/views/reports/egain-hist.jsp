@@ -224,11 +224,71 @@
                                 break;
                         }
                         break;
+                    case "C50T":
+                        barColor = jlab.colors.cmtypes[5];
+                        switch (by) {
+                            case "cavity":
+                                ymax = 15;
+                                ymin = 0;
+                                nominal = 6.25;
+                                break;
+                            case "zone":
+                                ymax = 75;
+                                ymin = 0;
+                                nominal = 50;
+                                break;
+                            case "cmtype":
+                                ymax = null;
+                                ymin = null;
+                                nominal = -1;
+                                break;
+                        }
+                        break;
+                    case "C75":
+                        barColor = jlab.colors.cmtypes[3];
+                        switch (by) {
+                            case "cavity":
+                                ymax = 13;
+                                ymin = 0;
+                                nominal = 9.375;
+                                break;
+                            case "zone":
+                                ymax = 90;
+                                ymin = 0;
+                                nominal = 75;
+                                break;
+                            case "cmtype":
+                                ymax = null;
+                                ymin = null;
+                                nominal = -1;
+                                break;
+                        }
+                        break;
+                    case "F100":
+                        barColor = jlab.colors.cmtypes[4];
+                        switch (by) {
+                            case "cavity":
+                                ymax = 20;
+                                ymin = 0;
+                                nominal = 12.5;
+                                break;
+                            case "zone":
+                                ymax = 125;
+                                ymin = 0;
+                                nominal = 100;
+                                break;
+                            case "cmtype":
+                                ymax = null;
+                                ymin = null;
+                                nominal = -1;
+                                break;
+                        }
+                        break;
                     default:
                         ymax = 125;
                         ymin = 0;
                         nominal = 0;
-                        barColor = jlab.colors.cmtypes[4];
+                        barColor = jlab.colors.cmtypes[7];
                 }
 
                 // Setup the title as a drilldown link if we're showing a cmtyp or zone chart.  Can't drilldown more than the cavity.
@@ -303,9 +363,9 @@
                 $(".multi-select").select2({width: "290px", closeOnSelect: false});
                 $("#by-selector").select2({width: "290px"});
 
-                var labels = ["C100", "C25", "C50"];
+                var labels = ["C100", "C25", "C50", "C75", "F100", "C50T"];
                 var jcc = jlab.colors.cmtypes;
-                var colors = [jcc[0], jcc[1], jcc[2]];
+                var colors = [jcc[0], jcc[1], jcc[2], jcc[3], jcc[4], jcc[5]];
                 jlab.util.addLegend('cm-legend', colors, labels);
 
                 var massSelector = function (checkbox, optionText) {
