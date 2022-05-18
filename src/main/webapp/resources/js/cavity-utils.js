@@ -21,7 +21,7 @@ jlab.cavity.getCavityData = function (settings) {
         exitFunc("Error: Settings object required");
     }
 
-    // Required alwyas
+    // Required always
     if (typeof settings.success !== "function") {
         exitFunc("Error: settings.success function required");
     } else {
