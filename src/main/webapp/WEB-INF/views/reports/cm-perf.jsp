@@ -92,7 +92,7 @@
 
                 var labels = ["C100", "C25", "C50", "C75", "F100", "C50T"];
                 var jcc = jlab.colors.cmtypes;
-                var colors = [jcc[0], jcc[1], jcc[2], jcc[5], jcc[6], jcc[7]];
+                var colors = [jcc[0], jcc[1], jcc[2], jcc[3], jcc[4], jcc[5]];
                 jlab.util.addLegend('cm-perf-legend', colors, labels);
 
                 $(".date-field").datepicker({
