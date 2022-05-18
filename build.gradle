@@ -15,7 +15,7 @@ description "RF Dashboard app for CEBAF"
 group 'org.jlab'
 version '1.9.0'
 ext.releaseDate = 'May 18 2020'
-ext.resourceVersion = '39'
+ext.resourceNumber = '39'
 
 repositories {
     // Use Maven Central for resolving dependencies.
@@ -44,7 +44,7 @@ war {
             String line -> line.replaceAll('@RELEASE_DATE@', releaseDate)
         }
         filter {
-            String line -> line.replaceAll('@RESOURCE_VERSION@', resourceVersion)
+            String line -> line.replaceAll('@RESOURCE_NUMBER@', resourceNumber)
         }
     }
 }
