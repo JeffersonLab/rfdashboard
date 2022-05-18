@@ -110,7 +110,7 @@ public class MyaService {
         if ( response.containsKey("error") ) {
             throw new IOException("Mya Error: " +  response.getString("error"));
         }
-        
+
         JsonArray data = response.getJsonArray("data");
         JsonArray values = data.getJsonObject(0).getJsonArray("values");
         
