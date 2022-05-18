@@ -58,10 +58,3 @@ test{
         exceptionFormat = 'full'
     }
 }
-
-tasks.war.doLast {
-    copy {
-        from war
-        into 'dockerWarVolume'
-    }
-}
