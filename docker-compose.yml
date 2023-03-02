@@ -1,0 +1,44 @@
+services:
+  oracle:
+    extends:
+      file: deps.yml
+      service: oracle
+
+  keycloak:
+    extends:
+      file: deps.yml
+      service: keycloak
+
+  puppet:
+    extends:
+      file: deps.yml
+      service: puppet
+
+  mailhog:
+    extends:
+      file: deps.yml
+      service: mailhog
+
+  rfd:
+    hostname: rfd
+    container_name: rfd
+    ports:
+      - "8443:8443"
+      - "8080:8080"
+      - "9990:9990"
+    environment:
+      RFD_FEEDBACK_SENDER_ADDRESS: 'admin@example.com'
+      RFD_FEEDBACK_TO_ADDRESS_CSV: 'user1@example.com,user2@example.com'
+      RFD_CONTENT_CONTACT: 'bob@example.com'
+      RFD_TECHNICAL_CONTACT: 'larry@example.com'
+      KEYCLOAK_REALM: 'test-realm'
+      KEYCLOAK_RESOURCE: 'rfd'
+      KEYCLOAK_SECRET: 'yHi6W2raPmLvPXoxqMA7VWbLAA2WN0eB'
+      KEYCLOAK_SERVER_URL: 'http://keycloak:8080'
+      LOGBOOK_SERVER: 'elog'
+      ORACLE_DATASOURCE: 'rfgradteam_rw'
+      ORACLE_SERVER: 'oracle:1521'
+      ORACLE_USER: 'rfgradteam_rw'
+      ORACLE_PASS: 'rfgradteam_rw'
+      ORACLE_SERVICE: 'xepdb1'
+      PUPPET_SHOW_SERVER: 'puppet:3000'
