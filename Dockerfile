@@ -20,5 +20,5 @@ RUN cd /app && gradle build -x test --no-watch-fs $OPTIONAL_CERT_ARG
 ############ Stage 1
 FROM ${RUN_IMAGE} as runner
 COPY --from=builder /app/docker/app/app-setup.env /
-run /app-setup.sh /app-setup.env
+RUN /app-setup.sh /app-setup.env
 COPY --from=builder /app/build/libs/* /opt/jboss/wildfly/standalone/deployments
