@@ -1,9 +1,16 @@
---
--- Run as System after mod_anode_harvester_* tables and ma_harvester_*_seq have been created
---
+ALTER SESSION SET CONTAINER=XEPDB1;
 
---
+-- Create users with read only and read/write permissions on the rfgradteam_owner schema
+
 -- rfgradteam_read
+-- UPDATE THIS PASSWORD
+CREATE USER rfgradteam_read IDENTIFIED BY rfgradteam_read;
+GRANT CREATE SESSION TO rfgradteam_read;
+GRANT SELECT ON rfgradteam_owner.lem_scan TO rfgradteam_read;
+GRANT CREATE SYNONYM TO rfgradteam_read;
+
+CREATE OR REPLACE SYNONYM rfgradteam_read.lem_scan
+  FOR rfgradteam_owner.lem_scan;
 
 -- Add additional reader permissions to for the new mod_anode_harvester_* tables
 GRANT SELECT ON rfgradteam_owner.mod_anode_harvester_scan TO rfgradteam_read;
@@ -16,10 +23,21 @@ CREATE OR REPLACE SYNONYM rfgradteam_read.mod_anode_harvester_linac_scan FOR rfg
 CREATE OR REPLACE SYNONYM rfgradteam_read.mod_anode_harvester_gset FOR rfgradteam_owner.mod_anode_harvester_gset;
 
 
---
 -- rfgradteam_rw
+-- UPDATE THIS PASSWORD
+CREATE USER rfgradteam_rw IDENTIFIED BY rfgradteam_rw;
+GRANT CREATE SESSION TO rfgradteam_rw;
+GRANT SELECT ON rfgradteam_owner.lem_scan TO rfgradteam_rw;
+GRANT INSERT ON rfgradteam_owner.lem_scan TO rfgradteam_rw;
+GRANT CREATE SYNONYM TO rfgradteam_rw;
+GRANT SELECT ON rfgradteam_owner.lem_scan_seq TO rfgradteam_rw;
 
--- Add additional read/write permissions to for the new mod_anode_harvester_* tables
+CREATE OR REPLACE SYNONYM rfgradteam_rw.lem_scan
+  FOR rfgradteam_owner.lem_scan;
+CREATE OR REPLACE SYNONYM rfgradteam_rw.lem_scan_seq
+  FOR rfgradteam_owner.lem_scan_seq;
+
+    -- Add additional read/write permissions to for the new mod_anode_harvester_* tables
 GRANT SELECT ON rfgradteam_owner.mod_anode_harvester_scan TO rfgradteam_rw;
 GRANT INSERT ON rfgradteam_owner.mod_anode_harvester_scan TO rfgradteam_rw;
 GRANT SELECT ON rfgradteam_owner.mod_anode_harvester_linac_scan TO rfgradteam_rw;
