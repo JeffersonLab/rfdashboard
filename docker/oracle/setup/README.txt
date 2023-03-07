@@ -4,6 +4,9 @@ These scripts create the application database schema for the rfdashboard app.  T
 Make sure to change passwords for the users prior to production deployment.
 ##############################################################################
 
+0. For production, comment out the 'ALTER SESSION SET CONTAINER=XEPDB1;' line.  It is used by the oracle docker image.
+   Update the passwords set in the SQL files to match your users in the production database.
+
 1. Create the main user/schema, rfgradteam_owner.  This contains all of the application tables and this user has
    unlimited permissions to these tables
 
