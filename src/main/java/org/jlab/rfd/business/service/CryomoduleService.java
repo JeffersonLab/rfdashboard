@@ -27,6 +27,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import org.jlab.rfd.business.util.CebafNames;
 import org.jlab.rfd.business.util.DateUtil;
+import org.jlab.rfd.config.AppConfig;
 import org.jlab.rfd.model.CavityResponse;
 import org.jlab.rfd.model.CryomoduleDataPoint;
 import org.jlab.rfd.model.CryomoduleType;
@@ -235,10 +236,14 @@ public class CryomoduleService {
             Double heat = null;
             if (heats != null) {
                 String pv = epicsName + LEM_PV_HEAT_SUFFIX;
-                try {
-                    heat = Double.parseDouble(heats.get(pv));
-                } catch (NumberFormatException e) {
-                    LOGGER.log(Level.INFO, "Error parsing number from mySampler response for {0}={1}", new Object[]{pv, heats.get(pv)});
+                if (heats.containsKey(pv)) {
+                    try {
+                        heat = Double.parseDouble(heats.get(pv));
+                    } catch (NumberFormatException e) {
+                        LOGGER.log(Level.INFO, "Error parsing number from mySampler response for {0}={1}", new Object[]{pv, heats.get(pv)});
+                    }
+                } else {
+                    LOGGER.log(Level.INFO, "mySampler did not return response for " + pv);
                 }
             }
             String name = CebafNames.epicsZoneToCedZone(epicsName);
