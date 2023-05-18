@@ -195,7 +195,6 @@ public class EnergyReach extends HttpServlet {
             LOGGER.log(Level.WARNING, "Error querying LEM scan database", ex);
             throw new ServletException("Error querying LEM scan database");
         }
-        
         // This is a little hacky, but there was already lots of client code written to manage the JSON objects
         request.setAttribute("energyReach", energyReach == null ? "undefined" : energyReach.toString());
         request.setAttribute("dayScan", dayScan == null ? "undefined" : dayScan.toString());
@@ -207,7 +206,7 @@ public class EnergyReach extends HttpServlet {
         dates.add(diffEnd);
         try {
             cavityData = cs.getCavityDataSpan(dates).toJson();
-        } catch (SQLException | ParseException ex) {
+        } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Error querying cavity datasources", ex);
             throw new ServletException("Error querying cavity datasources");
         }
