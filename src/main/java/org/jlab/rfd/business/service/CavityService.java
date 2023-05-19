@@ -27,6 +27,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import org.jlab.rfd.business.filter.CommentFilter;
 import org.jlab.rfd.business.util.DateUtil;
+import org.jlab.rfd.config.AppConfig;
 import org.jlab.rfd.model.CavityDataPoint;
 import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.CavityResponse;
@@ -57,13 +58,7 @@ public class CavityService {
         URL url = new URL(urlString);
         InputStream is = url.openStream();
         try (JsonReader reader = Json.createReader(is)) {
-            JsonObject json = reader.readObject();
-            String status = json.getString("stat");
-            if (!"ok".equals(status)) {
-                throw new IOException("unable to lookup Cavity Data from CED: response stat: " + status);
-            }
-            JsonObject inventory = json.getJsonObject("Inventory");
-            JsonArray elements = inventory.getJsonArray("elements");
+            JsonArray elements = CEDUtils.processCEDResponse(reader);
             for (JsonObject elem : elements.getValuesAs(JsonObject.class)) {
                 names.add(elem.getString("name"));
             }
@@ -103,13 +98,7 @@ public class CavityService {
             URL url = new URL(CED_INVENTORY_URL + cavityQuery);
             InputStream in = url.openStream();
             try (JsonReader reader = Json.createReader(in)) {
-                JsonObject json = reader.readObject();
-                String status = json.getString("stat");
-                if (!"ok".equals(status)) {
-                    throw new IOException("unable to lookup Cavity Data from CED: response stat: " + status);
-                }
-                JsonObject inventory = json.getJsonObject("Inventory");
-                JsonArray elements = inventory.getJsonArray("elements");
+                JsonArray elements = CEDUtils.processCEDResponse(reader);
                 CryomoduleType cmType;
 
                 // Construct a map of ced names to epics names
