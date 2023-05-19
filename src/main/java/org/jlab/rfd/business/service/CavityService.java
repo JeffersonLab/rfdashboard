@@ -46,7 +46,7 @@ public class CavityService {
 
     private static final Logger LOGGER = Logger.getLogger(CavityService.class.getName());
     // Append the wrkspc argument to the end of this string
-    public static final String CED_INVENTORY_URL = "http://ced.acc.jlab.org/inventory";
+    public static final String CED_INVENTORY_URL = AppConfig.getAppConfig().getCEDUrl() + "/inventory";
 
     // Caches getCavityData output.  The cached HashSets should be inserted with Collecitons.unmodifiableMap() to be safe.
     private static final ConcurrentHashMap<String, Set<CavityDataPoint>> CAVITY_CACHE = new ConcurrentHashMap<>();
