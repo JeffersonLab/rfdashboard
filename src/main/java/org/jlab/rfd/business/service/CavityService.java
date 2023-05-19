@@ -48,7 +48,7 @@ public class CavityService {
     // Append the wrkspc argument to the end of this string
     public static final String CED_INVENTORY_URL = AppConfig.getAppConfig().getCEDUrl() + "/inventory";
 
-    // Caches getCavityData output.  The cached HashSets should be inserted with Collecitons.unmodifiableMap() to be safe.
+    // Caches getCavityData output.  The cached HashSets should be inserted with Collections.unmodifiableMap() to be safe.
     private static final ConcurrentHashMap<String, Set<CavityDataPoint>> CAVITY_CACHE = new ConcurrentHashMap<>();
 
     public SortedSet<String> getCavityNames() throws IOException {
@@ -83,12 +83,11 @@ public class CavityService {
         String cavityQuery = "?t=CryoCavity&p=PhaseRMS,Q0,Qexternal,MaxGSET,OpsGsetMax,TripOffset,TripSlope,Length,"
                 + "Bypassed,TunerBad,EPICSName,ModAnode,Housed_by&out=json&ced=history&wrkspc=" + wrkspc;
 
-        // Chech the cache.  If not there, run the query, build the results, check that somebody else hasn't already inserted this
+        // Check the cache.  If not there, run the query, build the results, check that somebody else hasn't already inserted this
         // into the cache, then add the query result to the cache.
         if (CAVITY_CACHE.containsKey(cavityQuery)) {
             Set<CavityDataPoint> temp = CAVITY_CACHE.get(cavityQuery);
-            Set<CavityResponse> out = this.createCommentResponseSet(temp, comments);
-            return out;
+            return this.createCommentResponseSet(temp, comments);
         } else {
 
             Map<String, CryomoduleType> cmTypes = new CryomoduleService().getCryoModuleTypes(timestamp);
@@ -133,7 +132,7 @@ public class CavityService {
                 // We either need a whole data set or throw an error.  Except that we expect this behavior for injector cavities
                 // since ModAnodeHarvester only runs against the North and South Linacs.  It's also possible (but should be
                 // checked for in the data harvester) that the database has an incomplete set of cavities.  We only want to include
-                // the data if all of the cavities are present.
+                // the data if all cavities are present.
                 boolean useMAH = true;
                 if (cgds == null) {
                     useMAH = false;
@@ -195,7 +194,7 @@ public class CavityService {
                         throw new IOException("Cryocavity '" + cavityName + "' missing EPICSName in ced history '" + wrkspc);
                     }
 
-                    // Get all of the CED required parameters.  These should always be returned since they are "required" fields
+                    // Get all CED required parameters.  These should always be returned since they are "required" fields
                     q0 = properties.getString("Q0");
                     qExternal = properties.getString("Qexternal");
                     maxGset = new BigDecimal(properties.getString("MaxGSET"));
@@ -234,9 +233,9 @@ public class CavityService {
      *
      * @param timestamp Timestamp to look up data for
      * @return A Map of cavity names to cavity response objects
-     * @throws IOException
-     * @throws ParseException
-     * @throws SQLException
+     * @throws IOException On non-ok CED server response
+     * @throws ParseException On error parsing JSON responses
+     * @throws SQLException On database error
      */
     public Map<String, CavityResponse> getCavityDataMap(Date timestamp) throws IOException, ParseException, SQLException {
         Set<CavityResponse> crs = getCavityData(timestamp);
@@ -258,7 +257,7 @@ public class CavityService {
      * @param cavities The CavityDataPoints for a given date
      * @param comments The comments split by topic (getCommentsByTopic) up until
      * the end of the requested date
-     * @return
+     * @return A set of CavityResponse objects
      */
     private Set<CavityResponse> createCommentResponseSet(Set<CavityDataPoint> cavities, Map<String, SortedSet<Comment>> comments) {
         Set<CavityResponse> cr = new HashSet<>();
