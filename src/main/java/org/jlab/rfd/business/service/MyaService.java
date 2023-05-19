@@ -117,7 +117,7 @@ public class MyaService {
             JsonObject t = chan.getJsonObject(pv).getJsonArray("data").get(0).asJsonObject();
 
             if (v != null) {
-                out.put(pv, v.getJsonNumber("v").bigIntegerValue().toString());
+                out.put(pv, v.getJsonNumber("v").bigDecimalValue().toString());
             } else if (t != null) {
                 out.put(pv, t.getString("t"));
             }
