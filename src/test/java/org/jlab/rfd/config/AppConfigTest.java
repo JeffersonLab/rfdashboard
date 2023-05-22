@@ -26,19 +26,19 @@ public class AppConfigTest {
     @Test
     public void basicUsage(){
         AppConfig config = AppConfig.getAppConfig();
-        assertEquals(config.getCEDUrl(), "test_ced_file");
-        assertEquals(config.getMYAUrl(), "test_mya_file");
+        assertEquals(config.getCEDUrl(), "http://localhost:8080/RFDashboard");
+        assertEquals(config.getMYAUrl(), "http://localhost:8080/RFDashboard");
     }
     @Test
-    public void getCEDUrl() {
-        String exp = "test_ced_file";
+    public void getCEDUrl_File() {
+        String exp = "http://localhost:8080/RFDashboard";
         String result = AppConfig.getAppConfig(null, new MockEnvironment(), true).getCEDUrl();
         assertEquals(exp, result);
     }
 
     @Test
-    public void getMYAUrl() {
-        String exp = "test_mya_file";
+    public void getMYAUrl_File() {
+        String exp = "http://localhost:8080/RFDashboard";
         String result = AppConfig.getAppConfig(null, new MockEnvironment(), true).getMYAUrl();
         assertEquals(exp, result);
     }
