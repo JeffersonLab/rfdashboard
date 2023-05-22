@@ -40,7 +40,7 @@ public class MyaServiceTest extends TestCase {
         String deployment = "history";
 
         MyaService instance = new MyaService();
-        String expResult = "{\"data\":[{\"date\":\"2018-01-01T00:00:00\",\"values\":[{\"R12XHTPLEM\":\"73.4588\"},{\"R13XHTPLEM\":\"86.6749\"}]}]}";
+        String expResult = "{\"channels\":{\"R12XHTPLEM\":{\"metadata\":{\"name\":\"R12XHTPLEM\",\"datatype\":\"DBR_DOUBLE\",\"datasize\":1,\"datahost\":\"opsmya8\",\"ioc\":\"iocnl1\",\"active\":true},\"data\":[{\"d\":\"2023-01-01T00:00:00\",\"v\":72.117897}],\"returnCount\":1},\"R13XHTPLEM\":{\"metadata\":{\"name\":\"R13XHTPLEM\",\"datatype\":\"DBR_DOUBLE\",\"datasize\":1,\"datahost\":\"opsmya13\",\"ioc\":\"iocnl1\",\"active\":true},\"data\":[{\"d\":\"2023-01-01T00:00:00\",\"v\":66.913399}],\"returnCount\":1}}}";
         String result = instance.mySampler(channels, date, stepSize, numSteps, deployment).toString();
         
         assertEquals(expResult, result);
@@ -60,7 +60,7 @@ public class MyaServiceTest extends TestCase {
         Date date = cal.getTime();
 
         MyaService instance = new MyaService();
-        String expResult = "{R12XHTPLEM=73.4588, R13XHTPLEM=86.6749}";
+        String expResult = "{R12XHTPLEM=72.117897, R13XHTPLEM=66.913399}";
         String result = instance.mySampler(channels, date, "history").toString();
         assertEquals(expResult, result);
     }    
