@@ -6,7 +6,6 @@
 package org.jlab.rfd.presentation.controller.reports;
 
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -140,7 +139,7 @@ public class CommentHistory extends HttpServlet {
         try {
             comments = cs.getComments(filter, limit, offset);
             validTopics = cs.getValidTopics();
-            authors = cs.getCurrnetAuthors();
+            authors = cs.getCurrentAuthors();
             totalRecords = cs.countList(filter);
 
         } catch (SQLException | ParseException ex) {
