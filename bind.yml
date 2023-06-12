@@ -19,10 +19,10 @@ services:
       file: build.yml
       service: mailhog
 
-  bam:
+  rfd:
     extends:
       file: build.yml
-      service: bam
+      service: rfd
     volumes:
       - ./docker/wildfly/standalone/configuration/:/opt/jboss/wildfly/standalone/configuration/
       - ./docker/wildfly/standalone/deployments/:/opt/jboss/wildfly/standalone/deployments/
