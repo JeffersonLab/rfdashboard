@@ -32,7 +32,7 @@ services:
       RFD_CONTENT_CONTACT: 'bob@example.com'
       RFD_TECHNICAL_CONTACT: 'larry@example.com'
       KEYCLOAK_REALM: 'test-realm'
-      KEYCLOAK_RESOURCE: 'rfd'
+      KEYCLOAK_RESOURCE: 'RFDashboard'
       KEYCLOAK_SECRET: 'yHi6W2raPmLvPXoxqMA7VWbLAA2WN0eB'
       KEYCLOAK_SERVER_URL: 'http://keycloak:8080'
       LOGBOOK_SERVER: 'elog'
