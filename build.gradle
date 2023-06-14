@@ -30,7 +30,7 @@ repositories {
 
 dependencies {
     // No matter what smoothness weblib MUST be included in WAR (https://github.com/JeffersonLab/smoothness/issues/4)
-    implementation 'org.jlab:smoothness-weblib:3.12.3'
+    implementation 'org.jlab:smoothness-weblib:4.3.0'
     // This dependency is used by the application.
     implementation 'org.tuckey:urlrewritefilter:4.0.4'
     // Use JUnit test framework.
