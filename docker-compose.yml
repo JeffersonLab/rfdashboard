@@ -42,3 +42,5 @@ services:
       ORACLE_PASS: 'rfgradteam_rw'
       ORACLE_SERVICE: 'xepdb1'
       PUPPET_SHOW_SERVER: 'puppet:3000'
+      BACKEND_SERVER_URL: 'http://rfd:8080'
+      FRONTEND_SERVER_URL: 'https://localhost:8443'
