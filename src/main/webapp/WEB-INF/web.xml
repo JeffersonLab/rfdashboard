@@ -71,15 +71,15 @@
             <url-pattern>/sso</url-pattern>
         </web-resource-collection>
         <auth-constraint>
-            <role-name>ipausers</role-name>
+            <!-- ** = any authenticated user.  See https://javaee.github.io/servlet-spec/downloads/servlet-4.0/servlet-4_0_FINAL.pdf section 13.8 -->
+            <role-name>**</role-name>
         </auth-constraint>
         <user-data-constraint>
             <transport-guarantee>CONFIDENTIAL</transport-guarantee>
         </user-data-constraint>
     </security-constraint>
     <login-config>
-        <auth-method>KEYCLOAK</auth-method>
-        <realm-name>jlab</realm-name>
+        <auth-method>OIDC</auth-method>
     </login-config>
     <security-role>
         <description>Every ACE user is a member of ipausers.</description>
