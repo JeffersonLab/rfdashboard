@@ -16,9 +16,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import javax.json.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -168,7 +166,15 @@ public class LemScanAjax extends HttpServlet {
                 switch (out) {
                     case "flot": {
                         SortedMap<Date, SortedMap<String, BigDecimal>> reach = span.getEnergyReach();
-                        JsonObject json = DataFormatter.toFlotFromDateMap(reach);
+                        JsonObject json;
+                        if (reach == null) {
+                            JsonObjectBuilder job = Json.createObjectBuilder();
+                            job.add("labels", Json.createArrayBuilder().add("Reach").build());
+                            job.add("data", Json.createArrayBuilder().build());
+                            json = job.build();
+                        } else {
+                            json = DataFormatter.toFlotFromDateMap(reach);
+                        }
                         response.setContentType("application/json");
                         pw.write(json.toString());
                         pw.close();
