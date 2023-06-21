@@ -50,9 +50,6 @@ war {
         filter {
             String line -> line.replaceAll('@RELEASE_DATE@', releaseDate)
         }
-        filter {
-            String line -> line.replaceAll('@RESOURCE_NUMBER@', resourceNumber)
-        }
     }
 }
 
