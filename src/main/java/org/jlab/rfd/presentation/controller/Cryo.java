@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jlab.rfd.business.service.CavityService;
+import org.jlab.rfd.config.AppConfig;
 import org.jlab.rfd.presentation.util.ParamChecker;
 
 /**
@@ -177,6 +178,7 @@ public class Cryo extends HttpServlet {
         }
 
         request.setAttribute("cavityData", cavityData);
+        request.setAttribute("myaURL", AppConfig.getAppConfig().getMYAUrl());
 
         request.getRequestDispatcher("/WEB-INF/views/cryo.jsp").forward(request, response);
     }
