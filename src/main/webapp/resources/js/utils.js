@@ -187,6 +187,18 @@ jlab.daysBetweenDates = function (d1, d2) {
     return (d2 - d1) / millisPerDay;
 };
 
+
+// This returns a date string (YYYY-mm-dd that is the end date adjusted to the week boundary that occurs after,
+// but nearest to end.
+jlab.adjustEndToWeekBoundary = function(date1, date2) {
+    var days = jlab.daysBetweenDates(date1, date2);
+    var d2 = new Date(date2);
+
+    // Set the date to whatever it was plus the number needed to hit the next week boundary (7 day grouping).
+    d2.setDate(d2.getDate() + 7 - (days % 7));
+    return jlab.formatDatePretty(d2);
+};
+
 // This does a decent job of parsing out argument names of a function.
 // It gets tripped up by things like defualt values using '()' (e.g. a  = 1 / (5*7)),
 // but I don't tend to do those things.
@@ -254,6 +266,20 @@ jlab.formatTimestampPretty = function (date) {
             ':' + pad(this.getMinutes()) +
             ':' + pad(this.getSeconds());
 };
+
+
+jlab.formatDatePretty = function(date) {
+    function pad(number) {
+        if (number < 10) {
+            return '0' + number;
+        }
+        return number;
+    }
+
+    return date.getFullYear() +
+        '-' + pad(date.getMonth() + 1) +
+        '-' + pad(date.getDate());
+}
 
 /*
  * Generates a simple HTML table from a 2D arary.  Uses the first row as headers.
