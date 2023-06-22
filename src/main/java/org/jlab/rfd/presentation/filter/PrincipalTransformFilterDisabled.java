@@ -9,8 +9,9 @@ import java.io.IOException;
  * This filter stores a transformed version of the remoteUser so that JSPs have a nicer version to display.
  * @author adamc
  */
-@WebFilter(filterName = "PrincipalTransformFilter", urlPatterns = {"/*"}, dispatcherTypes = {DispatcherType.REQUEST})
-public class PrincipalTransformFilter implements Filter {
+//@WebFilter(filterName = "PrincipalTransformFilter", urlPatterns = {"/*"}, dispatcherTypes = {DispatcherType.REQUEST})
+//@WebFilter(filterName = "PrincipalTransformFilterDisabled", urlPatterns = {"/disabled-*"}, dispatcherTypes = {DispatcherType.REQUEST})
+public class PrincipalTransformFilterDisabled implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
