@@ -109,7 +109,7 @@
                 </c:when>
                 <c:otherwise>
                     <div class="message-box">
-                        <a href="<c:url value="/login"><c:param name="returnUrl" value="${domainRelativeReturnUrl}"/></c:url>">Comment Form</a>
+                        <a href="<c:url value="/sso"><c:param name="returnUrl" value="${domainRelativeReturnUrl}"/></c:url>">Comment Form</a>
                     </div>
                 </c:otherwise>
             </c:choose>
