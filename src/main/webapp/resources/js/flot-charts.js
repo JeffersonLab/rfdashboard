@@ -337,7 +337,7 @@ jlab.flotCharts.addLegend = function (chartId, colors, labels) {
     if (colors.length !== labels.length) {
         console.log("Error: unequal number of colors and labels");
     }
-    for (var i = 0; i < colors.length; i++) {
+    for (var i = 0; i < labels.length; i++) {
         legendString += '<tr><td><div class=color-box style="background-color: ' + colors[i] + ';"></div></td><td>' + labels[i] + '</td></tr>';
     }
     legendString += '</table></div>';
