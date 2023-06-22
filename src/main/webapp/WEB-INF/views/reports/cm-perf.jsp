@@ -43,23 +43,21 @@
 
                     var color;
                     switch (cmType) {
+                        // J. Benesch requested this grouping for one-off CM types
+                        case "F100":
                         case "C100":
                             color = jlab.colors.cmtypes[0];
                             break;
                         case "C25":
                             color = jlab.colors.cmtypes[1];
                             break;
+                        // J. Benesch requested this grouping for one-off CM types
+                        case "C50T":
                         case "C50":
                             color = jlab.colors.cmtypes[2];
                             break;
                         case "C75":
                             color = jlab.colors.cmtypes[3];
-                            break;
-                        case "F100":
-                            color = jlab.colors.cmtypes[4];
-                            break;
-                        case "C50T":
-                            color = jlab.colors.cmtypes[5];
                             break;
                         default:
                             color = "#A9A9A9"; //A different type of unknown. I don't want to include in the legend and this looks different enough to avoid confusion.
@@ -88,10 +86,11 @@
                     heightStyle: "content"
                 });
 
-                var labels = ["C100", "C25", "C50", "C75", "F100", "C50T"];
+                // F100 and C50T are lumped in with C100 and C50, respectively.
+                var labels = ["C100", "C25", "C50", "C75"];
                 var jcc = jlab.colors.cmtypes;
-                var colors = [jcc[0], jcc[1], jcc[2], jcc[3], jcc[4], jcc[5]];
-                jlab.util.addLegend('cm-perf-legend', colors, labels);
+                var colors = [jcc[0], jcc[1], jcc[2], jcc[3]];
+                jlab.util.addLegend('cm-perf-legend', colors, labels, true);
 
                 $(".date-field").datepicker({
                     dateFormat: "yy-mm-dd",
