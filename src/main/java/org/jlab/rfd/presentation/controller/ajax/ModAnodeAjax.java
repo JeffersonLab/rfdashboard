@@ -93,7 +93,7 @@ public class ModAnodeAjax extends HttpServlet {
                 factoredData = span.getModAnodeCountByLinac();
                 break;
             case "cmtype":
-                factoredData = span.getModAnodeCountByCMType();
+                factoredData = span.getModAnodeCountByCMType(null);
                 break;
             default:
                 factoredData = span.getModAnodeCountByLinac();

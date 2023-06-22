@@ -7,13 +7,7 @@ package org.jlab.rfd.model;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -137,32 +131,44 @@ public class CavityDataSpan {
 
             }
             byLinac.put(LinacName.Total.toString(), new BigDecimal(total));
-            byLinac.put("Unknown", new BigDecimal(unknown));
+            if (unknown > 0) {
+                byLinac.put("Unknown", new BigDecimal(unknown));
+            }
             data.put(date, byLinac);
         }
         return data;
     }
 
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getModAnodeCountByCMType() {
+    public SortedMap<Date, SortedMap<String, BigDecimal>> getModAnodeCountByCMType(Map<String, String> typeMapper) {
         SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
+
+        if (typeMapper == null) {
+            typeMapper = new HashMap<>();
+            typeMapper.put(CryomoduleType.C100.toString(), CryomoduleType.C100.toString());
+            typeMapper.put(CryomoduleType.F100.toString(), CryomoduleType.C100.toString());
+            typeMapper.put(CryomoduleType.C25.toString(), CryomoduleType.C25.toString());
+            typeMapper.put(CryomoduleType.C50.toString(), CryomoduleType.C50.toString());
+            typeMapper.put(CryomoduleType.C50T.toString(), CryomoduleType.C50.toString());
+            typeMapper.put(CryomoduleType.C75.toString(), CryomoduleType.C75.toString());
+        }
 
         SortedMap<String, BigDecimal> byCMType;
         int total;
         int unknown;
         String CMType;
 
-        for (Date date : (Set<Date>) dataSpan.keySet()) {
+        for (Date date : dataSpan.keySet()) {
             byCMType = new TreeMap<>();
-            byCMType.put(CryomoduleType.C100.toString(), new BigDecimal(0));
-            byCMType.put(CryomoduleType.C50.toString(), new BigDecimal(0));
-            byCMType.put(CryomoduleType.C25.toString(), new BigDecimal(0));
-            byCMType.put(CryomoduleType.F100.toString(), new BigDecimal(0));
-            byCMType.put(CryomoduleType.C75.toString(), new BigDecimal(0));
-            byCMType.put(CryomoduleType.C50T.toString(), new BigDecimal(0));
+            byCMType.put(typeMapper.get(CryomoduleType.C100.toString()), new BigDecimal(0));
+            byCMType.put(typeMapper.get(CryomoduleType.C50.toString()), new BigDecimal(0));
+            byCMType.put(typeMapper.get(CryomoduleType.C25.toString()), new BigDecimal(0));
+            byCMType.put(typeMapper.get(CryomoduleType.F100.toString()), new BigDecimal(0));
+            byCMType.put(typeMapper.get(CryomoduleType.C75.toString()), new BigDecimal(0));
+            byCMType.put(typeMapper.get(CryomoduleType.C50T.toString()), new BigDecimal(0));
             total = 0;
             unknown = 0;
 
-            for (CavityResponse cDP : (Set<CavityResponse>) dataSpan.get(date)) {
+            for (CavityResponse cDP : dataSpan.get(date)) {
 
                 if (cDP.getModAnodeVoltage() == null) {
                     unknown++;
@@ -173,7 +179,7 @@ public class CavityDataSpan {
                             || cDP.getCryomoduleType().equals(CryomoduleType.C75)
                             || cDP.getCryomoduleType().equals(CryomoduleType.F100)
                             || cDP.getCryomoduleType().equals(CryomoduleType.C25)) {
-                        CMType = cDP.getCryomoduleType().toString();
+                        CMType = typeMapper.get(cDP.getCryomoduleType().toString());
                         byCMType.put(CMType, byCMType.get(CMType).add(new BigDecimal(1)));
                         total++;
                     }
@@ -181,7 +187,9 @@ public class CavityDataSpan {
 
             }
             byCMType.put(LinacName.Total.toString(), new BigDecimal(total));
-            byCMType.put("Unknown", new BigDecimal(unknown));
+            if (unknown > 0) {
+                byCMType.put("Unknown", new BigDecimal(unknown));
+            }
             data.put(date, byCMType);
         }
         return data;
