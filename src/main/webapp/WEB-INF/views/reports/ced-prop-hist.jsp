@@ -11,7 +11,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <t:reports-page title="CED Property Updates">
     <jsp:attribute name="stylesheets">
-        <link rel="stylesheet" href="${initParam.cdnContextPath}/jquery-plugins/select2/4.0.5/dist/css/select2.min.css"/>
         <style>
             .select2-selection {
                 max-height: 125px;
@@ -20,8 +19,7 @@
         </style>
     </jsp:attribute>
     <jsp:attribute name="scripts">
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/select2/4.0.5/dist/js/select2.min.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/utils.js"></script>
         <script type="text/javascript">
             $(document).ready(function () {
                 jlab.util.initDateTimePickers();
