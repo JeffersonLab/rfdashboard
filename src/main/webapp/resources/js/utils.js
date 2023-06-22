@@ -50,7 +50,7 @@ jlab.colors = jlab.colors || {};
 // Inj, North, South, Total, Unknown
 jlab.colors.linacs = ["#FF0000", "#006400", "#273BE7", "#333333", "#ECAF2F"];
 // C100, C25, C50, C75, F100, C50T, Total, Unknown
-jlab.colors.cmtypes = ["#FFCE00", "#0375B4", "#007849", "#34EBB1", "#EB34E5", "#239E23", "#333333", "#ECAF2F"];
+jlab.colors.cmtypes = ["#FFCE00", "#0375B4", "#007849", "#239E23", "#34EBB1", "#EB34E5", "#333333", "#ECAF2F"];
 // Total 1050, Total 1050 No M.A.V, Total 1090, Total 1090 No M.A.V
 jlab.colors.modAnodeHarvester = ["#5e3c99", "#b2abd2", "#e66101", "#fdb863"];
 jlab.colors.energyReach = ["#666666"];
@@ -468,8 +468,9 @@ jlab.util.initCalendarStartEnd = function(widgetId) {
  * id - the id of the element to prepend legend tag (no leading '#')
  * colors - array with fill colors that match the chart
  * labels - array with color labels that match the chart
+ * colorFirst - should the color appear before the label
  */
-jlab.util.addLegend = function (id, colors, labels) {
+jlab.util.addLegend = function (id, colors, labels, colorFirst=false) {
     var legendString = "<div class=chart-legend id=" + id + '-legend">\n';
     legendString += "<table>";
     if (colors.length !== labels.length) {
@@ -477,7 +478,11 @@ jlab.util.addLegend = function (id, colors, labels) {
     }
     legendString += '<tr>';
     for (var i = 0; i < colors.length; i++) {
-        legendString += '<td>' + labels[i] + '</td>' + '<td><div class=color-box style="background-color: ' + colors[i] + ';"></div></td>';
+        if (colorFirst) {
+            legendString += '<td><div class=color-box style="background-color: ' + colors[i] + ';"></div></td>' + '<td>' + labels[i] + '</td>';
+        } else {
+            legendString += '<td>' + labels[i] + '</td>' + '<td><div class=color-box style="background-color: ' + colors[i] + ';"></div></td>';
+        }
     }
     legendString += '</tr>';
 
