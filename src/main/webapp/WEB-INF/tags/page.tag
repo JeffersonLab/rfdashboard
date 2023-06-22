@@ -88,6 +88,9 @@
     <jsp:attribute name="secondaryNavigation">
         <jsp:invoke fragment="secondaryNavigation"/>
     </jsp:attribute>
+    <jsp:attribute name="footnote">
+        <div id="version-info">Version: ${initParam.releaseNumber}, Released: ${initParam.releaseDate}</div>
+    </jsp:attribute>
     <jsp:body>
         <jsp:doBody/>
     </jsp:body>
