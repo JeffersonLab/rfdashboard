@@ -33,7 +33,7 @@ import org.jlab.rfd.presentation.util.RequestParamUtil;
  *
  * @author adamc
  */
-@WebServlet(name = "CommentHistory", urlPatterns = {"/comments/history"})
+@WebServlet(name = "CommentHistory", urlPatterns = {"/comments/history", "/reports/comments/history"})
 public class CommentHistory extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(CommentHistory.class.getName());
@@ -100,7 +100,7 @@ public class CommentHistory extends HttpServlet {
         request.setAttribute("offset", offset);
 
         if (redirectNeeded) {
-            StringBuilder redirectUrl = new StringBuilder(request.getContextPath() + "/comments/history");
+            StringBuilder redirectUrl = new StringBuilder(request.getContextPath() + "/reports/comments/history");
 
             redirectUrl.append("?limit=").append(URLEncoder.encode(String.valueOf(limit), StandardCharsets.UTF_8));
             redirectUrl.append("&offset=").append(URLEncoder.encode(String.valueOf(offset), StandardCharsets.UTF_8));
