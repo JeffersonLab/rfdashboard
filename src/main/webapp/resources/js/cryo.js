@@ -23,8 +23,15 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
     if (numDays > 1) {
         queryEnd = jlab.adjustEndToWeekBoundary(start, end);
     }
-    var dayDiff = jlab.daysBetweenDates(start, queryEnd) + 1;
+    var dayDiff = jlab.daysBetweenDates(start, queryEnd);
     var numBins = Math.floor(dayDiff / numDays);
+
+    // Converting from millis from epoch.  The history archiver usually has data starting 2-3 months back.
+    var queryAge = (Date.now() - new Date(queryEnd).getTime()) / (1000 * 60 * 60 * 24);
+    var mya = "ops";
+    if (queryAge > 120 ) {
+        mya = "history";
+    }
 
     // Get the cryo pressure data
     var cryoPromise = $.ajax({
@@ -34,7 +41,8 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
             b: start,
             e: queryEnd,
             n: numBins,
-            c: "CPI4107B,CPI5107B"
+            c: "CPI4107B,CPI5107B",
+            m: mya
         },
         dataType: "jsonp",
         jsonp: "jsonp",
