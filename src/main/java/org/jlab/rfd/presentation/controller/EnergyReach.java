@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jlab.rfd.business.service.CavityService;
 import org.jlab.rfd.business.service.LemService;
 import org.jlab.rfd.business.util.DateUtil;
+import org.jlab.rfd.config.AppConfig;
 import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.LemSpan;
 import org.jlab.rfd.model.TimeUnit;
@@ -211,6 +212,7 @@ public class EnergyReach extends HttpServlet {
             throw new ServletException("Error querying cavity datasources");
         }
         request.setAttribute("cavityData", cavityData.toString());
+        request.setAttribute("myaURL", AppConfig.getAppConfig().getMYAUrl());
 
         request.getRequestDispatcher("/WEB-INF/views/energy-reach.jsp").forward(request, response);
     }

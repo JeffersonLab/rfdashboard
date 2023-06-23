@@ -38,7 +38,7 @@
             Energy reach values are calculated by running the Linac Energy Manager (LEM) tool at linac energies ranging from 1000 MeV to 1190 MeV
             in 5 MeV steps, saving the trip rate at each step and interpolating the energy that produces eight C25 TrueArc trips per hour.
             LEM requires that an operation EPICS control system be up and responding.  This may result in a lack of data being produced or display during
-            accelerator downs.
+            accelerator downs.  These LEM operations are done using a default value for linac beam current of 400 uA.
             <h3>Page Controls</h3>
             <ul>
                 <li>
@@ -96,7 +96,7 @@
                 jlab.energyReachData = ${requestScope.energyReach};
                 jlab.dayScanData = ${requestScope.dayScan};
                 jlab.cavityData = ${requestScope.cavityData};
-
+                jlab.myaURL = "${requestScope.myaURL}";
 
         </script>
     </jsp:body>

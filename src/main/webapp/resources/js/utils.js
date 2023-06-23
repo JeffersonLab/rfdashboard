@@ -276,9 +276,9 @@ jlab.formatDatePretty = function(date) {
         return number;
     }
 
-    return date.getFullYear() +
-        '-' + pad(date.getMonth() + 1) +
-        '-' + pad(date.getDate());
+    return date.getUTCFullYear() +
+        '-' + pad(date.getUTCMonth() + 1) +
+        '-' + pad(date.getUTCDate());
 }
 
 /*
