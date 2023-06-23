@@ -50,7 +50,8 @@
             <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.resize.js"></script>
             <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/flot/axislabels/2.2.js"></script>
             <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/flot/sideBySideImproved/jquery.flot.orderBars.js"></script>
-            <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/select2/4.0.5/dist/js/select2.min.js"/>
+            <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/select2/4.0.5/dist/js/select2.min.js"></script>
+            <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/flot/errorbars/1.0.js"></script>
         </c:when>
         <c:otherwise> <!-- LOCAL -->
             <script type="text/javascript" src="${pageContext.request.contextPath}/resources/cdn/jquery/1.10.2.min.js"></script>
@@ -66,7 +67,8 @@
             <script type="text/javascript" src="${pageContext.request.contextPath}/resources/cdn/jquery-plugins/flot/0.8.3/jquery.flot.resize.js"></script>
             <script type="text/javascript" src="${pageContext.request.contextPath}/resources/cdn/jquery-plugins/flot/axislabels/2.2.js"></script>
             <script type="text/javascript" src="${pageContext.request.contextPath}/resources/cdn/jquery-plugins/flot/sideBySideImproved/jquery.flot.orderBars.js"></script>
-            <script type="text/javascript" src="${pageContext.request.contextPath}/resources/cdn/jquery-plugins/select2/4.0.5/dist/js/select2.min.js"/>
+            <script type="text/javascript" src="${pageContext.request.contextPath}/resources/cdn/jquery-plugins/select2/4.0.5/dist/js/select2.min.js"></script>
+            <script type="text/javascript" src="${pageContext.request.contextPath}/resources/cdn/jquery-plugins/flot/errorbars/1.0.js"></script>
         </c:otherwise>
         </c:choose>
         <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/lib/jquery-migrate-1.4.1.min.js"></script>
