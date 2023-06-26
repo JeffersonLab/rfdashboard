@@ -114,6 +114,21 @@
                                 </div>
                                 <div class="input-elem">
                                     <div class="li-key">
+                                        <label for="c75">C75</label>
+                                    </div>
+                                    <div class="li-value">
+                                        <c:choose>
+                                            <c:when test="${cmtypes.containsKey('C75')}">
+                                                <input type="checkbox" id="c75" name="cmtypes" value="C75" checked/>
+                                            </c:when>
+                                            <c:when test="${not cmtypes.containsKey('C75')}">
+                                                <input type="checkbox" id="c75" name="cmtypes" value="C75" />
+                                            </c:when>
+                                        </c:choose>
+                                    </div>
+                                </div>
+                                <div class="input-elem">
+                                    <div class="li-key">
                                         <label for="c100">C100</label>
                                     </div>
                                     <div class="li-value">

@@ -86,10 +86,18 @@ public class Cavity extends HttpServlet {
 
         List<String> cmtypes = RequestParamUtil.processMultiValuedParameter(request, "cmtypes");
         if (cmtypes == null) {
-            String[] allTypes = new String[]{"QTR", "C25", "C50", "C100"};
+            String[] allTypes = new String[]{"QTR", "C25", "C50", "C50T", "C75", "C100", "F100"};
             cmtypes = new ArrayList<>();
             cmtypes.addAll(Arrays.asList(allTypes));
         }
+        // These one-off types should be included in the more general category request as well.
+        if (cmtypes.contains("C100") && !cmtypes.contains("F100")) {
+            cmtypes.add("F100");
+        }
+        if (cmtypes.contains("C50") && !cmtypes.contains("C50T")) {
+            cmtypes.add("C50T");
+        }
+
         request.setAttribute("cmtypes", DataFormatter.listToMap(cmtypes));
 
         List<String> properties = RequestParamUtil.processMultiValuedParameter(request, "properties");
