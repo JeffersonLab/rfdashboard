@@ -229,6 +229,7 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
                 break;
             default:
                 hArray.push(prop);
+                window.console && console.log("Unexpected property: " + prop);
         }
     }
     if (jlab.util.arrayIncludes(properties, "comments")) {
