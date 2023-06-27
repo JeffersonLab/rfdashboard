@@ -1,18 +1,13 @@
 package org.jlab.rfd.presentation.controller.reports;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.time.Instant;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -20,15 +15,16 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.jlab.rfd.business.service.CavityService;
+import org.jlab.rfd.business.service.CryomoduleService;
 import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.CavityResponse;
+import org.jlab.rfd.model.CryomoduleType;
 import org.jlab.rfd.model.TimeUnit;
-import org.jlab.rfd.presentation.util.DataFormatter;
 import org.jlab.rfd.presentation.util.RequestParamUtil;
 
 /**
- *
  * @author adamc
  */
 @WebServlet(name = "Cavity", urlPatterns = {"/reports/cavity"})
@@ -39,10 +35,10 @@ public class Cavity extends HttpServlet {
     /**
      * Handles the HTTP <code>GET</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -76,58 +72,62 @@ public class Cavity extends HttpServlet {
             throw new ServletException("Error parsing start/end parameters");
         }
 
-        List<String> linacs = RequestParamUtil.processMultiValuedParameter(request, "linacs");
-        if (linacs == null) {
-            String[] allLinacs = new String[]{"injector", "north", "south"};
-            linacs = new ArrayList<>();
-            linacs.addAll(Arrays.asList(allLinacs));
-        }
-        request.setAttribute("linacs", DataFormatter.listToMap(linacs));
+        List<String> lp = RequestParamUtil.processMultiValuedParameter(request, "linacs");
+        Set<String> linacsParams;
+        linacsParams = lp == null ? null : new HashSet<>(lp);
+        Set<String> allLinacs = new HashSet<>(Arrays.asList("injector", "north", "south"));
+        Map<String, Boolean> linacs = RequestParamUtil.generateMultiSelectionMap(allLinacs, linacsParams, false);
+        request.setAttribute("linacs", linacs);
 
-        List<String> cmtypes = RequestParamUtil.processMultiValuedParameter(request, "cmtypes");
-        if (cmtypes == null) {
-            String[] allTypes = new String[]{"QTR", "C25", "C50", "C50T", "C75", "C100", "F100"};
-            cmtypes = new ArrayList<>();
-            cmtypes.addAll(Arrays.asList(allTypes));
-        }
-        // These one-off types should be included in the more general category request as well.
-        if (cmtypes.contains("C100") && !cmtypes.contains("F100")) {
-            cmtypes.add("F100");
-        }
-        if (cmtypes.contains("C50") && !cmtypes.contains("C50T")) {
-            cmtypes.add("C50T");
+        // Get the options that should be displayed.  CED may change over time so keep the static list as insurance for
+        // deletions, but query CED to get any additions.
+        String[] allTypes = new String[]{"QTR", "C25", "C50", "C50T", "C75", "C100", "F100", "Booster"};
+        Set<String> cmtypeOptions = new HashSet<>(Arrays.asList(allTypes));
+        try {
+            CryomoduleService cs = new CryomoduleService();
+            Collection<CryomoduleType> cedCMTypeOptions = cs.getCryoModuleTypes(Date.from(Instant.now())).values();
+            for (CryomoduleType cmt : cedCMTypeOptions) {
+                cmtypeOptions.add(cmt.toString());
+            }
+        } catch (ParseException ex) {
+            throw new ServletException("Error querying ModuleTypes from CED", ex);
         }
 
-        request.setAttribute("cmtypes", DataFormatter.listToMap(cmtypes));
+        // Make the map of what was selected and what was not.
+        List<String> ctp = RequestParamUtil.processMultiValuedParameter(request, "cmtypes");
+        Set<String> cmtypesParam = ctp == null ? null : new HashSet<>(ctp);
 
-        List<String> properties = RequestParamUtil.processMultiValuedParameter(request, "properties");
-        if (properties == null) {
-            String[] allProps = new String[]{"cmtype", "linac", "length", "odvh", "opsGsetMax", "maxGset", "q0", "qExternal", "tripOffset",
-                "tripSlope", "modAnode", "comments", "bypassed", "tunerBad", "gset"};
-            properties = new ArrayList<>();
-            properties.addAll(Arrays.asList(allProps));
-        }
-        request.setAttribute("properties", DataFormatter.listToMap(properties));
+        Map <String, Boolean> cmtypes = RequestParamUtil.generateMultiSelectionMap(cmtypeOptions, cmtypesParam, false);
+        request.setAttribute("cmtypes", cmtypes);
+
+        List<String> pp = RequestParamUtil.processMultiValuedParameter(request, "properties");
+        Set<String> propertiesParam = pp == null ? null : new HashSet<>(pp);
+        Set<String> allProps = new HashSet<>(Arrays.asList("cmtype", "linac", "length", "odvh", "opsGsetMax", "maxGset", "q0", "qExternal", "tripOffset",
+                "tripSlope", "modAnode", "comments", "bypassed", "tunerBad", "gset"));
+        Map<String, Boolean> properties = RequestParamUtil.generateMultiSelectionMap(allProps, propertiesParam, false);
+        request.setAttribute("properties", properties);
 
         if (redirectNeeded) {
-            String redirectUrl;
-            try {
-                redirectUrl = request.getContextPath()
-                        + "/reports/cavity?start=" + URLEncoder.encode((String) request.getAttribute("start"), "UTF-8")
-                        + "&end=" + URLEncoder.encode((String) request.getAttribute("end"), "UTF-8");
-                for (String linac : linacs) {
-                    redirectUrl = redirectUrl + "&linacs=" + URLEncoder.encode(linac, "UTF-8");
+            StringBuilder redirectUrl;
+            redirectUrl = new StringBuilder(request.getContextPath()
+                    + "/reports/cavity?start=" + URLEncoder.encode((String) request.getAttribute("start"), StandardCharsets.UTF_8)
+                    + "&end=" + URLEncoder.encode((String) request.getAttribute("end"), StandardCharsets.UTF_8));
+            for (String linac : linacs.keySet()) {
+                if (linacs.get(linac)) {
+                    redirectUrl.append("&linacs=").append(URLEncoder.encode(linac, StandardCharsets.UTF_8));
                 }
-                for (String cmtype : cmtypes) {
-                    redirectUrl = redirectUrl + "&cmtypes=" + URLEncoder.encode(cmtype, "UTF-8");
-                }
-                for (String prop : properties) {
-                    redirectUrl = redirectUrl + "&properties=" + URLEncoder.encode(prop, "UTF-8");
-                }
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException("JVM doesn't support UTF-8");
             }
-            response.sendRedirect(response.encodeRedirectURL(redirectUrl));
+            for (String cmtype : cmtypes.keySet()) {
+                if (cmtypes.get(cmtype)) {
+                    redirectUrl.append("&cmtypes=").append(URLEncoder.encode(cmtype, StandardCharsets.UTF_8));
+                }
+            }
+            for (String prop : properties.keySet()) {
+                if (properties.get(prop)) {
+                    redirectUrl.append("&properties=").append(URLEncoder.encode(prop, StandardCharsets.UTF_8));
+                }
+            }
+            response.sendRedirect(response.encodeRedirectURL(redirectUrl.toString()));
             return;
         }
 
