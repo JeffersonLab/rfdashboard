@@ -6,21 +6,15 @@
 package org.jlab.rfd.presentation.util;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
+
 import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.model.TimeUnit;
 
 /**
- *
  * @author adamc
  */
 public class RequestParamUtil {
@@ -36,8 +30,8 @@ public class RequestParamUtil {
      * format
      *
      * @param request HTTP Request object
-     * @param valid Array of valid parameter values
-     * @param def Default value applied if out parameter is null
+     * @param valid   Array of valid parameter values
+     * @param def     Default value applied if out parameter is null
      * @return The string representing the parameter value or null if an invalid
      * request was made.
      */
@@ -59,7 +53,7 @@ public class RequestParamUtil {
      * format
      *
      * @param request HTTP Request object
-     * @param def Default value applied if out parameter is null
+     * @param def     Default value applied if out parameter is null
      * @return The string representing the parameter value or null if an invalid
      * request was made.
      */
@@ -84,10 +78,10 @@ public class RequestParamUtil {
      * end is today, and start is determined as the "numBetween" "unit" before
      * end - e.g., 5, DAY means 5 days before end if nothing was specified.
      *
-     * @param request The HttpServletRequest object of the request
-     * @param unit The time unit for calculating default start time
+     * @param request    The HttpServletRequest object of the request
+     * @param unit       The time unit for calculating default start time
      * @param numBetween The number of "time units" before end we should set
-     * start
+     *                   start
      * @return A Map object containing "start"/"end" keys and values
      * @throws ParseException
      */
@@ -169,7 +163,7 @@ public class RequestParamUtil {
      * multiple times in a single request.
      *
      * @param request
-     * @param param The parameter to process
+     * @param param   The parameter to process
      * @return A List of values associated with the specified request parameter
      */
     public static List<String> processMultiValuedParameter(HttpServletRequest request, String param) {
@@ -184,5 +178,54 @@ public class RequestParamUtil {
             }
         }
         return props;
+    }
+
+    /**
+     * This method supplies the common logic for turning multiple selections into a map of which of the available
+     * options should be selected.  The idea is that all keys can be displayed as options, but only those with values
+     * of TRUE should be treated as selected.
+     * @param options The set of all options to be displayed.
+     * @param selections Which options were selected by the user?  If null, use all options.
+     * @param caseSensitive Does case matter when matching selections to options?
+     * @return
+     */
+    public static Map<String, Boolean> generateMultiSelectionMap(Set<String> options, Set<String> selections,
+                                                                 boolean caseSensitive) {
+        Map<String, Boolean> out = new HashMap<>();
+
+        if (selections == null) {
+            for (String prop : options) {
+                out.put(prop, Boolean.TRUE);
+            }
+        } else {
+            // Create set containing lower case versions of the user choices if case insensitive.
+            Set<String> selected;
+            if (caseSensitive) {
+                selected = selections;
+            } else {
+                selected = new HashSet<>();
+                for (String prop : selections) {
+                    selected.add(prop.toLowerCase());
+                }
+            }
+
+            for (String prop : options) {
+                if (caseSensitive) {
+                    if (selected.contains(prop)) {
+                        out.put(prop, Boolean.TRUE);
+                    } else {
+                        out.put(prop, Boolean.FALSE);
+                    }
+                } else {
+                    // Selected has been mapped to lower case in this scenario
+                    if (selected.contains(prop.toLowerCase())) {
+                        out.put(prop, Boolean.TRUE);
+                    } else {
+                        out.put(prop, Boolean.FALSE);
+                    }
+                }
+            }
+        }
+        return out;
     }
 }
