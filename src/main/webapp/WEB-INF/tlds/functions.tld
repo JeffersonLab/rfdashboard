@@ -9,9 +9,14 @@
       <function-class>org.jlab.rfd.presentation.util.Functions</function-class>
       <function-signature>java.lang.Boolean inArray(java.lang.String[], java.lang.String)</function-signature>
   </function>
-  <function>
-      <name>inList</name>
-      <function-class>org.jlab.rfd.presentation.util.Functions</function-class>
-      <function-signature>java.lang.Boolean inList(java.util.List, java.lang.String)</function-signature>
-  </function>
+    <function>
+        <name>inList</name>
+        <function-class>org.jlab.rfd.presentation.util.Functions</function-class>
+        <function-signature>java.lang.Boolean inList(java.util.List, java.lang.String)</function-signature>
+    </function>
+    <function>
+        <name>capitalizeFirst</name>
+        <function-class>org.jlab.rfd.presentation.util.Functions</function-class>
+        <function-signature>java.lang.String capitalizeFirst(java.lang.String)</function-signature>
+    </function>
 </taglib>
