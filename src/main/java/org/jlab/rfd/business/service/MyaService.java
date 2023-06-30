@@ -41,6 +41,12 @@ public class MyaService {
         if ( timestamp.after(new Date()) ) {
             return null;
         }
+
+        // Switch to the history deployment if we are querying more than 180 days (~6 months) in the past
+        String deployment = "ops";
+        if (DateUtil.getDifferenceInDays(timestamp, new Date()) > 180) {
+            deployment = "history";
+        }
         Map<String, BigDecimal> gsetData = new HashMap<>();
         
         // Create a reverse lookup map.  name2Epics should be a 1:1 map
@@ -65,7 +71,7 @@ public class MyaService {
         }
         String channels = builder.toString();
 
-        String mySamplerQuery = "?b=" + sdf.format(timestamp) + "&s=1&n=1&m=&c=" + channels;
+        String mySamplerQuery = "?b=" + sdf.format(timestamp) + "&m=" + deployment + "&s=1&n=1&m=&c=" + channels;
         URL url = new URL(MYSAMPLER_URL + mySamplerQuery);
         InputStream in = url.openStream();
         try (JsonReader reader = Json.createReader(in)) {
@@ -92,6 +98,22 @@ public class MyaService {
         
         return gsetData;
     }
+
+    /**
+     * A simplified interface for a single date query.  Will use the history deployment if the request is older than
+     * about six months.
+     * @param channels The channels to be sampled
+     * @param date The time at which to sample them.
+     * @return A map of PVs to mySampler result
+     */
+    public Map<String, String> mySampler(List<String> channels, Date date) throws IOException {
+        String deployment = "ops";
+        if (DateUtil.getDifferenceInDays(date, new Date()) > 180) {
+            deployment = "history";
+        }
+        return mySampler(channels, date, deployment);
+    }
+
 
     /**
      * Runs a query against the myquery mySampler service.  This simplified version hands back a single sample for the specified
