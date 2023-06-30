@@ -213,7 +213,7 @@ public class CryomoduleService {
             pvs.add(epicsName + LEM_PV_HEAT_SUFFIX);
         }
         MyaService ms = new MyaService();
-        Map<String, String> heats = ms.mySampler(pvs, date, "ops");
+        Map<String, String> heats = ms.mySampler(pvs, date);
         for (String epicsName : gsets.keySet()) {
             Double heat = null;
             if (heats != null) {
