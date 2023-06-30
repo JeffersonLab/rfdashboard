@@ -44,7 +44,7 @@
             <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/widgets/widget-output.min.js"></script>
             <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/parsers/parser-input-select.min.js"></script>
             <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/tablesorter-mottie/2.28.15/js/extras/jquery.tablesorter.pager.min.js"></script>
-            <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/select2/4.0.5/dist/js/select2.min.js"></script>
+            <script type="text/javascript" src="${pageContext.request.contextPath}/resources/cdn/everpolate/everpolate.browserified.min.js"></script>
             <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.js"></script>
             <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.time.js"></script>
             <script type="text/javascript" src="${cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.resize.js"></script>
