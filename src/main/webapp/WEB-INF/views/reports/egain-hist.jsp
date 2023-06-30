@@ -14,7 +14,6 @@
 <t:reports-page title="${title}">
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/css/flot-barchart.css"/>
-        <link rel="stylesheet" href="${initParam.cdnContextPath}/jquery-plugins/select2/4.0.5/dist/css/select2.min.css"/>
         <style>
             .legend-panel {
                 width: 0px;
