@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -25,16 +25,13 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+
 import org.jlab.rfd.business.filter.CommentFilter;
 import org.jlab.rfd.business.util.DateUtil;
+import org.jlab.rfd.business.util.SqlUtil;
 import org.jlab.rfd.config.AppConfig;
-import org.jlab.rfd.model.CavityDataPoint;
-import org.jlab.rfd.model.CavityDataSpan;
-import org.jlab.rfd.model.CavityResponse;
-import org.jlab.rfd.model.Comment;
-import org.jlab.rfd.model.CryomoduleType;
+import org.jlab.rfd.model.*;
 import org.jlab.rfd.model.ModAnodeHarvester.CavityGsetData;
-import org.jlab.rfd.model.TimeUnit;
 
 /**
  * This service object returns objects related to Cryocavity information in a
@@ -66,6 +63,196 @@ public class CavityService {
         return names;
     }
 
+    /**
+     * Check the cache to see if we have this response already.
+     *
+     * @param date The date for which data is cached
+     * @return The Set of CavityDataPoints associated with the query
+     */
+    private Set<CavityDataPoint> readCache(Date date) throws SQLException, ParseException, IOException {
+        Set<CavityDataPoint> data = null;
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        String sql = "SELECT * FROM CAVITY_CACHE WHERE QUERY_DATE = TO_DATE(?, 'YYYY-MM-DD')";
+        try {
+            conn = SqlUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, DateUtil.formatDateYMD(date));
+            rs = pstmt.executeQuery();
+
+            // If we don't have the data cached, return null
+            if (rs.isBeforeFirst()) {
+                data = new HashSet<>();
+                Date d;
+                String cavityName, epicsName, q0, qExternal;
+                CryomoduleType cryoModuleType;
+                boolean bypassed, tunerBad;
+                BigDecimal modAnodeVoltage, gset, odvh, maxGset, opsGsetMax, tripSlope, tripOffset, length;
+                CavityDataPoint cdp;
+                while (rs.next()) {
+                    d = rs.getDate("QUERY_DATE");
+                    cavityName = rs.getString("CAVITY_NAME");
+                    epicsName = rs.getString("EPICS_NAME");
+                    modAnodeVoltage = BigDecimal.valueOf(rs.getDouble("MOD_ANODE_VOLTAGE"));
+                    cryoModuleType = CryomoduleType.valueOf(rs.getString("CRYOMODULE_TYPE"));
+                    gset = getBigDecimal(rs, "GSET");
+                    odvh = getBigDecimal(rs, "ODVH");
+                    q0 = rs.getString("Q0");
+                    qExternal = rs.getString("QEXTERNAL");
+                    maxGset = getBigDecimal(rs, "MAX_GSET");
+                    opsGsetMax = getBigDecimal(rs, "OPS_GSET_MAX");
+                    tripOffset = getBigDecimal(rs, "TRIP_OFFSET");
+                    tripSlope = getBigDecimal(rs, "TRIP_SLOPE");
+                    length = getBigDecimal(rs, "LENGTH");
+                    bypassed = rs.getInt("BYPASSED") == 1;
+                    tunerBad = rs.getInt("TUNER_BAD") == 1;
+
+                    cdp = new CavityDataPoint(d, cavityName, cryoModuleType, modAnodeVoltage, epicsName, gset, odvh, q0,
+                            qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, length, null, bypassed, tunerBad);
+                    data.add(cdp);
+                }
+            }
+            rs.close();
+        } finally {
+            SqlUtil.close(rs, pstmt, conn);
+        }
+
+        // The mod anode simulation data is already saved in the database.  Query that and update the existing data points.
+        ModAnodeHarvesterService mahs = new ModAnodeHarvesterService();
+        Map<String, CavityGsetData> mahData = mahs.getCavityGsetData(date);
+        Set<CavityDataPoint> out;
+        if (mahData == null || mahData.isEmpty()) {
+            out = data;
+        } else {
+            out = new HashSet<>();
+            for (CavityDataPoint cdp : data) {
+                CavityGsetData mah = mahData.get(cdp.getCavityName());
+                if (mah != null) {
+                    CavityDataPoint copy = new CavityDataPoint(cdp.getTimestamp(), cdp.getCavityName(),
+                            cdp.getCryomoduleType(), cdp.getModAnodeVoltage(), cdp.getEpicsName(), cdp.getGset(),
+                            cdp.getOdvh(), cdp.getQ0(), cdp.getqExternal(), cdp.getMaxGset(), cdp.getOpsGsetMax(),
+                            cdp.getTripOffset(), cdp.getTripSlope(), cdp.getLength(), mah, cdp.isBypassed(),
+                            cdp.isTunerBad());
+                    out.add(copy);
+                } else {
+                    out.add(cdp);
+                }
+            }
+        }
+//    }
+
+        return out;
+    }
+
+    /**
+     * Utility function for reading BigDecimal values (saved as doubles) from a ResultSet.
+     *
+     * @param rs         The ResultSet from an executed statement
+     * @param columnName The name of the column to process into a BigDecimal
+     * @return The value as a BigDecimal.  Null if the database had a null value
+     * @throws SQLException If something goes wrong communicating with the database
+     */
+    private BigDecimal getBigDecimal(ResultSet rs, String columnName) throws SQLException {
+        BigDecimal out;
+        Double temp;
+        temp = rs.getDouble(columnName);
+        if (rs.wasNull()) {
+            out = null;
+        } else {
+            out = BigDecimal.valueOf(temp);
+        }
+        return out;
+    }
+
+    /**
+     * Cache the cavity data in the performance improvements.
+     * Cavity data can take a long time to query from the CED as each day has to be queried individually.  At the last
+     * performance test, a single query can take ~0.3 seconds, which adds up when considering a month or a year's worth
+     * of data.
+     *
+     * @param date The date to use when reading/writing from/to the cache
+     * @param data The set of cavity data to cache
+     * @throws SQLException
+     */
+    private void writeCache(Date date, Set<CavityDataPoint> data) throws SQLException, IllegalArgumentException {
+        // Check that all cavities have the same date
+        for (CavityDataPoint cdp : data) {
+            if (!cdp.getTimestamp().equals(date)) {
+                throw new IllegalArgumentException("Cavity '" + cdp.getCavityName() + "' has different date (" +
+                        DateUtil.formatDateYMD(cdp.getTimestamp()) + ") than used for caching (" +
+                        DateUtil.formatDateYMD(date) + ").");
+            }
+        }
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        String sql = "INSERT INTO cavity_cache (CACHE_ID, QUERY_DATE, CAVITY_NAME, EPICS_NAME, " +
+                " MOD_ANODE_VOLTAGE, CRYOMODULE_TYPE, GSET, ODVH, Q0, QEXTERNAL," +
+                " MAX_GSET, OPS_GSET_MAX, TRIP_OFFSET, TRIP_SLOPE, LENGTH, BYPASSED, TUNER_BAD) " +
+                "VALUES (cavity_cache_seq.NEXTVAL, TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?," +
+                " ?, ?)";
+        try {
+            conn = SqlUtil.getConnection();
+            conn.setAutoCommit(false);
+            pstmt = conn.prepareStatement(sql);
+            int i, numUpdated;
+            for (CavityDataPoint cdp : data) {
+                i = 1; // Since the sequence is the first
+                pstmt.setString(i++, DateUtil.formatDateYMD(date));
+                pstmt.setString(i++, cdp.getCavityName());
+                pstmt.setString(i++, cdp.getEpicsName());
+                if (cdp.getModAnodeVoltage() == null) {
+                    pstmt.setNull(i++, Types.NULL);
+                } else {
+                    pstmt.setDouble(i++, cdp.getModAnodeVoltage().doubleValue());
+                }
+                pstmt.setString(i++, cdp.getCryomoduleType().toString());
+                if (cdp.getGset() == null) {
+                    pstmt.setNull(i++, Types.NULL);
+                } else {
+                    pstmt.setDouble(i++, cdp.getGset().doubleValue());
+                }
+                if (cdp.getOdvh() == null) {
+                    pstmt.setNull(i++, Types.NULL);
+                } else {
+                    pstmt.setDouble(i++, cdp.getOdvh().doubleValue());
+                }
+                pstmt.setString(i++, cdp.getQ0());
+                pstmt.setString(i++, cdp.getqExternal());
+                pstmt.setDouble(i++, cdp.getMaxGset().doubleValue());
+                if (cdp.getOpsGsetMax() == null) {
+                    pstmt.setNull(i++, Types.NULL);
+                } else {
+                    pstmt.setDouble(i++, cdp.getOpsGsetMax().doubleValue());
+                }
+                if (cdp.getTripOffset() == null) {
+                    pstmt.setNull(i++, Types.NULL);
+                } else {
+                    pstmt.setDouble(i++, cdp.getTripOffset().doubleValue());
+                }
+                if (cdp.getTripSlope() == null) {
+                    pstmt.setNull(i++, Types.NULL);
+                } else {
+                    pstmt.setDouble(i++, cdp.getTripSlope().doubleValue());
+                }
+                pstmt.setDouble(i++, cdp.getLength().doubleValue());
+                pstmt.setInt(i++, cdp.isBypassed() ? 1 : 0);
+                pstmt.setInt(i++, cdp.isTunerBad() ? 1 : 0);
+
+                numUpdated = pstmt.executeUpdate();
+                if (numUpdated != 1) {
+                    conn.rollback();
+                    throw new SQLException("Error adding cavity data ('" + cdp.getCavityName() + "') to database cache");
+                }
+            }
+            conn.commit();
+        } finally {
+            SqlUtil.close(pstmt, conn);
+        }
+    }
+
     public Set<CavityResponse> getCavityData(Date timestamp) throws IOException, ParseException, SQLException {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -85,13 +272,17 @@ public class CavityService {
 
         // Check the cache.  If not there, run the query, build the results, check that somebody else hasn't already inserted this
         // into the cache, then add the query result to the cache.
-        if (CAVITY_CACHE.containsKey(cavityQuery)) {
-            Set<CavityDataPoint> temp = CAVITY_CACHE.get(cavityQuery);
-            return this.createCommentResponseSet(temp, comments);
-        } else {
+        Set<CavityDataPoint> data = null;
+        try {
+            data = readCache(timestamp);
+        } catch (SQLException | ParseException | IOException ex) {
+            LOGGER.log(Level.WARNING, "Error reading from cavity cache", ex);
+        }
 
+        // If cache miss
+        if (data == null) {
             Map<String, CryomoduleType> cmTypes = new CryomoduleService().getCryoModuleTypes(timestamp);
-            Set<CavityDataPoint> data = new HashSet<>();
+            data = new HashSet<>();
 
             //LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cavityQuery);
             URL url = new URL(CED_INVENTORY_URL + cavityQuery);
@@ -220,11 +411,14 @@ public class CavityService {
             }
 
             // In case somebody has already inserted it use putIfAbsent.
-            CAVITY_CACHE.putIfAbsent(cavityQuery, Collections.unmodifiableSet(data));
-
-            return this.createCommentResponseSet(CAVITY_CACHE.get(cavityQuery), comments);
+            try {
+                writeCache(timestamp, data);
+            } catch (SQLException | IllegalArgumentException ex) {
+                LOGGER.log(Level.WARNING, "Error writing to cavity cache", ex);
+            }
         }
 
+        return this.createCommentResponseSet(data, comments);
     }
 
     /**
@@ -233,9 +427,9 @@ public class CavityService {
      *
      * @param timestamp Timestamp to look up data for
      * @return A Map of cavity names to cavity response objects
-     * @throws IOException On non-ok CED server response
+     * @throws IOException    On non-ok CED server response
      * @throws ParseException On error parsing JSON responses
-     * @throws SQLException On database error
+     * @throws SQLException   On database error
      */
     public Map<String, CavityResponse> getCavityDataMap(Date timestamp) throws IOException, ParseException, SQLException {
         Set<CavityResponse> crs = getCavityData(timestamp);
@@ -256,7 +450,7 @@ public class CavityService {
      *
      * @param cavities The CavityDataPoints for a given date
      * @param comments The comments split by topic (getCommentsByTopic) up until
-     * the end of the requested date
+     *                 the end of the requested date
      * @return A set of CavityResponse objects
      */
     private Set<CavityResponse> createCommentResponseSet(Set<CavityDataPoint> cavities, Map<String, SortedSet<Comment>> comments) {
@@ -273,7 +467,7 @@ public class CavityService {
     }
 
     /*
-    * If end is for future date, set it for now.  Data isn't valid for future dates, but some of our data services (CED, MYA) give results anyway.
+     * If end is for future date, set it for now.  Data isn't valid for future dates, but some of our data services (CED, MYA) give results anyway.
      */
     public CavityDataSpan getCavityDataSpan(Date start, Date end, TimeUnit timeUnit) throws ParseException, IOException, SQLException {
         int timeInt;
