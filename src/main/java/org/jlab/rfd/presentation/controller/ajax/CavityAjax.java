@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +32,6 @@ import org.jlab.rfd.model.TimeUnit;
 public class CavityAjax extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(CavityAjax.class.getName());
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -52,8 +49,8 @@ public class CavityAjax extends HttpServlet {
             TimeUnit timeUnit = RequestParamUtil.processTimeUnit(request, TimeUnit.WEEK);
             if (timeUnit == null) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                LOGGER.log(Level.SEVERE, "Unsupported timeUnit value supplied {0}", timeUnit);
-                pw.write("{\"error\": \"Unsupported timeUnit value '" + timeUnit + "' supplied\"}");
+                LOGGER.log(Level.SEVERE, "Unsupported timeUnit value supplied 'null'");
+                pw.write("{\"error\": \"Unsupported timeUnit value 'null' supplied\"}");
                 return;
             }
 
@@ -94,8 +91,8 @@ public class CavityAjax extends HttpServlet {
             String out = RequestParamUtil.processOut(request, valid, "json");
             if (out == null) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                LOGGER.log(Level.SEVERE, "Unsupported out value supplied {0}", out);
-                pw.write("{\"error\":\"Unsupported out value '" + out + "' supplied\"}");
+                LOGGER.log(Level.SEVERE, "Unsupported out value supplied 'null'");
+                pw.write("{\"error\":\"Unsupported out value 'null' supplied\"}");
                 return;
             }
 
