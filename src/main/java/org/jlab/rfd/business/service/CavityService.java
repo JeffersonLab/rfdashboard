@@ -226,25 +226,31 @@ public class CavityService {
                     pstmt = conn.prepareStatement(sql);
                     int i, numUpdated;
                     for (CavityDataPoint cdp : data) {
-                        i = 1; // Since the sequence is the first
-                        pstmt.setString(i++, DateUtil.formatDateYMD(date));
-                        pstmt.setString(i++, cdp.getCavityName());
-                        pstmt.setString(i++, cdp.getEpicsName());
-                        i = setBigDecimal(cdp.getModAnodeVoltage(), pstmt, i);
-                        pstmt.setString(i++, cdp.getCryomoduleType().toString());
-                        i = setBigDecimal(cdp.getGset(), pstmt, i);
-                        i = setBigDecimal(cdp.getOdvh(), pstmt, i);
-                        pstmt.setString(i++, cdp.getQ0());
-                        pstmt.setString(i++, cdp.getqExternal());
-                        pstmt.setDouble(i++, cdp.getMaxGset().doubleValue());
-                        i = setBigDecimal(cdp.getOpsGsetMax(), pstmt, i);
-                        i = setBigDecimal(cdp.getTripOffset(), pstmt, i);
-                        i = setBigDecimal(cdp.getTripSlope(), pstmt, i);
-                        pstmt.setDouble(i++, cdp.getLength().doubleValue());
-                        pstmt.setInt(i++, cdp.isBypassed() ? 1 : 0);
-                        pstmt.setInt(i, cdp.isTunerBad() ? 1 : 0);
+                        try {
+                            i = 1; // Since the sequence is the first
+                            pstmt.setString(i++, DateUtil.formatDateYMD(date));
+                            pstmt.setString(i++, cdp.getCavityName());
+                            pstmt.setString(i++, cdp.getEpicsName());
+                            i = setBigDecimal(cdp.getModAnodeVoltage(), pstmt, i);
+                            pstmt.setString(i++, cdp.getCryomoduleType().toString());
+                            i = setBigDecimal(cdp.getGset(), pstmt, i);
+                            i = setBigDecimal(cdp.getOdvh(), pstmt, i);
+                            pstmt.setString(i++, cdp.getQ0());
+                            pstmt.setString(i++, cdp.getqExternal());
+                            pstmt.setDouble(i++, cdp.getMaxGset().doubleValue());
+                            i = setBigDecimal(cdp.getOpsGsetMax(), pstmt, i);
+                            i = setBigDecimal(cdp.getTripOffset(), pstmt, i);
+                            i = setBigDecimal(cdp.getTripSlope(), pstmt, i);
+                            pstmt.setDouble(i++, cdp.getLength().doubleValue());
+                            pstmt.setInt(i++, cdp.isBypassed() ? 1 : 0);
+                            pstmt.setInt(i, cdp.isTunerBad() ? 1 : 0);
 
-                        numUpdated = pstmt.executeUpdate();
+                            numUpdated = pstmt.executeUpdate();
+                        } catch (SQLException ex) {
+                            // Which cavity triggered the error gets lost without catch and rethrow.
+                            LOGGER.log(Level.WARNING, "Error caching cavity data on this cavity: " + cdp.toJson().toString());
+                            throw ex;
+                        }
                         if (numUpdated != 1) {
                             conn.rollback();
                             throw new SQLException("Error adding cavity data ('" + cdp.getCavityName() + "') to database cache");
@@ -530,6 +536,7 @@ public class CavityService {
                 timeInt = Calendar.WEEK_OF_YEAR;
         }
 
+        List<Date> dates = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         // Convert date objects to have no hh:mm:ss ... portion
         Date curr = sdf.parse(sdf.format(start));
@@ -544,9 +551,18 @@ public class CavityService {
         CavityDataSpan span = new CavityDataSpan();
 
         while (!curr.after(e)) {
-            span.put(curr, this.getCavityData(curr));
+            dates.add(curr);
             cal.add(timeInt, 1);
             curr = cal.getTime();
+        }
+
+        // Randomize the order of the dates that are queried.  Consider multiple overlapping requests looking for
+        // uncached data.  If they all go in order, then cache is never helpful and each query fetches the uncached
+        // data.  Shuffling the order of requests is an easy way to minimize the chance of queries hitting the same
+        // dates at the same time.
+        Collections.shuffle(dates);
+        for (Date date : dates) {
+            span.put(date, this.getCavityData(date));
         }
 
         return span;
