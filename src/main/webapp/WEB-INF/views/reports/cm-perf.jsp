@@ -46,18 +46,18 @@
                         // J. Benesch requested this grouping for one-off CM types
                         case "F100":
                         case "C100":
-                            color = jlab.colors.cmtypes[0];
+                            color = jlab.colors["C100"];
                             break;
                         case "C25":
-                            color = jlab.colors.cmtypes[1];
+                            color = jlab.colors["C25"];
                             break;
                         // J. Benesch requested this grouping for one-off CM types
                         case "C50T":
                         case "C50":
-                            color = jlab.colors.cmtypes[2];
+                            color = jlab.colors["C50"];
                             break;
                         case "C75":
-                            color = jlab.colors.cmtypes[3];
+                            color = jlab.colors["C75"];
                             break;
                         default:
                             color = "#A9A9A9"; //A different type of unknown. I don't want to include in the legend and this looks different enough to avoid confusion.
@@ -88,8 +88,8 @@
 
                 // F100 and C50T are lumped in with C100 and C50, respectively.
                 var labels = ["C100", "C25", "C50", "C75"];
-                var jcc = jlab.colors.cmtypes;
-                var colors = [jcc[0], jcc[1], jcc[2], jcc[3]];
+                var jcc = jlab.colors;
+                var colors = [jcc["C100"], jcc["C25"], jcc["C50"], jcc["C75"]];
                 jlab.util.addLegend('cm-perf-legend', colors, labels, true);
 
                 $(".date-field").datepicker({
