@@ -150,7 +150,7 @@
                                     <div class="table-title">Cryomodule Data</div>
                                     <div class="table-wrap">
                                         <table class="comments-table">
-                                            <thead><tr><th>Name</th><th>Module Type</th><th>EGain (MeV)</th><th>%Nominal</th><th>LEM Heat</th><tr></thead>
+                                            <thead><tr><th>Name</th><th>Module Type</th><th>EGain (MeV)</th><th>%Nominal</th><th>LEM Heat (Watts)</th><tr></thead>
                                             <tbody>
                                                 <tr>
                                                     <td>${cm.name}</td>
