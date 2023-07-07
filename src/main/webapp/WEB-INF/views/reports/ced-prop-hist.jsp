@@ -24,7 +24,7 @@
             $(document).ready(function () {
                 jlab.util.initDateTimePickers();
                 $('.multi-select').select2({
-                    width: 290,
+                    width: '90%',
                     closeOnSelect: false,
                     maximumSelectionLength: 50
                 });
