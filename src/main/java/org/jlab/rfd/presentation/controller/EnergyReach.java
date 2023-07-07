@@ -60,7 +60,7 @@ public class EnergyReach extends HttpServlet {
         Date end, start;
         boolean redirectNeeded = false;
 
-        LOGGER.log(Level.FINEST, "EnergyReach controler with received parameters: {0}", request.getParameterMap());
+        LOGGER.log(Level.FINEST, "EnergyReach controller with received parameters: {0}", request.getParameterMap());
         if (request.getParameter("end") == null || request.getParameter("end").equals("")) {
             LOGGER.log(Level.FINEST, "No end parameter supplied.  Defaulting to today.");
             end = new Date();
