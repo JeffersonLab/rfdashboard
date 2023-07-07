@@ -157,7 +157,7 @@
                 //   so let the yaxis auto adjust
                 switch (cmType) {
                     case "C100":
-                        barColor = jlab.colors.cmtypes[0];
+                        barColor = jlab.colors["C100"];
                         switch (by) {
                             case "cavity":
                                 ymax = 20;
@@ -177,7 +177,7 @@
                         }
                         break;
                     case "C25":
-                        barColor = jlab.colors.cmtypes[1];
+                        barColor = jlab.colors["C25"];
                         switch (by) {
                             case "cavity":
                                 ymax = 10;
@@ -197,7 +197,7 @@
                         }
                         break;
                     case "C50":
-                        barColor = jlab.colors.cmtypes[2];
+                        barColor = jlab.colors["C50"];
                         switch (by) {
                             case "cavity":
                                 ymax = 15;
@@ -217,7 +217,7 @@
                         }
                         break;
                     case "C50T":
-                        barColor = jlab.colors.cmtypes[5];
+                        barColor = jlab.colors["C50T"];
                         switch (by) {
                             case "cavity":
                                 ymax = 15;
@@ -237,7 +237,7 @@
                         }
                         break;
                     case "C75":
-                        barColor = jlab.colors.cmtypes[3];
+                        barColor = jlab.colors["C75"];
                         switch (by) {
                             case "cavity":
                                 ymax = 13;
@@ -257,7 +257,7 @@
                         }
                         break;
                     case "F100":
-                        barColor = jlab.colors.cmtypes[4];
+                        barColor = jlab.colors["F100"];
                         switch (by) {
                             case "cavity":
                                 ymax = 20;
@@ -280,7 +280,7 @@
                         ymax = 125;
                         ymin = 0;
                         nominal = 0;
-                        barColor = jlab.colors.cmtypes[7];
+                        barColor = jlab.colors["Unknown"];
                 }
 
                 // Setup the title as a drilldown link if we're showing a cmtyp or zone chart.  Can't drilldown more than the cavity.
@@ -355,13 +355,12 @@
                 $(".multi-select").select2({width: "290px", closeOnSelect: false});
                 $("#by-selector").select2({width: "290px"});
 
-                var labels = ["C100", "C25", "C50", "C75", "F100", "C50T"];
-                var jcc = jlab.colors.cmtypes;
-                var colors = [jcc[0], jcc[1], jcc[2], jcc[3], jcc[4], jcc[5]];
-                jlab.util.addLegend('cm-legend', colors, labels);
+                var labels = ["C100", "C25", "C50", "C75"];
+                var jcc = jlab.colors;
+                var colors = [jcc["C100"], jcc["C25"], jcc["C50"], jcc["C75"]];
+                jlab.util.addLegend('cm-legend', colors, labels, true);
 
                 var massSelector = function (checkbox, optionText) {
-                    console.log(optionText);
                     if ($(checkbox).is(':checked')) {
                         $("#zone-selector > option:contains('" + optionText + "')").prop("selected", "selected");
                         $("#zone-selector").trigger("change");
