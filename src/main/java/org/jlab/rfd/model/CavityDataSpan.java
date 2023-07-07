@@ -107,7 +107,7 @@ public class CavityDataSpan {
      *
      * @return
      */
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getModAnodeCountByLinac() {
+    public SortedMap<Date, SortedMap<String, BigDecimal>> getModAnodeCountByLinac(boolean includeInjector) {
         SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
 
         SortedMap<String, BigDecimal> byLinac;
@@ -115,13 +115,18 @@ public class CavityDataSpan {
         int unknown;
         for (Date date : (Set<Date>) dataSpan.keySet()) {
             byLinac = new TreeMap<>();
-            byLinac.put(LinacName.Injector.toString(), new BigDecimal(0));
+            if (includeInjector) {
+                byLinac.put(LinacName.Injector.toString(), new BigDecimal(0));
+            }
             byLinac.put(LinacName.North.toString(), new BigDecimal(0));
             byLinac.put(LinacName.South.toString(), new BigDecimal(0));
             total = 0;
             unknown = 0;
 
-            for (CavityResponse cDP : (Set<CavityResponse>) dataSpan.get(date)) {
+            for (CavityResponse cDP : dataSpan.get(date)) {
+                if (!includeInjector && cDP.getLinacName() == LinacName.Injector) {
+                    continue;
+                }
                 if (cDP.getModAnodeVoltage() == null) {
                     unknown++;
                 } else if (cDP.getModAnodeVoltage().doubleValue() > 0) {

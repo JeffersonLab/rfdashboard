@@ -10,7 +10,6 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.SortedMap;
@@ -89,14 +88,11 @@ public class ModAnodeAjax extends HttpServlet {
 
         SortedMap<Date, SortedMap<String, BigDecimal>> factoredData;
         switch (factor) {
-            case "linac":
-                factoredData = span.getModAnodeCountByLinac();
-                break;
             case "cmtype":
                 factoredData = span.getModAnodeCountByCMType(null);
                 break;
             default:
-                factoredData = span.getModAnodeCountByLinac();
+                factoredData = span.getModAnodeCountByLinac(true);
                 break;
         }
 
@@ -112,19 +108,6 @@ public class ModAnodeAjax extends HttpServlet {
         }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-//    @Override
-//    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-//            throws ServletException, IOException {
-//        processRequest(request, response);
-//    }
 
     /**
      * Returns a short description of the servlet.
