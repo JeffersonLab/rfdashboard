@@ -47,13 +47,13 @@ jlab.requestEnd = function () {
 };
 
 jlab.colors = jlab.colors || {};
-// Inj, North, South, Total, Unknown
-jlab.colors.linacs = ["#FF0000", "#006400", "#273BE7", "#333333", "#ECAF2F"];
-// C100, C25, C50, C75, Total, Unknown
-jlab.colors.cmtypes = ["#FFCE00", "#0375B4", "#007849", "#239E23", "#333333", "#ECAF2F"];
-// Total 1050, Total 1050 No M.A.V, Total 1090, Total 1090 No M.A.V
-jlab.colors.modAnodeHarvester = ["#5e3c99", "#b2abd2", "#e66101", "#fdb863"];
-jlab.colors.energyReach = ["#666666"];
+jlab.colors = {
+    "Reach": "#666666", "Total":"#333333", "Unknown": "#ECAF2F",
+    "Inj": "#FF0000", "North": "#006400", "South": "#273BE7",
+    "C100": "#FFCE00", "C25": "#0375B4", "C50": "#007849", "C75": "#239E23",
+    "C50T": "#0ff0aa", "F100": "#e80000",
+    "Total_1050": "#5e3c99", "Total_1050_NoMAV": "#b2abd2", "Total_1090": "#e66101", "Total_1090_NoMAV": "#fdb863"
+};
 
 // Default JQuery dialog properties
 jlab.dialogProperties = {
