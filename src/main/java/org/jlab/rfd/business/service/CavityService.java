@@ -423,10 +423,19 @@ public class CavityService {
                         tripSlope = new BigDecimal(properties.getString("TripSlope"));
                     }
                     if (mavsEPICS != null) {
-                        mav = mavsEPICS.get(cavityName);
+                        // mav has 0 as default.  There are some weird cases in mya data that R...KMAS is huge, but the
+                        // control system tries to limit KMAS to less than 2.  Maybe it's possible for this to be set
+                        // a little more than 2.0 kV, but it's very unlikely that it gets set much higher.  3.0 kV is a
+                        // reasonable cutoff as a sanity check that something went wrong with the data reporting.  If
+                        // > 3 kV, assume it's a software bug and that no mod anode voltage is present per discussion
+                        // with K. Hesse and C. Mounts.  This means don't change it from the zero value it is created
+                        // with.  Similarly, no CED property means zero mod anode voltage is present.
+                        if (mavsEPICS.get(cavityName).doubleValue() < 3.0) {
+                            mav = mavsEPICS.get(cavityName);
+                        }
                     } else {
                         if (properties.containsKey("ModAnode")) {
-                            mav = mav.add(new BigDecimal(properties.getString("ModAnode")));
+                            mav = new BigDecimal(properties.getString("ModAnode"));
                         }
                     }
                     if (properties.containsKey("OpsGsetMax")) {
