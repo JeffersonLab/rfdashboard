@@ -161,13 +161,14 @@ public class MyaService {
 
         JsonObject chan = response.getJsonObject("channels");
         for (String pv : chan.keySet()) {
-            JsonObject v = chan.getJsonObject(pv).getJsonArray("data").get(0).asJsonObject();
-            JsonObject t = chan.getJsonObject(pv).getJsonArray("data").get(0).asJsonObject();
+            JsonObject sample = chan.getJsonObject(pv).getJsonArray("data").get(0).asJsonObject();
 
-            if (v != null) {
-                out.put(pv, v.getJsonNumber("v").bigDecimalValue().toString());
-            } else if (t != null) {
-                out.put(pv, t.getString("t"));
+            if (sample.get("v") != null) {
+                out.put(pv, sample.getJsonNumber("v").toString());
+            } else if (sample.getString("t") !=null) {
+                out.put(pv, sample.getString("t"));
+            } else {
+                throw new IOException("Unexpected mySampler format for '" + pv + "': " + sample);
             }
         }
 
