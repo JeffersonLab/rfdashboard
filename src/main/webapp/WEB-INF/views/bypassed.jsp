@@ -29,8 +29,13 @@
         </div>
         <div id="page-details-dialog" class="dialog" title="Details">
             <h3> Bypassed Cavities </h3>
-            Bypassed cavities are here defined as those cavities with an EPICS GSET value of zero.  This data is pulled from the
-            archiver with supporting data from the CED.
+            Bypassed cavities are here defined as those cavities with an EPICS GSET value of zero or a CED bypassed
+            attribute.  This data is pulled from the archiver with supporting data from the CED.  A cavity is counted in
+            the Unknown category if it is not explicitly bypassed in CED and it's GSET value was undefined in the MYA
+            archiver.
+
+            Note:  The QTR cavities are included in the "By Linac" chart, however they are excluded from the "By CMType"
+            chart in order to limit the number displayed types.
             <h3>Page Controls</h3>
             <ul>
                 <li>
