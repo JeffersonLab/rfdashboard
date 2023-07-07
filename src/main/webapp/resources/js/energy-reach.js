@@ -21,9 +21,10 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
     var reachRates = jlab.energyReach.getReachTripRates();
     var linacRate = reachRates[0];
     var totalRate = reachRates[1];
+    var colors = [jlab.colors["North"], jlab.colors["South"], jlab.colors["Total"]]
 
     var settings = {
-        colors: jlab.colors.linacs.slice(1, 4), // Grab the North, South, and Total colors
+        colors: colors,
         labels: scanData.labels,
         timeUnit: "day",
         title: title,
@@ -89,7 +90,7 @@ jlab.energyReach.loadEnergyReachChart = function (chartId, start, end, reachData
 
     var timeUnit = "day";
     var settings = {
-        colors: jlab.colors.energyReach,
+        colors: [jlab.colors["Reach"]],
         labels: reachData.labels,
         timeUnit: timeUnit,
         title: title,
