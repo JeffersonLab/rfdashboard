@@ -172,6 +172,7 @@ CREATE TABLE rfgradteam_owner.rfd_comments (
 -- takes a fraction of second, but we often end up making many calls over a date range.
 -- Note: MOD_ANODE_HARVESTER_GSET_DATA isn't needed since it is already saved in the
 --       database and is not from CED web service.
+-- Note: MOD_ANODE_VOLTAGE should be capped at 2 kV.  Number(10,6) gives a max 99.999999 kV for some wiggle room.
 CREATE SEQUENCE rfgradteam_owner.cavity_cache_seq START WITH 1;
 CREATE TABLE rfgradteam_owner.cavity_cache (
        CACHE_ID                   NUMBER(20)      PRIMARY KEY,
