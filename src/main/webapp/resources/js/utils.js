@@ -51,7 +51,7 @@ jlab.colors = {
     "Reach": "#666666", "Total":"#333333", "Unknown": "#ECAF2F",
     "Inj": "#FF0000", "North": "#006400", "South": "#273BE7",
     "C100": "#FFCE00", "C25": "#0375B4", "C50": "#007849", "C75": "#239E23",
-    "C50T": "#0ff0aa", "F100": "#e80000",
+    "C50T": "#0ff0aa", "F100": "#e80000", "QTR": "#AF7171",
     "Total_1050": "#5e3c99", "Total_1050_NoMAV": "#b2abd2", "Total_1090": "#e66101", "Total_1090_NoMAV": "#fdb863"
 };
 
