@@ -90,11 +90,8 @@ public class BypassedAjax extends HttpServlet {
         
         SortedMap<Date, SortedMap<String, BigDecimal>> factoredData;
         switch (factor) {
-            case "linac":
-                factoredData = span.getBypassedCountByLinac();
-                break;
             case "cmtype":
-                factoredData = span.getBypassedCountByCMType();
+                factoredData = span.getBypassedCountByCMType(null);
                 break;
             default:
                 factoredData = span.getBypassedCountByLinac();
