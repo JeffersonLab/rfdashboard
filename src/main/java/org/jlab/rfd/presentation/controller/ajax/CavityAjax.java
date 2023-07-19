@@ -91,8 +91,8 @@ public class CavityAjax extends HttpServlet {
             String out = RequestParamUtil.processOut(request, valid, "json");
             if (out == null) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                LOGGER.log(Level.SEVERE, "Unsupported out value supplied 'null'");
-                pw.write("{\"error\":\"Unsupported out value 'null' supplied\"}");
+                LOGGER.log(Level.SEVERE, "Unsupported 'out' value supplied.");
+                pw.write("{\"error\":\"Unsupported 'out' value supplied.  Valid = {" + String.join(", ", valid) + "}");
                 return;
             }
 
