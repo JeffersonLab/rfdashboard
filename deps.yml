@@ -39,7 +39,9 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KEYCLOAK_FRONTEND_HOSTNAME: 'localhost'
+      # If localhost, then rfd server tries to connect to itself and finds no one listening.  Need to expose
+      # keycloak port, and use dev system hostname to direct traffic to the proper system/port
+      #KEYCLOAK_FRONTEND_HOSTNAME: <YOUR_SYSTEM_HOSTNAME>
       KEYCLOAK_FRONTEND_PORT: '8081'
       KEYCLOAK_SERVER_URL: 'http://keycloak:8080'
       KEYCLOAK_HOME: '/opt/keycloak'
