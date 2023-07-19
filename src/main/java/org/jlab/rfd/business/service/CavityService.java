@@ -54,13 +54,42 @@ public class CavityService {
         return names;
     }
 
+
+    /**
+     * Delete cached cavity data corresponding to a particular date
+     * @param date The date for which we want to flush the cache
+     * @return The number of rows that were deleted from the cache table
+     * @throws SQLException If something goes wrong communicating with the database.
+     */
+    public int clearCache(Date date) throws SQLException {
+        int rowsDeleted = 0;
+        if (date == null) {
+            return rowsDeleted;
+        }
+
+        synchronized (CACHE_LOCK) {
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+            String sql = "DELETE from CAVITY_CACHE WHERE QUERY_DATE = TO_DATE(?, 'YYYY-MM-DD')";
+            try {
+                conn = SqlUtil.getConnection();
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, DateUtil.formatDateYMD(date));
+                rowsDeleted = pstmt.executeUpdate();
+            } finally {
+                SqlUtil.close(pstmt, conn);
+            }
+        }
+        return rowsDeleted;
+    }
+
     /**
      * Check the cache to see if we have this response already.
      *
      * @param date The date for which data is cached
      * @return The Set of CavityDataPoints associated with the query or null if cache miss
      */
-    private Set<CavityDataPoint> readCache(Date date) throws SQLException, ParseException, IOException {
+    public Set<CavityDataPoint> readCache(Date date) throws SQLException, ParseException, IOException {
         Set<CavityDataPoint> data = null;
         synchronized (CACHE_LOCK) {
             Connection conn = null;
@@ -428,7 +457,7 @@ public class CavityService {
                         // a little more than 2.0 kV, but it's very unlikely that it gets set much higher.  3.0 kV is a
                         // reasonable cutoff as a sanity check that something went wrong with the data reporting.  If
                         // > 3 kV, assume it's a software bug and that no mod anode voltage is present per discussion
-                        // with K. Hesse and C. Mounts.  This means don't change it from the zero value it is created
+                        // with K. Hesse and C. Mounts.  Don't change it from the zero value it is created
                         // with.  Similarly, no CED property means zero mod anode voltage is present.
                         if (mavsEPICS.get(cavityName).doubleValue() < 3.0) {
                             mav = mavsEPICS.get(cavityName);
@@ -518,8 +547,11 @@ public class CavityService {
      *                 the end of the requested date
      * @return A set of CavityResponse objects
      */
-    private Set<CavityResponse> createCommentResponseSet(Set<CavityDataPoint> cavities, Map<String, SortedSet<Comment>> comments) {
+    public Set<CavityResponse> createCommentResponseSet(Set<CavityDataPoint> cavities, Map<String, SortedSet<Comment>> comments) {
         Set<CavityResponse> cr = new HashSet<>();
+        if (cavities == null) {
+            return null;
+        }
         for (CavityDataPoint cdp : cavities) {
             SortedSet<Comment> temp = comments.get(cdp.getCavityName());
             if (temp == null) {
