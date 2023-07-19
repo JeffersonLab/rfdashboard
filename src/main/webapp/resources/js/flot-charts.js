@@ -156,7 +156,9 @@ jlab.flotCharts.drawChart = function (chartId, data, flotOptions, settings) {
     
     // Draw the flot plot
     var plot = $.plot($("#" + chartId), plotData, options);
-    
+
+    jlab.flotCharts.addDownloadButton(chartId, plotData);
+
     // Add a custom legend off to the side
     if ( settings.legend ) {
          jlab.flotCharts.addLegend(chartId, settings.colors, settings.labels);
@@ -174,35 +176,63 @@ jlab.flotCharts.drawChart = function (chartId, data, flotOptions, settings) {
     return plot;
 };
 
+jlab.flotCharts.addDownloadButton = function(chartId, plotData, filename) {
+    var data = jlab.flotCharts.convertPlotDataToCSV(plotData);
+    var divId = chartId + "-data-download";
+    if (filename === undefined) {
+        filename = chartId + ".csv";
+    }
+    var content = '<button class="btn"><a href="data:,' + data + '" download="' + filename +'">Download</a></button>';
+    $("#" + chartId + "-data-download").prepend(content);
+};
 
+/**
+ * Converts a flot plotData object into a CSV format string
+ * @param plotData The flot plotData object
+ * @returns {string} A CSV formatted string of the data.
+ */
+jlab.flotCharts.convertPlotDataToCSV = function(plotData) {
+  var headers = [];
+  var data = [];
+  var nrows = 0;
+  var ncols = 0;
+  plotData.forEach(series => {
+      headers.push(series.label + "-X");
+      headers.push(series.label + "-Y");
+      ncols = ncols + 2;
+  });
 
-//            // These prev_* variables track whether or not the plothover event is for the same bar -- removes the "flicker" effect.
-//            var prev_point = null;
-//            var prev_label = null;
-//            
-//            $('#' + chartId).bind("plothover", function (event, pos, item) {
-//                if (item) {
-//                    if ((prev_point != item.dataIndex) || (prev_label != item.series.label)) {
-//                        prev_point = item.dataIndex;
-//                        prev_label = item.series.label;
-//
-//                        $('#flot-tooltip').remove();
-//                        // The item.datapoint is x coordinate of the bar, not of the original data point.  item.series.data contains
-//                        // the original data, and item.dataIndex this item's index in the data.
-//                        var timestamp = item.series.data[item.dataIndex][0];
-//                        var d = new Date(timestamp);
-//                        var time = jlab.triCharMonthNames[d.getMonth()] + " " + d.getDate();
-//                        var y = item.datapoint[1];
-//                        var borderColor = item.series.color;
-//                        var content = "<b>Series:</b> " + item.series.label + "<br /><b>Date:</b> " + time + "<br /><b>Value:</b> " + y;
-//                        jlab.showTooltip(item.pageX + 20, item.pageY - 20, content, borderColor);
-//                    }
-//                } else {
-//                    $('#flot-tooltip').remove();
-//                    prev_point = null;
-//                    prev_label = null;
-//                }
-//            });
+  plotData.forEach(series => {
+      if (series.data.length > nrows) {
+          nrows = series.data.length;
+      }
+  });
+
+  for(var i = 0; i < nrows; i++) {
+      data.push(new Array(ncols));
+  }
+
+  for(var j = 0; j < plotData.length; j++) {
+      var series = plotData[j];
+      for (var i = 0; i < series.data.length; i++) {
+          data[i][j*2] = series.data[i][0];
+          data[i][j*2 + 1] = series.data[i][1];
+      }
+      if (series.data.length < data.length) {
+          for (var i = series.data.length; i < data.length; i++) {
+              data[i][j*2] = "";
+              data[i][j*2 + 1] = "";
+          }
+      }
+  }
+
+  var out = new Array(nrows + 1);
+  out[0] = headers.join(",");
+  for (var i = 1; i < nrows + 1; i++) {
+      out[i] = data[i-1].join(",");
+  }
+  return out.join("\n");
+};
 
 
 //+++++++++++++++++++++++++++++++++
@@ -288,7 +318,7 @@ jlab.flotCharts.addXYToolTip = function(chartId, xlabel, ylabel) {
                         // the original data, and item.dataIndex this item's index in the data.
                         var timestamp = item.series.data[item.dataIndex][0];
                         var start = new Date(timestamp);
-                        x = jlab.triCharMonthNames[start.getMonth()] + " " + start.getDate();
+                        x = jlab.triCharMonthNames[start.getUTCMonth()] + " " + start.getUTCDate();
                     } else if (xlabel === "Time") {
                         var timestamp = new Date(item.series.data[item.dataIndex][0]);
                         x = jlab.formatPrettyTimestamp(timestamp);
