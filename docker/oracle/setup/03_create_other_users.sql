@@ -54,6 +54,7 @@ GRANT SELECT ON rfgradteam_owner.rfd_comments TO rfgradteam_rw;
 GRANT INSERT ON rfgradteam_owner.rfd_comments TO rfgradteam_rw;
 GRANT SELECT ON rfgradteam_owner.cavity_cache TO rfgradteam_rw;
 GRANT INSERT ON rfgradteam_owner.cavity_cache TO rfgradteam_rw;
+GRANT DELETE ON rfgradteam_owner.cavity_cache TO rfgradteam_rw;
 
 
 -- Add additional SELECT permissions to for the new mod_anode_harvester_*_seq so we can do "good" updates
