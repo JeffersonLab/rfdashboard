@@ -29,11 +29,15 @@ services:
     environment:
       RFD_FEEDBACK_SENDER_ADDRESS: 'admin@example.com'
       RFD_FEEDBACK_TO_ADDRESS_CSV: 'user1@example.com,user2@example.com'
-      RFD_CONTENT_CONTACT: 'bob@example.com'
-      RFD_TECHNICAL_CONTACT: 'larry@example.com'
+      RFD_CONTENT_CONTACT: 'User Name1 (username1)'
+      RFD_TECHNICAL_CONTACT: 'User Name2 (username2)'
       KEYCLOAK_REALM: 'test-realm'
       KEYCLOAK_RESOURCE: 'RFDashboard'
       KEYCLOAK_SECRET: 'yHi6W2raPmLvPXoxqMA7VWbLAA2WN0eB'
+      KEYCLOAK_BACKEND_SERVER_URL: 'http://keycloak:8080'
+      # If localhost, then rfd server tries to connect to itself and finds no one listening.  Need to expose
+      # keycloak port, and use dev system hostname to direct traffic to the proper system/port
+      # KEYCLOAK_FRONTEND_SERVER_URL: 'http://<hostname>:8081'
       KEYCLOAK_SERVER_URL: 'http://keycloak:8080'
       LOGBOOK_SERVER: 'elog'
       ORACLE_DATASOURCE: 'rfgradteam_rw'
