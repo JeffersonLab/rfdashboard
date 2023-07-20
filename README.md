@@ -2,6 +2,8 @@
 A Java EE 8 web application for high level display of the performance of CEBAF's RF and related systems.  This
 application is build using the [Smoothness](https://github.com/JeffersonLab/smoothness) web template.
 
+![Screenshot](https://github.com/JeffersonLab/rfdashboard/raw/main/Screenshot.png?raw=true "Screenshot")
+
 ## Overview
 
 The RF Dashboard summarizes data from a variety of sources including the CED, MYA, custom data collection scripts, and
