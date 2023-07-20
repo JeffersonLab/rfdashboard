@@ -21,10 +21,6 @@
         <param-value>RFD</param-value>
     </context-param>
     <context-param>
-        <param-name>cdnContextPath</param-name>
-        <param-value>https://cdn.acc.jlab.org</param-value>
-    </context-param>
-    <context-param>
         <param-name>releaseNumber</param-name>
         <param-value>@VERSION@</param-value>
     </context-param>
