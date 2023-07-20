@@ -36,6 +36,8 @@ understanding the performance of CEBAF's RF system at a point in time and identi
     docker compose 
     ```
 
+**Note**: Login with demo username "tbrown" and password "password".
+
 **See**: [Docker Compose Strategy](https://gist.github.com/slominskir/a7da801e8259f5974c978f9c3091d52c) developed by
 Ryan Slominski.
 
