@@ -35,5 +35,6 @@ GRANT SELECT ON rfgradteam_owner.cavity_cache TO rfgradteam_read;
 CREATE OR REPLACE SYNONYM rfgradteam_rw.cavity_cache FOR rfgradteam_owner.cavity_cache;
 GRANT SELECT ON rfgradteam_owner.cavity_cache TO rfgradteam_rw;
 GRANT INSERT ON rfgradteam_owner.cavity_cache TO rfgradteam_rw;
+GRANT DELETE ON rfgradteam_owner.cavity_cache TO rfgradteam_rw;
 GRANT SELECT ON rfgradteam_owner.cavity_cache_seq TO rfgradteam_rw;
 CREATE OR REPLACE SYNONYM rfgradteam_rw.cavity_cache_seq FOR rfgradteam_owner.cavity_cache_seq;
