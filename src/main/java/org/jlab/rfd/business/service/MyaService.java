@@ -26,7 +26,7 @@ import org.jlab.rfd.config.AppConfig;
 public class MyaService {
 
     private static final Logger LOGGER = Logger.getLogger(MyaService.class.getName());
-    public static final String MYSAMPLER_URL = AppConfig.getAppConfig().getMYAUrl() + "/myquery/mysampler";
+    public static final String MYSAMPLER_URL = AppConfig.getAppConfig().getMyqueryUrl() + "/myquery/mysampler";
 
     /**
      * A convenience method for getCavityMyaData when there is only a single PV postfix.

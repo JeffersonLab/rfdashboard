@@ -173,7 +173,7 @@ public class Cryo extends HttpServlet {
         }
 
         request.setAttribute("cavityData", cavityData);
-        request.setAttribute("myaURL", AppConfig.getAppConfig().getMYAUrl());
+        request.setAttribute("myaURL", AppConfig.getAppConfig().getMyqueryUrl());
 
         request.getRequestDispatcher("/WEB-INF/views/cryo.jsp").forward(request, response);
     }

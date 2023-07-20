@@ -199,7 +199,7 @@ public class EnergyReach extends HttpServlet {
             throw new ServletException("Error querying cavity datasources");
         }
         request.setAttribute("cavityData", cavityData.toString());
-        request.setAttribute("myaURL", AppConfig.getAppConfig().getMYAUrl());
+        request.setAttribute("myaURL", AppConfig.getAppConfig().getMyqueryUrl());
 
         request.getRequestDispatcher("/WEB-INF/views/energy-reach.jsp").forward(request, response);
     }

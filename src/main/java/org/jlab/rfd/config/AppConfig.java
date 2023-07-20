@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 public class AppConfig {
     private static final Logger LOGGER = Logger.getLogger(AppConfig.class.getName());
     private static final String DEFAULT_CONFIG_FILE = "/config/rfdashboard.properties";
-    private static final List<String> CONFIG_OPTIONS = new ArrayList<>(List.of("CED_URL", "MYA_URL"));
+    private static final List<String> CONFIG_OPTIONS = new ArrayList<>(List.of("CED_URL", "MYQUERY_URL"));
     private final Properties config;
     private static AppConfig configInstance = null;
 
@@ -49,7 +49,7 @@ public class AppConfig {
      */
     private static void updateFromDefaultConfig(Properties config) {
         config.put("CED_URL", "https://ced.acc.jlab.org");
-        config.put("MYA_URL", "https://myaweb.acc.jlab.org");
+        config.put("MYQUERY_URL", "https://epicsweb.jlab.org");
     }
 
     /**
@@ -115,10 +115,10 @@ public class AppConfig {
         }
     }
 
-    public String getMYAUrl() {
+    public String getMyqueryUrl() {
         // configInstance starts as null, but only one is ever created.  Can't call this method until it exists.
         synchronized (configInstance) {
-            return this.config.getProperty("MYA_URL");
+            return this.config.getProperty("MYQUERY_URL");
         }
     }
 

@@ -27,7 +27,7 @@ public class AppConfigTest {
     public void basicUsage(){
         AppConfig config = AppConfig.getAppConfig();
         assertEquals(config.getCEDUrl(), "http://localhost:8080/RFDashboard");
-        assertEquals(config.getMYAUrl(), "http://localhost:8080/RFDashboard");
+        assertEquals(config.getMyqueryUrl(), "http://localhost:8080/RFDashboard");
     }
     @Test
     public void getCEDUrl_File() {
@@ -39,7 +39,7 @@ public class AppConfigTest {
     @Test
     public void getMYAUrl_File() {
         String exp = "http://localhost:8080/RFDashboard";
-        String result = AppConfig.getAppConfig(null, new MockEnvironment(), true).getMYAUrl();
+        String result = AppConfig.getAppConfig(null, new MockEnvironment(), true).getMyqueryUrl();
         assertEquals(exp, result);
     }
 
@@ -55,10 +55,10 @@ public class AppConfigTest {
 
     @Test
     public void getMYAUrl_Stream() {
-        String cfg = "MYA_URL = test_mya_stream";
+        String cfg = "MYQUERY_URL = test_mya_stream";
         String exp = "test_mya_stream";
         InputStream is = new ByteArrayInputStream(cfg.getBytes());
-        String result = AppConfig.getAppConfig(is, new MockEnvironment(), true).getMYAUrl();
+        String result = AppConfig.getAppConfig(is, new MockEnvironment(), true).getMyqueryUrl();
         assertEquals(exp, result);
     }
 
@@ -75,8 +75,8 @@ public class AppConfigTest {
     public void getMYAUrl_ENV() {
         String exp = "test_mya_env";
         Map<String, String> env = new HashMap<>();
-        env.put("RFD_MYA_URL", "test_mya_env");
-        String result = AppConfig.getAppConfig(null, new MockEnvironment(env), true).getMYAUrl();
+        env.put("RFD_MYQUERY_URL", "test_mya_env");
+        String result = AppConfig.getAppConfig(null, new MockEnvironment(env), true).getMyqueryUrl();
         assertEquals(exp, result);
     }
 }
