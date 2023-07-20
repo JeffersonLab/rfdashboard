@@ -6,8 +6,8 @@
 package org.jlab.rfd.presentation.controller;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,7 +35,6 @@ public class Cryo extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(Cryo.class.getName());
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -49,10 +48,10 @@ public class Cryo extends HttpServlet {
             throws ServletException, IOException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-        Date end, start, tableDate;
+        Date end, start;
         boolean redirectNeeded = false;
 
-        LOGGER.log(Level.FINEST, "Cryo controler with received parameters: {0}", request.getParameterMap());
+        LOGGER.log(Level.FINEST, "Cryo controller with received parameters: {0}", request.getParameterMap());
 
         if (request.getParameter("end") == null || request.getParameter("end").equals("")) {
             LOGGER.log(Level.FINEST, "No end parameter supplied.  Defaulting to now.");
@@ -64,7 +63,7 @@ public class Cryo extends HttpServlet {
                 end = sdf.parse(request.getParameter("end"));
                 request.setAttribute("end", sdf.format(end));
             } catch (ParseException e) {
-                end = new Date();  // In case something bad happend during try.
+                end = new Date();  // In case something bad happened during try.
                 LOGGER.log(Level.WARNING, "Error parsing end parameter '{0}'.  Defaulting to now", request.getParameter("end"));
                 request.setAttribute("end", sdf.format(end));
                 redirectNeeded = true;
@@ -151,16 +150,12 @@ public class Cryo extends HttpServlet {
 
         if (redirectNeeded) {
             String redirectUrl;
-            try {
-                redirectUrl = request.getContextPath()
-                        + "/cryo?start=" + URLEncoder.encode((String) request.getAttribute("start"), "UTF-8")
-                        + "&end=" + URLEncoder.encode((String) request.getAttribute("end"), "UTF-8")
-                        + "&diffStart=" + URLEncoder.encode((String) request.getAttribute("diffStart"), "UTF-8")
-                        + "&diffEnd=" + URLEncoder.encode((String) request.getAttribute("diffEnd"), "UTF-8")
-                        + "&timeUnit=" + URLEncoder.encode((String) request.getAttribute("timeUnit"), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException("JVM doesn't support UTF-8");
-            }
+            redirectUrl = request.getContextPath()
+                    + "/cryo?start=" + URLEncoder.encode((String) request.getAttribute("start"), StandardCharsets.UTF_8)
+                    + "&end=" + URLEncoder.encode((String) request.getAttribute("end"), StandardCharsets.UTF_8)
+                    + "&diffStart=" + URLEncoder.encode((String) request.getAttribute("diffStart"), StandardCharsets.UTF_8)
+                    + "&diffEnd=" + URLEncoder.encode((String) request.getAttribute("diffEnd"), StandardCharsets.UTF_8)
+                    + "&timeUnit=" + URLEncoder.encode((String) request.getAttribute("timeUnit"), StandardCharsets.UTF_8);
             response.sendRedirect(response.encodeRedirectURL(redirectUrl));
             return;
         }
