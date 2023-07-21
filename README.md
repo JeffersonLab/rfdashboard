@@ -2,7 +2,7 @@
 A Java EE 8 web application for high level display of the performance of CEBAF's RF and related systems.  This
 application is build using the [Smoothness](https://github.com/JeffersonLab/smoothness) web template.
 
-![Screenshot](https://github.com/JeffersonLab/rfdashboard/raw/main/Screenshot.png?raw=true "Screenshot")
+![Screenshot](https://github.com/JeffersonLab/rfdashboard/raw/master/Screenshot.png?raw=true "Screenshot")
 
 ## Overview
 
@@ -51,7 +51,7 @@ Some docker configuration is left commented out for the mya/myquery dependency a
 but interactions are more flexible over the VPN.  Since CED still requires the VPN, it makes more sense to leverage the
 "real" service.
 
-1. Install service [dependencies](https://github.com/JeffersonLab/rfdashboard/blob/main/deps.yml)
+1. Install service [dependencies](https://github.com/JeffersonLab/rfdashboard/blob/master/deps.yml)
 2. Download [Wildfly 26.1.3](https://www.wildfly.org/downloads/)
 3. [Configure](https://github.com/JeffersonLab/rfdashboard#configure) Wildfly and start it
 4. Download [rfdashboard.war](https://github.com/JeffersonLab/rfdashboard/releases) and deploy it to Wildfly
@@ -63,7 +63,7 @@ but interactions are more flexible over the VPN.  Since CED still requires the V
 ### Configtime
 Wildfly must be pre-configured before the first deployment of the app.  The 
 [wildfly bash scripts](https://github.com/JeffersonLab/wildfly#configure) can be used to accomplish this.  See the 
-[Dockerfile](https://github.com/JeffersonLab/rfdashboard/blob/main/Dockerfile) for an example.
+[Dockerfile](https://github.com/JeffersonLab/rfdashboard/blob/master/Dockerfile) for an example.
 
 ### Runtime
 Uses the [Smoothness Environment Variables](https://github.com/JeffersonLab/smoothness#global-runtime) plus the 
@@ -76,7 +76,7 @@ following application specific:
 
 ### Database
 The RF Dashboard app requires an Oracle 18+ database with the following
-[schema](https://github.com/JeffersonLab/rfdashboard/tree/main/docker/oracle/setup) installed.  The application server
+[schema](https://github.com/JeffersonLab/rfdashboard/tree/master/docker/oracle/setup) installed.  The application server
 hosting the RF Dashboard application must also be configured with a JNDI datasource.
 
 ## Build
@@ -100,4 +100,4 @@ in the source
 1. Bump the version number and release date in build.gradle and commit and push to GitHub (using [Semantic Versioning](https://semver.org/)).
 2. Create a new release on the GitHub Releases page corresponding to the same version in the build.gradle.   The release should enumerate changes and link issues.   A war artifact can be attached to the release to facilitate easy installation by users.
 3. Build and publish a new Docker image [from the GitHub tag](https://gist.github.com/slominskir/a7da801e8259f5974c978f9c3091d52c#8-build-an-image-based-of-github-tag). GitHub is configured to do this automatically on git push of semver tag (typically part of GitHub release) or the [Publish to DockerHub](https://github.com/JeffersonLab/rfdashboard/actions/workflows/docker-publish.yml) action can be manually triggered after selecting a tag.
-4. Bump and commit quick start [image version](https://github.com/JeffersonLab/rfdashboard/blob/main/docker-compose.override.yml)
+4. Bump and commit quick start [image version](https://github.com/JeffersonLab/rfdashboard/blob/master/docker-compose.override.yml)
