@@ -11,9 +11,6 @@
 <c:set var="title" value="New Comment"/>
 <t:reports-page title="${title}">
     <jsp:attribute name="stylesheets">
-        <link rel="stylesheet" href="${initParam.cdnContextPath}/jquery-plugins/select2/3.5.2/select2.css"/>
-        <link rel="stylesheet" href="${initParam.cdnContextPath}/jquery-plugins/timepicker/jquery-ui-timepicker-1.3.1.css"/>
-
         <style type="text/css">
             #subject {
                 width: 375px;
@@ -31,9 +28,7 @@
         </style>
     </jsp:attribute>
     <jsp:attribute name="scripts">
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/select2/3.5.2/select2.min.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/timepicker/jquery-ui-timepicker-1.3.1.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/utils.js"></script>
         <script type="text/javascript">
             var jlab = jlab || {};
             jlab.comment = jlab.comment || {};
@@ -114,7 +109,7 @@
                 </c:when>
                 <c:otherwise>
                     <div class="message-box">
-                        <a href="<c:url value="/login"><c:param name="returnUrl" value="${domainRelativeReturnUrl}"/></c:url>">Comment Form</a>
+                        <a href="<c:url value="/sso"><c:param name="returnUrl" value="${domainRelativeReturnUrl}"/></c:url>">Comment Form</a>
                     </div>
                 </c:otherwise>
             </c:choose>

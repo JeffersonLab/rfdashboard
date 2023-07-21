@@ -15,10 +15,8 @@ jlab.bypassed.bypassedUrl = "/RFDashboard/bypassed";
 jlab.bypassed.loadBypassedCountByFactorChart = function (chartId, start, end, bypassedData, timeUnit, factor) {
     jlab.showChartLoading(chartId);
 
-    var colors = jlab.colors.cmtypes;
-    if (factor === 'linac') {
-        colors = jlab.colors.linacs;
-    }
+    var colors = [];
+    bypassedData.labels.forEach(label => colors.push(jlab.colors[label]));
 
     var settings = {
         colors: colors, // Grab the North, South, and Total colors

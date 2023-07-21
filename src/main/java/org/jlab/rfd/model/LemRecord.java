@@ -38,7 +38,7 @@ public class LemRecord {
     }
 
     public List<Integer> getEnergy() {
-        return new ArrayList(tripRates.keySet());
+        return new ArrayList<>(tripRates.keySet());
     }
 
     public long getScanId() {

@@ -11,9 +11,7 @@ import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.JsonObject;
@@ -162,7 +160,16 @@ public class Bypassed extends HttpServlet {
         List<Date> date = new ArrayList<>();
         date.add(tableDate);
         try {
-            bypassedCMType = DataFormatter.toFlotFromDateMap(cs.getCavityDataSpan(start, end, tu).getBypassedCountByCMType());
+            // J. Benesch requested this type of mapping
+            Map<String, String> typeMapper = new HashMap<>();
+            typeMapper.put("C100", "C100");
+            typeMapper.put("F100", "C100");
+            typeMapper.put("C25", "C25");
+            typeMapper.put("C50", "C50");
+            typeMapper.put("C50T", "C50");
+            typeMapper.put("C75", "C75");
+
+            bypassedCMType = DataFormatter.toFlotFromDateMap(cs.getCavityDataSpan(start, end, tu).getBypassedCountByCMType(typeMapper));
             bypassedLinac = DataFormatter.toFlotFromDateMap(cs.getCavityDataSpan(start, end, tu).getBypassedCountByLinac());
             tableData = cs.getCavityDataSpan(date).toJson();
         } catch (ParseException | SQLException ex) {

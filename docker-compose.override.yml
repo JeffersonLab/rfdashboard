@@ -1,0 +1,3 @@
+services:
+  rfd:
+    image: jeffersonlab/rfdashboard:2.0.0

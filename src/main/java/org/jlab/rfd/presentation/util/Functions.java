@@ -8,7 +8,6 @@ package org.jlab.rfd.presentation.util;
 import java.util.List;
 
 /**
- *
  * @author adamc
  */
 public class Functions {
@@ -42,4 +41,16 @@ public class Functions {
         return inList;
     }
 
+    public static String capitalizeFirst(String s) {
+        if (s == null) {
+            return null;
+        } else if (s.isEmpty()) {
+            return s;
+        } else if (s.length() == 1) {
+            return s.toUpperCase();
+        } else {
+            String s1 = s.substring(0, 1).toUpperCase();
+            return s1 + s.substring(1);
+        }
+    }
 }

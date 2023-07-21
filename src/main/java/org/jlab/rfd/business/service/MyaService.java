@@ -9,20 +9,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap; 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import org.jlab.rfd.business.util.DateUtil;
+import org.jlab.rfd.config.AppConfig;
 
 /**
  *
@@ -31,76 +26,129 @@ import org.jlab.rfd.business.util.DateUtil;
 public class MyaService {
 
     private static final Logger LOGGER = Logger.getLogger(MyaService.class.getName());
-    public static final String MYSAMPLER_URL = "https://myaweb.acc.jlab.org/mySampler/data";
+    public static final String MYSAMPLER_URL = AppConfig.getAppConfig().getMyqueryUrl() + "/myquery/mysampler";
 
-    /*
-    * returns null if timestamp is for future date
-    * This assumes that PVs are of the structure <EPICSName><postfix>.  E.g. R123GMES or R2A8ODVH
-    */
-    public Map<String, BigDecimal> getCavityMyaData(Date timestamp, Map<String, String> name2Epics, String postfix) throws IOException, ParseException {
+    /**
+     * A convenience method for getCavityMyaData when there is only a single PV postfix.
+     * @param timestamp What date are we sampling the data for
+     * @param name2Epics A map of cavity name (CED) to EPICSName.  This is used to map results back to cavity name.
+     * @param postfix The single postfix to be appended to every EPICSName
+     * @return A map of cavity names (CED) to BigDecimal values of the PVs at that time or null if timestamp is in the
+     * future.
+     * @throws IOException If problem arise while contacting the mya web service.
+     */
+    public Map<String, BigDecimal> getCavityMyaData(Date timestamp, Map<String, String> name2Epics, String postfix) throws IOException {
+        Map<String, List<String>> postfixes = new HashMap<>();
+        for (String name : name2Epics.keySet()) {
+            postfixes.putIfAbsent(name, new ArrayList<>());
+            postfixes.get(name).add(postfix);
+        }
+        return getCavityMyaData(timestamp, name2Epics, postfixes);
+    }
 
+
+    /**
+     * Query the MYA mysampler webservice for a collection of RF cavity PVs.  This assumes that PVs follow the standard
+     * pattern of EPICSName<postfix>.  All values are assumed to be numeric values represented by BigDecimals.
+     * @param timestamp What date are we sampling the data for
+     * @param name2Epics A map of cavity name (CED) to EPICSName.  This is used to map results back to cavity name.
+     * @param postfixes A map of cavity name (CED) to a list of PV postfixes that are to be queried.
+     * @return A map of cavity names (CED) to BigDecimal values of the PVs at that time or null if timestamp is in the
+     * future.
+     * @throws IOException If problem arise while contacting the mya web service.
+     */
+    public Map<String, BigDecimal> getCavityMyaData(Date timestamp, Map<String, String> name2Epics, Map<String, List<String>> postfixes) throws IOException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         if ( timestamp.after(new Date()) ) {
             return null;
+        }
+
+        // Switch to the history deployment if we are querying more than 180 days (~6 months) in the past
+        String deployment = "ops";
+        if (DateUtil.getDifferenceInDays(timestamp, new Date()) > 180) {
+            deployment = "history";
         }
         Map<String, BigDecimal> gsetData = new HashMap<>();
         
         // Create a reverse lookup map.  name2Epics should be a 1:1 map
         Map<String, String> epics2Name = new HashMap<>();
-        for( String name : (Set<String>) name2Epics.keySet()) {
+        for( String name : name2Epics.keySet()) {
             if (epics2Name.put(name2Epics.get(name), name) != null ) {
                 throw new IllegalArgumentException("Found cavity to gset map was not 1:1");
             }
         }
 
         // Create the channel request string
-        String channels = "";        
-        for (String epicsName:  name2Epics.values() ) {
-            if ( channels.isEmpty() ) {
-                channels = epicsName + postfix;
-            } else {
-                channels = channels + "+" + epicsName + postfix;
+        boolean empty = true;
+        StringBuilder builder = new StringBuilder();
+        for (String name:  name2Epics.keySet() ) {
+            String epicsName = name2Epics.get(name);
+            for (String postfix : postfixes.get(name)) {
+                if (!empty) {
+                    builder.append(",");
+                } else {
+                    empty = false;
+                }
+                builder.append(epicsName);
+                builder.append(postfix);
             }
         }
-        
-        String mySamplerQuery = "?b=" + sdf.format(timestamp) + "&s=1&n=1&m=&channels=" + channels;
+        String channels = builder.toString();
+
+        String mySamplerQuery = "?b=" + sdf.format(timestamp) + "&m=" + deployment + "&s=1&n=1&m=&c=" + channels;
         URL url = new URL(MYSAMPLER_URL + mySamplerQuery);
         InputStream in = url.openStream();
         try (JsonReader reader = Json.createReader(in)) {
             JsonObject json = reader.readObject();
-            //LOGGER.log(Level.FINEST, "Received mySampler response: {0}", json.toString());
             if (json.containsKey("error")) {
                 LOGGER.log(Level.WARNING, "Error querying mySampler web service.  Response: {0}", json.toString());
                 throw new IOException("Error querying mySampler web service: " + json.getString("error"));
             }
-            JsonArray values = json.getJsonArray("data").getJsonObject(0).getJsonArray("values");
-            //LOGGER.log(Level.FINEST, "Recevied GSET data: {0}", values.toString());
-            
-            for(JsonObject value: values.getValuesAs(JsonObject.class)) {
-                String epicsName = ((String) value.keySet().toArray()[0]).substring(0, 4);
-                BigDecimal gset = null;
-                if (! value.getString(epicsName + postfix).startsWith("<") ) {
-                    gset = new BigDecimal(value.getString(epicsName + postfix));
+
+            JsonObject chan = json.getJsonObject("channels");
+            for (String pv : chan.keySet()) {
+                if (pv == null || pv.isEmpty()) {
+                    continue;
+                } else if (chan.getJsonObject(pv).containsKey("error")) {
+                    throw new IOException("Error querying PV '" + pv + "'.  " + chan.getJsonObject(pv).getString("error"));
                 }
+                String epicsName = pv.substring(0, 4);
+                BigDecimal gset = null;
+                JsonObject sample = chan.getJsonObject(pv).getJsonArray("data").get(0).asJsonObject();
 
-                //LOGGER.log(Level.FINEST, "GSETService Processing value: timestamp{0}, epicsName: {1}, gset: {2}",
-                //        new Object[] {sdf.format(timestamp), epicsName, gset});
-
+                if (sample.containsKey("v")) {
+                    gset = sample.getJsonNumber("v").bigDecimalValue();
+                }
                 gsetData.put(epics2Name.get(epicsName), gset);
             }
         }
-        
         return gsetData;
     }
 
     /**
-     * Runs a query against the myaweb mySampler service.  This simplified version hands back a single sample for the specified
+     * A simplified interface for a single date query.  Will use the history deployment if the request is older than
+     * about six months.
+     * @param channels The channels to be sampled
+     * @param date The time at which to sample them.
+     * @return A map of PVs to mySampler result
+     */
+    public Map<String, String> mySampler(List<String> channels, Date date) throws IOException {
+        String deployment = "ops";
+        if (DateUtil.getDifferenceInDays(date, new Date()) > 180) {
+            deployment = "history";
+        }
+        return mySampler(channels, date, deployment);
+    }
+
+
+    /**
+     * Runs a query against the myquery mySampler service.  This simplified version hands back a single sample for the specified
      * date
      * @param channels A list of PVs
      * @param date The date to sample on
-     * @param deployment
+     * @param deployment The MYA deployment to query
      * @return A map of PVs to response
-     * @throws java.io.IOException Propogated up or thrown directly if the JSON resonse contains an error key
+     * @throws java.io.IOException Propagated up or thrown directly if the JSON response contains an error key
      */
     public Map<String, String> mySampler(List<String> channels, Date date, String deployment) throws IOException {
         
@@ -111,20 +159,24 @@ public class MyaService {
             throw new IOException("Mya Error: " +  response.getString("error"));
         }
 
-        JsonArray data = response.getJsonArray("data");
-        JsonArray values = data.getJsonObject(0).getJsonArray("values");
-        
-        // The values array contains objects with a single PVName: Value pair.
-        for(JsonObject pv : values.getValuesAs(JsonObject.class)) {
-            String[] names = pv.keySet().toArray(new String[pv.size()]);
-            out.put(names[0], pv.getString(names[0]));
+        JsonObject chan = response.getJsonObject("channels");
+        for (String pv : chan.keySet()) {
+            JsonObject sample = chan.getJsonObject(pv).getJsonArray("data").get(0).asJsonObject();
+
+            if (sample.get("v") != null) {
+                out.put(pv, sample.getJsonNumber("v").toString());
+            } else if (sample.getString("t") !=null) {
+                out.put(pv, sample.getString("t"));
+            } else {
+                throw new IOException("Unexpected mySampler format for '" + pv + "': " + sample);
+            }
         }
-        
+
         return out;
     }
     
     /**
-     * Runs a query against the myaweb mySampler service.  You probably want to use the simpler two parameter version
+     * Runs a query against the myquery mySampler service.  You probably want to use the simpler two parameter version
      * @param channels A list of PVs
      * @param date The start date
      * @param stepSize mySampler s param
@@ -134,15 +186,14 @@ public class MyaService {
      * @throws IOException Thrown if issue with URL connection to mySampler service
      */
     public JsonObject mySampler(List<String> channels, Date date, int stepSize, int numSteps, String deployment) throws IOException {
-        
-        String pvs = String.join("+", channels);
-        
-        String query = "?b=" + DateUtil.formatDateYMD(date) + "&n=" + numSteps + "&s=" + stepSize + "&m=" + deployment 
-                + "&channels=" + pvs;
+
+        String pvs = String.join(",", channels);
+        String query = "?b=" + DateUtil.formatDateYMD(date) + "&n=" + numSteps + "&s=" + stepSize * 1000L + "&m=" + deployment
+                + "&c=" + pvs;
 
         URL url = new URL(MYSAMPLER_URL + query);
         InputStream in = url.openStream();
-        JsonObject out = null;
+        JsonObject out;
         try (JsonReader reader = Json.createReader(in)) {
             out = reader.readObject();
         }

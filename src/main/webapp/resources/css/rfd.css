@@ -688,6 +688,20 @@ th.scrollbar-header {
 .chart-panel {
     width: 100%;
 }
+.chart-wrap .chart-download {
+    position: relative;
+    display: inline-block;
+    float: right;
+}
+.chart-wrap .chart-download .btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.chart-wrap .chart-download .btn a {
+    color: black;
+}
 .color-box {
     height: 16px;
     width: 24px;

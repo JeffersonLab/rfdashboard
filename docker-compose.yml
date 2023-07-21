@@ -1,0 +1,50 @@
+services:
+  oracle:
+    extends:
+      file: deps.yml
+      service: oracle
+
+  keycloak:
+    extends:
+      file: deps.yml
+      service: keycloak
+
+  puppet:
+    extends:
+      file: deps.yml
+      service: puppet
+
+  mailhog:
+    extends:
+      file: deps.yml
+      service: mailhog
+
+  rfd:
+    hostname: rfd
+    container_name: rfd
+    ports:
+      - "8443:8443"
+      - "8080:8080"
+      - "9990:9990"
+    environment:
+      RFD_FEEDBACK_SENDER_ADDRESS: 'admin@example.com'
+      RFD_FEEDBACK_TO_ADDRESS_CSV: 'user1@example.com,user2@example.com'
+      RFD_CONTENT_CONTACT: 'User Name1 (username1)'
+      RFD_TECHNICAL_CONTACT: 'User Name2 (username2)'
+      KEYCLOAK_REALM: 'test-realm'
+      KEYCLOAK_RESOURCE: 'RFDashboard'
+      KEYCLOAK_SECRET: 'yHi6W2raPmLvPXoxqMA7VWbLAA2WN0eB'
+      KEYCLOAK_BACKEND_SERVER_URL: 'http://keycloak:8080'
+      # If localhost, then rfd server tries to connect to itself and finds no one listening.  Need to expose
+      # keycloak port, and use dev system hostname to direct traffic to the proper system/port
+      # KEYCLOAK_FRONTEND_SERVER_URL: 'http://<hostname>:8081'
+      KEYCLOAK_SERVER_URL: 'http://keycloak:8080'
+      LOGBOOK_SERVER: 'elog'
+      ORACLE_DATASOURCE: 'rfgradteam_rw'
+      ORACLE_SERVER: 'oracle:1521'
+      ORACLE_USER: 'rfgradteam_rw'
+      ORACLE_PASS: 'rfgradteam_rw'
+      ORACLE_SERVICE: 'xepdb1'
+      PUPPET_SHOW_SERVER: 'puppet:3000'
+      BACKEND_SERVER_URL: 'http://rfd:8080'
+      FRONTEND_SERVER_URL: 'https://localhost:8443'

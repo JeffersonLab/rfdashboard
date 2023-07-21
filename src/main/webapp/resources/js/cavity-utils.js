@@ -11,7 +11,7 @@ jlab.cavity = jlab.cavity || {};
 jlab.cavity.getCavityData = function (settings) {
 
     var exitFunc = function (msg) {
-        console.log(msg);
+        window.console && console.log(msg);
         throw msg;
     };
 
@@ -82,7 +82,7 @@ jlab.cavity.getCavityData = function (settings) {
                 "textStatus": textStatus,
                 "errorThrown": errorThrown
             };
-            console.log("Error querying cavity service", ajaxSettings, textStatus, errorThrown);
+            window.console && console.log("Error querying cavity service", ajaxSettings, textStatus, errorThrown);
         },
         "success": success
     };
@@ -132,7 +132,7 @@ jlab.cavity.getStartEndMaps = function (cavityJson, start, end, commentData) {
         cavityMaps[0] = jlab.cavity.createCavityMap(cavityJson.data[1], commentData); // end
         cavityMaps[1] = jlab.cavity.createCavityMap(cavityJson.data[0]); //start
     } else {
-        console.log("Error: received unexpected AJAX cavity service repsonse", cavityJson);
+        window.console && console.log("Error: received unexpected AJAX cavity service repsonse", cavityJson);
         return null;
     }
 
@@ -147,7 +147,7 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
     // Check that the two maps contain identical cavity sets
     var match = jlab.util.compareMapKeySets(startMap, endMap);
     if (!match) {
-        console.log("Error: start and end maps contain different cavities");
+        window.console && console.log("Error: start and end maps contain different cavities");
         return null;
     }
 
@@ -229,6 +229,7 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
                 break;
             default:
                 hArray.push(prop);
+                window.console && console.log("Unexpected property: " + prop);
         }
     }
     if (jlab.util.arrayIncludes(properties, "comments")) {
@@ -399,7 +400,7 @@ jlab.cavity.getTotalsByCMType = function (startMap, endMap) {
 
     var match = jlab.util.compareMapKeySets(startMap, endMap);
     if (!match) {
-        console.log("Error: start and end maps contain different cavities");
+        window.console && console.log("Error: start and end maps contain different cavities");
         return null;
     }
 
@@ -518,7 +519,7 @@ jlab.cavity.createCavitySetPointTables = function (basicId, advId, summaryId, ca
     if (maps === null) {
         jlab.util.hideTableLoading(basicId, "Error querying data");
         jlab.util.hideTableLoading(summaryId, "Error querying data");
-        console.log("Error: received unexpected AJAX cavity service repsonse", json);
+        window.console && console.log("Error: received unexpected AJAX cavity service repsonse", json);
         return;
     } else {
         startMap = maps[0];

@@ -47,13 +47,13 @@ jlab.requestEnd = function () {
 };
 
 jlab.colors = jlab.colors || {};
-// Inj, North, South, Total, Unknown
-jlab.colors.linacs = ["#FF0000", "#006400", "#273BE7", "#333333", "#ECAF2F"];
-// C100, C25, C50, C75, F100, C50T, Total, Unknown
-jlab.colors.cmtypes = ["#FFCE00", "#0375B4", "#007849", "#34EBB1", "#EB34E5", "#239E23", "#333333", "#ECAF2F"];
-// Total 1050, Total 1050 No M.A.V, Total 1090, Total 1090 No M.A.V
-jlab.colors.modAnodeHarvester = ["#5e3c99", "#b2abd2", "#e66101", "#fdb863"];
-jlab.colors.energyReach = ["#666666"];
+jlab.colors = {
+    "Reach": "#666666", "Total":"#333333", "Unknown": "#ECAF2F",
+    "Injector": "#FF0000", "North": "#006400", "South": "#273BE7",
+    "C100": "#FFCE00", "C25": "#0375B4", "C50": "#007849", "C75": "#239E23",
+    "C50T": "#0ff0aa", "F100": "#e80000", "QTR": "#AF7171",
+    "Total_1050": "#5e3c99", "Total_1050_NoMAV": "#b2abd2", "Total_1090": "#e66101", "Total_1090_NoMAV": "#fdb863"
+};
 
 // Default JQuery dialog properties
 jlab.dialogProperties = {
@@ -187,6 +187,18 @@ jlab.daysBetweenDates = function (d1, d2) {
     return (d2 - d1) / millisPerDay;
 };
 
+
+// This returns a date string (YYYY-mm-dd that is the end date adjusted to the week boundary that occurs after,
+// but nearest to end.
+jlab.adjustEndToWeekBoundary = function(date1, date2) {
+    var days = jlab.daysBetweenDates(date1, date2);
+    var d2 = new Date(date2);
+
+    // Set the date to whatever it was plus the number needed to hit the next week boundary (7 day grouping).
+    d2.setDate(d2.getDate() + 7 - (days % 7));
+    return jlab.formatDatePretty(d2);
+};
+
 // This does a decent job of parsing out argument names of a function.
 // It gets tripped up by things like defualt values using '()' (e.g. a  = 1 / (5*7)),
 // but I don't tend to do those things.
@@ -254,6 +266,20 @@ jlab.formatTimestampPretty = function (date) {
             ':' + pad(this.getMinutes()) +
             ':' + pad(this.getSeconds());
 };
+
+
+jlab.formatDatePretty = function(date) {
+    function pad(number) {
+        if (number < 10) {
+            return '0' + number;
+        }
+        return number;
+    }
+
+    return date.getUTCFullYear() +
+        '-' + pad(date.getUTCMonth() + 1) +
+        '-' + pad(date.getUTCDate());
+}
 
 /*
  * Generates a simple HTML table from a 2D arary.  Uses the first row as headers.
@@ -442,8 +468,9 @@ jlab.util.initCalendarStartEnd = function(widgetId) {
  * id - the id of the element to prepend legend tag (no leading '#')
  * colors - array with fill colors that match the chart
  * labels - array with color labels that match the chart
+ * colorFirst - should the color appear before the label
  */
-jlab.util.addLegend = function (id, colors, labels) {
+jlab.util.addLegend = function (id, colors, labels, colorFirst=false) {
     var legendString = "<div class=chart-legend id=" + id + '-legend">\n';
     legendString += "<table>";
     if (colors.length !== labels.length) {
@@ -451,7 +478,11 @@ jlab.util.addLegend = function (id, colors, labels) {
     }
     legendString += '<tr>';
     for (var i = 0; i < colors.length; i++) {
-        legendString += '<td>' + labels[i] + '</td>' + '<td><div class=color-box style="background-color: ' + colors[i] + ';"></div></td>';
+        if (colorFirst) {
+            legendString += '<td><div class=color-box style="background-color: ' + colors[i] + ';"></div></td>' + '<td>' + labels[i] + '</td>';
+        } else {
+            legendString += '<td>' + labels[i] + '</td>' + '<td><div class=color-box style="background-color: ' + colors[i] + ';"></div></td>';
+        }
     }
     legendString += '</tr>';
 

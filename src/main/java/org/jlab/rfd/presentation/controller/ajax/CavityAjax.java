@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +32,6 @@ import org.jlab.rfd.model.TimeUnit;
 public class CavityAjax extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(CavityAjax.class.getName());
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -46,103 +43,75 @@ public class CavityAjax extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        PrintWriter pw = response.getWriter();
-        
-        long ts = new Date().getTime();
-        //LOGGER.log(Level.FINEST, "Received followig request parameters: {0}", request.getParameterMap().toString());
+        response.setContentType("application/json");
 
-        TimeUnit timeUnit = RequestParamUtil.processTimeUnit(request, TimeUnit.WEEK);
-        if (timeUnit == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            LOGGER.log(Level.SEVERE, "Unsupported timeUnit value supplied {0}", timeUnit);
-            response.setContentType("application/json");
-            pw.write("{error: 'Unsupported timeUnit value \"" + timeUnit + "\" supplied'}");
-            return;
-        }
-        
-        // Support requesting a selection of dates as an alternative to a full range.  This should override the start/end request.
-        List<Date> dates;
-        try {
-            dates = RequestParamUtil.processDate(request);
-        } catch ( ParseException ex ) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
-            response.setContentType("application/json");
-            pw.write("{error: 'Error parsing start/end parameters'}");
-            return;
-        }
-        if ( dates != null && dates.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            LOGGER.log(Level.SEVERE, "Error.  No valid date requested");
-            response.setContentType("application/json");
-            pw.write("{error: 'Error. No valid date requested'}");
-            return;
-        }
-              
-        Map<String, Date> startEnd;
-        Date start = null;
-        Date end = null;
-        if (dates == null) {
+        try (PrintWriter pw = response.getWriter()) {
+            TimeUnit timeUnit = RequestParamUtil.processTimeUnit(request, TimeUnit.WEEK);
+            if (timeUnit == null) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                LOGGER.log(Level.SEVERE, "Unsupported timeUnit value supplied 'null'");
+                pw.write("{\"error\": \"Unsupported timeUnit value 'null' supplied\"}");
+                return;
+            }
+
+            // Support requesting a selection of dates as an alternative to a full range.  This should override the start/end request.
+            List<Date> dates;
             try {
-                startEnd = RequestParamUtil.processStartEnd(request, TimeUnit.WEEK, 4);
-                start = startEnd.get("start");
-                end = startEnd.get("end");
+                dates = RequestParamUtil.processDate(request);
             } catch (ParseException ex) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
-                response.setContentType("application/json");
-                pw.write("{error: 'Error parsing start/end parameters'}");
+                pw.write("{\"error\": \"Error parsing start/end parameters\"}");
                 return;
             }
-        }
-        
-        String[] valid = {"json"};
-        String out = RequestParamUtil.processOut(request, valid, "json");
-        if (out == null ) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            LOGGER.log(Level.SEVERE, "Unsupported out value supplied {0}", out);
-            response.setContentType("application/json");
-            pw.write("{error:\"Unsupported out value '" + out + "' supplied\"}");
-            return;            
-        }
-        
-        CavityService cs = new CavityService();
-        CavityDataSpan span;
-        if (dates == null) {
+            if (dates != null && dates.isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                LOGGER.log(Level.SEVERE, "Error.  No valid date requested");
+                pw.write("{\"error\": \"Error. No valid date requested\"}");
+                return;
+            }
+
+            Map<String, Date> startEnd;
+            Date start = null;
+            Date end = null;
+            if (dates == null) {
+                try {
+                    startEnd = RequestParamUtil.processStartEnd(request, TimeUnit.WEEK, 4);
+                    start = startEnd.get("start");
+                    end = startEnd.get("end");
+                } catch (ParseException ex) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
+                    pw.write("{\"error\": \"Error parsing start/end parameters\"}");
+                    return;
+                }
+            }
+
+            String[] valid = {"json"};
+            String out = RequestParamUtil.processOut(request, valid, "json");
+            if (out == null) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                LOGGER.log(Level.SEVERE, "Unsupported 'out' value supplied.");
+                pw.write("{\"error\":\"Unsupported 'out' value supplied.  Valid = {" + String.join(", ", valid) + "}");
+                return;
+            }
+
+            CavityService cs = new CavityService();
+            CavityDataSpan span;
             try {
-                span = cs.getCavityDataSpan(start, end, timeUnit);
-            } catch (ParseException | SQLException ex) {
+                if (dates == null) {
+                    span = cs.getCavityDataSpan(start, end, timeUnit);
+                } else {
+                    span = cs.getCavityDataSpan(dates);
+                }
+            } catch (ParseException | SQLException | IOException ex) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 LOGGER.log(Level.SEVERE, "Error querying cavity data service", ex);
-                response.setContentType("application/json");
-                pw.write("{error: 'Error querying cavity data service'}");
+                pw.write("{\"error\": \"Error querying cavity data service: " + ex.getMessage() + "\"}");
                 return;
             }
-        } else {
-            try {
-                span = cs.getCavityDataSpan(dates);
-            } catch (ParseException | SQLException ex) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                LOGGER.log(Level.SEVERE, "Error querying cavity data service", ex);
-                response.setContentType("application/json");
-                pw.write("{error: 'Error querying cavity data service'}");
-                return;
-            }
+
+            pw.write(span.toJson().toString());
         }
-        
-        response.setContentType("application/json");
-        pw.write(span.toJson().toString());
     }
-
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
 }

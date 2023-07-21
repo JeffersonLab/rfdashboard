@@ -1,0 +1,6 @@
+load data
+  infile './05_export-rfd-comments.csv'
+  into table rfgradteam_owner.RFD_COMMENTS
+  fields terminated by "," optionally enclosed by '"'
+  TRAILING NULLCOLS
+  (COMMENT_ID,COMMENT_TIME,USERNAME,TOPIC,COMMENT_STRING)

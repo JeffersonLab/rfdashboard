@@ -21,9 +21,10 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
     var reachRates = jlab.energyReach.getReachTripRates();
     var linacRate = reachRates[0];
     var totalRate = reachRates[1];
+    var colors = [jlab.colors["North"], jlab.colors["South"], jlab.colors["Total"]]
 
     var settings = {
-        colors: jlab.colors.linacs.slice(1, 4), // Grab the North, South, and Total colors
+        colors: colors,
         labels: scanData.labels,
         timeUnit: "day",
         title: title,
@@ -68,6 +69,9 @@ jlab.energyReach.loadLemScanChart = function (chartId, date, scanData) {
     // Add a custom legend off to the side
     jlab.energyReach.addLegend(chartId, settings.colors, scanData.labels, reaches);
 
+    // Query for the current energy gain of each linac and update the legend to show current estimated values
+    jlab.energyReach.queryLinacEnergies(date, scanData);
+
     // Add the horizontal lines for 4 and 8 trips/hr with annotations
     var pTot = plot.pointOffset({x: 1010, y: totalRate});
     var pLin = plot.pointOffset({x: 1010, y: linacRate});
@@ -86,7 +90,7 @@ jlab.energyReach.loadEnergyReachChart = function (chartId, start, end, reachData
 
     var timeUnit = "day";
     var settings = {
-        colors: jlab.colors.energyReach,
+        colors: [jlab.colors["Reach"]],
         labels: reachData.labels,
         timeUnit: timeUnit,
         title: title,
@@ -214,17 +218,93 @@ jlab.energyReach.getReachTripRates = function () {
 jlab.energyReach.addLegend = function (chartId, colors, labels, reaches) {
     var legendString = '<div class="chart-legend" id=' + chartId + '-chart-legend">\n';
     legendString += "<table>";
-    legendString += '<tr><th colspan="2">Linac</th><th>Reach</th><tr>';
+    legendString += '<tr><th colspan="2">Linac</th><th>Reach</th><th>Req. EGain</th><th>Trips / Hr</th><tr>';
     if (colors.length !== labels.length) {
         console.log("Error: unequal number of colors and labels");
     }
     for (var i = 0; i < colors.length; i++) {
-        legendString += '<tr><td><div class=color-box style="background-color: ' + colors[i] + ';"></div></td><td>' + labels[i] + '</td><td>' + reaches[i] + '</td></tr>';
+        legendString += '<tr><td><div class=color-box style="background-color: ' + colors[i] + ';"></div></td><td>' +
+            labels[i] + '</td><td>' + reaches[i] + '</td><td id="' + labels[i] + '-egain"></td><td id="' + labels[i]
+            + '-trips"></td></tr>';
     }
     legendString += '</table></div>';
     $("#" + chartId + "-legend-panel").prepend(legendString);
 };
 
+
+/**
+ * A method that queries the mystats endpoint of myquery for the average north and south linac energy for a given date
+ * range.
+ * begin - start of the date range query
+ * end - end of the date range to query
+ */
+jlab.energyReach.queryLinacEnergies = function (date, tripData) {
+    // We want the requested energy for the current day.  The resulting mean should only count up until 'now'.
+    var end = new Date(date);
+    end.setDate(end.getDate() + 1)
+    end = jlab.formatDatePretty(end);
+
+    // Converting from millis from epoch.  The history archiver usually has data starting 2-3 months back.
+    var daysDiff = (Date.now() - new Date(date).getTime()) / (1000 * 60 * 60 * 24);
+    var mya = "ops";
+    if (daysDiff > 120 ) {
+        mya = "history";
+    }
+
+    // Get the flot oriented data structure into something everpolate wants to use
+    var labels = tripData.labels;
+    var data = tripData.data;
+    var everpolateData = {
+        north: {energy: [], tripRate: []},
+        south: {energy: [], tripRate: []},
+        total: {energy: [], tripRate: []}
+    };
+    for (var i = 0; i < data.length; i++) {
+        for (var j = 0; j < data[0].length; j++) {
+            var energy = data[i][j][0];
+            var tripRate = data[i][j][1];
+            if (tripRate !== "null") {
+                everpolateData[labels[i].toLowerCase()].energy.push(Number(energy));
+                everpolateData[labels[i].toLowerCase()].tripRate.push(Number(tripRate));
+            }
+        }
+    }
+
+    var promise = $.ajax({
+        url: jlab.myaURL + "/myquery/mystats",
+        timeout: 5000,  //in millis
+        data: {
+            b: date,
+            e: end,
+            n: 1,
+            c: "MMSLIN1EGAIN,MMSLIN2EGAIN",
+            m: mya
+        },
+        dataType: "jsonp",
+        jsonp: "jsonp"
+    });
+    promise.done(function(data, textStatus, jqXHR){
+        var nlEgain = data.channels.MMSLIN1EGAIN.data[0].mean;
+        var slEgain = data.channels.MMSLIN2EGAIN.data[0].mean;
+        var nlTripRate = everpolate.linear([nlEgain], everpolateData.north.energy, everpolateData.north.tripRate)[0];
+        var slTripRate = everpolate.linear([slEgain], everpolateData.south.energy, everpolateData.south.tripRate)[0];
+
+        $("#North-egain").append(nlEgain);
+        $("#South-egain").append(slEgain);
+        $("#Total-egain").append((slEgain + nlEgain)/2);
+        $("#North-trips").append(nlTripRate.toFixed(2));
+        $("#South-trips").append(slTripRate.toFixed(2));
+        $("#Total-trips").append((nlTripRate + slTripRate).toFixed(2));
+
+    });
+    promise.fail(function(jqXHR, textStatus, errorThrown){
+        console.log("Error requesting linac EGAINS. Status: " + textStatus + "  Error: " + errorThrown);
+        $("#North-egain").append("ERR");
+        $("#South-egain").append("ERR");
+        $("#North-trips").append("ERR");
+        $("#South-trips").append("ERR");
+    });
+}
 
 
 

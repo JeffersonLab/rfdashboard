@@ -24,7 +24,7 @@ import org.jlab.rfd.presentation.util.Paginator;
  *
  * @author adamc
  */
-@WebServlet(name = "NewComment", urlPatterns = {"/comments/new-comment"})
+@WebServlet(name = "NewComment", urlPatterns = {"/comments/new-comment", "/reports/comments/new-comment"})
 public class NewComment extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(NewComment.class.getName());
@@ -69,7 +69,7 @@ public class NewComment extends HttpServlet {
         request.setAttribute("topic", topic);
 
         if (redirectNeeded) {
-            String redirectUrl = request.getContextPath() + "/comments/new-comment";
+            String redirectUrl = request.getContextPath() + "/reports/comments/new-comment";
 
             redirectUrl += "?limit=" + URLEncoder.encode(String.valueOf(limit), "UTF-8");
             if (topic != null) {

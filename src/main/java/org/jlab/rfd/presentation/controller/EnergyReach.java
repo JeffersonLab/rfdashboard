@@ -6,9 +6,9 @@
 package org.jlab.rfd.presentation.controller;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,9 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.jlab.rfd.business.service.CavityService;
 import org.jlab.rfd.business.service.LemService;
 import org.jlab.rfd.business.util.DateUtil;
-import org.jlab.rfd.model.CavityDataSpan;
+import org.jlab.rfd.config.AppConfig;
 import org.jlab.rfd.model.LemSpan;
-import org.jlab.rfd.model.TimeUnit;
 import org.jlab.rfd.presentation.util.DataFormatter;
 import org.jlab.rfd.presentation.util.ParamChecker;
 
@@ -42,7 +41,6 @@ public class EnergyReach extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(EnergyReach.class.getName());
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -59,7 +57,7 @@ public class EnergyReach extends HttpServlet {
         Date end, start;
         boolean redirectNeeded = false;
 
-        LOGGER.log(Level.FINEST, "EnergyReach controler with received parameters: {0}", request.getParameterMap());
+        LOGGER.log(Level.FINEST, "EnergyReach controller with received parameters: {0}", request.getParameterMap());
         if (request.getParameter("end") == null || request.getParameter("end").equals("")) {
             LOGGER.log(Level.FINEST, "No end parameter supplied.  Defaulting to today.");
             end = new Date();
@@ -70,7 +68,7 @@ public class EnergyReach extends HttpServlet {
                 end = sdf.parse(request.getParameter("end"));
                 request.setAttribute("end", sdf.format(end));
             } catch (ParseException e) {
-                end = new Date();  // In case something bad happend during try.
+                end = new Date();  // In case something bad happened during try.
                 LOGGER.log(Level.WARNING, "Error parsing end parameter '{0}'.  Defaulting to today", request.getParameter("end"));
                 request.setAttribute("end", sdf.format(end));
                 redirectNeeded = true;
@@ -99,7 +97,6 @@ public class EnergyReach extends HttpServlet {
             ParamChecker.validateStartEnd(start, end);
         }
 
-        TimeUnit tu = TimeUnit.DAY;
         if (request.getParameter("timeUnit") == null || request.getParameter("timeUnit").equals("")) {
             // Default to week
             LOGGER.log(Level.FINEST, "No timeUnit parameter supplied.  Defaulting to 'week'.");
@@ -108,17 +105,12 @@ public class EnergyReach extends HttpServlet {
         } else {
             String timeUnit;
             switch (request.getParameter("timeUnit")) {
-                case "day":
-                    timeUnit = "day";
-                    tu = TimeUnit.DAY;
-                    break;
                 case "week":
                     timeUnit = "week";
-                    tu = TimeUnit.WEEK;
                     break;
+                case "day":
                 default:
                     timeUnit = "day";
-                    tu = TimeUnit.DAY;
             }
             request.setAttribute("timeUnit", timeUnit);
         }
@@ -164,16 +156,12 @@ public class EnergyReach extends HttpServlet {
 
         if (redirectNeeded) {
             String redirectUrl;
-            try {
-                redirectUrl = request.getContextPath()
-                        + "/energy-reach?start=" + URLEncoder.encode((String) request.getAttribute("start"), "UTF-8")
-                        + "&end=" + URLEncoder.encode((String) request.getAttribute("end"), "UTF-8")
-                        + "&diffStart=" + URLEncoder.encode((String) request.getAttribute("diffStart"), "UTF-8")
-                        + "&diffEnd=" + URLEncoder.encode((String) request.getAttribute("diffEnd"), "UTF-8")
-                        + "&timeUnit=" + URLEncoder.encode((String) request.getAttribute("timeUnit"), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException("JVM doesn't support UTF-8");
-            }
+            redirectUrl = request.getContextPath()
+                    + "/energy-reach?start=" + URLEncoder.encode((String) request.getAttribute("start"), StandardCharsets.UTF_8)
+                    + "&end=" + URLEncoder.encode((String) request.getAttribute("end"), StandardCharsets.UTF_8)
+                    + "&diffStart=" + URLEncoder.encode((String) request.getAttribute("diffStart"), StandardCharsets.UTF_8)
+                    + "&diffEnd=" + URLEncoder.encode((String) request.getAttribute("diffEnd"), StandardCharsets.UTF_8)
+                    + "&timeUnit=" + URLEncoder.encode((String) request.getAttribute("timeUnit"), StandardCharsets.UTF_8);
             response.sendRedirect(response.encodeRedirectURL(redirectUrl));
             return;
         }
@@ -182,8 +170,8 @@ public class EnergyReach extends HttpServlet {
         JsonObject energyReach;
         JsonObject dayScan;
         try {
-            // getLemSpan searches for energy reaches between the two dates, but requestors really want the number for the last day
-            // which was almost certainly not done at exactly midight the start of that day.
+            // getLemSpan searches for energy reaches between the two dates, but requesters really want the number for the last day
+            // which was almost certainly not done at exactly midnight the start of that day.
             Date endEffective = DateUtil.getNextDay(end);
             SortedMap<Date, SortedMap<String, BigDecimal>> reach = ls.getLemSpan(start, endEffective).getEnergyReach();
 
@@ -195,7 +183,6 @@ public class EnergyReach extends HttpServlet {
             LOGGER.log(Level.WARNING, "Error querying LEM scan database", ex);
             throw new ServletException("Error querying LEM scan database");
         }
-        
         // This is a little hacky, but there was already lots of client code written to manage the JSON objects
         request.setAttribute("energyReach", energyReach == null ? "undefined" : energyReach.toString());
         request.setAttribute("dayScan", dayScan == null ? "undefined" : dayScan.toString());
@@ -207,11 +194,12 @@ public class EnergyReach extends HttpServlet {
         dates.add(diffEnd);
         try {
             cavityData = cs.getCavityDataSpan(dates).toJson();
-        } catch (SQLException | ParseException ex) {
+        } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Error querying cavity datasources", ex);
             throw new ServletException("Error querying cavity datasources");
         }
         request.setAttribute("cavityData", cavityData.toString());
+        request.setAttribute("myaURL", AppConfig.getAppConfig().getMyqueryUrl());
 
         request.getRequestDispatcher("/WEB-INF/views/energy-reach.jsp").forward(request, response);
     }

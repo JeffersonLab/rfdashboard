@@ -11,23 +11,14 @@
 <c:set var="title" value="Cryo" />
 <t:page title="${title}" pageStart="${requestScope.start}" pageEnd="${requestScope.end}"> 
     <jsp:attribute name="stylesheets">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/flot-barchart.css"/>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/css/cryo.css"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/css/flot-barchart.css"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/css/cryo.css"/>
     </jsp:attribute>
     <jsp:attribute name="scripts">
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.time.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.resize.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/axislabels/2.2.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/errorbars/1.0.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/navigate/1.3.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cavity-utils.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/flot-charts.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/cryo.js"></script>
-        <script>
-
-        </script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/utils.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/cavity-utils.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/flot-charts.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/cryo.js"></script>
     </jsp:attribute>
     <jsp:body>
         <div class="page-title-bar">
@@ -116,6 +107,7 @@
                 jlab.diffStart = "${requestScope.diffStart}";
                 jlab.diffEnd = "${requestScope.diffEnd}";
                 jlab.cavityData = ${requestScope.cavityData};
+                jlab.myaURL = "${requestScope.myaURL}";
         </script>
     </jsp:body>
 </t:page>

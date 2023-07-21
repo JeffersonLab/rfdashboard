@@ -10,12 +10,8 @@
 <%@taglib prefix="t" tagdir="/WEB-INF/tags"%> 
 <c:set var="title" value="History"/>
 <t:reports-page title="${title}">
-    <jsp:attribute name="stylesheets">
-        <link rel="stylesheet" href="${initParam.cdnContextPath}/jquery-plugins/select2/3.5.2/select2.css"/>
-    </jsp:attribute>
     <jsp:attribute name="scripts">
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/select2/3.5.2/select2.min.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/utils.js"></script>
         <script type="text/javascript">
             $(document).ready(function () {
                 jlab.util.initDateTimePickers();

@@ -28,7 +28,7 @@ public class CommentService {
 
     private static final Logger LOGGER = Logger.getLogger(CommentService.class.getName());
 
-    public SortedSet<String> getCurrnetAuthors() throws SQLException {
+    public SortedSet<String> getCurrentAuthors() throws SQLException {
         SortedSet<String> users = new TreeSet<>();
         Connection conn = null;
         PreparedStatement pstmt = null;

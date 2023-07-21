@@ -6,8 +6,8 @@
 package org.jlab.rfd.presentation.controller.reports;
 
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -33,12 +33,11 @@ import org.jlab.rfd.presentation.util.RequestParamUtil;
  *
  * @author adamc
  */
-@WebServlet(name = "CommentHistory", urlPatterns = {"/comments/history"})
+@WebServlet(name = "CommentHistory", urlPatterns = {"/comments/history", "/reports/comments/history"})
 public class CommentHistory extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(CommentHistory.class.getName());
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -82,13 +81,13 @@ public class CommentHistory extends HttpServlet {
             throw new ServletException("Error parsing limit or offset parameters");
         }
 
-        Date start = null;
-        Date end = null;
+        Date start;
+        Date end;
         try {
             start = (s == null || s.isEmpty()) ? null : DateUtil.parseDateString(s);
             end = (e == null || e.isEmpty()) ? null : DateUtil.parseDateString(e);
         } catch (ParseException ex) {
-            LOGGER.log(Level.WARNING, "Error parsing start or end paramter", ex);
+            LOGGER.log(Level.WARNING, "Error parsing start or end parameter", ex);
             throw new ServletException("Error parsing start or end parameter");
         }
 
@@ -101,33 +100,33 @@ public class CommentHistory extends HttpServlet {
         request.setAttribute("offset", offset);
 
         if (redirectNeeded) {
-            String redirectUrl = request.getContextPath() + "/comments/history";
+            StringBuilder redirectUrl = new StringBuilder(request.getContextPath() + "/reports/comments/history");
 
-            redirectUrl += "?limit=" + URLEncoder.encode(String.valueOf(limit), "UTF-8");
-            redirectUrl += "&offset=" + URLEncoder.encode(String.valueOf(offset), "UTF-8");
+            redirectUrl.append("?limit=").append(URLEncoder.encode(String.valueOf(limit), StandardCharsets.UTF_8));
+            redirectUrl.append("&offset=").append(URLEncoder.encode(String.valueOf(offset), StandardCharsets.UTF_8));
             if (start != null) {
-                redirectUrl += "&start=" + URLEncoder.encode(DateUtil.formatDateYMDHMS(start), "UTF-8");
+                redirectUrl.append("&start=").append(URLEncoder.encode(DateUtil.formatDateYMDHMS(start), StandardCharsets.UTF_8));
             }
             if (end != null) {
-                redirectUrl += "&end=" + URLEncoder.encode(DateUtil.formatDateYMDHMS(end), "UTF-8");
+                redirectUrl.append("&end=").append(URLEncoder.encode(DateUtil.formatDateYMDHMS(end), StandardCharsets.UTF_8));
             }
             if (includeUsers != null) {
                 for (String user : includeUsers) {
-                    redirectUrl += "&includeUser=" + URLEncoder.encode(user, "UTF-8");
+                    redirectUrl.append("&includeUser=").append(URLEncoder.encode(user, StandardCharsets.UTF_8));
                 }
             }
             if (excludeUsers != null) {
                 for (String user : excludeUsers) {
-                    redirectUrl += "&excludeUser=" + URLEncoder.encode(user, "UTF-8");
+                    redirectUrl.append("&excludeUser=").append(URLEncoder.encode(user, StandardCharsets.UTF_8));
                 }
             }
             if (topics != null) {
                 for (String topic : topics) {
-                    redirectUrl += "&topic=" + URLEncoder.encode(topic, "UTF-8");
+                    redirectUrl.append("&topic=").append(URLEncoder.encode(topic, StandardCharsets.UTF_8));
                 }
             }
 
-            response.sendRedirect(response.encodeRedirectURL(redirectUrl));
+            response.sendRedirect(response.encodeRedirectURL(redirectUrl.toString()));
             return;
         }
 
@@ -140,7 +139,7 @@ public class CommentHistory extends HttpServlet {
         try {
             comments = cs.getComments(filter, limit, offset);
             validTopics = cs.getValidTopics();
-            authors = cs.getCurrnetAuthors();
+            authors = cs.getCurrentAuthors();
             totalRecords = cs.countList(filter);
 
         } catch (SQLException | ParseException ex) {

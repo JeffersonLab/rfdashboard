@@ -19,20 +19,30 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
             return;
     }
 
-    var dayDiff = jlab.daysBetweenDates(start, end);
-    var numSteps = Math.floor(dayDiff / numDays) + 1;  // +1 to add back in the starting point
+    var queryEnd = end
+    if (numDays > 1) {
+        queryEnd = jlab.adjustEndToWeekBoundary(start, end);
+    }
+    var dayDiff = jlab.daysBetweenDates(start, queryEnd);
+    var numBins = Math.floor(dayDiff / numDays);
 
-    var i = 0;
+    // Converting from millis from epoch.  The history archiver usually has data starting 2-3 months back.
+    var queryAge = (Date.now() - new Date(queryEnd).getTime()) / (1000 * 60 * 60 * 24);
+    var mya = "ops";
+    if (queryAge > 120 ) {
+        mya = "history";
+    }
+
     // Get the cryo pressure data
     var cryoPromise = $.ajax({
-        url: "https://myaweb.acc.jlab.org/myStatsSampler/data",
+        url: jlab.myaURL + "/myquery/mystats",
         timeout: 60000,  //in millis
         data: {
             b: start,
-            n: numSteps,
-            s: 1,
-            sUnit: timeUnit, // supports second, day, week as of 2017-05-30
-            l: "CPI4107B,CPI5107B"
+            e: queryEnd,
+            n: numBins,
+            c: "CPI4107B,CPI5107B",
+            m: mya
         },
         dataType: "jsonp",
         jsonp: "jsonp",
@@ -43,26 +53,12 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
     var lemPromise = $.getJSON("/RFDashboard/ajax/lem-scan", {"start": start, "end": end, "type": "reach-scan"});
 
     $.when(cryoPromise, lemPromise).then(function (cryoAjax, lemAjax) {
-        // First the success/done handler
-        // The myStatsSampler service can respond in the following ways:
-        //  - Return some non-OK HTTP status / server error without data (promise.fail - expected failure behavior)
-        //  - Return some non-OK HTTP status and something totally unexpected (promise.fail - unexpected failure behavior)
-        //  - Return some OK HTTP status, but each bin's object can contain an error parameter or data (promise.done - successful myStatsSampler
-        //    run, but zero or more bins had errors)
-        //    
-        // Expecting {data: [ {start: 'yyyy-MM-dd[ HH:mm:ss]', output: [{name: "PVName", min: "##.###',...}, ..., {name: ...}]}
-        //                          {start: ..., output: [...]}
-        //                }
-        // OR
-        // {data: [], error: "<message>"}
-        var cryoData = cryoAjax[0];
         var lemData = lemAjax[0].data[0]; // This now contains a single flot formated data series [ [x,y], [x,y], ...]
         var hasLemData = false;
         // It is possible that there is no LEM data returned without an error state - there just wasn't any scan data for that date
-        if ( $.isArray(lemAjax) && $.isArray(lemData) && lemData.length > 0 ) {
+        if ($.isArray(lemAjax) && $.isArray(lemData) && lemData.length > 0) {
             hasLemData = true;
         }
-        var flotData;
 
         var labels = ["<b>North</b> (CPI4107B)", "<b>South</b> (CPI5107B)", "<b>Energy Reach</b>"];
         var labelMap = new Map();
@@ -73,116 +69,157 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
         colorMap.set("CPI4107B", colors[0]);
         colorMap.set("CPI5107B", colors[1]);
 
-        if (!Array.isArray(cryoData.data)) {
+        if (!jlab.cryo.validateCryoResponse(cryoAjax[0], ["CPI4107B", "CPI5107B"])) {
             jlab.hideChartLoading(chartId, "Unexpected error querying data service.");
-        } else {
-            if ( hasLemData ) {
-                flotData = new Array(cryoData.data[0].output.length + 1); // Two linacs, plus energy reach data
-            } else {
-                // Don't include lem data in the flotData, labels, or colors.  The maps don't matter since nothing will call the key if
-                // the lem data isn't included elsewhere.
-                flotData = new Array(cryoData.data[0].output.length);
-                labels = labels.slice(0,2);
-                colors = colors.slice(0,2);
-            }
-            var d, mean, sigma;
-            for (var i = 0; i < cryoData.data.length; i++) {
-                d = new Date(cryoData.data[i].start); // treated as UTC, but thats how all of the dates are being displayed.
-                for (var j = 0; j < cryoData.data[i].output.length; j++) {
-                    if (typeof flotData[j] !== "object") {
-                        flotData[j] = {
-                            data: new Array(),
-                            label: labelMap.get(cryoData.data[i].output[j].name),
-                            color: colorMap.get(cryoData.data[i].output[j].name)
-                        };
-                    }
-                    mean = cryoData.data[i].output[j].mean;
-                    sigma = cryoData.data[i].output[j].sigma;
-                    flotData[j].data.push([d.getTime(), mean, sigma]);
-                }
-            }
-            if (hasLemData) {
-                flotData[2] = {
-                    data: lemData,
-                    label: "Energy Reach",
-                    color: colors[2], // the "Total" color
-                    yaxis: 2,
-                    // We want this to display as a line, not a series of error bars
-                    points: {show: false, errorbars: "n"},
-                    // This causes a weird bug where panning the graph to the left so that the right-most point of the line
-                    // is no longer visible results in the entire canvas above the line being filled with the fillColor.  Weird ...
-//                lines: {show: true, fill: true, fillColor: colors[2]}
-                    lines: {show: true}
-                };
-            }
-            jlab.hideChartLoading(chartId);
-            var settings = {
-                chartType: "errorBar",
-                tooltips: false,
-                timeUnit: timeUnit,
-                colors: colors,
-                labels: labels,
-                title: "Linac Cryogen Pressure</strong><br/>(" + start + " to " + end + " by " + timeUnit + ")<strong>"
-            };
-            var flotOptions = {
-                xaxes: [{mode: "time"}],
-                yaxes: [{axisLabel: "He Pressure (Atm)"}]
-            };
-            if ( jlab.cryo.hasDataInRange(flotData, 0.03, 0.05) ) {
-                flotOptions.yaxes[0].min = 0.03;
-                flotOptions.yaxes[0].max = 0.05;
-            }
-            if (hasLemData) {
-                flotOptions.yaxes.push({
-                    axisLabel: "Energy Reach (MeV)",
-                    min: 1000,
-                    max: 1190,
-                    position: "right",
-                    alignTicksWithAxis: false,
-                    zoomRange: false,
-                    panRange: false
-                });
-            }
-            // Expects an array of flot data arrays.  E.g.,
-            // [ [millis, mean, sigma], [millis, mean, sigma], ...],
-            //   [millis, mean, sigma], [millis, mean, sigma], ...],
-            //   ...
-            // ]
-            jlab.flotCharts.drawChart(chartId, flotData, flotOptions, settings);
-            jlab.cryo.addCryoReachToolTip(chartId, timeUnit);
-
-            $('#' + chartId).bind("plotclick", function (event, pos, item) {
-                if (item) {
-                    var url;
-                    var timestamp = item.series.data[item.dataIndex][0];
-                    var dateString = jlab.millisToDate(timestamp);
-                    if (item.series.label === "Energy Reach") {
-                        url = "/RFDashboard/cryo?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
-                                jlab.addDays(dateString, -1) + "&diffEnd=" + dateString + "&timeUnit=" + jlab.timeUnit;
-                    } else {
-                        url = "/RFDashboard/cryo?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
-                                dateString + "&diffEnd=" + jlab.addDays(dateString, numDays) + "&timeUnit=" + jlab.timeUnit;
-                    }
-                    window.location.href = url;
-                }
-            });
-            if ( ! hasLemData ) {
-                $("#" + chartId + "-chart-wrap").append("<small>* No LEM data available for " + jlab.start + " to " + jlab.end + "</small>");
-            }
+            return;
         }
-    }, function( jqXHR, textStatus, errorThrown ) {
+        var flotData = jlab.cryo.processCryoResponse(cryoAjax[0], labelMap, colorMap)
+
+        if (hasLemData) {
+            flotData.push({
+                data: lemData,
+                label: "Energy Reach",
+                color: colors[2], // the "Total" color
+                yaxis: 2,
+                // We want this to display as a line, not a series of error bars
+                points: {show: false, errorbars: "n"},
+                // This causes a weird bug where panning the graph to the left so that the right-most point of the line
+                // is no longer visible results in the entire canvas above the line being filled with the fillColor.  Weird ...
+//                lines: {show: true, fill: true, fillColor: colors[2]}
+                lines: {show: true}
+            });
+        }
+        jlab.hideChartLoading(chartId);
+        var settings = {
+            chartType: "errorBar",
+            tooltips: false,
+            timeUnit: timeUnit,
+            colors: colors,
+            labels: labels,
+            title: "Linac Cryogen Pressure</strong><br/>(" + start + " to " + end + " by " + timeUnit + ")<strong>"
+        };
+        var flotOptions = {
+            xaxes: [{mode: "time", zoomRange: false, panRange: false}],
+            yaxes: [{axisLabel: "He Pressure (Atm)"}]
+        };
+        if (jlab.cryo.hasDataInRange(flotData, 0.038, 0.039)) {
+            flotOptions.yaxes[0].min = 0.038;
+            flotOptions.yaxes[0].max = 0.039;
+        } else if (jlab.cryo.hasDataInRange(flotData, 0.03, 0.05)) {
+            flotOptions.yaxes[0].min = 0.03;
+            flotOptions.yaxes[0].max = 0.05;
+        }
+        if (hasLemData) {
+            flotOptions.yaxes.push({
+                axisLabel: "Energy Reach (MeV)",
+                min: 1000,
+                max: 1190,
+                position: "right",
+                alignTicksWithAxis: false,
+                zoomRange: false,
+                panRange: false
+            });
+        }
+        // Expects an array of flot data arrays.  E.g.,
+        // [ [millis, mean, sigma], [millis, mean, sigma], ...],
+        //   [millis, mean, sigma], [millis, mean, sigma], ...],
+        //   ...
+        // ]
+        jlab.flotCharts.drawChart(chartId, flotData, flotOptions, settings);
+        jlab.cryo.addCryoReachToolTip(chartId, timeUnit);
+
+        $('#' + chartId).bind("plotclick", function (event, pos, item) {
+            if (item) {
+                var url;
+                var timestamp = item.series.data[item.dataIndex][0];
+                var dateString = jlab.millisToDate(timestamp);
+                if (item.series.label === "Energy Reach") {
+                    url = "/RFDashboard/cryo?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
+                        jlab.addDays(dateString, -1) + "&diffEnd=" + dateString + "&timeUnit=" + jlab.timeUnit;
+                } else {
+                    url = "/RFDashboard/cryo?start=" + jlab.start + "&end=" + jlab.end + "&diffStart=" +
+                        dateString + "&diffEnd=" + jlab.addDays(dateString, numDays) + "&timeUnit=" + jlab.timeUnit;
+                }
+                window.location.href = url;
+            }
+        });
+        if (!hasLemData) {
+            $("#" + chartId + "-chart-wrap").append("<small>* No LEM data available for " + jlab.start + " to " + jlab.end + "</small>");
+        }
+    }, function (jqXHR, textStatus, errorThrown) {
         // Wrap the error handler in another layer so we can add the chartId to the function call (default fail callbacks only get the
         // first three.
         jlab.cryo.pressureChartFail(jqXHR, textStatus, errorThrown, chartId);
     });
 };
 
+
+// Check that the cryo data response has the expected format
+jlab.cryo.validateCryoResponse = function (response, expChannels) {
+    if (!response.hasOwnProperty("channels")) {
+        window.console && console.log("Missing channels");
+        return false;
+    }
+    if (Object.keys(response.channels).length !== expChannels.length) {
+        window.console && console.log("Incorrect channel count");
+        return false;
+    }
+    for (const channel in response.channels) {
+        if (!expChannels.includes(channel)) {
+            window.console && console.log("Missing channel '" + channel + "'");
+            return false;
+        }
+        if (!response.channels[channel].hasOwnProperty("data")) {
+            window.console && console.log("Missing data for '" + channel + "'");
+            return false;
+        }
+        if (!Array.isArray(response.channels[channel].data)) {
+            window.console && console.log("Malformed data for '" + channel + "'");
+            return false;
+        }
+    }
+    return true;
+};
+
+
+/** Processes the mystats response into the format needed by flot.
+ *
+ * Error status should have been caught during promise resolution and explicit validation check.
+ * @param {Object} response  The processed JSON response from myquery/mystats.
+ * @param {Map<, *>} labelMap The map of channel names to plot series labels
+ * @param {Map<*, *>} colorMap The map of channel names to plot series colors
+ */
+jlab.cryo.processCryoResponse = function (response, labelMap, colorMap) {
+    var flotData = new Array(2);
+    var cryoData = response.channels;
+
+    // Always get the same order regardless of server behavior
+    var keys = Object.keys(cryoData);
+    keys.sort();
+
+    for (var i = 0; i < keys.length; i++) {
+        var channel = keys[i];
+        var data = cryoData[channel].data;
+        flotData[i] = {
+            data: [],
+            label: labelMap.get(channel),
+            color: colorMap.get(channel)
+        };
+        for (var j = 0; j < data.length; j++) {
+            var d = new Date(data[j].begin); // treated as UTC, but that is how all the dates are being displayed.
+            flotData[i].data.push([d.getTime(), data[j].mean, data[j].stdev]);
+        }
+    }
+
+    return flotData;
+};
+
 // Check if any series in the flotData array has a y-value in the specified range.
 // flotData looks like [{data: [[x1,y1], [x2,y2] ... ], ...}, {data: [[x1,y1], ...], ...}, ... ]
-jlab.cryo.hasDataInRange = function(flotData, min, max) {
-    for ( var i = 0; i < flotData.length; i++) {
-        for ( var j = 0; j < flotData[i].data.length; j++ ) {
-            if ( flotData[i].data[j][1] >= min && flotData[i].data[j][1] <= max) {
+jlab.cryo.hasDataInRange = function (flotData, min, max) {
+    for (var i = 0; i < flotData.length; i++) {
+        for (var j = 0; j < flotData[i].data.length; j++) {
+            if (flotData[i].data[j][1] >= min && flotData[i].data[j][1] <= max) {
                 return true;
             }
         }
@@ -199,7 +236,7 @@ jlab.cryo.pressureChartFail = function (jqXHR, textStatus, errorThrown, chartId)
     var reqDates = start + '-' + end;
     if (textStatus === 0) {
         message = "Error in HTTP request.  Received HTTP status '0'";
-    } else if ( typeof jqXHR === "undefined" ) {
+    } else if (typeof jqXHR === "undefined") {
         message = "Error in request.  jqXHR undefined.";
     } else {
         try {
@@ -227,7 +264,7 @@ jlab.cryo.addCryoReachToolTip = function (chartId, timeUnit) {
                 prev_point = item.dataIndex;
                 prev_label = item.series.label;
                 $('#flot-tooltip').remove();
-                
+
                 var content, borderColor;
                 if (item.series.label === "Energy Reach") {
                     var timestamp = item.series.data[item.dataIndex][0];
@@ -236,8 +273,8 @@ jlab.cryo.addCryoReachToolTip = function (chartId, timeUnit) {
                     var reach = item.datapoint[1];
                     borderColor = item.series.color;
                     content = "<b>Series:</b> " + item.series.label
-                            + "<br /><b>Date:</b> " + start
-                            + "<br /><b>Reach (MeV):</b> " + reach;
+                        + "<br /><b>Date:</b> " + start
+                        + "<br /><b>Reach (MeV):</b> " + reach;
                 } else {
                     // The item.datapoint is x coordinate of the bar, not of the original data point.  item.series.data contains
                     // the original data, and item.dataIndex this item's index in the data.
@@ -264,9 +301,9 @@ jlab.cryo.addCryoReachToolTip = function (chartId, timeUnit) {
                     var sigma = item.datapoint[2];
                     borderColor = item.series.color;
                     content = "<b>Series:</b> " + item.series.label
-                            + "<br /><b>Date:</b> " + dateRange
-                            + "<br /><b>Mean:</b> " + mean + " Atm"
-                            + "<br/><b>Sigma:</b> " + sigma + " Atm";
+                        + "<br /><b>Date:</b> " + dateRange
+                        + "<br /><b>Mean:</b> " + mean + " Atm"
+                        + "<br/><b>Sigma:</b> " + sigma + " Atm";
                 }
                 jlab.showTooltip(item.pageX + 20, item.pageY - 20, content, borderColor);
             }
@@ -282,11 +319,10 @@ $(function () {
 
     // This enables the "Basic/Advanced" menu button to toggle between the two tables.  diff-table-advanced starts out with
     // display: none.
-    $("#menu-toggle").click(function() {
+    $("#menu-toggle").click(function () {
         $('#diff-table-basic').toggle();
         $('#diff-table-advanced').toggle();
     });
-    
     $("#page-details-dialog").dialog(jlab.dialogProperties);
     $("#page-details-opener").click(function () {
         $("#page-details-dialog").dialog("open");

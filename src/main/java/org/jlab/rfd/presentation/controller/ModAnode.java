@@ -12,9 +12,7 @@ import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.JsonObject;
@@ -150,8 +148,16 @@ public class ModAnode extends HttpServlet {
         JsonObject MAVCountLinac, MAVCountCMType, tableData;
         try {
             CavityDataSpan s1 = cs.getCavityDataSpan(start, end, tu);
-            MAVCountCMType = DataFormatter.toFlotFromDateMap(s1.getModAnodeCountByCMType());
-            MAVCountLinac = DataFormatter.toFlotFromDateMap(s1.getModAnodeCountByLinac());
+            // J. Benesch requested this type of mapping
+            Map<String, String> typeMapper = new HashMap<>();
+            typeMapper.put("C100", "C100");
+            typeMapper.put("F100", "C100");
+            typeMapper.put("C25", "C25");
+            typeMapper.put("C50", "C50");
+            typeMapper.put("C50T", "C50");
+            typeMapper.put("C75", "C75");
+            MAVCountCMType = DataFormatter.toFlotFromDateMap(s1.getModAnodeCountByCMType(typeMapper));
+            MAVCountLinac = DataFormatter.toFlotFromDateMap(s1.getModAnodeCountByLinac(false));
 
             List<Date> date = new ArrayList<>();
             date.add(tableDate);

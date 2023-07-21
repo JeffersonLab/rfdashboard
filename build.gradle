@@ -13,23 +13,57 @@ plugins {
 
 description "RF Dashboard app for CEBAF"
 group 'org.jlab'
-version '1.9.0'
-ext.releaseDate = 'May 18 2022'
-ext.resourceNumber = '39'
+version '2.0.0'
+ext.releaseDate = 'July 21, 2023'
+ext.resourceNumber = '41'
+
+tasks.withType(JavaCompile) {
+    options.release = 11
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ["-Xlint:deprecation", "-Xlint:unchecked"]
+}
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
 }
 
+sourceSets {
+    integration {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    integrationImplementation.extendsFrom testImplementation
+    integrationRunTimeOnly.extendsFrom runtimeOnly
+}
+
+task integrationTest(type: Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.integration.output.classesDirs
+    classpath = sourceSets.integration.runtimeClasspath
+
+    maxHeapSize = '1G'
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+}
+
 dependencies {
+    // No matter what smoothness weblib MUST be included in WAR (https://github.com/JeffersonLab/smoothness/issues/4)
+    implementation 'org.jlab:smoothness-weblib:4.3.0'
+    // This dependency is used by the application.
+    implementation 'org.tuckey:urlrewritefilter:4.0.4'
     // Use JUnit test framework.
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.glassfish:javax.json:1.1.4'
 
-    // This dependency is used by the application.
-    implementation 'org.tuckey:urlrewritefilter:4.0.4'
-    implementation 'com.oracle.database.jdbc:ojdbc8:19.3.0.0'
     providedCompile 'javax:javaee-api:8.0.1'
     providedCompile 'javax.servlet:jstl:1.2'
 }
@@ -43,17 +77,12 @@ war {
         filter {
             String line -> line.replaceAll('@RELEASE_DATE@', releaseDate)
         }
-        filter {
-            String line -> line.replaceAll('@RESOURCE_NUMBER@', resourceNumber)
-        }
     }
 }
 
-test{
+test {
     useJUnit()
-
     maxHeapSize = '1G'
-
     testLogging {
         exceptionFormat = 'full'
     }

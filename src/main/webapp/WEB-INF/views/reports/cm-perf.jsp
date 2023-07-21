@@ -33,9 +33,7 @@
         </style>
     </jsp:attribute>
     <jsp:attribute name="scripts">
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.min.js"></script>
-        <script type="text/javascript" src="${initParam.cdnContextPath}/jquery-plugins/flot/0.8.3/jquery.flot.resize.min.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.resourceVersionNumber}/js/utils.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/utils.js"></script>
         <script>
             $(document).ready(function () {
 
@@ -45,23 +43,21 @@
 
                     var color;
                     switch (cmType) {
+                        // J. Benesch requested this grouping for one-off CM types
+                        case "F100":
                         case "C100":
-                            color = jlab.colors.cmtypes[0];
+                            color = jlab.colors["C100"];
                             break;
                         case "C25":
-                            color = jlab.colors.cmtypes[1];
+                            color = jlab.colors["C25"];
                             break;
+                        // J. Benesch requested this grouping for one-off CM types
+                        case "C50T":
                         case "C50":
-                            color = jlab.colors.cmtypes[2];
+                            color = jlab.colors["C50"];
                             break;
                         case "C75":
-                            color = jlab.colors.cmtypes[3];
-                            break;
-                        case "F100":
-                            color = jlab.colors.cmtypes[4];
-                            break;
-                        case "C50T":
-                            color = jlab.colors.cmtypes[5];
+                            color = jlab.colors["C75"];
                             break;
                         default:
                             color = "#A9A9A9"; //A different type of unknown. I don't want to include in the legend and this looks different enough to avoid confusion.
@@ -90,10 +86,11 @@
                     heightStyle: "content"
                 });
 
-                var labels = ["C100", "C25", "C50", "C75", "F100", "C50T"];
-                var jcc = jlab.colors.cmtypes;
-                var colors = [jcc[0], jcc[1], jcc[2], jcc[3], jcc[4], jcc[5]];
-                jlab.util.addLegend('cm-perf-legend', colors, labels);
+                // F100 and C50T are lumped in with C100 and C50, respectively.
+                var labels = ["C100", "C25", "C50", "C75"];
+                var jcc = jlab.colors;
+                var colors = [jcc["C100"], jcc["C25"], jcc["C50"], jcc["C75"]];
+                jlab.util.addLegend('cm-perf-legend', colors, labels, true);
 
                 $(".date-field").datepicker({
                     dateFormat: "yy-mm-dd",
@@ -153,7 +150,7 @@
                                     <div class="table-title">Cryomodule Data</div>
                                     <div class="table-wrap">
                                         <table class="comments-table">
-                                            <thead><tr><th>Name</th><th>Module Type</th><th>EGain (MeV)</th><th>%Nominal</th><th>LEM Heat</th><tr></thead>
+                                            <thead><tr><th>Name</th><th>Module Type</th><th>EGain (MeV)</th><th>%Nominal</th><th>LEM Heat (Watts)</th><tr></thead>
                                             <tbody>
                                                 <tr>
                                                     <td>${cm.name}</td>

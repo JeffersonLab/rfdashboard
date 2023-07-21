@@ -5,12 +5,12 @@
 	 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
 	 version="3.1">
     <context-param>
-        <param-name>NotificationBar</param-name>
-        <param-value></param-value>
+        <param-name>appSpecificEnvPrefix</param-name>
+        <param-value>RFD</param-value>
     </context-param>
     <context-param>
-        <param-name>FeedbackUsers</param-name>
-        <param-value>adamc,baggett</param-value>
+        <param-name>NotificationBar</param-name>
+        <param-value></param-value>
     </context-param>
     <context-param>
         <param-name>appName</param-name>
@@ -19,14 +19,6 @@
     <context-param>
         <param-name>appShortName</param-name>   
         <param-value>RFD</param-value>
-    </context-param>
-    <context-param>
-        <param-name>cdnContextPath</param-name>
-        <param-value>https://cdn.acc.jlab.org</param-value>
-    </context-param>
-    <context-param>
-        <param-name>resourceVersionNumber</param-name>
-        <param-value>@RESOURCE_NUMBER@</param-value>
     </context-param>
     <context-param>
         <param-name>releaseNumber</param-name>
@@ -71,15 +63,15 @@
             <url-pattern>/sso</url-pattern>
         </web-resource-collection>
         <auth-constraint>
-            <role-name>ipausers</role-name>
+            <!-- ** = any authenticated user.  See https://javaee.github.io/servlet-spec/downloads/servlet-4.0/servlet-4_0_FINAL.pdf section 13.8 -->
+            <role-name>**</role-name>
         </auth-constraint>
         <user-data-constraint>
             <transport-guarantee>CONFIDENTIAL</transport-guarantee>
         </user-data-constraint>
     </security-constraint>
     <login-config>
-        <auth-method>KEYCLOAK</auth-method>
-        <realm-name>jlab</realm-name>
+        <auth-method>OIDC</auth-method>
     </login-config>
     <security-role>
         <description>Every ACE user is a member of ipausers.</description>

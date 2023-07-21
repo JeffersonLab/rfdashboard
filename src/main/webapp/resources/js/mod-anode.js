@@ -20,8 +20,9 @@ jlab.mod_anode.loadLEMSimChart = function (chartId, start, end, chartData, timeU
         return;
     }
 
+    var colors = [jlab.colors["North"], jlab.colors["South"], jlab.colors["Total"]];
     var settings = {
-        colors: jlab.colors.modAnodeHarvester.slice(0, 4), // Grab the North, South, and Total colors
+        colors: colors,
         labels: chartData.labels,
         timeUnit: timeUnit,
         title: title,
@@ -56,11 +57,9 @@ jlab.mod_anode.loadLEMSimChart = function (chartId, start, end, chartData, timeU
 
 jlab.mod_anode.loadMAVCountByFactorChart = function (chartId, start, end, countData, timeUnit, factor) {
 
-
-    var colors = jlab.colors.cmtypes;
-    if (factor === 'linac') {
-        colors = jlab.colors.linacs;
-    }
+    // Dynamic number of colors as 'unknown' may not be present.
+    var colors = [];
+    countData.labels.forEach(label => colors.push(jlab.colors[label]));
 
     var title = "<strong>Cavities With Mod Anode Voltage<br>(by " + factor + ")</strong>";
     if (typeof countData === "undefined") {

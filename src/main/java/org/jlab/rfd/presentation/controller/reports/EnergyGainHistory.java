@@ -10,15 +10,7 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
@@ -158,7 +150,15 @@ public class EnergyGainHistory extends HttpServlet {
                 data = cds.getEnergyGainByZone(zones);
                 break;
             case "cmtype":
-                data = cds.getEnergyGainByCMType(zones);
+                Map<String, String> typeMapper = new HashMap<>();
+                typeMapper.put("C100", "C100");
+                typeMapper.put("F100", "C100");
+                typeMapper.put("C50", "C50");
+                typeMapper.put("C50T", "C50");
+                typeMapper.put("C25", "C25");
+                typeMapper.put("C75", "C75");
+                typeMapper.put("QTR", "QTR");
+                data = cds.getEnergyGainByCMType(zones, typeMapper);
                 break;
             case "cavity":
                 data = cds.getEnergyGainByCavity(zones);
@@ -191,7 +191,7 @@ public class EnergyGainHistory extends HttpServlet {
         }
         JsonObject zonesByCMTypeJson = job.build();
 
-        // The effective values of the parameters specified in the reqest
+        // The effective values of the parameters specified in the request
         request.setAttribute("start", DateUtil.formatDateYMD(start));
         request.setAttribute("end", DateUtil.formatDateYMD(end));
         request.setAttribute("timeUnit", timeUnit.toString().toLowerCase());

@@ -24,6 +24,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import org.jlab.rfd.business.util.DateUtil;
+import org.jlab.rfd.config.AppConfig;
 import org.jlab.rfd.model.CEDElementUpdate;
 import org.jlab.rfd.model.CEDElementUpdateHistory;
 
@@ -34,7 +35,7 @@ import org.jlab.rfd.model.CEDElementUpdateHistory;
 public class CEDUpdateHistoryService {
 
     private static final Logger LOGGER = Logger.getLogger(CEDUpdateHistoryService.class.getName());
-    private static final String CED_UPDATE_HISTORY_URL = "http://ced.acc.jlab.org/ajax/history/";
+    private static final String CED_UPDATE_HISTORY_URL = AppConfig.getAppConfig().getCEDUrl() + "/ajax/history/";
 
     // Thread safe method called from public method getUpdateLIst
     public CEDElementUpdateHistory getElementUpdateHistory(String elem, List<String> props, Date start, Date end) throws IOException, ParseException {
@@ -114,8 +115,8 @@ public class CEDUpdateHistoryService {
 
         List<Future<CEDElementUpdateHistory>> futures = exec.invokeAll(callables);
         List<CEDElementUpdate> updates = new ArrayList<>();
-        for (Future f : futures) {
-            CEDElementUpdateHistory hist = (CEDElementUpdateHistory) f.get();
+        for (Future<CEDElementUpdateHistory> f : futures) {
+            CEDElementUpdateHistory hist = f.get();
             for (String prop : props) {
                 Map<Date, CEDElementUpdate> pUpdates = hist.getUpdateHistory(prop);
                 if (pUpdates != null) {
@@ -125,7 +126,7 @@ public class CEDUpdateHistoryService {
                 }
             }
         }
-        Collections.sort(updates, new Comparator<CEDElementUpdate>() {
+        Collections.sort(updates, new Comparator<>() {
             @Override
             public int compare(CEDElementUpdate c1, CEDElementUpdate c2) {
                 return c2.getDateString().compareTo(c1.getDateString());
