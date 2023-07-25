@@ -64,10 +64,11 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
         var labelMap = new Map();
         labelMap.set("CPI4107B", "<b>North</b> (CPI4107B)");
         labelMap.set("CPI5107B", "<b>South</b> (CPI5107B)");
-        var colors = jlab.colors.linacs.slice(1, 4);  // North, South, Total (Total is used for Energy Reach)
+        //(Total is used for Energy Reach)
+        var colors = [jlab.colors.North, jlab.colors.South, jlab.colors.Total];
         var colorMap = new Map();
-        colorMap.set("CPI4107B", colors[0]);
-        colorMap.set("CPI5107B", colors[1]);
+        colorMap.set("CPI4107B", jlab.colors.North);
+        colorMap.set("CPI5107B", jlab.colors.South);
 
         if (!jlab.cryo.validateCryoResponse(cryoAjax[0], ["CPI4107B", "CPI5107B"])) {
             jlab.hideChartLoading(chartId, "Unexpected error querying data service.");
@@ -79,7 +80,7 @@ jlab.cryo.updateCryoPressureChart = function (chartId, start, end, timeUnit) {
             flotData.push({
                 data: lemData,
                 label: "Energy Reach",
-                color: colors[2], // the "Total" color
+                color: jlab.colors.Total,
                 yaxis: 2,
                 // We want this to display as a line, not a series of error bars
                 points: {show: false, errorbars: "n"},

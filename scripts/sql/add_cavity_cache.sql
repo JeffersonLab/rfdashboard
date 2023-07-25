@@ -1,4 +1,5 @@
--- This should be run as sysdba in order to update multiple users
+-- This should be run as sysdba in order to update multiple users.  This update script should only be used when
+-- upgrading a database supporting a pre-2.0.0 version of the application to a > 2.0.0 version.
 
 -- Create a CACHE for the cavity data read from the CED web service.  Each call to that
 -- takes a fraction of second, but we often end up making many calls over a date range.
