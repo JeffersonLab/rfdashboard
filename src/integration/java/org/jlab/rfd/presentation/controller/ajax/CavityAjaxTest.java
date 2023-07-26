@@ -107,6 +107,18 @@ public class CavityAjaxTest {
 
 
     @Test
+    public void testMyaModAnodeVoltage() throws IOException, ParseException {
+        // This date has some cavities with zero and non-zero modAnode voltage.  An old bug would cause this query to
+        // fail due to a null pointer exception.  Mod Anode data was switched to MYA around the start of 2022.
+        String date = "2022-04-19";
+        clearCache(DateUtil.parseDateStringYMD(date));
+        String query = "?date=" + date;
+        JsonObject json = makeQuery(query);
+        JsonArray data = json.getJsonArray("data");
+        Assert.assertEquals(1, data.size());
+    }
+
+    @Test
     public void testWeeklyQuery() throws IOException {
         String query = "?t=day&start=2020-02-02&end=2020-02-09&timeUnit=week&out=json";
 

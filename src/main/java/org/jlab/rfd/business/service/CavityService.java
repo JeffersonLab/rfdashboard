@@ -459,7 +459,9 @@ public class CavityService {
                         // > 3 kV, assume it's a software bug and that no mod anode voltage is present per discussion
                         // with K. Hesse and C. Mounts.  Don't change it from the zero value it is created
                         // with.  Similarly, no CED property means zero mod anode voltage is present.
-                        if (mavsEPICS.get(cavityName).doubleValue() < 3.0) {
+                        if (mavsEPICS.containsKey(cavityName)
+                                && mavsEPICS.get(cavityName) != null
+                                && mavsEPICS.get(cavityName).doubleValue() < 3.0) {
                             mav = mavsEPICS.get(cavityName);
                         }
                     } else {
