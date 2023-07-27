@@ -4,6 +4,6 @@
 # These are explicitly windows files and should use crlf
 *         text=auto
 *.sh      text eol=lf
-docker/*  text eol=lf
+/docker/**  text eol=lf
 *.bat     text eol=crlf
 
