@@ -39,10 +39,7 @@ public class CavityCache extends HttpServlet {
         }
 
         // Default to read action
-        System.out.println("Before " + action);
         action = action == null ? "read" : action;
-        System.out.println("After " + action);
-
         switch (action){
             case "read":
                 break;
