@@ -664,8 +664,8 @@ public class CavityService {
 
         Map<Date, Set<CavityDataPoint>> cacheData = this.readCache(dates);
         if (cacheData != null) {
+            CommentService cs = new CommentService();
             for (Date d : cacheData.keySet()) {
-                CommentService cs = new CommentService();
                 CommentFilter filter = new CommentFilter(null, null, null, null, DateUtil.getEndOfDay(d));
                 Map<String, SortedSet<Comment>> comments = cs.getCommentsByTopic(filter);
 
