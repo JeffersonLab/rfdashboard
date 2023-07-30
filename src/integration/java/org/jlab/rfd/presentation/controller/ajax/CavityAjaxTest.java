@@ -164,4 +164,36 @@ public class CavityAjaxTest {
     public void testBadOut() {
         Assert.assertThrows(IOException.class, this::throwBadOut);
     }
+
+     @Test
+    public void testCacheSpeed() throws IOException {
+
+        String query = "?t=day" +
+                "&date=2022-02-01" +
+                "&date=2022-02-02" +
+                "&date=2022-02-03" +
+                "&date=2022-02-04" +
+                "&date=2022-02-05" +
+                "&date=2022-02-06" +
+                "&date=2022-02-07" +
+                "&out=json";
+
+        System.out.println("Making query - make take time since some data likely is not cached.");
+        JsonObject json = makeQuery(query);
+        JsonArray data = json.getJsonArray("data");
+
+        Date start, end;
+        double duration;
+        for (int i = 0; i < 5; i++) {
+            start = new Date();
+            json = makeQuery(query);
+            data = json.getJsonArray("data");
+            end = new Date();
+            duration = (end.getTime() - start.getTime()) / 1000.0;
+            System.out.println("Query took " + duration + " seconds");
+        }
+
+        // Make sure we got something
+        Assert.assertEquals(7, data.size());
+    }
 }
