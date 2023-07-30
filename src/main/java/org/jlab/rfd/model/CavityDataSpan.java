@@ -86,9 +86,10 @@ public class CavityDataSpan {
             JsonObjectBuilder sample = Json.createObjectBuilder();
             sample.add("date", sdf.format(d));
             JsonArrayBuilder cavities = Json.createArrayBuilder();
-
-            for (CavityDataPoint dp : dataSpan.get(d)) {
-                cavities.add(dp.toJson());
+            if (dataSpan.get(d) != null) {
+                for (CavityDataPoint dp : dataSpan.get(d)) {
+                    cavities.add(dp.toJson());
+                }
             }
             sample.add("cavities", cavities.build());
             data.add(sample.build());
