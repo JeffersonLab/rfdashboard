@@ -5,7 +5,6 @@
  */
 package org.jlab.rfd.business.service;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
@@ -35,7 +34,7 @@ import org.jlab.rfd.model.TimeUnit;
 
 /**
  * This service class exists to return the results of ModAnodeHarvester.pl,
- * which is a part of the the CSUE RFGradTeamTools application. This data
+ * which is a part of the CSUE RFGradTeamTools application. This data
  * contains the LEM-calculated Linac trip rates and Cavity GSETs associated with
  * a standard configuration and one without any applied Mod Anode Voltage.
  *
@@ -43,8 +42,8 @@ import org.jlab.rfd.model.TimeUnit;
  */
 public class ModAnodeHarvesterService {
 
-    private static final SimpleDateFormat DATE_FORMATER = new SimpleDateFormat("yyyy-MM-dd");
-    private static final SimpleDateFormat ORA_DATE_FORMATER = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat ORA_DATE_FORMATTER = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
     private static final Logger LOGGER = Logger.getLogger(ModAnodeHarvesterService.class.getName());
     // This will be shown to the user on error.  Better to make it generic and have a log statement just before.
@@ -52,13 +51,14 @@ public class ModAnodeHarvesterService {
 
     
     /**
-     * 
-     * @param start
-     * @param end
-     * @param timeUnit
-     * @return 
-     * @throws java.text.ParseException 
-     * @throws java.sql.SQLException 
+     * Get a LinacDataSpan with mod anode harvester linac level data for the requested dates
+     * @param start The first date to include
+     * @param end Include no dates after this
+     * @param timeUnit The interval between queried dates.  TimeUnit.Day implies on sample per day, Week implies one
+     *                 sample every seven days.
+     * @return A LinacDataSpan object for the requested dates.
+     * @throws java.text.ParseException If error parsing/formatting date strings
+     * @throws java.sql.SQLException If error querying the database
      */
     public LinacDataSpan getLinacDataSpan(Date start, Date end, TimeUnit timeUnit) throws ParseException, SQLException {
         int numDays;
@@ -90,8 +90,14 @@ public class ModAnodeHarvesterService {
         
         return this.getLinacDataSpan(dates);
     }
-    
-    
+
+    /**
+     * Query the mod anode harvester table for linac level data
+     * @param dates The dates to query the data for
+     * @return A LinacDataSpan containing data across the requested dates.
+     * @throws ParseException If error parsing/formatting date strings
+     * @throws SQLException If error querying the database
+     */
     public LinacDataSpan getLinacDataSpan(Set<Date> dates) throws ParseException, SQLException {
         LinacDataSpan span = new LinacDataSpan();
         for (Date d: dates) {
@@ -107,8 +113,8 @@ public class ModAnodeHarvesterService {
      * This queries the ModAnodeHarvester database tables for linac scan data associated with the first scan of that day.
      * @param timestamp The date of interested
      * @return A map of linac name to linac data for the day requested  or null if no scan data exists for that day
-     * @throws ParseException
-     * @throws SQLException 
+     * @throws ParseException If error parsing/formatting the date strings
+     * @throws SQLException If error querying the database
      */
     public Set<LinacDataPoint> getLinacData(Date timestamp) throws ParseException, SQLException {
 
@@ -137,11 +143,11 @@ public class ModAnodeHarvesterService {
                     BigDecimal energy = rs.getBigDecimal("ENERGY_MEV");
                     BigDecimal trips = rs.getBigDecimal("TRIPS_PER_HOUR");
                     if ( trips != null ) {
-                        trips.setScale(6, RoundingMode.HALF_UP);
+                        trips = trips.setScale(6, RoundingMode.HALF_UP);
                     }
                     BigDecimal tripsNoMav = rs.getBigDecimal("TRIPS_PER_HOUR_NO_MAV");
                     if ( tripsNoMav != null ) {
-                        tripsNoMav.setScale(6, RoundingMode.HALF_UP);
+                        tripsNoMav = tripsNoMav.setScale(6, RoundingMode.HALF_UP);
                     }
 
                     LinacRecord record = new LinacRecord(sr.getTimestamp(), sr.getEpicsDate(), linac, energy, trips, tripsNoMav);
@@ -167,7 +173,7 @@ public class ModAnodeHarvesterService {
                 }
                 for (LinacName linacName : records1050.keySet()) {
                     if (!records1090.containsKey(linacName)) {
-                        LOGGER.log(Level.SEVERE, "ModAnodeHarvester database has disimilar linac sets at different energy levels");
+                        LOGGER.log(Level.SEVERE, "ModAnodeHarvester database has dissimilar linac sets at different energy levels");
                         throw new RuntimeException(ERR_STRING);
                     }
                     if (linacName == null) {
@@ -175,11 +181,7 @@ public class ModAnodeHarvesterService {
                         throw new RuntimeException(ERR_STRING);
                     }
                     LinacDataPoint linacData = new LinacDataPoint(records1050.get(linacName), records1090.get(linacName));
-                    if (linacData == null) {
-                        throw new RuntimeException(ERR_STRING);
-                    } else {
-                        data.add(linacData);
-                    }
+                    data.add(linacData);
                 }
             } finally {
                 SqlUtil.close(conn, pstmt, rs);
@@ -188,21 +190,38 @@ public class ModAnodeHarvesterService {
         
         return data;
     }
-    
+
     /**
-     * This method queries the ModAnodeHarvester tables for the Cavity GSET data associated with first scan of the given day.
-     * @param timestamp The date of interest
-     * @return A map of cavity name to cavity data for the requested day or null if no scan data exists for that day
-     * @throws SQLException
-     * @throws ParseException
-     * @throws IOException 
+     * Convenience function for querying a single day's worth of CavityGsetData
+     * @param timestamp The date for which to query the data
+     * @return A map of cavity name to cavity data for the requested day or null if no scan data existed for that day.
+     * @throws SQLException If error on querying the database
+     * @throws ParseException If error parsing/formatting date strings
      */
-    public Map<String, CavityGsetData> getCavityGsetData(Date timestamp) throws SQLException, ParseException, IOException {
+    public Map<String, CavityGsetData> getCavityGsetData(Date timestamp) throws SQLException, ParseException {
+        Set<Date> dates = new HashSet<>();
+        dates.add(timestamp);
+        Map<Date, Map<String, CavityGsetData>> outMap = getCavityGsetData(dates);
+        if (outMap == null || outMap.isEmpty()) {
+            return null;
+        }
+        return outMap.get(timestamp);
+    }
 
-        ScanRecord sr = getFirstScanRecord(timestamp);
-        Map<String, CavityGsetData> data = null;
+        /**
+         * This method queries the ModAnodeHarvester tables for the Cavity GSET data associated with first scan of the given day.
+         * @param dates The dates of interest
+         * @return A map of cavity name to cavity data for the requested days or null if no scan data exists for those days
+         * @throws SQLException If error querying database
+         * @throws ParseException If error parsing/formatting dates
+         */
+    public Map<Date, Map<String, CavityGsetData>> getCavityGsetData(Set<Date> dates) throws SQLException, ParseException {
 
-        if (sr != null) {
+        Set<ScanRecord> scanRecords = getFirstScanRecord(dates);
+        Map<String, CavityGsetData> data;
+        Map<Date, Map<String, CavityGsetData>> outMap = new HashMap<>();
+
+        if (scanRecords != null && !scanRecords.isEmpty()) {
             Connection conn = null;
             PreparedStatement pstmt = null;
             ResultSet rs = null;
@@ -211,83 +230,96 @@ public class ModAnodeHarvesterService {
                     + " FROM MOD_ANODE_HARVESTER_GSET"
                     + " WHERE SCAN_ID = ?";
 
-            Map<String, GsetRecord> records1090 = new HashMap<>();
-            Map<String, GsetRecord> records1050 = new HashMap<>();
             try {
                 conn = SqlUtil.getConnection();
-
                 pstmt = conn.prepareStatement(gsetSql);
-                pstmt.setLong(1, sr.getScanId());
-                rs = pstmt.executeQuery();
-                while (rs.next()) {
-                    String epicsName = rs.getString("CAVITY_EPICS");
-                    BigDecimal energy = rs.getBigDecimal("ENERGY_MEV");
-                    BigDecimal gset = rs.getBigDecimal("GSET_MVPM");
-                    BigDecimal gsetNoMav = rs.getBigDecimal("GSET_NO_MAV_MVPM");
-                    BigDecimal modAnode = rs.getBigDecimal("MOD_ANODE_KV");
-                    GsetRecord record = new GsetRecord(sr.getTimestamp(), sr.getEpicsDate(), modAnode, epicsName, energy, gset, gsetNoMav);
-                    switch (record.getEnergy().intValue()) {
-                        case 1050:
-                            records1050.put(record.getEpicsName(), record);
-                            break;
-                        case 1090:
-                            records1090.put(record.getEpicsName(), record);
-                            break;
-                        default:
-                            LOGGER.log(Level.SEVERE, "Received record with unexpected energy ''{0}''", record.getEnergy().toString());
+
+                for(ScanRecord sr : scanRecords) {
+                    Map<String, GsetRecord> records1090 = new HashMap<>();
+                    Map<String, GsetRecord> records1050 = new HashMap<>();
+                    pstmt.setLong(1, sr.getScanId());
+                    rs = pstmt.executeQuery();
+                    while (rs.next()) {
+                        String epicsName = rs.getString("CAVITY_EPICS");
+                        BigDecimal energy = rs.getBigDecimal("ENERGY_MEV");
+                        BigDecimal gset = rs.getBigDecimal("GSET_MVPM");
+                        BigDecimal gsetNoMav = rs.getBigDecimal("GSET_NO_MAV_MVPM");
+                        BigDecimal modAnode = rs.getBigDecimal("MOD_ANODE_KV");
+                        GsetRecord record = new GsetRecord(sr.getTimestamp(), sr.getEpicsDate(), modAnode, epicsName, energy, gset, gsetNoMav);
+                        switch (record.getEnergy().intValue()) {
+                            case 1050:
+                                records1050.put(record.getEpicsName(), record);
+                                break;
+                            case 1090:
+                                records1090.put(record.getEpicsName(), record);
+                                break;
+                            default:
+                                LOGGER.log(Level.SEVERE, "Received record with unexpected energy ''{0}''", record.getEnergy().toString());
+                                throw new RuntimeException(ERR_STRING);
+                        }
+                    }
+
+                    data = new HashMap<>();
+
+                    // Combine the two records for each cavity into one CavityGsetData object and add it to the map.
+                    if (records1050.size() != records1090.size()) {
+                        LOGGER.log(Level.SEVERE, "Database query did not return identical cavity sets at different energies");
+                        throw new RuntimeException(ERR_STRING);
+                    }
+                    for (String epicsName : records1050.keySet()) {
+                        if (!records1090.containsKey(epicsName)) {
+                            LOGGER.log(Level.SEVERE, "ModAnodeHarvester database has dissimilar cavity sets at different energy levels");
                             throw new RuntimeException(ERR_STRING);
+                        }
+                        if (epicsName == null) {
+                            LOGGER.log(Level.SEVERE, "Received Gset record with null EPICS_NAME");
+                            throw new RuntimeException(ERR_STRING);
+                        }
+                        data.put(epicsName, new CavityGsetData(records1050.get(epicsName), records1090.get(epicsName)));
                     }
-                }
-
-                data = new HashMap<>();
-
-                // Combine the two records for each cavity into one CavityGsetData object and add it to the map.
-                if (records1050.size() != records1090.size()) {
-                    LOGGER.log(Level.SEVERE, "Database query did not return identical cavity sets at different energies");
-                    throw new RuntimeException(ERR_STRING);
-                }
-                for (String epicsName : records1050.keySet()) {
-                    if (!records1090.containsKey(epicsName)) {
-                        LOGGER.log(Level.SEVERE, "ModAnodeHarvester database has disimilar cavity sets at different energy levels");
-                        throw new RuntimeException(ERR_STRING);
-                    }
-                    if (epicsName == null) {
-                        LOGGER.log(Level.SEVERE, "Received Gset record with null EPICS_NAME");
-                        throw new RuntimeException(ERR_STRING);
-                    }
-                    CavityGsetData cgd = new CavityGsetData(records1050.get(epicsName), records1090.get(epicsName));
-                    if (cgd == null) {
-                        throw new RuntimeException(ERR_STRING);
-                    } else {
-                        data.put(epicsName, cgd);
-                    }
+                    outMap.put(DateUtil.truncateToDays(sr.getTimestamp()), data);
                 }
             } finally {
                 SqlUtil.close(rs, pstmt, conn);
             }
         }
-        return data;
+        return outMap;
     }
 
+    /**
+     * Get the first scan record on the specified date
+     * @param date The date to lookup
+     * @return A ScanRecord associated with that date or null
+     * @throws SQLException If error querying the database
+     * @throws ParseException If error parsing/formatting the date strings
+     */
+    private static ScanRecord getFirstScanRecord(Date date) throws SQLException, ParseException {
+        Set<Date> dates = new HashSet<>();
+        dates.add(date);
+        Set<ScanRecord> records = getFirstScanRecord(dates);
+        if (records == null || records.isEmpty()) {
+            return null;
+        }
+        return (ScanRecord) records.toArray()[0];
+    }
     // 
     // Returns the first record from that day or returns null.
     /**
      * This queries the ModAnodeHarvester tables for information on the first scan of the given day
-     * @param date The date of interested
-     * @return A ScanRecord object representing the fisrt scan of the day or null if no scan data exists for that day.
-     * @throws ParseException
-     * @throws SQLException 
+     * @param dates The list dates to query scan records for
+     * @return A ScanRecord object representing the first scan of the day or null if no scan data exists for that day.
+     * @throws ParseException If error parsing/formatting date strings
+     * @throws SQLException  If error querying database
      */
-    private static ScanRecord getFirstScanRecord(Date date) throws ParseException, SQLException {
+    private static Set<ScanRecord> getFirstScanRecord(Set<Date> dates) throws ParseException, SQLException {
 
-        Date start = DateUtil.truncateToDays(date);
-        Date end = DateUtil.getEndOfDay(start);
-        ScanRecord sr = null;
+        Set<ScanRecord> records = new HashSet<>();
 
         String scanSql = "SELECT SCAN_ID, START_TIME, EPICS_DATE"
                 + " FROM MOD_ANODE_HARVESTER_SCAN"
                 + " WHERE START_TIME BETWEEN TO_DATE(?, 'YYYY/MM/DD HH24:MI:SS') AND"
-                + " TO_DATE(?, 'YYYY/MM/DD HH24:MI:SS') AND ROWNUM <= 1 ORDER BY START_TIME ASC";
+                + " TO_DATE(?, 'YYYY/MM/DD HH24:MI:SS') AND ROWNUM <= 1 ORDER BY START_TIME";
+
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -295,21 +327,32 @@ public class ModAnodeHarvesterService {
         try {
             conn = SqlUtil.getConnection();
             pstmt = conn.prepareStatement(scanSql);
-            pstmt.setString(1, ORA_DATE_FORMATER.format(start));
-            pstmt.setString(2, ORA_DATE_FORMATER.format(end));
-            rs = pstmt.executeQuery();
-            if (rs.next()) {
-                long scanId = rs.getLong("SCAN_ID");
-                Date ts = DATE_FORMATER.parse(rs.getString("START_TIME"));
-                Date ed = DATE_FORMATER.parse(rs.getString("EPICS_DATE"));
-                pstmt.close();
-                rs.close();
-                sr = new ScanRecord(scanId, ts, ed);
+            for(Date date: dates) {
+                Date start = DateUtil.truncateToDays(date);
+                Date end = DateUtil.getEndOfDay(start);
+
+                pstmt.setString(1, ORA_DATE_FORMATTER.format(start));
+                pstmt.setString(2, ORA_DATE_FORMATTER.format(end));
+                rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    long scanId = rs.getLong("SCAN_ID");
+                    Date ts = DATE_FORMATTER.parse(rs.getString("START_TIME"));
+                    Date ed = DATE_FORMATTER.parse(rs.getString("EPICS_DATE"));
+                    pstmt.close();
+                    rs.close();
+                    records.add(new ScanRecord(scanId, ts, ed));
+                }
+                pstmt.clearParameters();
             }
         } finally {
             SqlUtil.close(conn, pstmt, rs);
         }
 
-        return sr;
+        // Downstream expects null if no data found
+        if (records.isEmpty()){
+            return null;
+        }
+
+        return records;
     }
 }

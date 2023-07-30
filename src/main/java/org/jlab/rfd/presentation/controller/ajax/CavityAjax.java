@@ -76,7 +76,7 @@ public class CavityAjax extends HttpServlet {
             Date end = null;
             if (dates == null) {
                 try {
-                    startEnd = RequestParamUtil.processStartEnd(request, TimeUnit.WEEK, 4);
+                    startEnd = RequestParamUtil.processStartEnd(request, timeUnit, 4);
                     start = startEnd.get("start");
                     end = startEnd.get("end");
                 } catch (ParseException ex) {

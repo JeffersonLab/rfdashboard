@@ -35,7 +35,6 @@ import org.jlab.rfd.presentation.util.DataFormatter;
 public class ModAnodeAjax extends HttpServlet {
     public static final Logger LOGGER = Logger.getLogger(ModAnodeAjax.class.getName());
     
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -47,7 +46,7 @@ public class ModAnodeAjax extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //LOGGER.log(Level.FINEST, "Received followig request parameters: {0}", request.getParameterMap().toString());
+        //LOGGER.log(Level.FINEST, "Received following request parameters: {0}", request.getParameterMap().toString());
         
         Map<String, Date> startEnd;
         Date start;
@@ -59,7 +58,7 @@ public class ModAnodeAjax extends HttpServlet {
             end = startEnd.get("end");
         } catch (ParseException ex) {
             LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
-            throw new ServletException("Error parseing start/end", ex);
+            throw new ServletException("Error parsing start/end", ex);
         }
 
         String[] valid = {"flot"};
@@ -87,13 +86,10 @@ public class ModAnodeAjax extends HttpServlet {
         }
 
         SortedMap<Date, SortedMap<String, BigDecimal>> factoredData;
-        switch (factor) {
-            case "cmtype":
-                factoredData = span.getModAnodeCountByCMType(null);
-                break;
-            default:
-                factoredData = span.getModAnodeCountByLinac(true);
-                break;
+        if (factor.equals("cmtype")) {
+            factoredData = span.getModAnodeCountByCMType(null);
+        } else {
+            factoredData = span.getModAnodeCountByLinac(true);
         }
 
         PrintWriter pw = response.getWriter();

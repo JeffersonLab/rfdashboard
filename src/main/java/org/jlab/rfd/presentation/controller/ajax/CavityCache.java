@@ -2,6 +2,7 @@ package org.jlab.rfd.presentation.controller.ajax;
 
 import org.jlab.rfd.business.service.CavityService;
 import org.jlab.rfd.business.util.DateUtil;
+import org.jlab.rfd.model.CavityDataPoint;
 import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.CavityResponse;
 
@@ -39,10 +40,7 @@ public class CavityCache extends HttpServlet {
         }
 
         // Default to read action
-        System.out.println("Before " + action);
         action = action == null ? "read" : action;
-        System.out.println("After " + action);
-
         switch (action){
             case "read":
                 break;
@@ -77,9 +75,12 @@ public class CavityCache extends HttpServlet {
             }
         } else {
             try {
-                Set<CavityResponse> data = cs.createCommentResponseSet(cs.readCache(d), new HashMap<>());
+                Set<CavityDataPoint> cdps = cs.readCache(d);
                 CavityDataSpan span = new CavityDataSpan();
-                span.put(d, data);
+                if (cdps != null) {
+                    Set<CavityResponse> data = cs.createCommentResponseSet(cdps, new HashMap<>());
+                    span.put(d, data);
+                }
                 try (PrintWriter pw = response.getWriter()) {
                     String json = span.toJson().toString();
                     pw.write("{\"response\": \"Success\", \"data\": " + json + "}");
