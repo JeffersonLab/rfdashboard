@@ -57,7 +57,8 @@ public class MyaService {
      * future.
      * @throws IOException If problem arise while contacting the mya web service.
      */
-    public Map<String, BigDecimal> getCavityMyaData(Date timestamp, Map<String, String> name2Epics, Map<String, List<String>> postfixes) throws IOException {
+    public Map<String, BigDecimal> getCavityMyaData(Date timestamp, Map<String, String> name2Epics, Map<String,
+            List<String>> postfixes) throws IOException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         if ( timestamp.after(new Date()) ) {
             return null;
@@ -68,7 +69,7 @@ public class MyaService {
         if (DateUtil.getDifferenceInDays(timestamp, new Date()) > 180) {
             deployment = "history";
         }
-        Map<String, BigDecimal> gsetData = new HashMap<>();
+        Map<String, BigDecimal> valueData = new HashMap<>();
         
         // Create a reverse lookup map.  name2Epics should be a 1:1 map
         Map<String, String> epics2Name = new HashMap<>();
@@ -119,10 +120,10 @@ public class MyaService {
                 if (sample.containsKey("v")) {
                     gset = sample.getJsonNumber("v").bigDecimalValue();
                 }
-                gsetData.put(epics2Name.get(epicsName), gset);
+                valueData.put(epics2Name.get(epicsName), gset);
             }
         }
-        return gsetData;
+        return valueData;
     }
 
     /**
