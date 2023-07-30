@@ -10,7 +10,9 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This is a test of the CavityAjax (i.e. /ajax/cavity) endpoint.  The expected result should have a structure like this
@@ -111,17 +113,42 @@ public class CavityAjaxTest {
         // This date has some cavities with zero and non-zero modAnode voltage.  An old bug would cause this query to
         // fail due to a null pointer exception.  Mod Anode data was switched to MYA around the start of 2022.
         String date = "2022-04-19";
+
+        // Check without cache
         clearCache(DateUtil.parseDateStringYMD(date));
         String query = "?date=" + date;
         JsonObject json = makeQuery(query);
         JsonArray data = json.getJsonArray("data");
         Assert.assertEquals(1, data.size());
+
+        // Check with cache
+        json = makeQuery(query);
+        data = json.getJsonArray("data");
+        Assert.assertEquals(1, data.size());
     }
 
     @Test
-    public void testWeeklyQuery() throws IOException {
-        String query = "?t=day&start=2020-02-02&end=2020-02-09&timeUnit=week&out=json";
+    public void testWeeklyQuery() throws IOException, ParseException {
+        List<String> dateStringList = new ArrayList<>();
+        dateStringList.add("2020-02-02");
+        dateStringList.add("2020-02-03");
+        dateStringList.add("2020-02-04");
+        dateStringList.add("2020-02-05");
+        dateStringList.add("2020-02-06");
+        dateStringList.add("2020-02-07");
+        dateStringList.add("2020-02-08");
+        dateStringList.add("2020-02-09");
+        List<Date> dates = new ArrayList<>();
+        for(String d : dateStringList) {
+            dates.add(DateUtil.parseDateStringYMD(d));
+        }
 
+        String query = "?t=day&start=" + dateStringList.get(0) + "&end=" + dateStringList.get(7) + "&timeUnit=week&out=json";
+
+        // Test without the cache
+        for (Date d : dates) {
+            clearCache(d);
+        }
         JsonObject json = makeQuery(query);
         JsonArray data = json.getJsonArray("data");
 
@@ -135,12 +162,45 @@ public class CavityAjaxTest {
         JsonArray cavities1 = data.getJsonObject(1).getJsonArray("cavities");
         Assert.assertEquals(418, cavities0.size());
         Assert.assertEquals(418, cavities1.size());
+
+        // Test with the cache
+        json = makeQuery(query);
+        data = json.getJsonArray("data");
+
+        // Should return data from 2020-02-02 and 2020-02-09
+        Assert.assertEquals(2, data.size());
+        Assert.assertEquals("2020-02-02", data.getJsonObject(0).getString("date"));
+        Assert.assertEquals("2020-02-09", data.getJsonObject(1).getString("date"));
+
+        // Did we get all the cavities?
+        cavities0 = data.getJsonObject(0).getJsonArray("cavities");
+        cavities1 = data.getJsonObject(1).getJsonArray("cavities");
+        Assert.assertEquals(418, cavities0.size());
+        Assert.assertEquals(418, cavities1.size());
     }
 
     @Test
-    public void testMultiDateQuery() throws IOException {
-        String query = "?t=day&date=2020-02-02&date=2020-02-09&out=json";
+    public void testMultiDateQuery() throws IOException, ParseException {
+        List<String> dateStringList = new ArrayList<>();
+        dateStringList.add("2020-02-02");
+        dateStringList.add("2020-02-03");
+        dateStringList.add("2020-02-04");
+        dateStringList.add("2020-02-05");
+        dateStringList.add("2020-02-06");
+        dateStringList.add("2020-02-07");
+        dateStringList.add("2020-02-08");
+        dateStringList.add("2020-02-09");
+        List<Date> dates = new ArrayList<>();
+        for(String d : dateStringList) {
+            dates.add(DateUtil.parseDateStringYMD(d));
+        }
 
+        String query = "?t=day&date=" + dateStringList.get(0) + "&date=" + dateStringList.get(7) + "&out=json";
+
+        // Do all of this without the cache
+        for (Date d : dates) {
+            clearCache(d);
+        }
         JsonObject json = makeQuery(query);
         JsonArray data = json.getJsonArray("data");
 
@@ -152,6 +212,21 @@ public class CavityAjaxTest {
         // Did we get all the cavities?
         JsonArray cavities0 = data.getJsonObject(0).getJsonArray("cavities");
         JsonArray cavities1 = data.getJsonObject(1).getJsonArray("cavities");
+        Assert.assertEquals(418, cavities0.size());
+        Assert.assertEquals(418, cavities1.size());
+
+        // Do it all again with the cache
+        json = makeQuery(query);
+        data = json.getJsonArray("data");
+
+        // Should return data from 2020-02-02 and 2020-02-09
+        Assert.assertEquals(2, data.size());
+        Assert.assertEquals("2020-02-02", data.getJsonObject(0).getString("date"));
+        Assert.assertEquals("2020-02-09", data.getJsonObject(1).getString("date"));
+
+        // Did we get all the cavities?
+        cavities0 = data.getJsonObject(0).getJsonArray("cavities");
+        cavities1 = data.getJsonObject(1).getJsonArray("cavities");
         Assert.assertEquals(418, cavities0.size());
         Assert.assertEquals(418, cavities1.size());
     }
@@ -167,7 +242,7 @@ public class CavityAjaxTest {
 
      @Test
     public void testCacheSpeed() throws IOException {
-
+        // Don't worry about clearing the cache.  We only wanted cached data for this test.
         String query = "?t=day" +
                 "&date=2022-02-01" +
                 "&date=2022-02-02" +
@@ -178,7 +253,7 @@ public class CavityAjaxTest {
                 "&date=2022-02-07" +
                 "&out=json";
 
-        System.out.println("Making query - make take time since some data likely is not cached.");
+        System.out.println("Making query - may take time since some data likely is not cached.");
         JsonObject json = makeQuery(query);
         JsonArray data = json.getJsonArray("data");
 

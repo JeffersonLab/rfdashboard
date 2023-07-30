@@ -39,8 +39,14 @@ public class ModAnodeAjaxTest {
         }
     }
     @Test
-    public void testBasicUsageCEDData () throws IOException {
-        String query = "?start=2021-12-15&end=2021-12-17&timeUnit=day";
+    public void testBasicUsageCEDData () throws IOException, ParseException {
+        String d1 = "2021-12-15";
+        String d2 = "2021-12-16";
+        String d3 = "2021-12-17";
+        Date date1 = DateUtil.parseDateStringYMD(d1);
+        Date date2 = DateUtil.parseDateStringYMD(d2);
+        Date date3 = DateUtil.parseDateStringYMD(d3);
+        String query = "?start=" + d1 + "&end=" + d3 + "&timeUnit=day";
         String expString = "{" +
                 "\"labels\":[\"Injector\",\"North\",\"South\",\"Total\"]," +
                 "\"data\":[" +
@@ -55,7 +61,15 @@ public class ModAnodeAjaxTest {
             exp = reader.readObject();
         }
 
+        // Check without cache
+        clearCache(date1);
+        clearCache(date2);
+        clearCache(date3);
         JsonObject res = makeQuery(query);
+        Assert.assertEquals(exp, res);
+
+        // Check with cache
+        res = makeQuery(query);
         Assert.assertEquals(exp, res);
     }
 
@@ -63,7 +77,6 @@ public class ModAnodeAjaxTest {
     public void testBasicUsageMYAData () throws IOException, ParseException {
         String d = "2022-03-15";
         Date date = DateUtil.parseDateStringYMD(d);
-        clearCache(date);
         String query = "?start=" + d + "&end=" + d + "&timeUnit=day";
         String expString = "{" +
                 "\"labels\":[\"Injector\",\"North\",\"South\",\"Total\",\"Unknown\"]," +
@@ -81,6 +94,7 @@ public class ModAnodeAjaxTest {
         }
 
         // Check without the cache
+        clearCache(date);
         JsonObject res = makeQuery(query);
         Assert.assertEquals(exp, res);
 
