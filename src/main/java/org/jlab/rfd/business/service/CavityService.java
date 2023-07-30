@@ -662,6 +662,18 @@ public class CavityService {
             curr = cal.getTime();
         }
 
+        Map<Date, Set<CavityDataPoint>> cacheData = this.readCache(dates);
+        if (cacheData != null) {
+            for (Date d : cacheData.keySet()) {
+                CommentService cs = new CommentService();
+                CommentFilter filter = new CommentFilter(null, null, null, null, DateUtil.getEndOfDay(d));
+                Map<String, SortedSet<Comment>> comments = cs.getCommentsByTopic(filter);
+
+                span.put(d, this.createCommentResponseSet(cacheData.get(d), comments));
+            }
+            dates.removeAll(cacheData.keySet());
+        }
+
         // Randomize the order of the dates that are queried.  Consider multiple overlapping requests looking for
         // uncached data.  If they all go in order, then cache is never helpful and each query fetches the uncached
         // data.  Shuffling the order of requests is an easy way to minimize the chance of queries hitting the same
