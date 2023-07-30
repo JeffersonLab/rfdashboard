@@ -35,6 +35,7 @@ public class CavityService {
     private static final Logger LOGGER = Logger.getLogger(CavityService.class.getName());
     // Append the wrkspc argument to the end of this string
     public static final String CED_INVENTORY_URL = AppConfig.getAppConfig().getCEDUrl() + "/inventory";
+    public static final String MAV_MOVED_TO_MYA_DATE = "2022-01-01";
 
     // This manages concurrent access to the cache
     private static final Object CACHE_LOCK = new Object();
@@ -83,29 +84,67 @@ public class CavityService {
         return rowsDeleted;
     }
 
+    private String getCacheReadSql(int numDates) {
+        if (numDates < 1) {
+            throw new IllegalArgumentException("Cache query must be for at least one date");
+        }
+        StringBuilder sql = new StringBuilder("SELECT * FROM CAVITY_CACHE WHERE QUERY_DATE IN" +
+                " (TO_DATE(?, 'YYYY-MM-DD')");
+
+        // Only do this if we've requested more than one date.
+        for (int i = 1; i < numDates; i++) {
+            sql.append(", TO_DATE(?, 'YYYY-MM-DD')");
+        }
+        sql.append(")");
+
+        return sql.toString();
+    }
+
     /**
-     * Check the cache to see if we have this response already.
-     *
-     * @param date The date for which data is cached
-     * @return The Set of CavityDataPoints associated with the query or null if cache miss
+     * Query the cache for a single date.
+     * @param date The date to query for
+     * @return A set of cavity data
+     * @throws SQLException  If a problem happens while querying the database
+     * @throws ParseException If a problem happens while formatting/parsing date strings
      */
-    public Set<CavityDataPoint> readCache(Date date) throws SQLException, ParseException, IOException {
-        Set<CavityDataPoint> data = null;
+    public Set<CavityDataPoint> readCache(Date date) throws SQLException, ParseException {
+        List<Date> dates = new ArrayList<>();
+        dates.add(date);
+        Map<Date, Set<CavityDataPoint>> data = readCache(dates);
+        if (data == null) {
+            return null;
+        }
+        return data.get(date);
+    }
+
+
+        /**
+         * Check the cache to see if we have data for these dates.
+         *
+         * @param dates The list dates for which cached data should be queried
+         * @return The Set of CavityDataPoints associated with the query or null if cache miss
+         * @throws SQLException If a problem happens while querying the database
+         * @throws ParseException If a problem happens while formatting/parsing date strings
+         */
+    public Map<Date, Set<CavityDataPoint>> readCache(List<Date> dates) throws SQLException, ParseException {
+        Map<Date, Set<CavityDataPoint>> dataMap = null;
         synchronized (CACHE_LOCK) {
             Connection conn = null;
             PreparedStatement pstmt = null;
             ResultSet rs = null;
-            String sql = "SELECT * FROM CAVITY_CACHE WHERE QUERY_DATE = TO_DATE(?, 'YYYY-MM-DD')";
+            String sql = getCacheReadSql(dates.size());
             try {
                 conn = SqlUtil.getConnection();
                 pstmt = conn.prepareStatement(sql);
 
-                pstmt.setString(1, DateUtil.formatDateYMD(date));
+                for (int i = 0; i < dates.size(); i++) {
+                    pstmt.setString(i+1, DateUtil.formatDateYMD(dates.get(i)));
+                }
                 rs = pstmt.executeQuery();
 
-                // If we don't have the data cached, return null
+                // If we don't have the data cached, return null.  Happens after the processing block.
                 if (rs.isBeforeFirst()) {
-                    data = new HashSet<>();
+                    dataMap = new HashMap<>();
                     Date d;
                     String cavityName, epicsName, q0, qExternal;
                     CryomoduleType cryoModuleType;
@@ -116,7 +155,7 @@ public class CavityService {
                         d = rs.getDate("QUERY_DATE");
                         cavityName = rs.getString("CAVITY_NAME");
                         epicsName = rs.getString("EPICS_NAME");
-                        modAnodeVoltage = BigDecimal.valueOf(rs.getDouble("MOD_ANODE_VOLTAGE"));
+                        modAnodeVoltage = getBigDecimal(rs, "MOD_ANODE_VOLTAGE");
                         cryoModuleType = CryomoduleType.valueOf(rs.getString("CRYOMODULE_TYPE"));
                         gset = getBigDecimal(rs, "GSET");
                         odvh = getBigDecimal(rs, "ODVH");
@@ -132,7 +171,8 @@ public class CavityService {
 
                         cdp = new CavityDataPoint(d, cavityName, cryoModuleType, modAnodeVoltage, epicsName, gset, odvh, q0,
                                 qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, length, null, bypassed, tunerBad);
-                        data.add(cdp);
+                        dataMap.putIfAbsent(d, new HashSet<>());
+                        dataMap.get(d).add(cdp);
                     }
                 }
                 rs.close();
@@ -141,35 +181,39 @@ public class CavityService {
             }
         }
 
-        if (data == null) {
+        if (dataMap == null) {
             return null;
         }
 
-        // If we haven't returned null already, then we expect there to be something in the cavity cache.
-        // The mod anode simulation data is already saved in the database.  Query that and update the existing data points.
-        ModAnodeHarvesterService mahs = new ModAnodeHarvesterService();
-        Map<String, CavityGsetData> mahData = mahs.getCavityGsetData(date);
-        Set<CavityDataPoint> out;
-        if (mahData == null || mahData.isEmpty()) {
-            out = data;
-        } else {
-            out = new HashSet<>();
-            for (CavityDataPoint cdp : data) {
-                CavityGsetData mah = mahData.get(cdp.getCavityName());
-                if (mah != null) {
-                    CavityDataPoint copy = new CavityDataPoint(cdp.getTimestamp(), cdp.getCavityName(),
-                            cdp.getCryomoduleType(), cdp.getModAnodeVoltage(), cdp.getEpicsName(), cdp.getGset(),
-                            cdp.getOdvh(), cdp.getQ0(), cdp.getqExternal(), cdp.getMaxGset(), cdp.getOpsGsetMax(),
-                            cdp.getTripOffset(), cdp.getTripSlope(), cdp.getLength(), mah, cdp.isBypassed(),
-                            cdp.isTunerBad());
-                    out.add(copy);
-                } else {
-                    out.add(cdp);
+        Map<Date, Set<CavityDataPoint>> outMap = new HashMap<>();
+        for (Date date : dataMap.keySet()) {
+            // If we haven't returned null already, then we expect there to be something in the cavity cache.
+            // The mod anode simulation data is already saved in the database.  Query that and update the existing data points.
+            ModAnodeHarvesterService mahs = new ModAnodeHarvesterService();
+            Map<String, CavityGsetData> mahData = mahs.getCavityGsetData(date);
+            Set<CavityDataPoint> out;
+            if (mahData == null || mahData.isEmpty()) {
+                outMap.put(date, dataMap.get(date));
+            } else {
+                out = new HashSet<>();
+                for (CavityDataPoint cdp : dataMap.get(date)) {
+                    CavityGsetData mah = mahData.get(cdp.getCavityName());
+                    if (mah != null) {
+                        CavityDataPoint copy = new CavityDataPoint(cdp.getTimestamp(), cdp.getCavityName(),
+                                cdp.getCryomoduleType(), cdp.getModAnodeVoltage(), cdp.getEpicsName(), cdp.getGset(),
+                                cdp.getOdvh(), cdp.getQ0(), cdp.getqExternal(), cdp.getMaxGset(), cdp.getOpsGsetMax(),
+                                cdp.getTripOffset(), cdp.getTripSlope(), cdp.getLength(), mah, cdp.isBypassed(),
+                                cdp.isTunerBad());
+                        out.add(copy);
+                    } else {
+                        out.add(cdp);
+                    }
                 }
+                outMap.put(date, out);
             }
         }
 
-        return out;
+        return outMap;
     }
 
     /**
@@ -315,7 +359,7 @@ public class CavityService {
         Set<CavityDataPoint> data = null;
         try {
             data = readCache(timestamp);
-        } catch (SQLException | ParseException | IOException ex) {
+        } catch (SQLException | ParseException ex) {
             LOGGER.log(Level.WARNING, "Error reading from cavity cache", ex);
         }
 
@@ -353,6 +397,14 @@ public class CavityService {
                             cmTypes.get(zoneName).equals(CryomoduleType.C50) ||
                             cmTypes.get(zoneName).equals(CryomoduleType.C50T)) {
                         names6GEV.add(cavityName);
+                    // Weird historical problem, the QTR used to be LLRF 1.0 (6GeV), but they never archived the PV.
+                    // But the QTR was swapped out to 3.0 controls so the KMAS PV was archived at some point.  Ignoring
+                    // the old style just means that before the upgrade we will get null / unknown for this cavity which
+                    // is correct.  I'll leave this little comment block here in case someone comes across this in the
+                    // future.
+                    // } else if (cmTypes.get(zoneName).equals(CryomoduleType.QTR)
+                    //        && timestamp.before(DateUtil.parseDateStringYMD(QTR_UPGRADE_TO_LLRF3_0_DATE))) {
+                    //     names6GEV.add(cavityName);
                     } else {
                         names12GEV.add(cavityName);
                     }
@@ -360,7 +412,7 @@ public class CavityService {
                 MyaService ms = new MyaService();
 
                 // We switched from CED to EPICS/MYA for tracking ModAnodeVolts in 2022.
-                boolean useMyaMAV = timestamp.after(DateUtil.parseDateString("2022-01-01"));
+                boolean useMyaMAV = timestamp.after(DateUtil.parseDateString(MAV_MOVED_TO_MYA_DATE));
 
                 Map<String, List<String>> postfixes = new HashMap<>();
                 for (String name : name2Epics.keySet()) {
@@ -419,8 +471,7 @@ public class CavityService {
 
                 for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
                     // Optional in CED - objects initialized to null are not required to be displayed on dashboard
-                    BigDecimal mav = new BigDecimal(0);  // No ModAnode property indicates a zero modulating anode voltage is applied
-                    // CED units: kilovolts  
+                    // CED units: kilovolts
                     boolean tunerBad = false; // CED note: false unless set
                     boolean bypassed = false; // CED note: false unless set
                     BigDecimal tripOffset = null;   // CED units: trips per shift
@@ -432,6 +483,10 @@ public class CavityService {
                     String qExternal;
                     BigDecimal maxGset; // CED units: MeV/m
                     BigDecimal length; // CED units: meters
+
+                    // ModAnode is CED property before 2022, no prop means MAV == 0. After starting 2022, it's moved
+                    // to MYA/EPICS and has some slightly more complicated processing rules.
+                    BigDecimal mav;
 
                     String cavityName = element.getString("name");
                     cmType = cmTypes.get(cavityName.substring(0, 4));
@@ -452,21 +507,31 @@ public class CavityService {
                         tripSlope = new BigDecimal(properties.getString("TripSlope"));
                     }
                     if (mavsEPICS != null) {
-                        // mav has 0 as default.  There are some weird cases in mya data that R...KMAS is huge, but the
+                        // Getting from MYA.  There are some weird cases in mya data that R...KMAS is huge, but the
                         // control system tries to limit KMAS to less than 2.  Maybe it's possible for this to be set
                         // a little more than 2.0 kV, but it's very unlikely that it gets set much higher.  3.0 kV is a
                         // reasonable cutoff as a sanity check that something went wrong with the data reporting.  If
                         // > 3 kV, assume it's a software bug and that no mod anode voltage is present per discussion
-                        // with K. Hesse and C. Mounts.  Don't change it from the zero value it is created
-                        // with.  Similarly, no CED property means zero mod anode voltage is present.
-                        if (mavsEPICS.containsKey(cavityName)
-                                && mavsEPICS.get(cavityName) != null
-                                && mavsEPICS.get(cavityName).doubleValue() < 3.0) {
-                            mav = mavsEPICS.get(cavityName);
+                        // with K. Hesse and C. Mounts.
+                        if (mavsEPICS.containsKey(cavityName)) {
+                            if (mavsEPICS.get(cavityName) == null) {
+                                mav = null;
+                            } else if (mavsEPICS.get(cavityName).doubleValue() > 3.0) {
+                                mav = BigDecimal.ZERO;
+                            } else {
+                                mav = mavsEPICS.get(cavityName);
+                            }
+                        } else {
+                            // If for some
+                            mav = null;
                         }
                     } else {
+                        // Getting from CED.  no CED property means zero mod anode voltage is present.  Otherwise, use
+                        // the value in CED.  Not possible to have a null/unknown value in this case.
                         if (properties.containsKey("ModAnode")) {
                             mav = new BigDecimal(properties.getString("ModAnode"));
+                        } else {
+                            mav = BigDecimal.ZERO;
                         }
                     }
                     if (properties.containsKey("OpsGsetMax")) {
@@ -505,8 +570,6 @@ public class CavityService {
                 }
             }
 
-
-            // In case somebody has already inserted it use putIfAbsent.
             try {
                 writeCache(timestamp, data);
             } catch (SQLException | IllegalArgumentException ex) {
