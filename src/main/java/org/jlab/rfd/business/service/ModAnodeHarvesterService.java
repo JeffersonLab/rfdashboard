@@ -338,8 +338,6 @@ public class ModAnodeHarvesterService {
                     long scanId = rs.getLong("SCAN_ID");
                     Date ts = DATE_FORMATTER.parse(rs.getString("START_TIME"));
                     Date ed = DATE_FORMATTER.parse(rs.getString("EPICS_DATE"));
-                    pstmt.close();
-                    rs.close();
                     records.add(new ScanRecord(scanId, ts, ed));
                 }
                 pstmt.clearParameters();

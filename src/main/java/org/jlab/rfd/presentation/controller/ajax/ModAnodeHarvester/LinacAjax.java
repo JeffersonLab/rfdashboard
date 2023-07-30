@@ -63,7 +63,7 @@ public class LinacAjax extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             LOGGER.log(Level.SEVERE, "Unsupported timeUnit value supplied {0}", timeUnit);
             response.setContentType("application/json");
-            pw.write("{error: 'Unsupported timeUnit value \"" + timeUnit + "\" supplied'}");
+            pw.write("{\"error\": \"Unsupported timeUnit value \"" + timeUnit + "\" supplied\"}");
             return;
         }
         
@@ -85,7 +85,7 @@ public class LinacAjax extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 LOGGER.log(Level.SEVERE, "Error.  No valid date requested");
                 response.setContentType("application/json");
-                pw.write("{error: 'Error. No valid date requested'}");
+                pw.write("{\"error\": \"Error. No valid date requested\"}");
                 return;
             }
         }
@@ -103,7 +103,7 @@ public class LinacAjax extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 LOGGER.log(Level.SEVERE, "Error parsing start/end attributes", ex);
                 response.setContentType("application/json");
-                pw.write("{error: 'Error parsing start/end parameters'}");
+                pw.write("{\"error\": \"Error parsing start/end parameters\"}");
                 return;
             }
         }
@@ -114,7 +114,7 @@ public class LinacAjax extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             LOGGER.log(Level.SEVERE, "Unsupported out value supplied {0}", out);
             response.setContentType("application/json");
-            pw.write("{error:\"Unsupported out value '" + out + "' supplied\"}");
+            pw.write("{\"error\": \"Unsupported out value '" + out + "' supplied\"}");
             return;            
         }
         
@@ -127,7 +127,7 @@ public class LinacAjax extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 LOGGER.log(Level.SEVERE, "Error querying linac data service", ex);
                 response.setContentType("application/json");
-                pw.write("{error: 'Error querying linac data service'}");
+                pw.write("{\"error\": \"Error querying linac data service\"}");
                 return;
             }
         } else {
@@ -137,7 +137,7 @@ public class LinacAjax extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 LOGGER.log(Level.SEVERE, "Error querying linac data service", ex);
                 response.setContentType("application/json");
-                pw.write("{error: 'Error querying linac data service'}");
+                pw.write("{\"error\": \"Error querying linac data service\"}");
                 return;
             }
         }
