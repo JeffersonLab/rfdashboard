@@ -5,6 +5,7 @@ import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.model.CavityDataPoint;
 import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.CavityResponse;
+import org.jlab.rfd.presentation.util.RequestParamUtil;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -13,9 +14,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,19 +23,22 @@ public class CavityCache extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(CavityCache.class.getName());
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String date = request.getParameter("date");  // The date to operate on
         String secret = request.getParameter("secret"); // A "secret" to keep prevent accidentally cache clears
         String action = request.getParameter("action"); // "read" or "clear".  clear requires the "secret"
 
         response.setContentType("application/json");
 
         String error = null;
-        Date d = null;
+        List<Date> dateList= null;
         String reqSecret = "ayqs";
         try {
-            d = DateUtil.parseDateStringYMD(date);
+            dateList = RequestParamUtil.processDate(request);
         } catch (ParseException e) {
             error = "Error parsing date.  Requires YYYY-mm-dd format.";
+        }
+
+        if (dateList == null || dateList.isEmpty()) {
+            error = "At least one date required";
         }
 
         // Default to read action
@@ -63,7 +65,8 @@ public class CavityCache extends HttpServlet {
         if (action.equals("clear")) {
             int numCleared;
             try {
-                numCleared = cs.clearCache(d);
+                // We only work on the first date to prevent accidental mass cache clears
+                numCleared = cs.clearCache(dateList.get(0));
             } catch (SQLException e) {
                 LOGGER.log(Level.WARNING, e.getMessage());
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -71,15 +74,23 @@ public class CavityCache extends HttpServlet {
                 return;
             }
             try (PrintWriter pw = response.getWriter()) {
-                pw.write("{\"response\": \"Success\", \"rowsCleared\": " + numCleared + "}");
+                if (dateList.size() > 1) {
+                    pw.write("{\"response\": \"Success\", \"rowsCleared\": " + numCleared
+                            + ", \"Comment\": \"Only first date cleared.\"}");
+                } else {
+                    pw.write("{\"response\": \"Success\", \"rowsCleared\": " + numCleared + "}");
+                }
             }
         } else {
             try {
-                Set<CavityDataPoint> cdps = cs.readCache(d);
+                Map<Date, Set<CavityDataPoint>> dataMap = cs.readCache(dateList);
                 CavityDataSpan span = new CavityDataSpan();
-                if (cdps != null) {
-                    Set<CavityResponse> data = cs.createCommentResponseSet(cdps, new HashMap<>());
-                    span.put(d, data);
+                if (dataMap != null && !dataMap.isEmpty()) {
+                    for (Date d : dataMap.keySet()) {
+                        Set<CavityDataPoint> cdps = dataMap.get(d);
+                        Set<CavityResponse> data = cs.createCommentResponseSet(cdps, new HashMap<>());
+                        span.put(d, data);
+                    }
                 }
                 try (PrintWriter pw = response.getWriter()) {
                     String json = span.toJson().toString();
