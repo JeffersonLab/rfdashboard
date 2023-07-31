@@ -34,8 +34,9 @@ public class CavityService {
 
     private static final Logger LOGGER = Logger.getLogger(CavityService.class.getName());
     // Append the wrkspc argument to the end of this string
-    public static final String CED_INVENTORY_URL = AppConfig.getAppConfig().getCEDUrl() + "/inventory";
-    public static final String MAV_MOVED_TO_MYA_DATE = "2022-01-01";
+    private static final String CED_INVENTORY_URL = AppConfig.getAppConfig().getCEDUrl() + "/inventory";
+    private static final String MAV_MOVED_TO_MYA_DATE = "2022-01-01";
+    private static final int CACHE_QUERY_CHUNK_SIZE = 365;
 
     // This manages concurrent access to the cache
     private static final Object CACHE_LOCK = new Object();
@@ -128,56 +129,72 @@ public class CavityService {
          */
     public Map<Date, Set<CavityDataPoint>> readCache(List<Date> dates) throws SQLException, ParseException {
         Map<Date, Set<CavityDataPoint>> dataMap = null;
-        synchronized (CACHE_LOCK) {
-            Connection conn = null;
-            PreparedStatement pstmt = null;
-            ResultSet rs = null;
-            String sql = getCacheReadSql(dates.size());
-            try {
-                conn = SqlUtil.getConnection();
-                pstmt = conn.prepareStatement(sql);
 
-                for (int i = 0; i < dates.size(); i++) {
-                    pstmt.setString(i+1, DateUtil.formatDateYMD(dates.get(i)));
+        // SQL can grow too large over many years.  Check if we need to break the query into chunks.
+        if (dates.size() > CACHE_QUERY_CHUNK_SIZE) {
+            int numChunks = (int) Math.ceil(dates.size() / (double) CACHE_QUERY_CHUNK_SIZE);
+            Map<Date, Set<CavityDataPoint>> chunkMap;
+            dataMap = new HashMap<>();
+            for (int i = 0; i < numChunks; i++) {
+                int end = Math.min((i + 1) * CACHE_QUERY_CHUNK_SIZE - 1, dates.size());
+                int start = i * CACHE_QUERY_CHUNK_SIZE;
+                chunkMap = readCache(dates.subList(start, end));
+                if (chunkMap != null) {
+                    dataMap.putAll(chunkMap);
                 }
-                rs = pstmt.executeQuery();
+            }
+        } else {
+            synchronized (CACHE_LOCK) {
+                Connection conn = null;
+                PreparedStatement pstmt = null;
+                ResultSet rs = null;
+                String sql = getCacheReadSql(dates.size());
+                try {
+                    conn = SqlUtil.getConnection();
+                    pstmt = conn.prepareStatement(sql);
 
-                // If we don't have the data cached, return null.  Happens after the processing block.
-                if (rs.isBeforeFirst()) {
-                    dataMap = new HashMap<>();
-                    Date d;
-                    String cavityName, epicsName, q0, qExternal;
-                    CryomoduleType cryoModuleType;
-                    boolean bypassed, tunerBad;
-                    BigDecimal modAnodeVoltage, gset, odvh, maxGset, opsGsetMax, tripSlope, tripOffset, length;
-                    CavityDataPoint cdp;
-                    while (rs.next()) {
-                        d = rs.getDate("QUERY_DATE");
-                        cavityName = rs.getString("CAVITY_NAME");
-                        epicsName = rs.getString("EPICS_NAME");
-                        modAnodeVoltage = getBigDecimal(rs, "MOD_ANODE_VOLTAGE");
-                        cryoModuleType = CryomoduleType.valueOf(rs.getString("CRYOMODULE_TYPE"));
-                        gset = getBigDecimal(rs, "GSET");
-                        odvh = getBigDecimal(rs, "ODVH");
-                        q0 = rs.getString("Q0");
-                        qExternal = rs.getString("QEXTERNAL");
-                        maxGset = getBigDecimal(rs, "MAX_GSET");
-                        opsGsetMax = getBigDecimal(rs, "OPS_GSET_MAX");
-                        tripOffset = getBigDecimal(rs, "TRIP_OFFSET");
-                        tripSlope = getBigDecimal(rs, "TRIP_SLOPE");
-                        length = getBigDecimal(rs, "LENGTH");
-                        bypassed = rs.getInt("BYPASSED") == 1;
-                        tunerBad = rs.getInt("TUNER_BAD") == 1;
-
-                        cdp = new CavityDataPoint(d, cavityName, cryoModuleType, modAnodeVoltage, epicsName, gset, odvh, q0,
-                                qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, length, null, bypassed, tunerBad);
-                        dataMap.putIfAbsent(d, new HashSet<>());
-                        dataMap.get(d).add(cdp);
+                    for (int i = 0; i < dates.size(); i++) {
+                        pstmt.setString(i + 1, DateUtil.formatDateYMD(dates.get(i)));
                     }
+                    rs = pstmt.executeQuery();
+
+                    // If we don't have the data cached, return null.  Happens after the processing block.
+                    if (rs.isBeforeFirst()) {
+                        dataMap = new HashMap<>();
+                        Date d;
+                        String cavityName, epicsName, q0, qExternal;
+                        CryomoduleType cryoModuleType;
+                        boolean bypassed, tunerBad;
+                        BigDecimal modAnodeVoltage, gset, odvh, maxGset, opsGsetMax, tripSlope, tripOffset, length;
+                        CavityDataPoint cdp;
+                        while (rs.next()) {
+                            d = rs.getDate("QUERY_DATE");
+                            cavityName = rs.getString("CAVITY_NAME");
+                            epicsName = rs.getString("EPICS_NAME");
+                            modAnodeVoltage = getBigDecimal(rs, "MOD_ANODE_VOLTAGE");
+                            cryoModuleType = CryomoduleType.valueOf(rs.getString("CRYOMODULE_TYPE"));
+                            gset = getBigDecimal(rs, "GSET");
+                            odvh = getBigDecimal(rs, "ODVH");
+                            q0 = rs.getString("Q0");
+                            qExternal = rs.getString("QEXTERNAL");
+                            maxGset = getBigDecimal(rs, "MAX_GSET");
+                            opsGsetMax = getBigDecimal(rs, "OPS_GSET_MAX");
+                            tripOffset = getBigDecimal(rs, "TRIP_OFFSET");
+                            tripSlope = getBigDecimal(rs, "TRIP_SLOPE");
+                            length = getBigDecimal(rs, "LENGTH");
+                            bypassed = rs.getInt("BYPASSED") == 1;
+                            tunerBad = rs.getInt("TUNER_BAD") == 1;
+
+                            cdp = new CavityDataPoint(d, cavityName, cryoModuleType, modAnodeVoltage, epicsName, gset, odvh, q0,
+                                    qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, length, null, bypassed, tunerBad);
+                            dataMap.putIfAbsent(d, new HashSet<>());
+                            dataMap.get(d).add(cdp);
+                        }
+                    }
+                    rs.close();
+                } finally {
+                    SqlUtil.close(rs, pstmt, conn);
                 }
-                rs.close();
-            } finally {
-                SqlUtil.close(rs, pstmt, conn);
             }
         }
 
