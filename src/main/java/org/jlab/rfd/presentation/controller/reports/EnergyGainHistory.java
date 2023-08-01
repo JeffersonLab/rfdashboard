@@ -143,7 +143,7 @@ public class EnergyGainHistory extends HttpServlet {
             throw new ServletException("Error querying cryomodule data");
         }
         
-        SortedMap<Date, SortedMap<String, BigDecimal>> data;
+        SortedMap<Date, SortedMap<String, Double>> data;
         
         switch(by) {
             case "zone":

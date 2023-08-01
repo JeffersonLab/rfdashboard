@@ -88,7 +88,7 @@ public class BypassedAjax extends HttpServlet {
             throw new ServletException("Error in Bypassed Data", ex);
         }
         
-        SortedMap<Date, SortedMap<String, BigDecimal>> factoredData;
+        SortedMap<Date, SortedMap<String, Integer>> factoredData;
         switch (factor) {
             case "cmtype":
                 factoredData = span.getBypassedCountByCMType(null);
@@ -101,7 +101,7 @@ public class BypassedAjax extends HttpServlet {
         try {                
             if (out.equals("flot")) {
                 PrintWriter pw = response.getWriter();
-                JsonObject json = DataFormatter.toFlotFromDateMap(factoredData);
+                JsonObject json = DataFormatter.toFlotFromDateMapInt(factoredData);
                 response.setContentType("application/json");
                 pw.write(json.toString());
             }

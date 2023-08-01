@@ -35,6 +35,7 @@ services:
       KEYCLOAK_RESOURCE: 'RFDashboard'
       KEYCLOAK_SECRET: 'yHi6W2raPmLvPXoxqMA7VWbLAA2WN0eB'
       KEYCLOAK_BACKEND_SERVER_URL: 'http://keycloak:8080'
+      # TLDR; You can't logout unless you set frontend to be your development hostname.
       # If localhost, then rfd server tries to connect to itself and finds no one listening.  Need to expose
       # keycloak port, and use dev system hostname to direct traffic to the proper system/port
       # KEYCLOAK_FRONTEND_SERVER_URL: 'http://<hostname>:8081'

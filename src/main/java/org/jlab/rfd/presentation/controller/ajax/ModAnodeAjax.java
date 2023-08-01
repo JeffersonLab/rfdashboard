@@ -7,7 +7,6 @@ package org.jlab.rfd.presentation.controller.ajax;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
@@ -85,7 +84,7 @@ public class ModAnodeAjax extends HttpServlet {
             throw new ServletException("Error in getting modAnode Data", ex);
         }
 
-        SortedMap<Date, SortedMap<String, BigDecimal>> factoredData;
+        SortedMap<Date, SortedMap<String, Integer>> factoredData;
         if (factor.equals("cmtype")) {
             factoredData = span.getModAnodeCountByCMType(null);
         } else {
@@ -95,7 +94,7 @@ public class ModAnodeAjax extends HttpServlet {
         PrintWriter pw = response.getWriter();
         try {
             if (out.equals("flot")) {
-                JsonObject json = DataFormatter.toFlotFromDateMap(factoredData);
+                JsonObject json = DataFormatter.toFlotFromDateMapInt(factoredData);
                 response.setContentType("application/json");
                 pw.write(json.toString());
             }

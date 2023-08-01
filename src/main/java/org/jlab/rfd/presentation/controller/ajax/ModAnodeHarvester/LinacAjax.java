@@ -7,7 +7,6 @@ package org.jlab.rfd.presentation.controller.ajax.ModAnodeHarvester;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -150,7 +149,7 @@ public class LinacAjax extends HttpServlet {
                 break;
             case "flot":
                 response.setContentType("application/json");
-                SortedMap<Date, SortedMap<String, BigDecimal>> factoredData = span.getTripRates();
+                SortedMap<Date, SortedMap<String, Double>> factoredData = span.getTripRates();
                 try {
                     JsonObject flot = DataFormatter.toFlotFromDateMap(factoredData);
                     pw.write(flot.toString());

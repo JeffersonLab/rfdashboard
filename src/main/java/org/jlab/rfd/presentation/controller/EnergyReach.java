@@ -6,7 +6,6 @@
 package org.jlab.rfd.presentation.controller;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
@@ -173,11 +172,11 @@ public class EnergyReach extends HttpServlet {
             // getLemSpan searches for energy reaches between the two dates, but requesters really want the number for the last day
             // which was almost certainly not done at exactly midnight the start of that day.
             Date endEffective = DateUtil.getNextDay(end);
-            SortedMap<Date, SortedMap<String, BigDecimal>> reach = ls.getLemSpan(start, endEffective).getEnergyReach();
+            SortedMap<Date, SortedMap<String, Double>> reach = ls.getLemSpan(start, endEffective).getEnergyReach();
 
             energyReach = DataFormatter.toFlotFromDateMap(reach);
             LemSpan lemSpan = ls.getLemSpan(diffEnd, DateUtil.getNextDay(diffEnd));
-            SortedMap<Integer, SortedMap<String, BigDecimal>> tripRates = lemSpan.getTripRateCurve(diffEnd);
+            SortedMap<Integer, SortedMap<String, Double>> tripRates = lemSpan.getTripRateCurve(diffEnd);
             dayScan = DataFormatter.toFlotFromIntMap(tripRates);
         } catch (ParseException | SQLException ex) {
             LOGGER.log(Level.WARNING, "Error querying LEM scan database", ex);

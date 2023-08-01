@@ -5,7 +5,6 @@
  */
 package org.jlab.rfd.model.ModAnodeHarvester;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,10 +28,10 @@ public class LinacDataPoint {
     private final LinacName linacName;
     private final Date timestamp;
     private final Date epicsDate;
-    private final BigDecimal trips1050;
-    private final BigDecimal trips1090;
-    private final BigDecimal tripsNoMav1050;
-    private final BigDecimal tripsNoMav1090;
+    private final Double trips1050;
+    private final Double trips1090;
+    private final Double tripsNoMav1050;
+    private final Double tripsNoMav1090;
 
     public LinacDataPoint(LinacRecord r1050, LinacRecord r1090) {
         String errString = "Error querying data";
@@ -88,19 +87,19 @@ public class LinacDataPoint {
         return epicsDate;
     }
 
-    public BigDecimal getTrips1050() {
+    public Double getTrips1050() {
         return trips1050;
     }
 
-    public BigDecimal getTrips1090() {
+    public Double getTrips1090() {
         return trips1090;
     }
 
-    public BigDecimal getTripsNoMav1050() {
+    public Double getTripsNoMav1050() {
         return tripsNoMav1050;
     }
 
-    public BigDecimal getTripsNoMav1090() {
+    public Double getTripsNoMav1090() {
         return tripsNoMav1090;
     }
     

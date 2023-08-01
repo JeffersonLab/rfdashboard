@@ -16,9 +16,9 @@ import org.jlab.rfd.model.LinacName;
 public class LinacRecord {
     private final Date timestamp;
     private final Date epicsDate;
-    private final BigDecimal energy;
-    private final BigDecimal trips;
-    private final BigDecimal tripsNoMav;
+    private final Double energy;
+    private final Double trips;
+    private final Double tripsNoMav;
     private final LinacName linacName;
     
     /**
@@ -30,7 +30,7 @@ public class LinacRecord {
      * @param trips The number of trips per hour estimated by LEM when including the CED ModAnode values
      * @param tripsNoMav The number of trips per hour estimated by LEM when zeroing out the CED ModAnode values
      */
-    public LinacRecord(Date timestamp, Date epicsDate, LinacName linacName, BigDecimal energy, BigDecimal trips, BigDecimal tripsNoMav) {
+    public LinacRecord(Date timestamp, Date epicsDate, LinacName linacName, Double energy, Double trips, Double tripsNoMav) {
 
         this.linacName = linacName;
         this.timestamp = timestamp;
@@ -44,7 +44,7 @@ public class LinacRecord {
         return linacName;
     }
 
-    public BigDecimal getEnergy() {
+    public Double getEnergy() {
         return energy;
     }
 
@@ -56,11 +56,11 @@ public class LinacRecord {
         return epicsDate;
     }
 
-    public BigDecimal getTrips() {
+    public Double getTrips() {
         return trips;
     }
 
-    public BigDecimal getTripsNoMav() {
+    public Double getTripsNoMav() {
         return tripsNoMav;
     }    
 }

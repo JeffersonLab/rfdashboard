@@ -14,7 +14,6 @@ RUN if [ -z "${CUSTOM_CRT_URL}" ] ; then echo "No custom cert needed"; else \
            && export OPTIONAL_CERT_ARG=--cert=/etc/ssl/certs/ca-certificates.crt \
     ; fi
 COPY . /app
-# TODO: What is OPTIONAL_CERT_ARG for?
 RUN cd /app && gradle build -x test --no-watch-fs $OPTIONAL_CERT_ARG
 
 
