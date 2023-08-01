@@ -7,7 +7,6 @@ package org.jlab.rfd.business.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -33,11 +32,11 @@ public class MyaService {
      * @param timestamp What date are we sampling the data for
      * @param name2Epics A map of cavity name (CED) to EPICSName.  This is used to map results back to cavity name.
      * @param postfix The single postfix to be appended to every EPICSName
-     * @return A map of cavity names (CED) to BigDecimal values of the PVs at that time or null if timestamp is in the
+     * @return A map of cavity names (CED) to Double values of the PVs at that time or null if timestamp is in the
      * future.
      * @throws IOException If problem arise while contacting the mya web service.
      */
-    public Map<String, BigDecimal> getCavityMyaData(Date timestamp, Map<String, String> name2Epics, String postfix) throws IOException {
+    public Map<String, Double> getCavityMyaData(Date timestamp, Map<String, String> name2Epics, String postfix) throws IOException {
         Map<String, List<String>> postfixes = new HashMap<>();
         for (String name : name2Epics.keySet()) {
             postfixes.putIfAbsent(name, new ArrayList<>());
@@ -53,11 +52,11 @@ public class MyaService {
      * @param timestamp What date are we sampling the data for
      * @param name2Epics A map of cavity name (CED) to EPICSName.  This is used to map results back to cavity name.
      * @param postfixes A map of cavity name (CED) to a list of PV postfixes that are to be queried.
-     * @return A map of cavity names (CED) to BigDecimal values of the PVs at that time or null if timestamp is in the
+     * @return A map of cavity names (CED) to Double values of the PVs at that time or null if timestamp is in the
      * future.
      * @throws IOException If problem arise while contacting the mya web service.
      */
-    public Map<String, BigDecimal> getCavityMyaData(Date timestamp, Map<String, String> name2Epics, Map<String,
+    public Map<String, Double> getCavityMyaData(Date timestamp, Map<String, String> name2Epics, Map<String,
             List<String>> postfixes) throws IOException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         if ( timestamp.after(new Date()) ) {
@@ -69,7 +68,7 @@ public class MyaService {
         if (DateUtil.getDifferenceInDays(timestamp, new Date()) > 180) {
             deployment = "history";
         }
-        Map<String, BigDecimal> valueData = new HashMap<>();
+        Map<String, Double> valueData = new HashMap<>();
         
         // Create a reverse lookup map.  name2Epics should be a 1:1 map
         Map<String, String> epics2Name = new HashMap<>();
@@ -114,13 +113,13 @@ public class MyaService {
                     throw new IOException("Error querying PV '" + pv + "'.  " + chan.getJsonObject(pv).getString("error"));
                 }
                 String epicsName = pv.substring(0, 4);
-                BigDecimal gset = null;
+                Double value = null;
                 JsonObject sample = chan.getJsonObject(pv).getJsonArray("data").get(0).asJsonObject();
 
                 if (sample.containsKey("v")) {
-                    gset = sample.getJsonNumber("v").bigDecimalValue();
+                    value = sample.getJsonNumber("v").doubleValue();
                 }
-                valueData.put(epics2Name.get(epicsName), gset);
+                valueData.put(epics2Name.get(epicsName), value);
             }
         }
         return valueData;

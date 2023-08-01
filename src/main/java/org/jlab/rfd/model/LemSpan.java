@@ -5,8 +5,6 @@
  */
 package org.jlab.rfd.model;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -84,30 +82,30 @@ public class LemSpan {
      * @param timeStamp The time stamp from the dataSpan that is to be fetched
      * @return
      */
-    public SortedMap<Integer, SortedMap<String, BigDecimal>> getTripRateCurve(Date timeStamp) {
+    public SortedMap<Integer, SortedMap<String, Double>> getTripRateCurve(Date timeStamp) {
 
         if (!dataSpan.containsKey(timeStamp)) {
             LOGGER.log(Level.FINEST, "LemSpan does not contain request timestamp - {0}", timeStamp);
             return null;
         }
 
-        SortedMap<Integer, SortedMap<String, BigDecimal>> data = new TreeMap<>();
+        SortedMap<Integer, SortedMap<String, Double>> data = new TreeMap<>();
 
-        Map<Integer, BigDecimal> north = dataSpan.get(timeStamp).get(LinacName.North).getTripRates();
-        Map<Integer, BigDecimal> south = dataSpan.get(timeStamp).get(LinacName.South).getTripRates();
+        Map<Integer, Double> north = dataSpan.get(timeStamp).get(LinacName.North).getTripRates();
+        Map<Integer, Double> south = dataSpan.get(timeStamp).get(LinacName.South).getTripRates();
         List<Integer> energies = dataSpan.get(timeStamp).get(LinacName.North).getEnergy();
-        SortedMap<String, BigDecimal> byLinac;
+        SortedMap<String, Double> byLinac;
 
         for (int i = 0; i < energies.size(); i++) {
             byLinac = new TreeMap<>();
-            BigDecimal total = null;
+            Double total = null;
 
             byLinac.put(LinacName.North.toString(), north.get(energies.get(i)));
             byLinac.put(LinacName.South.toString(), south.get(energies.get(i)));
 
             // Null means lem couldn't find valid solution for the linac at that energy or it wasn't scanned.
             if (north.get(energies.get(i)) != null && south.get(energies.get(i)) != null) {
-                total = south.get(energies.get(i)).add(north.get(energies.get(i)));
+                total = south.get(energies.get(i)) + north.get(energies.get(i));
             }
 
             byLinac.put("Total", total);
@@ -124,23 +122,23 @@ public class LemSpan {
      *
      * @return
      */
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getEnergyReach() {
+    public SortedMap<Date, SortedMap<String, Double>> getEnergyReach() {
 
         if (dataSpan.isEmpty()) {
             LOGGER.log(Level.FINEST, "LemSpan does not contain any trip rate data");
             return null;
         }
 
-        SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
-        Map<Integer, BigDecimal> north;
-        Map<Integer, BigDecimal> south;
+        SortedMap<Date, SortedMap<String, Double>> data = new TreeMap<>();
+        Map<Integer, Double> north;
+        Map<Integer, Double> south;
         List<Integer> energy;
-        BigDecimal[] eight = {new BigDecimal(8).setScale(10, RoundingMode.HALF_UP)};
+        Double[] eight = {8.0};
 
         // Go through each date in the lem span
         for (Date timestamp : dataSpan.keySet()) {
 
-            SortedMap<String, BigDecimal> reach = new TreeMap<>();
+            SortedMap<String, Double> reach = new TreeMap<>();
 
             // Grab the trip rates, and the energies for the scans from that date
             north = dataSpan.get(timestamp).get(LinacName.North).getTripRates();
@@ -150,34 +148,34 @@ public class LemSpan {
             // Make sure that we have scans for both and that they have the same number of entries (different energies imply something weird would have happened)
             if (north != null && south != null && north.size() == south.size()) {
                 // Calculate the total trip rate at each energy for that day
-                List<BigDecimal> total = new ArrayList<>();
+                List<Double> total = new ArrayList<>();
                 for (int i = 0; i < north.size(); i++) {
                     if (north.get(energy.get(i)) != null && south.get(energy.get(i)) != null) {
-                        total.add(north.get(energy.get(i)).add(south.get(energy.get(i))).setScale(10, RoundingMode.HALF_UP));
+                        total.add(north.get(energy.get(i)) + south.get(energy.get(i)));
                     } else {
                         total.add(null);
                     }
                 }
                 // Convert these lists to arrays for use in our linear interpolation function.  Then convert the resultant array back to list
                 // We need to condense this down and remove the nulls.
-                List<BigDecimal> tempT = new ArrayList<>();
-                List<BigDecimal> tempE = new ArrayList<>();
+                List<Double> tempT = new ArrayList<>();
+                List<Double> tempE = new ArrayList<>();
                 for (int i = 0; i < total.size(); i++) {
                     if (total.get(i) != null) {
                         tempT.add(total.get(i));
-                        tempE.add(new BigDecimal(energy.get(i)));
+                        tempE.add((double) energy.get(i));
                     }
                 }
-                BigDecimal[] totalArray = tempT.toArray(new BigDecimal[tempT.size()]);
-                BigDecimal[] energyArray = tempE.toArray(new BigDecimal[tempE.size()]);
+                Double[] totalArray = tempT.toArray(new Double[tempT.size()]);
+                Double[] energyArray = tempE.toArray(new Double[tempE.size()]);
                 if ((totalArray.length >= 2)
-                        && (totalArray[0].doubleValue() < 8)
-                        && (totalArray[totalArray.length - 1].doubleValue() > 8)
+                        && (totalArray[0] < 8)
+                        && (totalArray[totalArray.length - 1] > 8)
                         && MathUtil.isSorted(totalArray)) {
-                    BigDecimal[] temp = MathUtil.interpLinear(totalArray, energyArray, eight);
+                    Double[] temp = MathUtil.interpLinear(totalArray, energyArray, eight);
                     // We're only giving it a single value in the input array, so extract the first element of this vector.
                     // LEM only gives out three decimal places
-                    reach.put("Reach", temp[0].setScale(3, RoundingMode.HALF_UP));
+                    reach.put("Reach", temp[0]);
                 }
             } else {
                 if (north == null || south == null) {

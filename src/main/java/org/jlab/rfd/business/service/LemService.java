@@ -136,12 +136,12 @@ public class LemService {
     private LemRecord processResult(ResultSet rs, Date date, LinacName linac, int energyStart, int energyEnd, int energyStep) throws SQLException {
 
         long scanId = rs.getLong(1);
-        Map<Integer, BigDecimal> tripRates = new TreeMap<>();
+        Map<Integer, Double> tripRates = new TreeMap<>();
         int i = 4;
         for (int e = energyStart; e <= energyEnd; e = e + energyStep) {
             String tripRate = rs.getString(i);
             if (tripRate != null) {
-                tripRates.put(e, new BigDecimal(tripRate).setScale(10, RoundingMode.HALF_UP));
+                tripRates.put(e, Double.valueOf(tripRate));
             } else {
                 tripRates.put(e, null);
             }

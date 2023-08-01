@@ -7,7 +7,6 @@ package org.jlab.rfd.presentation.controller.ajax;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -103,7 +102,7 @@ public class LemScanAjax extends HttpServlet {
             try {
                 switch (out) {
                     case "flot": {
-                        SortedMap<Integer, SortedMap<String, BigDecimal>> tripRates = span.getTripRateCurve(start);
+                        SortedMap<Integer, SortedMap<String, Double>> tripRates = span.getTripRateCurve(start);
                         JsonObject json = DataFormatter.toFlotFromIntMap(tripRates);
                         response.setContentType("application/json");
                         pw.write(json.toString());
@@ -165,7 +164,7 @@ public class LemScanAjax extends HttpServlet {
             try {
                 switch (out) {
                     case "flot": {
-                        SortedMap<Date, SortedMap<String, BigDecimal>> reach = span.getEnergyReach();
+                        SortedMap<Date, SortedMap<String, Double>> reach = span.getEnergyReach();
                         JsonObject json;
                         if (reach == null) {
                             JsonObjectBuilder job = Json.createObjectBuilder();

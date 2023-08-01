@@ -5,7 +5,6 @@
  */
 package org.jlab.rfd.model.ModAnodeHarvester;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -73,12 +72,12 @@ public class LinacDataSpan {
                 if (ldp != null) {
                     linacs.add(ldp.getLinacName().toString(), Json.createObjectBuilder()
                             .add("mav", Json.createObjectBuilder()
-                                    .add("1050", ldp.getTrips1050() == null ? "" : ldp.getTrips1050().toPlainString())
-                                    .add("1090", ldp.getTrips1090() == null ? "" : ldp.getTrips1090().toPlainString())
+                                    .add("1050", ldp.getTrips1050() == null ? "" : String.format("%.6f", ldp.getTrips1050()))
+                                    .add("1090", ldp.getTrips1090() == null ? "" : String.format("%.6f", ldp.getTrips1090()))
                                     .build())
                             .add("no_mav", Json.createObjectBuilder()
-                                    .add("1050", ldp.getTripsNoMav1050() == null ? "" : ldp.getTripsNoMav1050().toPlainString())
-                                    .add("1090", ldp.getTripsNoMav1090() == null ? "" : ldp.getTripsNoMav1090().toPlainString())
+                                    .add("1050", ldp.getTripsNoMav1050() == null ? "" : String.format("%.6f", ldp.getTripsNoMav1050()))
+                                    .add("1090", ldp.getTripsNoMav1090() == null ? "" : String.format("%.6f", ldp.getTripsNoMav1090()))
                                     .build())
                             .build());
                 }
@@ -94,35 +93,35 @@ public class LinacDataSpan {
      *
      * @return
      */
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getTripRates() {
+    public SortedMap<Date, SortedMap<String, Double>> getTripRates() {
 
         if (dataSpan.isEmpty()) {
             return null;
         }
 
-        SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
+        SortedMap<Date, SortedMap<String, Double>> data = new TreeMap<>();
         for (Date d : dataSpan.keySet()) {
-            TreeMap<String, BigDecimal> tmp = new TreeMap<>();
-            BigDecimal tnm1050 = BigDecimal.ZERO;
-            BigDecimal t1050 = BigDecimal.ZERO;
-            BigDecimal tnm1090 = BigDecimal.ZERO;
-            BigDecimal t1090 = BigDecimal.ZERO;
+            TreeMap<String, Double> tmp = new TreeMap<>();
+            Double tnm1050 = 0.0;
+            Double t1050 = 0.0;
+            Double tnm1090 = 0.0;
+            Double t1090 = 0.0;
 
             for (LinacDataPoint ldp : dataSpan.get(d)) {
 
                 // Need to make sure that both Linacs had non-null trip rates.  This indicates that both could be run at this energy and
                 // is a combined trip rate for CEBAF.
                 if (tnm1050 != null) {
-                    tnm1050 = ldp.getTripsNoMav1050() == null ? null : tnm1050.add(ldp.getTripsNoMav1050());
+                    tnm1050 = ldp.getTripsNoMav1050() == null ? null : tnm1050 + ldp.getTripsNoMav1050();
                 }
                 if (tnm1090 != null) {
-                    tnm1090 = ldp.getTripsNoMav1090() == null ? null : tnm1090.add(ldp.getTripsNoMav1090());
+                    tnm1090 = ldp.getTripsNoMav1090() == null ? null : tnm1090 + ldp.getTripsNoMav1090();
                 }
                 if (t1050 != null) {
-                    t1050 = ldp.getTrips1050() == null ? null : t1050.add(ldp.getTrips1050());
+                    t1050 = ldp.getTrips1050() == null ? null : t1050 + ldp.getTrips1050();
                 }
                 if (t1090 != null) {
-                    t1090 = ldp.getTrips1090() == null ? null : t1090.add(ldp.getTrips1090());
+                    t1090 = ldp.getTrips1090() == null ? null : t1090 + ldp.getTrips1090();
                 }
             }
 //            tmp.put("Total 1050 MeV No M.A.V.", tnm1050 == null ? BigDecimal.ZERO : tnm1050);

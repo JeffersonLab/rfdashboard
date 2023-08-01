@@ -5,7 +5,6 @@
  */
 package org.jlab.rfd.model;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -26,11 +25,11 @@ public class LemRecord {
     private static final Logger LOGGER = Logger.getLogger(LemRecord.class.getName());
 
     private final long scanId;
-    private final Map<Integer, BigDecimal> tripRates;
+    private final Map<Integer, Double> tripRates;
     private final Date timestamp;
     private final LinacName linac;
 
-    public LemRecord(long scanId, Date timestamp, LinacName linac, Map<Integer, BigDecimal> tripRates) {
+    public LemRecord(long scanId, Date timestamp, LinacName linac, Map<Integer, Double> tripRates) {
         this.scanId = scanId;
         this.timestamp = timestamp;
         this.linac = linac;
@@ -56,7 +55,7 @@ public class LemRecord {
     /**
      * @return Unmodifiable list of trip rates
      */
-    public Map<Integer, BigDecimal> getTripRates() {
+    public Map<Integer, Double> getTripRates() {
         return Collections.unmodifiableMap(tripRates);
     }
 
@@ -71,7 +70,7 @@ public class LemRecord {
         for(Integer e : tripRates.keySet()) {
             String tr = "";
             if (tripRates.get(e) != null) {
-                tr = tripRates.get(e).toPlainString();
+                tr = tripRates.get(e).toString();
             }
             trBuilder.add(e.toString(), tr);
         }
