@@ -6,7 +6,6 @@
 package org.jlab.rfd.model;
 
 import org.jlab.rfd.model.ModAnodeHarvester.CavityGsetData;
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -16,12 +15,12 @@ import javax.json.JsonObjectBuilder;
 import org.jlab.rfd.business.util.CebafNames;
 
 /**
- * This class represents a the available data about a cavity at a specific point
+ * This class represents the available data about a cavity at a specific point
  * in time. This includes MYA data like cavity GSET, CED data like
  * ModAnodeVoltage or CryoModule ModuleType, or custom database data like the
  * ModAnodeHarvester data that shows the difference in trips and GSET with and
  * without any CED ModAnode voltages. Note: This object contains historical data that can easily be cached and doesn't
- * change once set.  CavityResponse should be used to respond to queries of cavity data, espeically if the response 
+ * change once set.  CavityResponse should be used to respond to queries of cavity data, especially if the response
  * is a value that needs to vary over a date (since the cache is effectively keyed on date).
  *
  * @author adamc
@@ -35,19 +34,19 @@ public class CavityDataPoint implements Cloneable {
     private final String epicsName;
     private final String zoneName;
     private final String epicsZoneName;
-    private final BigDecimal modAnodeVoltage;
+    private final Double modAnodeVoltage;
     private final CryomoduleType cryomoduleType;
     private final LinacName linacName;
-    private final BigDecimal gset;
+    private final Double gset;
     private final CavityGsetData modAnodeHarvesterGsetData;
-    private final BigDecimal odvh;
+    private final Double odvh;
     private final String q0;
     private final String qExternal;
-    private final BigDecimal maxGset;
-    private final BigDecimal opsGsetMax;
-    private final BigDecimal tripOffset;
-    private final BigDecimal tripSlope;
-    private final BigDecimal length;
+    private final Double maxGset;
+    private final Double opsGsetMax;
+    private final Double tripOffset;
+    private final Double tripSlope;
+    private final Double length;
     private final boolean bypassed;
     private final boolean tunerBad;
 
@@ -80,9 +79,9 @@ public class CavityDataPoint implements Cloneable {
     }
 
     public CavityDataPoint(Date timestamp, String cavityName, CryomoduleType cryomoduleType,
-            BigDecimal modAnodeVoltage, String epicsName, BigDecimal gset, BigDecimal odvh,
-            String q0, String qExternal, BigDecimal maxGset, BigDecimal opsGsetMax, BigDecimal tripOffset, BigDecimal tripSlope,
-            BigDecimal length, CavityGsetData modAnodeHarvesterGsetData, boolean bypassed, boolean tunerBad) {
+            Double modAnodeVoltage, String epicsName, Double gset, Double odvh,
+            String q0, String qExternal, Double maxGset, Double opsGsetMax, Double tripOffset, Double tripSlope,
+            Double length, CavityGsetData modAnodeHarvesterGsetData, boolean bypassed, boolean tunerBad) {
 
         if (!cavityName.matches("\\dL\\d\\d-\\d")) {
             LOGGER.log(Level.SEVERE, "Improper cavity name format - {0}", cavityName);
@@ -127,27 +126,27 @@ public class CavityDataPoint implements Cloneable {
         return qExternal;
     }
 
-    public BigDecimal getMaxGset() {
+    public Double getMaxGset() {
         return maxGset;
     }
 
-    public BigDecimal getOpsGsetMax() {
+    public Double getOpsGsetMax() {
         return opsGsetMax;
     }
 
-    public BigDecimal getTripOffset() {
+    public Double getTripOffset() {
         return tripOffset;
     }
 
-    public BigDecimal getTripSlope() {
+    public Double getTripSlope() {
         return tripSlope;
     }
 
-    public BigDecimal getLength() {
+    public Double getLength() {
         return length;
     }
 
-    public BigDecimal getOdvh() {
+    public Double getOdvh() {
         return odvh;
     }
 
@@ -167,7 +166,7 @@ public class CavityDataPoint implements Cloneable {
         return linacName;
     }
 
-    public BigDecimal getGset() {
+    public Double getGset() {
         return gset;
     }
 
@@ -175,7 +174,7 @@ public class CavityDataPoint implements Cloneable {
         return epicsName;
     }
 
-    public BigDecimal getModAnodeVoltage() {
+    public Double getModAnodeVoltage() {
         return modAnodeVoltage;
     }
 
@@ -196,17 +195,17 @@ public class CavityDataPoint implements Cloneable {
         cavBuilder.add("name", cavityName).add("linac", linacName.toString());
         // The json builder throws an exception on Null or Double.NaN.  This seemed like the smartest way to handle it.
         if (gset != null) {
-            cavBuilder.add("gset", gset.doubleValue());
+            cavBuilder.add("gset", gset);
         } else {
             cavBuilder.add("gset", "");
         }
         if (modAnodeVoltage != null) {
-            cavBuilder.add("modAnodeVoltage_kv", modAnodeVoltage.doubleValue());
+            cavBuilder.add("modAnodeVoltage_kv", modAnodeVoltage);
         } else {
             cavBuilder.add("modAnodeVoltage_kv", "");
         }
         if (odvh != null) {
-            cavBuilder.add("odvh", odvh.doubleValue());
+            cavBuilder.add("odvh", odvh);
         } else {
             cavBuilder.add("odvh", "");
         }
@@ -222,27 +221,27 @@ public class CavityDataPoint implements Cloneable {
             cavBuilder.add("qExternal", "");
         }
         if (maxGset != null) {
-            cavBuilder.add("maxGset", maxGset.doubleValue());
+            cavBuilder.add("maxGset", maxGset);
         } else {
             cavBuilder.add("maxGset", "");
         }
         if (opsGsetMax != null) {
-            cavBuilder.add("opsGsetMax", opsGsetMax.doubleValue());
+            cavBuilder.add("opsGsetMax", opsGsetMax);
         } else {
             cavBuilder.add("opsGsetMax", "");
         }
         if (tripOffset != null) {
-            cavBuilder.add("tripOffset", tripOffset.doubleValue());
+            cavBuilder.add("tripOffset", tripOffset);
         } else {
             cavBuilder.add("tripOffset", "");
         }
         if (tripSlope != null) {
-            cavBuilder.add("tripSlope", tripSlope.doubleValue());
+            cavBuilder.add("tripSlope", tripSlope);
         } else {
             cavBuilder.add("tripSlope", "");
         }
         if (length!= null) {
-            cavBuilder.add("length", length.doubleValue());
+            cavBuilder.add("length", length);
         } else {
             cavBuilder.add("length", "");
         }

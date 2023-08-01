@@ -2,7 +2,6 @@ package org.jlab.rfd.business.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
 import java.text.ParseException;
@@ -34,8 +33,9 @@ public class CavityService {
 
     private static final Logger LOGGER = Logger.getLogger(CavityService.class.getName());
     // Append the wrkspc argument to the end of this string
-    public static final String CED_INVENTORY_URL = AppConfig.getAppConfig().getCEDUrl() + "/inventory";
-    public static final String MAV_MOVED_TO_MYA_DATE = "2022-01-01";
+    private static final String CED_INVENTORY_URL = AppConfig.getAppConfig().getCEDUrl() + "/inventory";
+    private static final String MAV_MOVED_TO_MYA_DATE = "2022-01-01";
+    private static final int CACHE_QUERY_CHUNK_SIZE = 365;
 
     // This manages concurrent access to the cache
     private static final Object CACHE_LOCK = new Object();
@@ -128,56 +128,72 @@ public class CavityService {
          */
     public Map<Date, Set<CavityDataPoint>> readCache(List<Date> dates) throws SQLException, ParseException {
         Map<Date, Set<CavityDataPoint>> dataMap = null;
-        synchronized (CACHE_LOCK) {
-            Connection conn = null;
-            PreparedStatement pstmt = null;
-            ResultSet rs = null;
-            String sql = getCacheReadSql(dates.size());
-            try {
-                conn = SqlUtil.getConnection();
-                pstmt = conn.prepareStatement(sql);
 
-                for (int i = 0; i < dates.size(); i++) {
-                    pstmt.setString(i+1, DateUtil.formatDateYMD(dates.get(i)));
+        // SQL can grow too large over many years.  Check if we need to break the query into chunks.
+        if (dates.size() > CACHE_QUERY_CHUNK_SIZE) {
+            int numChunks = (int) Math.ceil(dates.size() / (double) CACHE_QUERY_CHUNK_SIZE);
+            Map<Date, Set<CavityDataPoint>> chunkMap;
+            dataMap = new HashMap<>();
+            for (int i = 0; i < numChunks; i++) {
+                int end = Math.min((i + 1) * CACHE_QUERY_CHUNK_SIZE - 1, dates.size());
+                int start = i * CACHE_QUERY_CHUNK_SIZE;
+                chunkMap = readCache(dates.subList(start, end));
+                if (chunkMap != null) {
+                    dataMap.putAll(chunkMap);
                 }
-                rs = pstmt.executeQuery();
+            }
+        } else {
+            synchronized (CACHE_LOCK) {
+                Connection conn = null;
+                PreparedStatement pstmt = null;
+                ResultSet rs = null;
+                String sql = getCacheReadSql(dates.size());
+                try {
+                    conn = SqlUtil.getConnection();
+                    pstmt = conn.prepareStatement(sql);
 
-                // If we don't have the data cached, return null.  Happens after the processing block.
-                if (rs.isBeforeFirst()) {
-                    dataMap = new HashMap<>();
-                    Date d;
-                    String cavityName, epicsName, q0, qExternal;
-                    CryomoduleType cryoModuleType;
-                    boolean bypassed, tunerBad;
-                    BigDecimal modAnodeVoltage, gset, odvh, maxGset, opsGsetMax, tripSlope, tripOffset, length;
-                    CavityDataPoint cdp;
-                    while (rs.next()) {
-                        d = rs.getDate("QUERY_DATE");
-                        cavityName = rs.getString("CAVITY_NAME");
-                        epicsName = rs.getString("EPICS_NAME");
-                        modAnodeVoltage = getBigDecimal(rs, "MOD_ANODE_VOLTAGE");
-                        cryoModuleType = CryomoduleType.valueOf(rs.getString("CRYOMODULE_TYPE"));
-                        gset = getBigDecimal(rs, "GSET");
-                        odvh = getBigDecimal(rs, "ODVH");
-                        q0 = rs.getString("Q0");
-                        qExternal = rs.getString("QEXTERNAL");
-                        maxGset = getBigDecimal(rs, "MAX_GSET");
-                        opsGsetMax = getBigDecimal(rs, "OPS_GSET_MAX");
-                        tripOffset = getBigDecimal(rs, "TRIP_OFFSET");
-                        tripSlope = getBigDecimal(rs, "TRIP_SLOPE");
-                        length = getBigDecimal(rs, "LENGTH");
-                        bypassed = rs.getInt("BYPASSED") == 1;
-                        tunerBad = rs.getInt("TUNER_BAD") == 1;
-
-                        cdp = new CavityDataPoint(d, cavityName, cryoModuleType, modAnodeVoltage, epicsName, gset, odvh, q0,
-                                qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, length, null, bypassed, tunerBad);
-                        dataMap.putIfAbsent(d, new HashSet<>());
-                        dataMap.get(d).add(cdp);
+                    for (int i = 0; i < dates.size(); i++) {
+                        pstmt.setString(i + 1, DateUtil.formatDateYMD(dates.get(i)));
                     }
+                    rs = pstmt.executeQuery();
+
+                    // If we don't have the data cached, return null.  Happens after the processing block.
+                    if (rs.isBeforeFirst()) {
+                        dataMap = new HashMap<>();
+                        Date d;
+                        String cavityName, epicsName, q0, qExternal;
+                        CryomoduleType cryoModuleType;
+                        boolean bypassed, tunerBad;
+                        Double modAnodeVoltage, gset, odvh, maxGset, opsGsetMax, tripSlope, tripOffset, length;
+                        CavityDataPoint cdp;
+                        while (rs.next()) {
+                            d = rs.getDate("QUERY_DATE");
+                            cavityName = rs.getString("CAVITY_NAME");
+                            epicsName = rs.getString("EPICS_NAME");
+                            modAnodeVoltage = getDouble(rs, "MOD_ANODE_VOLTAGE");
+                            cryoModuleType = CryomoduleType.valueOf(rs.getString("CRYOMODULE_TYPE"));
+                            gset = getDouble(rs, "GSET");
+                            odvh = getDouble(rs, "ODVH");
+                            q0 = rs.getString("Q0");
+                            qExternal = rs.getString("QEXTERNAL");
+                            maxGset = getDouble(rs, "MAX_GSET");
+                            opsGsetMax = getDouble(rs, "OPS_GSET_MAX");
+                            tripOffset = getDouble(rs, "TRIP_OFFSET");
+                            tripSlope = getDouble(rs, "TRIP_SLOPE");
+                            length = getDouble(rs, "LENGTH");
+                            bypassed = rs.getInt("BYPASSED") == 1;
+                            tunerBad = rs.getInt("TUNER_BAD") == 1;
+
+                            cdp = new CavityDataPoint(d, cavityName, cryoModuleType, modAnodeVoltage, epicsName, gset, odvh, q0,
+                                    qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, length, null, bypassed, tunerBad);
+                            dataMap.putIfAbsent(d, new HashSet<>());
+                            dataMap.get(d).add(cdp);
+                        }
+                    }
+                    rs.close();
+                } finally {
+                    SqlUtil.close(rs, pstmt, conn);
                 }
-                rs.close();
-            } finally {
-                SqlUtil.close(rs, pstmt, conn);
             }
         }
 
@@ -217,39 +233,36 @@ public class CavityService {
     }
 
     /**
-     * Utility function for reading BigDecimal values (saved as doubles) from a ResultSet.
+     * Utility function for reading Double values (saved as doubles) from a ResultSet.
      *
      * @param rs         The ResultSet from an executed statement
-     * @param columnName The name of the column to process into a BigDecimal
-     * @return The value as a BigDecimal.  Null if the database had a null value
+     * @param columnName The name of the column to process into a Double
+     * @return The value as a Double.  Null if the database had a null value
      * @throws SQLException If something goes wrong communicating with the database
      */
-    private BigDecimal getBigDecimal(ResultSet rs, String columnName) throws SQLException {
-        BigDecimal out;
-        double temp;
-        temp = rs.getDouble(columnName);
+    private Double getDouble(ResultSet rs, String columnName) throws SQLException {
+        Double out;
+        out = rs.getDouble(columnName);
         if (rs.wasNull()) {
             out = null;
-        } else {
-            out = BigDecimal.valueOf(temp);
         }
         return out;
     }
 
     /**
-     * Utility function for setting BigDecimal values (as doubles) to a PreparedStatement.
+     * Utility function for setting Double values (as doubles) to a PreparedStatement.
      *
-     * @param value  The BigDecimal value to be written to the database
+     * @param value  The Double value to be written to the database
      * @param stmt   The PreparedStatement to update
      * @param index  The index of the current parameter to be updated
      * @return The incremented index
      * @throws SQLException If something goes wrong communicating with the database
      */
-    private int setBigDecimal(BigDecimal value, PreparedStatement stmt, int index) throws SQLException {
+    private int setDouble(Double value, PreparedStatement stmt, int index) throws SQLException {
         if (value == null) {
             stmt.setNull(index, Types.NULL);
         } else {
-            stmt.setDouble(index, value.doubleValue());
+            stmt.setDouble(index, value);
         }
         return index + 1;
     }
@@ -304,17 +317,17 @@ public class CavityService {
                             pstmt.setString(i++, DateUtil.formatDateYMD(date));
                             pstmt.setString(i++, cdp.getCavityName());
                             pstmt.setString(i++, cdp.getEpicsName());
-                            i = setBigDecimal(cdp.getModAnodeVoltage(), pstmt, i);
+                            i = setDouble(cdp.getModAnodeVoltage(), pstmt, i);
                             pstmt.setString(i++, cdp.getCryomoduleType().toString());
-                            i = setBigDecimal(cdp.getGset(), pstmt, i);
-                            i = setBigDecimal(cdp.getOdvh(), pstmt, i);
+                            i = setDouble(cdp.getGset(), pstmt, i);
+                            i = setDouble(cdp.getOdvh(), pstmt, i);
                             pstmt.setString(i++, cdp.getQ0());
                             pstmt.setString(i++, cdp.getqExternal());
-                            pstmt.setDouble(i++, cdp.getMaxGset().doubleValue());
-                            i = setBigDecimal(cdp.getOpsGsetMax(), pstmt, i);
-                            i = setBigDecimal(cdp.getTripOffset(), pstmt, i);
-                            i = setBigDecimal(cdp.getTripSlope(), pstmt, i);
-                            pstmt.setDouble(i++, cdp.getLength().doubleValue());
+                            pstmt.setDouble(i++, cdp.getMaxGset());
+                            i = setDouble(cdp.getOpsGsetMax(), pstmt, i);
+                            i = setDouble(cdp.getTripOffset(), pstmt, i);
+                            i = setDouble(cdp.getTripSlope(), pstmt, i);
+                            pstmt.setDouble(i++, cdp.getLength());
                             pstmt.setInt(i++, cdp.isBypassed() ? 1 : 0);
                             pstmt.setInt(i, cdp.isTunerBad() ? 1 : 0);
 
@@ -433,13 +446,13 @@ public class CavityService {
 
                 // These could return null if timestamp is a future date.  Shouldn't happen as we check end before, but let''s check
                 // and throw an exception if it does happen.  URL is too long unless we split GSET from the rest.
-                Map<String, BigDecimal> gsets = ms.getCavityMyaData(timestamp, name2Epics, "GSET");
+                Map<String, Double> gsets = ms.getCavityMyaData(timestamp, name2Epics, "GSET");
                 if (gsets == null) {
                     throw new RuntimeException("MyaService returned null.  Likely requesting data from future date.");
                 }
 
 
-                Map<String, BigDecimal> mavsEPICS = null;
+                Map<String, Double> mavsEPICS = null;
                 if (useMyaMAV) {
                     mavsEPICS = ms.getCavityMyaData(timestamp, name2Epics, postfixes);
                     if (mavsEPICS == null) {
@@ -474,19 +487,19 @@ public class CavityService {
                     // CED units: kilovolts
                     boolean tunerBad = false; // CED note: false unless set
                     boolean bypassed = false; // CED note: false unless set
-                    BigDecimal tripOffset = null;   // CED units: trips per shift
-                    BigDecimal tripSlope = null;   // CED units: trips per shift
-                    BigDecimal opsGsetMax = null;  // CED units: MeV/m
+                    Double tripOffset = null;   // CED units: trips per shift
+                    Double tripSlope = null;   // CED units: trips per shift
+                    Double opsGsetMax = null;  // CED units: MeV/m
 
                     // Required in CED
                     String q0;
                     String qExternal;
-                    BigDecimal maxGset; // CED units: MeV/m
-                    BigDecimal length; // CED units: meters
+                    Double maxGset; // CED units: MeV/m
+                    Double length; // CED units: meters
 
                     // ModAnode is CED property before 2022, no prop means MAV == 0. After starting 2022, it's moved
                     // to MYA/EPICS and has some slightly more complicated processing rules.
-                    BigDecimal mav;
+                    Double mav;
 
                     String cavityName = element.getString("name");
                     cmType = cmTypes.get(cavityName.substring(0, 4));
@@ -501,10 +514,10 @@ public class CavityService {
                         bypassed = true;
                     }
                     if (properties.containsKey("TripOffset")) {
-                        tripOffset = new BigDecimal(properties.getString("TripOffset"));
+                        tripOffset = Double.valueOf(properties.getString("TripOffset"));
                     }
                     if (properties.containsKey("TripSlope")) {
-                        tripSlope = new BigDecimal(properties.getString("TripSlope"));
+                        tripSlope = Double.valueOf(properties.getString("TripSlope"));
                     }
                     if (mavsEPICS != null) {
                         // Getting from MYA.  There are some weird cases in mya data that R...KMAS is huge, but the
@@ -516,8 +529,8 @@ public class CavityService {
                         if (mavsEPICS.containsKey(cavityName)) {
                             if (mavsEPICS.get(cavityName) == null) {
                                 mav = null;
-                            } else if (mavsEPICS.get(cavityName).doubleValue() > 3.0) {
-                                mav = BigDecimal.ZERO;
+                            } else if (mavsEPICS.get(cavityName) > 3.0) {
+                                mav = 0.0;
                             } else {
                                 mav = mavsEPICS.get(cavityName);
                             }
@@ -529,13 +542,13 @@ public class CavityService {
                         // Getting from CED.  no CED property means zero mod anode voltage is present.  Otherwise, use
                         // the value in CED.  Not possible to have a null/unknown value in this case.
                         if (properties.containsKey("ModAnode")) {
-                            mav = new BigDecimal(properties.getString("ModAnode"));
+                            mav = Double.valueOf(properties.getString("ModAnode"));
                         } else {
-                            mav = BigDecimal.ZERO;
+                            mav = 0.0;
                         }
                     }
                     if (properties.containsKey("OpsGsetMax")) {
-                        opsGsetMax = new BigDecimal(properties.getString("OpsGsetMax"));
+                        opsGsetMax = Double.valueOf(properties.getString("OpsGsetMax"));
                     }
                     if (properties.containsKey("EPICSName")) {
                         epicsName = properties.getString("EPICSName");
@@ -548,10 +561,10 @@ public class CavityService {
                     // Get all CED required parameters.  These should always be returned since they are "required" fields
                     q0 = properties.getString("Q0");
                     qExternal = properties.getString("Qexternal");
-                    maxGset = new BigDecimal(properties.getString("MaxGSET"));
-                    length = new BigDecimal(properties.getString("Length"));
+                    maxGset = Double.valueOf(properties.getString("MaxGSET"));
+                    length = Double.valueOf(properties.getString("Length"));
 
-                    BigDecimal odvh = maxGset;
+                    Double odvh = maxGset;
                     // The ops drive high (odvh) is set to the opsGsetMax if it exists or GsetMax otherwise
                     if (opsGsetMax != null) {
                         odvh = opsGsetMax;

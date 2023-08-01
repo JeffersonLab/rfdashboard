@@ -6,7 +6,6 @@
 package org.jlab.rfd.business.service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -140,15 +139,21 @@ public class ModAnodeHarvesterService {
                 Map<LinacName, LinacRecord> records1090 = new HashMap<>();
                 while( rs.next() ) {
                     LinacName linac = LinacName.valueOf(rs.getString("LINAC"));
-                    BigDecimal energy = rs.getBigDecimal("ENERGY_MEV");
-                    BigDecimal trips = rs.getBigDecimal("TRIPS_PER_HOUR");
-                    if ( trips != null ) {
-                        trips = trips.setScale(6, RoundingMode.HALF_UP);
+                    Double energy = rs.getDouble("ENERGY_MEV");
+                    Double trips = rs.getDouble("TRIPS_PER_HOUR");
+                    if (rs.wasNull()) {
+                        trips = null;
                     }
-                    BigDecimal tripsNoMav = rs.getBigDecimal("TRIPS_PER_HOUR_NO_MAV");
-                    if ( tripsNoMav != null ) {
-                        tripsNoMav = tripsNoMav.setScale(6, RoundingMode.HALF_UP);
+//                    if ( trips != null ) {
+//                        trips = trips.setScale(6, RoundingMode.HALF_UP);
+//                    }
+                    Double tripsNoMav = rs.getDouble("TRIPS_PER_HOUR_NO_MAV");
+                    if (rs.wasNull()) {
+                        tripsNoMav = null;
                     }
+//                    if ( tripsNoMav != null ) {
+//                        tripsNoMav = tripsNoMav.setScale(6, RoundingMode.HALF_UP);
+//                    }
 
                     LinacRecord record = new LinacRecord(sr.getTimestamp(), sr.getEpicsDate(), linac, energy, trips, tripsNoMav);
                     switch (record.getEnergy().intValue()) {

@@ -7,7 +7,6 @@ package org.jlab.rfd.presentation.controller;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -156,8 +155,8 @@ public class ModAnode extends HttpServlet {
             typeMapper.put("C50", "C50");
             typeMapper.put("C50T", "C50");
             typeMapper.put("C75", "C75");
-            MAVCountCMType = DataFormatter.toFlotFromDateMap(s1.getModAnodeCountByCMType(typeMapper));
-            MAVCountLinac = DataFormatter.toFlotFromDateMap(s1.getModAnodeCountByLinac(false));
+            MAVCountCMType = DataFormatter.toFlotFromDateMapInt(s1.getModAnodeCountByCMType(typeMapper));
+            MAVCountLinac = DataFormatter.toFlotFromDateMapInt(s1.getModAnodeCountByLinac(false));
 
             List<Date> date = new ArrayList<>();
             date.add(tableDate);

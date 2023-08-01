@@ -5,7 +5,6 @@
  */
 package org.jlab.rfd.model;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.json.Json;
@@ -108,19 +107,19 @@ public class CavityDataSpan {
      *
      * @return
      */
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getModAnodeCountByLinac(boolean includeInjector) {
-        SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
+    public SortedMap<Date, SortedMap<String, Integer>> getModAnodeCountByLinac(boolean includeInjector) {
+        SortedMap<Date, SortedMap<String, Integer>> data = new TreeMap<>();
 
-        SortedMap<String, BigDecimal> byLinac;
+        SortedMap<String, Integer> byLinac;
         int total;
         int unknown;
         for (Date date : (Set<Date>) dataSpan.keySet()) {
             byLinac = new TreeMap<>();
             if (includeInjector) {
-                byLinac.put(LinacName.Injector.toString(), new BigDecimal(0));
+                byLinac.put(LinacName.Injector.toString(), 0);
             }
-            byLinac.put(LinacName.North.toString(), new BigDecimal(0));
-            byLinac.put(LinacName.South.toString(), new BigDecimal(0));
+            byLinac.put(LinacName.North.toString(), 0);
+            byLinac.put(LinacName.South.toString(), 0);
             total = 0;
             unknown = 0;
 
@@ -130,23 +129,23 @@ public class CavityDataSpan {
                 }
                 if (cDP.getModAnodeVoltage() == null) {
                     unknown++;
-                } else if (cDP.getModAnodeVoltage().doubleValue() > 0) {
-                    byLinac.put(cDP.getLinacName().toString(), byLinac.get(cDP.getLinacName().toString()).add(new BigDecimal(1)));
+                } else if (cDP.getModAnodeVoltage() > 0) {
+                    byLinac.put(cDP.getLinacName().toString(), byLinac.get(cDP.getLinacName().toString()) + 1);
                     total++;
                 }
 
             }
-            byLinac.put(LinacName.Total.toString(), new BigDecimal(total));
+            byLinac.put(LinacName.Total.toString(), total);
             if (unknown > 0) {
-                byLinac.put("Unknown", new BigDecimal(unknown));
+                byLinac.put("Unknown", unknown);
             }
             data.put(date, byLinac);
         }
         return data;
     }
 
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getModAnodeCountByCMType(Map<String, String> typeMapper) {
-        SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
+    public SortedMap<Date, SortedMap<String, Integer>> getModAnodeCountByCMType(Map<String, String> typeMapper) {
+        SortedMap<Date, SortedMap<String, Integer>> data = new TreeMap<>();
 
         if (typeMapper == null) {
             typeMapper = new HashMap<>();
@@ -158,19 +157,19 @@ public class CavityDataSpan {
             typeMapper.put(CryomoduleType.C75.toString(), CryomoduleType.C75.toString());
         }
 
-        SortedMap<String, BigDecimal> byCMType;
+        SortedMap<String, Integer> byCMType;
         int total;
         int unknown;
         String CMType;
 
         for (Date date : dataSpan.keySet()) {
             byCMType = new TreeMap<>();
-            byCMType.put(typeMapper.get(CryomoduleType.C100.toString()), new BigDecimal(0));
-            byCMType.put(typeMapper.get(CryomoduleType.C50.toString()), new BigDecimal(0));
-            byCMType.put(typeMapper.get(CryomoduleType.C25.toString()), new BigDecimal(0));
-            byCMType.put(typeMapper.get(CryomoduleType.F100.toString()), new BigDecimal(0));
-            byCMType.put(typeMapper.get(CryomoduleType.C75.toString()), new BigDecimal(0));
-            byCMType.put(typeMapper.get(CryomoduleType.C50T.toString()), new BigDecimal(0));
+            byCMType.put(typeMapper.get(CryomoduleType.C100.toString()), 0);
+            byCMType.put(typeMapper.get(CryomoduleType.C50.toString()), 0);
+            byCMType.put(typeMapper.get(CryomoduleType.C25.toString()), 0);
+            byCMType.put(typeMapper.get(CryomoduleType.F100.toString()), 0);
+            byCMType.put(typeMapper.get(CryomoduleType.C75.toString()), 0);
+            byCMType.put(typeMapper.get(CryomoduleType.C50T.toString()), 0);
             total = 0;
             unknown = 0;
 
@@ -178,7 +177,7 @@ public class CavityDataSpan {
 
                 if (cDP.getModAnodeVoltage() == null) {
                     unknown++;
-                } else if (cDP.getModAnodeVoltage().doubleValue() > 0) {
+                } else if (cDP.getModAnodeVoltage() > 0) {
                     if (cDP.getCryomoduleType().equals(CryomoduleType.C100)
                             || cDP.getCryomoduleType().equals(CryomoduleType.C50)
                             || cDP.getCryomoduleType().equals(CryomoduleType.C50T)
@@ -186,26 +185,26 @@ public class CavityDataSpan {
                             || cDP.getCryomoduleType().equals(CryomoduleType.F100)
                             || cDP.getCryomoduleType().equals(CryomoduleType.C25)) {
                         CMType = typeMapper.get(cDP.getCryomoduleType().toString());
-                        byCMType.put(CMType, byCMType.get(CMType).add(new BigDecimal(1)));
+                        byCMType.put(CMType, byCMType.get(CMType) + 1);
                         total++;
                     }
                 }
 
             }
-            byCMType.put(LinacName.Total.toString(), new BigDecimal(total));
+            byCMType.put(LinacName.Total.toString(), total);
             if (unknown > 0) {
-                byCMType.put("Unknown", new BigDecimal(unknown));
+                byCMType.put("Unknown", unknown);
             }
             data.put(date, byCMType);
         }
         return data;
     }
 
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getBypassedCountByCMType(Map<String, String> typeMapper){
+    public SortedMap<Date, SortedMap<String, Integer>> getBypassedCountByCMType(Map<String, String> typeMapper){
         return getBypassedCountByCMType(typeMapper, false);
     }
 
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getBypassedCountByCMType(Map<String, String> typeMapper,
+    public SortedMap<Date, SortedMap<String, Integer>> getBypassedCountByCMType(Map<String, String> typeMapper,
                                                                                    boolean includeInjector) {
 
         if (typeMapper == null) {
@@ -219,10 +218,10 @@ public class CavityDataSpan {
         }
 
         // We want C25, C50, C100, Total, Unknown.  Compare as strings unless both are C*.  Then compare the number.
-        SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
+        SortedMap<Date, SortedMap<String, Integer>> data = new TreeMap<>();
 
 
-        SortedMap<String, BigDecimal> byCMType;
+        SortedMap<String, Integer> byCMType;
         int total;
         int unknown;
         String CMType;
@@ -239,12 +238,12 @@ public class CavityDataSpan {
                     return o1.compareTo(o2);
                 }
             });
-            byCMType.put(typeMapper.get(CryomoduleType.C100.toString()), new BigDecimal(0));
-            byCMType.put(typeMapper.get(CryomoduleType.C50.toString()), new BigDecimal(0));
-            byCMType.put(typeMapper.get(CryomoduleType.C25.toString()), new BigDecimal(0));
-            byCMType.put(typeMapper.get(CryomoduleType.F100.toString()), new BigDecimal(0));
-            byCMType.put(typeMapper.get(CryomoduleType.C75.toString()), new BigDecimal(0));
-            byCMType.put(typeMapper.get(CryomoduleType.C50T.toString()), new BigDecimal(0));
+            byCMType.put(typeMapper.get(CryomoduleType.C100.toString()), 0);
+            byCMType.put(typeMapper.get(CryomoduleType.C50.toString()), 0);
+            byCMType.put(typeMapper.get(CryomoduleType.C25.toString()), 0);
+            byCMType.put(typeMapper.get(CryomoduleType.F100.toString()), 0);
+            byCMType.put(typeMapper.get(CryomoduleType.C75.toString()), 0);
+            byCMType.put(typeMapper.get(CryomoduleType.C50T.toString()), 0);
             total = 0;
             unknown = 0;
 
@@ -264,7 +263,7 @@ public class CavityDataSpan {
                     switch (bypassed) {
                         case 1:
                             CMType = cDP.getCryomoduleType().toString();
-                            byCMType.put(typeMapper.get(CMType), byCMType.get(typeMapper.get(CMType)).add(new BigDecimal(1)));
+                            byCMType.put(typeMapper.get(CMType), byCMType.get(typeMapper.get(CMType)) + 1);
                             total++;
                             break;
                         case 0:
@@ -278,33 +277,33 @@ public class CavityDataSpan {
                 }
             }
 
-            byCMType.put(LinacName.Total.toString(), new BigDecimal(total));
+            byCMType.put(LinacName.Total.toString(), total);
             if (unknown > 0) {
-                byCMType.put("Unknown", new BigDecimal(unknown));
+                byCMType.put("Unknown", unknown);
             }
             data.put(date, byCMType);
         }
         return data;
     }
 
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getBypassedCountByLinac() {
+    public SortedMap<Date, SortedMap<String, Integer>> getBypassedCountByLinac() {
         return getBypassedCountByLinac(false);
     }
 
 
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getBypassedCountByLinac(boolean includeInjector) {
-        SortedMap<Date, SortedMap<String, BigDecimal>> data = new TreeMap<>();
+    public SortedMap<Date, SortedMap<String, Integer>> getBypassedCountByLinac(boolean includeInjector) {
+        SortedMap<Date, SortedMap<String, Integer>> data = new TreeMap<>();
 
-        SortedMap<String, BigDecimal> byLinac;
+        SortedMap<String, Integer> byLinac;
         int total;
         int unknown;
         for (Date date : dataSpan.keySet()) {
             byLinac = new TreeMap<>();
             if (includeInjector) {
-                byLinac.put(LinacName.Injector.toString(), new BigDecimal(0));
+                byLinac.put(LinacName.Injector.toString(), 0);
             }
-            byLinac.put(LinacName.North.toString(), new BigDecimal(0));
-            byLinac.put(LinacName.South.toString(), new BigDecimal(0));
+            byLinac.put(LinacName.North.toString(), 0);
+            byLinac.put(LinacName.South.toString(), 0);
             total = 0;
             unknown = 0;
 
@@ -316,7 +315,7 @@ public class CavityDataSpan {
                 bypassed = checkCavityBypassed(cr);
                 switch(bypassed) {
                     case 1:
-                        byLinac.put(cr.getLinacName().toString(), byLinac.get(cr.getLinacName().toString()).add(new BigDecimal(1)));
+                        byLinac.put(cr.getLinacName().toString(), byLinac.get(cr.getLinacName().toString()) + 1);
                         total++;
                         break;
                     case 0:
@@ -328,10 +327,10 @@ public class CavityDataSpan {
                         throw new RuntimeException("Unexpected response from checkCavityBypassed");
                 }
             }
-            byLinac.put(LinacName.Total.toString(), new BigDecimal(total));
+            byLinac.put(LinacName.Total.toString(), total);
             data.put(date, byLinac);
             if (unknown > 0) {
-                byLinac.put("Unknown", new BigDecimal(unknown));
+                byLinac.put("Unknown", unknown);
             }
         }
         return data;
@@ -348,7 +347,7 @@ public class CavityDataSpan {
         int bypassed = 0;
         if (cr.isBypassed()) {
             bypassed  = 1;
-        } else if (cr.getGset() != null && cr.getGset().doubleValue() == 0) {
+        } else if (cr.getGset() != null && cr.getGset() == 0) {
             bypassed = 1;
         }
 
@@ -372,9 +371,9 @@ public class CavityDataSpan {
      * @return a map, keyed on date, where each date is a map of zone to energy
      * gain
      */
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getEnergyGainByZone(List<String> zones) {
-        SortedMap<Date, SortedMap<String, BigDecimal>> out = new TreeMap<>();
-        SortedMap<String, BigDecimal> byZone;
+    public SortedMap<Date, SortedMap<String, Double>> getEnergyGainByZone(List<String> zones) {
+        SortedMap<Date, SortedMap<String, Double>> out = new TreeMap<>();
+        SortedMap<String, Double> byZone;
 
         for (Date date : dataSpan.keySet()) {
             byZone = new TreeMap<>();
@@ -383,18 +382,18 @@ public class CavityDataSpan {
 
                 if (zones == null || zones.isEmpty() || zones.contains(zone)) {
                     if (!byZone.containsKey(zone)) {
-                        byZone.put(zone, BigDecimal.ZERO);
+                        byZone.put(zone, 0.0);
                     }
 
                     // GSET could be null if the control system was down, but the CED _should_ always have a length.
-                    BigDecimal gset = cr.getGset();
-                    BigDecimal cavEGain;
+                    Double gset = cr.getGset();
+                    double cavEGain;
                     if (gset == null) {
-                        cavEGain = BigDecimal.ZERO;
+                        cavEGain = 0.0;
                     } else {
-                        cavEGain = gset.multiply(cr.getLength());
+                        cavEGain = gset * cr.getLength();
                     }
-                    byZone.put(zone, byZone.get(zone).add(cavEGain));
+                    byZone.put(zone, byZone.get(zone) + cavEGain);
                 }
             }
             out.put(date, byZone);
@@ -412,7 +411,7 @@ public class CavityDataSpan {
      * @return a map, keyed on date, where each date is a map of zone to energy
      * gain
      */
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getEnergyGainByCMType(List<String> zones, Map<String, String> typeMapper) {
+    public SortedMap<Date, SortedMap<String, Double>> getEnergyGainByCMType(List<String> zones, Map<String, String> typeMapper) {
         if (typeMapper == null) {
             typeMapper = new HashMap<>();
             typeMapper.put("C100", "C100");
@@ -423,8 +422,8 @@ public class CavityDataSpan {
             typeMapper.put("C75", "C75");
             typeMapper.put("QTR", "QTR");
         }
-        SortedMap<Date, SortedMap<String, BigDecimal>> out = new TreeMap<>();
-        SortedMap<String, BigDecimal> byCMType;
+        SortedMap<Date, SortedMap<String, Double>> out = new TreeMap<>();
+        SortedMap<String, Double> byCMType;
 
         for (Date date : dataSpan.keySet()) {
             byCMType = new TreeMap<>();
@@ -434,18 +433,18 @@ public class CavityDataSpan {
 
                 if (zones == null || zones.isEmpty() || zones.contains(zone)) {
                     if (!byCMType.containsKey(cmType)) {
-                        byCMType.put(typeMapper.get(cmType), BigDecimal.ZERO);
+                        byCMType.put(typeMapper.get(cmType), 0.0);
                     }
 
                     // GSET could be null if the control system was down, but the CED _should_ always have a length.
-                    BigDecimal gset = cr.getGset();
-                    BigDecimal cavEGain;
+                    Double gset = cr.getGset();
+                    double cavEGain;
                     if (gset == null) {
-                        cavEGain = BigDecimal.ZERO;
+                        cavEGain = 0.0;
                     } else {
-                        cavEGain = gset.multiply(cr.getLength());
+                        cavEGain = gset * cr.getLength();
                     }
-                    byCMType.put(typeMapper.get(cmType), byCMType.get(typeMapper.get(cmType)).add(cavEGain));
+                    byCMType.put(typeMapper.get(cmType), byCMType.get(typeMapper.get(cmType)) + cavEGain);
                 }
             }
             out.put(date, byCMType);
@@ -463,9 +462,9 @@ public class CavityDataSpan {
      * @return a map, keyed on date, where each date is a map of zone to energy
      * gain
      */
-    public SortedMap<Date, SortedMap<String, BigDecimal>> getEnergyGainByCavity(List<String> zones) {
-        SortedMap<Date, SortedMap<String, BigDecimal>> out = new TreeMap<>();
-        SortedMap<String, BigDecimal> byCavity;
+    public SortedMap<Date, SortedMap<String, Double>> getEnergyGainByCavity(List<String> zones) {
+        SortedMap<Date, SortedMap<String, Double>> out = new TreeMap<>();
+        SortedMap<String, Double> byCavity;
 
         for (Date date : dataSpan.keySet()) {
             byCavity = new TreeMap<>();
@@ -475,18 +474,18 @@ public class CavityDataSpan {
 
                 if (zones == null || zones.isEmpty() || zones.contains(zone)) {
                     if (!byCavity.containsKey(cavity)) {
-                        byCavity.put(cavity, BigDecimal.ZERO);
+                        byCavity.put(cavity, 0.0);
                     }
 
                     // GSET could be null if the control system was down, but the CED _should_ always have a length.
-                    BigDecimal gset = cr.getGset();
-                    BigDecimal cavEGain;
+                    Double gset = cr.getGset();
+                    double cavEGain;
                     if (gset == null) {
-                        cavEGain = BigDecimal.ZERO;
+                        cavEGain = 0.0;
                     } else {
-                        cavEGain = gset.multiply(cr.getLength());
+                        cavEGain = gset * cr.getLength();
                     }
-                    byCavity.put(cavity, byCavity.get(cavity).add(cavEGain));
+                    byCavity.put(cavity, byCavity.get(cavity) + cavEGain);
                 }
             }
             out.put(date, byCavity);

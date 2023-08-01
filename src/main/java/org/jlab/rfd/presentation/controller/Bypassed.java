@@ -169,8 +169,8 @@ public class Bypassed extends HttpServlet {
             typeMapper.put("C50T", "C50");
             typeMapper.put("C75", "C75");
 
-            bypassedCMType = DataFormatter.toFlotFromDateMap(cs.getCavityDataSpan(start, end, tu).getBypassedCountByCMType(typeMapper));
-            bypassedLinac = DataFormatter.toFlotFromDateMap(cs.getCavityDataSpan(start, end, tu).getBypassedCountByLinac());
+            bypassedCMType = DataFormatter.toFlotFromDateMapInt(cs.getCavityDataSpan(start, end, tu).getBypassedCountByCMType(typeMapper));
+            bypassedLinac = DataFormatter.toFlotFromDateMapInt(cs.getCavityDataSpan(start, end, tu).getBypassedCountByLinac());
             tableData = cs.getCavityDataSpan(date).toJson();
         } catch (ParseException | SQLException ex) {
             LOGGER.log(Level.WARNING, "Error querying cavity data", ex);

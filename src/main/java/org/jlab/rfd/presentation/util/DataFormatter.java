@@ -6,7 +6,6 @@
 package org.jlab.rfd.presentation.util;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
@@ -95,14 +94,14 @@ public class DataFormatter {
      * @throws java.text.ParseException
      * @throws java.io.IOException
      */
-    public static JsonObject toFlotFromDateMap(SortedMap<Date, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
+    public static JsonObject toFlotFromDateMap(SortedMap<Date, SortedMap<String, Double>> data) throws ParseException, IOException {
 
         if (data == null) {
             return null;
         }
 
         // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
-        Map<String, BigDecimal> temp;
+        Map<String, Double> temp;
         // The tree map keeps the series sorted in a reliable fashion.  Needed to coordinate the alignment of labels and data... well maybe not...
         SortedMap<String, JsonArrayBuilder> seriesBuilders = new TreeMap<>();
 
@@ -135,14 +134,104 @@ public class DataFormatter {
         return chartData;
     }
 
-    public static JsonObject toFlotFromIntMap(SortedMap<Integer, SortedMap<String, BigDecimal>> data) throws ParseException, IOException {
+    /**
+     * This function is designed to format a "By Linac", time series data
+     * structure as in JSON format.
+     *
+     * @param data A SortedMap keyed on data, with the value being a Map keyed
+     * on LinacName, valued on some BigDecimal
+     * @return A json object structured for direct consumption by Flot as a data
+     * object {series1: [[1,2],...], series2:...}
+     * @throws java.text.ParseException
+     * @throws java.io.IOException
+     */
+    public static JsonObject toFlotFromDateMapInt(SortedMap<Date, SortedMap<String, Integer>> data) throws ParseException, IOException {
 
         if (data == null) {
             return null;
         }
 
         // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
-        Map<String, BigDecimal> temp;
+        Map<String, Integer> temp;
+        // The tree map keeps the series sorted in a reliable fashion.  Needed to coordinate the alignment of labels and data... well maybe not...
+        SortedMap<String, JsonArrayBuilder> seriesBuilders = new TreeMap<>();
+
+        for (Date curr : (Set<Date>) data.keySet()) {
+            temp = data.get(curr);
+            for (String seriesName : data.get(curr).keySet()) {
+                if (!seriesBuilders.containsKey(seriesName)) {
+                    seriesBuilders.put(seriesName, Json.createArrayBuilder());
+                }
+                seriesBuilders.get(seriesName)
+                        .add(Json.createArrayBuilder()
+                                .add(curr.getTime())
+                                //                                .add((temp.get(seriesName) != null) ? temp.get(seriesName).toString() : "null"));
+                                .add((temp.get(seriesName) != null) ? temp.get(seriesName).toString() : ""));
+            }
+        }
+
+        JsonArrayBuilder labelBuilder = Json.createArrayBuilder();
+        JsonArrayBuilder dataBuilder = Json.createArrayBuilder();
+        for (String seriesName : seriesBuilders.keySet()) {
+            labelBuilder.add(seriesName);
+            dataBuilder.add(seriesBuilders.get(seriesName).build());
+        }
+
+        JsonObject chartData = Json.createObjectBuilder()
+                .add("labels", labelBuilder.build())
+                .add("data", dataBuilder.build())
+                .build();
+
+        return chartData;
+    }
+
+    public static JsonObject toFlotFromIntMap(SortedMap<Integer, SortedMap<String, Double>> data) throws ParseException, IOException {
+
+        if (data == null) {
+            return null;
+        }
+
+        // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
+        Map<String, Double> temp;
+        // The tree map keeps the series sorted in a reliable fashion.  Needed to coordinate the alignment of labels and data... well maybe not...
+        SortedMap<String, JsonArrayBuilder> seriesBuilders = new TreeMap<>();
+
+        for (Integer curr : (Set<Integer>) data.keySet()) {
+            temp = data.get(curr);
+            for (String seriesName : data.get(curr).keySet()) {
+                if (!seriesBuilders.containsKey(seriesName)) {
+                    seriesBuilders.put(seriesName, Json.createArrayBuilder());
+                }
+                seriesBuilders.get(seriesName)
+                        .add(Json.createArrayBuilder()
+                                .add(curr.toString())
+                                .add((temp.get(seriesName) != null) ? temp.get(seriesName).toString() : "null"));
+            }
+        }
+
+        JsonArrayBuilder labelBuilder = Json.createArrayBuilder();
+        JsonArrayBuilder dataBuilder = Json.createArrayBuilder();
+        for (String seriesName : seriesBuilders.keySet()) {
+            labelBuilder.add(seriesName);
+            dataBuilder.add(seriesBuilders.get(seriesName).build());
+        }
+
+        JsonObject chartData = Json.createObjectBuilder()
+                .add("labels", labelBuilder.build())
+                .add("data", dataBuilder.build())
+                .build();
+
+        return chartData;
+    }
+
+    public static JsonObject toFlotFromIntMapInt(SortedMap<Integer, SortedMap<String, Integer>> data) throws ParseException, IOException {
+
+        if (data == null) {
+            return null;
+        }
+
+        // Javascript time format is like Unix Time, but in milliseconds.  the getTime() function gives you this by default.
+        Map<String, Integer> temp;
         // The tree map keeps the series sorted in a reliable fashion.  Needed to coordinate the alignment of labels and data... well maybe not...
         SortedMap<String, JsonArrayBuilder> seriesBuilders = new TreeMap<>();
 
