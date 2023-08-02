@@ -5,8 +5,6 @@
  */
 package org.jlab.rfd.business.util;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,9 +18,9 @@ public class MathUtil {
 
     // Check each value to the following value.  If the following value is greater, return false.  If no comparison returns false,
     // then the array must be sorted.
-    public static final boolean isSorted(Double[] nums) {
+    public static boolean isSorted(Double[] nums) {
         for ( int i = 0; i < nums.length-1; i++ ) {
-            if ( nums[i] < nums[i+1] ) {
+            if ( nums[i] > nums[i+1] ) {
                 return false;
             }
         }
@@ -31,7 +29,7 @@ public class MathUtil {
     
     // Shamelessly stolen from www.java2s.com/Code/Java/Collections-Data-Structure/LinearInterpolation.htm
     // Added a MathContext to the only divide operation in this method.  Can cause exception without specified rounding, scale.
-    public static final Double[] interpLinear(Double[] x, Double[] y, Double[] xi) {
+    public static Double[] interpLinear(Double[] x, Double[] y, Double[] xi) {
         if (x.length != y.length) {
             throw new IllegalArgumentException("X and Y must be the same length");
         }
@@ -43,15 +41,11 @@ public class MathUtil {
         Double[] slope = new Double[x.length - 1];
         Double[] intercept = new Double[x.length - 1];
 
-        // Calculate the line equation (i.e. slope and intercept) between each point
-        BigInteger zero = new BigInteger("0");
-        BigDecimal minusOne = new BigDecimal(-1);
-
         for (int i = 0; i < x.length - 1; i++) {
             //dx[i] = x[i + 1] - x[i];
             dx[i] = x[i + 1] - x[i];
             if (dx[i] > -1E-6 && dx[i] < 1E-6) {
-                throw new IllegalArgumentException("X must be montotonic. A duplicate " + "x-value was found");
+                throw new IllegalArgumentException("X must be monotonic. A duplicate " + "x-value was found");
             }
             if (dx[i] < 0) {
                 LOGGER.log(Level.WARNING, "X must be sorted.");
@@ -91,15 +85,15 @@ public class MathUtil {
 
     // Convenience function for printing out BigDecimalArrays
     private static String toLogString(Double[] nums) {
-        String msg = "[";
+        StringBuilder msg = new StringBuilder("[");
         for (Double n : nums) {
             if (n != null) {
-                msg += ", " + n.toString();
+                msg.append(", ").append(n);
             } else {
-                msg += ", null";
+                msg.append(", null");
             }
         }
-        msg += "]";
-        return msg;
+        msg.append("]");
+        return msg.toString();
     }
 }
