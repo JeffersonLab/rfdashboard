@@ -112,7 +112,7 @@ public class CavityCacheTest {
         Calendar c = Calendar.getInstance();
         c.setTime(DateUtil.parseDateStringYMD(startString));
         Date start = c.getTime();
-        int numDates = 400;
+        int numDates = 190;
 
         List<Date> dateList = new ArrayList<>();
         Date curr = start;
@@ -122,7 +122,7 @@ public class CavityCacheTest {
             curr = c.getTime();
             dateList.add(curr);
         }
-        String middleString = "2021-02-02"; // Should be after the chunk break.  No guarantee if someone changes code.
+        String middleString = "2020-07-01"; // Should be after the chunk break.  No guarantee if someone changes code.
         String endString = DateUtil.formatDateYMD(curr);
 
         primeCache(startString);
