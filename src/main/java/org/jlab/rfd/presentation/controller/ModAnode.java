@@ -25,6 +25,7 @@ import org.jlab.rfd.business.service.ModAnodeHarvesterService;
 import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.ModAnodeHarvester.LinacDataSpan;
 import org.jlab.rfd.model.TimeUnit;
+import org.jlab.rfd.presentation.util.CMTypeMapper;
 import org.jlab.rfd.presentation.util.DataFormatter;
 import org.jlab.rfd.presentation.util.ParamChecker;
 
@@ -148,13 +149,7 @@ public class ModAnode extends HttpServlet {
         try {
             CavityDataSpan s1 = cs.getCavityDataSpan(start, end, tu);
             // J. Benesch requested this type of mapping
-            Map<String, String> typeMapper = new HashMap<>();
-            typeMapper.put("C100", "C100");
-            typeMapper.put("F100", "C100");
-            typeMapper.put("C25", "C25");
-            typeMapper.put("C50", "C50");
-            typeMapper.put("C50T", "C50");
-            typeMapper.put("C75", "C75");
+            CMTypeMapper typeMapper = new CMTypeMapper();
             MAVCountCMType = DataFormatter.toFlotFromDateMapInt(s1.getModAnodeCountByCMType(typeMapper));
             MAVCountLinac = DataFormatter.toFlotFromDateMapInt(s1.getModAnodeCountByLinac(false));
 

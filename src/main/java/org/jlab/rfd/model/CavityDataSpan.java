@@ -5,6 +5,8 @@
  */
 package org.jlab.rfd.model;
 
+import org.jlab.rfd.presentation.util.CMTypeMapper;
+
 import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.json.Json;
@@ -144,18 +146,8 @@ public class CavityDataSpan {
         return data;
     }
 
-    public SortedMap<Date, SortedMap<String, Integer>> getModAnodeCountByCMType(Map<String, String> typeMapper) {
+    public SortedMap<Date, SortedMap<String, Integer>> getModAnodeCountByCMType(CMTypeMapper typeMapper) {
         SortedMap<Date, SortedMap<String, Integer>> data = new TreeMap<>();
-
-        if (typeMapper == null) {
-            typeMapper = new HashMap<>();
-            typeMapper.put(CryomoduleType.C100.toString(), CryomoduleType.C100.toString());
-            typeMapper.put(CryomoduleType.F100.toString(), CryomoduleType.C100.toString());
-            typeMapper.put(CryomoduleType.C25.toString(), CryomoduleType.C25.toString());
-            typeMapper.put(CryomoduleType.C50.toString(), CryomoduleType.C50.toString());
-            typeMapper.put(CryomoduleType.C50T.toString(), CryomoduleType.C50.toString());
-            typeMapper.put(CryomoduleType.C75.toString(), CryomoduleType.C75.toString());
-        }
 
         SortedMap<String, Integer> byCMType;
         int total;
@@ -164,12 +156,6 @@ public class CavityDataSpan {
 
         for (Date date : dataSpan.keySet()) {
             byCMType = new TreeMap<>();
-            byCMType.put(typeMapper.get(CryomoduleType.C100.toString()), 0);
-            byCMType.put(typeMapper.get(CryomoduleType.C50.toString()), 0);
-            byCMType.put(typeMapper.get(CryomoduleType.C25.toString()), 0);
-            byCMType.put(typeMapper.get(CryomoduleType.F100.toString()), 0);
-            byCMType.put(typeMapper.get(CryomoduleType.C75.toString()), 0);
-            byCMType.put(typeMapper.get(CryomoduleType.C50T.toString()), 0);
             total = 0;
             unknown = 0;
 
@@ -184,7 +170,11 @@ public class CavityDataSpan {
                             || cDP.getCryomoduleType().equals(CryomoduleType.C75)
                             || cDP.getCryomoduleType().equals(CryomoduleType.F100)
                             || cDP.getCryomoduleType().equals(CryomoduleType.C25)) {
-                        CMType = typeMapper.get(cDP.getCryomoduleType().toString());
+                        CMType = cDP.getCryomoduleType().toString();
+                        if (typeMapper != null) {
+                            CMType = typeMapper.get(CMType);
+                        }
+                        byCMType.putIfAbsent(CMType, 0);
                         byCMType.put(CMType, byCMType.get(CMType) + 1);
                         total++;
                     }
@@ -200,23 +190,12 @@ public class CavityDataSpan {
         return data;
     }
 
-    public SortedMap<Date, SortedMap<String, Integer>> getBypassedCountByCMType(Map<String, String> typeMapper){
+    public SortedMap<Date, SortedMap<String, Integer>> getBypassedCountByCMType(CMTypeMapper typeMapper){
         return getBypassedCountByCMType(typeMapper, false);
     }
 
-    public SortedMap<Date, SortedMap<String, Integer>> getBypassedCountByCMType(Map<String, String> typeMapper,
+    public SortedMap<Date, SortedMap<String, Integer>> getBypassedCountByCMType(CMTypeMapper typeMapper,
                                                                                    boolean includeInjector) {
-
-        if (typeMapper == null) {
-            typeMapper = new HashMap<>();
-            typeMapper.put(CryomoduleType.C100.toString(), CryomoduleType.C100.toString());
-            typeMapper.put(CryomoduleType.F100.toString(), CryomoduleType.C100.toString());
-            typeMapper.put(CryomoduleType.C25.toString(), CryomoduleType.C25.toString());
-            typeMapper.put(CryomoduleType.C50.toString(), CryomoduleType.C50.toString());
-            typeMapper.put(CryomoduleType.C50T.toString(), CryomoduleType.C50.toString());
-            typeMapper.put(CryomoduleType.C75.toString(), CryomoduleType.C75.toString());
-        }
-
         // We want C25, C50, C100, Total, Unknown.  Compare as strings unless both are C*.  Then compare the number.
         SortedMap<Date, SortedMap<String, Integer>> data = new TreeMap<>();
 
@@ -238,12 +217,6 @@ public class CavityDataSpan {
                     return o1.compareTo(o2);
                 }
             });
-            byCMType.put(typeMapper.get(CryomoduleType.C100.toString()), 0);
-            byCMType.put(typeMapper.get(CryomoduleType.C50.toString()), 0);
-            byCMType.put(typeMapper.get(CryomoduleType.C25.toString()), 0);
-            byCMType.put(typeMapper.get(CryomoduleType.F100.toString()), 0);
-            byCMType.put(typeMapper.get(CryomoduleType.C75.toString()), 0);
-            byCMType.put(typeMapper.get(CryomoduleType.C50T.toString()), 0);
             total = 0;
             unknown = 0;
 
@@ -263,7 +236,11 @@ public class CavityDataSpan {
                     switch (bypassed) {
                         case 1:
                             CMType = cDP.getCryomoduleType().toString();
-                            byCMType.put(typeMapper.get(CMType), byCMType.get(typeMapper.get(CMType)) + 1);
+                            if (typeMapper != null) {
+                                CMType = typeMapper.get(CMType);
+                            }
+                            byCMType.putIfAbsent(CMType, 0);
+                            byCMType.put(CMType, byCMType.get(CMType) + 1);
                             total++;
                             break;
                         case 0:
@@ -411,17 +388,7 @@ public class CavityDataSpan {
      * @return a map, keyed on date, where each date is a map of zone to energy
      * gain
      */
-    public SortedMap<Date, SortedMap<String, Double>> getEnergyGainByCMType(List<String> zones, Map<String, String> typeMapper) {
-        if (typeMapper == null) {
-            typeMapper = new HashMap<>();
-            typeMapper.put("C100", "C100");
-            typeMapper.put("F100", "F100");
-            typeMapper.put("C50", "C50");
-            typeMapper.put("C50T", "C50T");
-            typeMapper.put("C25", "C25");
-            typeMapper.put("C75", "C75");
-            typeMapper.put("QTR", "QTR");
-        }
+    public SortedMap<Date, SortedMap<String, Double>> getEnergyGainByCMType(List<String> zones, CMTypeMapper typeMapper) {
         SortedMap<Date, SortedMap<String, Double>> out = new TreeMap<>();
         SortedMap<String, Double> byCMType;
 
@@ -430,11 +397,12 @@ public class CavityDataSpan {
             for (CavityResponse cr : dataSpan.get(date)) {
                 String zone = cr.getZoneName();
                 String cmType = cr.getCryomoduleType().toString();
+                if (typeMapper != null) {
+                    cmType = typeMapper.get(cmType);
+                }
 
                 if (zones == null || zones.isEmpty() || zones.contains(zone)) {
-                    if (!byCMType.containsKey(cmType)) {
-                        byCMType.put(typeMapper.get(cmType), 0.0);
-                    }
+                    byCMType.putIfAbsent(cmType, 0.0);
 
                     // GSET could be null if the control system was down, but the CED _should_ always have a length.
                     Double gset = cr.getGset();
@@ -444,7 +412,8 @@ public class CavityDataSpan {
                     } else {
                         cavEGain = gset * cr.getLength();
                     }
-                    byCMType.put(typeMapper.get(cmType), byCMType.get(typeMapper.get(cmType)) + cavEGain);
+                    double newGain = byCMType.get(cmType) + cavEGain;
+                    byCMType.put(cmType, newGain);
                 }
             }
             out.put(date, byCMType);
@@ -473,9 +442,7 @@ public class CavityDataSpan {
                 String cavity = cr.getCavityName();
 
                 if (zones == null || zones.isEmpty() || zones.contains(zone)) {
-                    if (!byCavity.containsKey(cavity)) {
-                        byCavity.put(cavity, 0.0);
-                    }
+                    byCavity.putIfAbsent(cavity, 0.0);
 
                     // GSET could be null if the control system was down, but the CED _should_ always have a length.
                     Double gset = cr.getGset();

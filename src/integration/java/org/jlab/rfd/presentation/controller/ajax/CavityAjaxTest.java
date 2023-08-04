@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.jlab.rfd.util.TestUtils.clearCache;
+
 /**
  * This is a test of the CavityAjax (i.e. /ajax/cavity) endpoint.  The expected result should have a structure like this
  * {
@@ -34,7 +36,6 @@ import java.util.List;
  */
 public class CavityAjaxTest {
     static final String CAVITY_URL = "http://localhost:8080/RFDashboard/ajax/cavity";
-    static final String CAVITY_CACHE_URL = "http://localhost:8080/RFDashboard/ajax/cavity-cache";
 
     private JsonObject makeQuery(String query) throws IOException {
         JsonObject json;
@@ -46,17 +47,6 @@ public class CavityAjaxTest {
         return json;
     }
 
-    private void clearCache(Date date) throws IOException {
-        JsonObject json;
-        URL url = new URL(CAVITY_CACHE_URL + "?date=" + DateUtil.formatDateYMD(date) + "&secret=ayqs&action=clear");
-        InputStream is = url.openStream();
-        try (JsonReader reader = Json.createReader(is)) {
-            json = reader.readObject();
-        }
-        if (json.get("rowsCleared") == null) {
-            throw new RuntimeException(("Error processing cache clear response"));
-        }
-    }
 
     private void basicUsage(String date) throws IOException {
         // Date is YYYY-mm-dd

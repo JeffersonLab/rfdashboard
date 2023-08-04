@@ -16,27 +16,17 @@ understanding the performance of CEBAF's RF system at a point in time and identi
     git clone https://github.com/JeffersonLab/rfdashboard
     cd rfdashboard
     ```
-2. Edit config files to reference the hostname of your development system.  If you use localhost, it will be interpreted by the container to be the wrong host.
+2. Connect to JLab network either directly or through VPN.  Some services have not yet been containerized.
+3. Launch Compose
     ```bash
-    vi docker-compose.yml
-    ...
-      rfd:
-    ...
-          KEYCLOAK_FRONTEND_SERVER_URL: 'http://<hostname>:8081'
-    
-    vi deps.yml
-    ...
-      keycloak:
-    ...
-          KEYCLOAK_FRONTEND_HOSTNAME: '<hostname>'
-    ```
-3. Connect to JLab network either directly or through VPN.  Some services have not yet been containerized.
-4. Launch Compose
-    ```bash
-    docker compose 
+    docker compose up
     ```
 
 **Note**: Login with demo username "tbrown" and password "password".
+
+**Note**: Logout functionality does not work unless you update the KEYCLOAK_FRONT_END_SERVER in the deps.yml 
+and docker-compose.yml to the hostname of your development machine due to an upstream issue.  More comments in those
+files.
 
 **See**: [Docker Compose Strategy](https://gist.github.com/slominskir/a7da801e8259f5974c978f9c3091d52c) developed by
 Ryan Slominski.

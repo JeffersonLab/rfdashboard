@@ -220,7 +220,7 @@ jlab.energyReach.addLegend = function (chartId, colors, labels, reaches) {
     legendString += "<table>";
     legendString += '<tr><th colspan="2">Linac</th><th>Reach</th><th>Req. EGain</th><th>Trips / Hr</th><tr>';
     if (colors.length !== labels.length) {
-        console.log("Error: unequal number of colors and labels");
+        window.console && console.log("Error: unequal number of colors and labels");
     }
     for (var i = 0; i < colors.length; i++) {
         legendString += '<tr><td><div class=color-box style="background-color: ' + colors[i] + ';"></div></td><td>' +
@@ -286,19 +286,37 @@ jlab.energyReach.queryLinacEnergies = function (date, tripData) {
     promise.done(function(data, textStatus, jqXHR){
         var nlEgain = data.channels.MMSLIN1EGAIN.data[0].mean;
         var slEgain = data.channels.MMSLIN2EGAIN.data[0].mean;
-        var nlTripRate = everpolate.linear([nlEgain], everpolateData.north.energy, everpolateData.north.tripRate)[0];
-        var slTripRate = everpolate.linear([slEgain], everpolateData.south.energy, everpolateData.south.tripRate)[0];
+        var nlTripRate = NaN;
+        var slTripRate = NaN;
+        if (everpolateData.north.energy != null && everpolateData.north.energy.length > 0) {
+            nlTripRate = everpolate.linear([nlEgain], everpolateData.north.energy, everpolateData.north.tripRate)[0];
+        }
+        if (everpolateData.south.energy != null && everpolateData.south.energy.length > 0) {
+            slTripRate = everpolate.linear([slEgain], everpolateData.south.energy, everpolateData.south.tripRate)[0];
+        }
 
         $("#North-egain").append(nlEgain);
         $("#South-egain").append(slEgain);
         $("#Total-egain").append((slEgain + nlEgain)/2);
-        $("#North-trips").append(nlTripRate.toFixed(2));
-        $("#South-trips").append(slTripRate.toFixed(2));
-        $("#Total-trips").append((nlTripRate + slTripRate).toFixed(2));
+        if (isNaN(nlTripRate)) {
+            $("#North-trips").append("N/A");
+        } else {
+            $("#North-trips").append(nlTripRate.toFixed(2));
+        }
+        if (isNaN(slTripRate)) {
+            $("#South-trips").append("N/A");
+        } else {
+            $("#South-trips").append(slTripRate.toFixed(2));
+        }
+        if (isNaN(nlTripRate) || isNaN(slTripRate)) {
+            $("#Total-trips").append("N/A");
+        } else {
+            $("#Total-trips").append((nlTripRate + slTripRate).toFixed(2));
+        }
 
     });
     promise.fail(function(jqXHR, textStatus, errorThrown){
-        console.log("Error requesting linac EGAINS. Status: " + textStatus + "  Error: " + errorThrown);
+        window.console && console.log("Error requesting linac EGAINS. Status: " + textStatus + "  Error: " + errorThrown);
         $("#North-egain").append("ERR");
         $("#South-egain").append("ERR");
         $("#North-trips").append("ERR");

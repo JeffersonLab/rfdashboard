@@ -34,8 +34,8 @@ public class CavityService {
     private static final Logger LOGGER = Logger.getLogger(CavityService.class.getName());
     // Append the wrkspc argument to the end of this string
     private static final String CED_INVENTORY_URL = AppConfig.getAppConfig().getCEDUrl() + "/inventory";
-    private static final String MAV_MOVED_TO_MYA_DATE = "2022-01-01";
-    private static final int CACHE_QUERY_CHUNK_SIZE = 365;
+    private static final String MAV_MOVED_TO_MYA_DATE = "2022-03-01";
+    private static final int CACHE_QUERY_CHUNK_SIZE = 180;
 
     // This manages concurrent access to the cache
     private static final Object CACHE_LOCK = new Object();

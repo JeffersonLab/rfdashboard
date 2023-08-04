@@ -14,11 +14,12 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.Date;
 
+import static org.jlab.rfd.util.TestUtils.clearCache;
+
 public class LinacAjaxTest {
 
 
     private static final String QUERY_URL = "http://localhost:8080/RFDashboard/ajax/linac";
-    static final String CAVITY_CACHE_URL = "http://localhost:8080/RFDashboard/ajax/cavity-cache";
     private JsonObject makeQuery(String query) throws IOException {
         JsonObject json;
         URL url = new URL(QUERY_URL + query);
@@ -28,18 +29,6 @@ public class LinacAjaxTest {
             json = reader.readObject();
         }
         return json;
-    }
-
-    private void clearCache(Date date) throws IOException {
-        JsonObject json;
-        URL url = new URL(CAVITY_CACHE_URL + "?date=" + DateUtil.formatDateYMD(date) + "&secret=ayqs&action=clear");
-        InputStream is = url.openStream();
-        try (JsonReader reader = Json.createReader(is)) {
-            json = reader.readObject();
-        }
-        if (json.get("rowsCleared") == null) {
-            throw new RuntimeException(("Error processing cache clear response"));
-        }
     }
 
     @Test
