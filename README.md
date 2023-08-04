@@ -17,7 +17,7 @@ understanding the performance of CEBAF's RF system at a point in time and identi
     cd rfdashboard
     ```
 2. Connect to JLab network either directly or through VPN.  Some services have not yet been containerized.
-3Launch Compose
+3. Launch Compose
     ```bash
     docker compose up
     ```
