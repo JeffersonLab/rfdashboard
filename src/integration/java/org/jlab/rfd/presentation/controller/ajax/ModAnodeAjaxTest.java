@@ -12,9 +12,10 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.Date;
 
+import static org.jlab.rfd.util.TestUtils.clearCache;
+
 public class ModAnodeAjaxTest {
 
-    static final String CAVITY_CACHE_URL = "http://localhost:8080/RFDashboard/ajax/cavity-cache";
     private static final String MOD_ANODE_URL = "http://localhost:8080/RFDashboard/ajax/mod-anode";
     private JsonObject makeQuery(String query) throws IOException {
         JsonObject json;
@@ -27,17 +28,6 @@ public class ModAnodeAjaxTest {
         return json;
     }
 
-    private void clearCache(Date date) throws IOException {
-        JsonObject json;
-        URL url = new URL(CAVITY_CACHE_URL + "?date=" + DateUtil.formatDateYMD(date) + "&secret=ayqs&action=clear");
-        InputStream is = url.openStream();
-        try (JsonReader reader = Json.createReader(is)) {
-            json = reader.readObject();
-        }
-        if (json.get("rowsCleared") == null) {
-            throw new RuntimeException(("Error processing cache clear response"));
-        }
-    }
     @Test
     public void testBasicUsageCEDData () throws IOException, ParseException {
         String d1 = "2021-12-15";

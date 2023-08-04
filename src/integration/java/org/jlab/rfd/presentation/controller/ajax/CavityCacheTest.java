@@ -15,29 +15,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import static org.jlab.rfd.util.TestUtils.clearCache;
+import static org.jlab.rfd.util.TestUtils.primeCache;
+
 public class CavityCacheTest {
 
     private static final String CACHE_URL = "http://localhost:8080/RFDashboard/ajax/cavity-cache";
-    private static final String CAVITY_URL = "http://localhost:8080/RFDashboard/ajax/cavity";
-
-    private JsonObject primeCache(String date) throws IOException {
-        JsonObject json;
-        URL url = new URL(CAVITY_URL + "?date=" + date);
-        InputStream is = url.openStream();
-        try (JsonReader reader = Json.createReader(is)) {
-            json = reader.readObject();
-        }
-        return json;
-    }
-    private JsonObject clearCache(String date) throws IOException {
-        JsonObject json;
-        URL url = new URL(CACHE_URL + "?date=" + date + "&action=clear&secret=ayqs");
-        InputStream is = url.openStream();
-        try (JsonReader reader = Json.createReader(is)) {
-            json = reader.readObject();
-        }
-        return json;
-    }
 
         private JsonObject makeQuery(String query) throws IOException {
         JsonObject json;
@@ -49,7 +32,7 @@ public class CavityCacheTest {
         return json;
     }
     @Test
-    public void testBasicUsageEmptyCache() throws IOException {
+    public void testBasicUsageEmptyCache() throws IOException, ParseException {
         String dateString = "2022-03-15";
         String expString = "{\n" +
                 "  \"response\": \"Success\",\n" +
