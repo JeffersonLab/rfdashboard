@@ -75,6 +75,18 @@ public class ModAnodeAjaxTest {
 
     @Test
     public void testBasicUsageMYAData () throws IOException, ParseException {
+        // This was a tricky test case to work out.  The QTR cavities R027,R028 never had R...ModAnodeVolts PVs even
+        // though they are a llrf 1.0 type.  When upgrade to llrf 3.0, they got R...KMAS pvs.  This means that after
+        // start of 2022 when we switched away from CED and until summer of 2023, the ModAnodeVolts are unknown for
+        // those two cavities (+2).  Then, for some reason, R17*KMAS was unarchived until summer 2022, so that's eight more
+        // unknown (+8).  R1Q was uninstalled and didn't report in mya for some reason (+8).  Then R2O*KMAS was undefined (+8)
+        //
+        // R1A (1L10) was in a transitional state in the CED, and both KMAS and ModAnodeVolts PVs were unrecorded. (+8)
+        // R04 (0L04) was offline due to network disconnects (+8).
+        //
+        // Total unknown really is 42.  This needed to be confirmed via the history archiver as some data had
+        // aged out of the ops deployment.
+        //
         String d = "2022-03-15";
         Date date = DateUtil.parseDateStringYMD(d);
         String query = "?start=" + d + "&end=" + d + "&timeUnit=day";
