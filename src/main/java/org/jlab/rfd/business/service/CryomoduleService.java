@@ -33,6 +33,7 @@ import org.jlab.rfd.model.CavityResponse;
 import org.jlab.rfd.model.CryomoduleDataPoint;
 import org.jlab.rfd.model.CryomoduleType;
 import org.jlab.rfd.model.LinacName;
+import org.jlab.rfd.presentation.util.CMTypeMapper;
 
 /**
  * Service used to query the CED about Cryomodule information.
@@ -89,7 +90,7 @@ public class CryomoduleService {
      * @return A map of CryomoduleType to the list of zones with that type.
      * @throws IOException On non-ok response from CED server
      */
-    public SortedMap<CryomoduleType, List<String>> getZonesByCryomoduleType(Date timestamp, List<String> zones) throws IOException {
+    public SortedMap<CryomoduleType, List<String>> getZonesByCryomoduleType(Date timestamp, List<String> zones, CMTypeMapper cmTypeMapper) throws IOException {
         if (timestamp.after(new Date())) {
             return null;
         }
@@ -112,7 +113,11 @@ public class CryomoduleService {
                 JsonObject properties = element.getJsonObject("properties");
                 String zoneName = element.getString("name");
                 if (zones == null || zones.isEmpty() || zones.contains(zoneName)) {
-                    cmTypes.get(CryomoduleType.valueOf(properties.getString("ModuleType"))).add(zoneName);
+                    String cmType = properties.getString("ModuleType");
+                    if (cmTypeMapper != null) {
+                        cmType = cmTypeMapper.get(cmType);
+                    }
+                    cmTypes.get(CryomoduleType.valueOf(cmType)).add(zoneName);
                 }
             }
         }
@@ -133,7 +138,8 @@ public class CryomoduleService {
      * @throws java.text.ParseException On error parsing JSON response
      * @throws java.io.IOException On non-ok response from CED server
      */
-    public SortedMap<String, CryomoduleType> getCryoModuleTypesByZone(Date timestamp, List<String> zones) throws ParseException, IOException {
+    public SortedMap<String, CryomoduleType> getCryoModuleTypesByZone(Date timestamp, List<String> zones,
+                                                                      CMTypeMapper cmTypeMapper) throws ParseException, IOException {
         URL url = getCryomoduleTypeURL(timestamp);
         if (url == null) {
             return null;
@@ -147,7 +153,11 @@ public class CryomoduleService {
             for (JsonObject element : elements.getValuesAs(JsonObject.class)) {
                 if (zones == null || zones.isEmpty() || zones.contains(element.getString("name"))) {
                     JsonObject properties = element.getJsonObject("properties");
-                    cmTypes.put(element.getString("name"), CryomoduleType.valueOf(properties.getString("ModuleType")));
+                    String cmType = properties.getString("ModuleType");
+                    if (cmTypeMapper != null) {
+                        cmType = cmTypeMapper.get(cmType);
+                    }
+                    cmTypes.put(element.getString("name"), CryomoduleType.valueOf(cmType));
                 }
             }
         }

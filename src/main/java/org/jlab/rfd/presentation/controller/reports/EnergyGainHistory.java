@@ -6,7 +6,6 @@
 package org.jlab.rfd.presentation.controller.reports;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -28,6 +27,7 @@ import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.CryomoduleType;
 import org.jlab.rfd.model.TimeUnit;
+import org.jlab.rfd.presentation.util.CMTypeMapper;
 import org.jlab.rfd.presentation.util.DataFormatter;
 import org.jlab.rfd.presentation.util.RequestParamUtil;
 
@@ -129,13 +129,14 @@ public class EnergyGainHistory extends HttpServlet {
             throw new ServletException("Error querying cavity data");
         }
 
+        CMTypeMapper cmTypeMapper = new CMTypeMapper();
         CryomoduleService cms = new CryomoduleService();
         Map<String, CryomoduleType> cmTypesByZone;
         SortedMap<CryomoduleType, List<String>> zonesByCMType;
         List<String> allZones;
         try {
-            cmTypesByZone = cms.getCryoModuleTypesByZone(end, zones);
-            zonesByCMType = cms.getZonesByCryomoduleType(end, zones);
+            cmTypesByZone = cms.getCryoModuleTypesByZone(end, zones, cmTypeMapper);
+            zonesByCMType = cms.getZonesByCryomoduleType(end, zones, cmTypeMapper);
              allZones = new ArrayList<>(cms.getCryoModuleTypes(end).keySet());
              Collections.sort(allZones);
         } catch (ParseException ex) {
@@ -144,21 +145,12 @@ public class EnergyGainHistory extends HttpServlet {
         }
         
         SortedMap<Date, SortedMap<String, Double>> data;
-        
         switch(by) {
             case "zone":
                 data = cds.getEnergyGainByZone(zones);
                 break;
             case "cmtype":
-                Map<String, String> typeMapper = new HashMap<>();
-                typeMapper.put("C100", "C100");
-                typeMapper.put("F100", "C100");
-                typeMapper.put("C50", "C50");
-                typeMapper.put("C50T", "C50");
-                typeMapper.put("C25", "C25");
-                typeMapper.put("C75", "C75");
-                typeMapper.put("QTR", "QTR");
-                data = cds.getEnergyGainByCMType(zones, typeMapper);
+                data = cds.getEnergyGainByCMType(zones, cmTypeMapper);
                 break;
             case "cavity":
                 data = cds.getEnergyGainByCavity(zones);
