@@ -493,7 +493,7 @@ jlab.cavity.getTotalsByCMType = function (startMap, endMap) {
 
 jlab.cavity.createCavitySetPointTables = function (basicId, advId, summaryId, cavityData, start, end) {
     var linacs = ["north", "south", "injector"];
-    var cmtypes = ["C25", "C50", "C100", "QTR"];
+    var cmtypes = ["C25", "C50", "C50T", "C75", "C100", "QTR"];
     var basicProps = ["cmtype", "gset", "odvh"];
     var advProps = ["cmtype", "modAnode", "gset", "odvh"];
 
