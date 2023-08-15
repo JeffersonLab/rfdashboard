@@ -412,43 +412,28 @@ jlab.cavity.getTotalsByCMType = function (startMap, endMap) {
 
     // Setup objects to hold the tallies for all of this
     var startTotals = {
-        Total: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        QTR: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C25: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C50: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C50T: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C75: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        F100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        Booster: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0}
+        Total: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0}
     };
     var endTotals = {
-        Total: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        QTR: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C25: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C50: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C50T: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C75: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        F100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        Booster: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0}
+        Total: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0}
     };
     var diffTotals = {
-        Total: {gset: 0, odvh: 0},
-        QTR: {gset: 0, odvh: 0},
-        C25: {gset: 0, odvh: 0},
-        C50: {gset: 0, odvh: 0},
-        C100: {gset: 0, odvh: 0},
-        C50T: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        C75: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        F100: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0},
-        Booster: {gset: 0, odvh: 0, nGset: 0, nOdvh: 0}
+        Total: {gset: 0, odvh: 0}
     };
 
     startMap.forEach(function (value, key) {
         let name = key;
         let startCav = startMap.get(name);
         let endCav = endMap.get(name);
+
+        if (!startTotals.hasOwnProperty(startCav.moduleType)) {
+            if (startCav.moduleType)
+            startTotals[startCav.moduleType] = {gset: 0, odvh: 0, nGset: 0, nOdvh: 0};
+            diffTotals[startCav.moduleType] = {gset: 0, odvh: 0};
+        }
+        if (!endTotals.hasOwnProperty(endCav.moduleType)) {
+            endTotals[endCav.moduleType] = {gset: 0, odvh: 0, nGset: 0, nOdvh: 0};
+        }
 
         if (startCav.gset !== "") {
             startTotals.Total.gset += startCav.gset;
