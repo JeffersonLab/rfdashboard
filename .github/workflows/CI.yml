@@ -13,6 +13,11 @@ permissions:
 jobs:
   ci:
     runs-on: ubuntu-latest
+
+    concurrency:
+      group: ${{ github.head_ref }}-ci
+      cancel-in-progress: true
+    
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
