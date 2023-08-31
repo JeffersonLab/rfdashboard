@@ -64,6 +64,8 @@ following application specific:
 | RFD_CED_URL      | (Optional) Base URL for the CED server.  Defaults to https://ced.acc.jlab.org      |
 | RFD_MYQUERY_URL  | (Optional) Base URL for the myquery server. Defaults to  https://epicsweb.jlab.org |                                               
 
+**Note**: The update-cache.bash script is intended to be run from cron every morning to prime the cavity cache for that day.
+
 ### Database
 The RF Dashboard app requires an Oracle 18+ database with the following
 [schema](https://github.com/JeffersonLab/rfdashboard/tree/master/docker/oracle/setup) installed.  The application server
