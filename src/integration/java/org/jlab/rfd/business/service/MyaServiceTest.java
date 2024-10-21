@@ -35,7 +35,7 @@ public class MyaServiceTest extends TestCase {
         Date date = cal.getTime();
 
         MyaService instance = new MyaService();
-        String expResult = "{\"channels\":{\"R12XHTPLEM\":{\"metadata\":{\"name\":\"R12XHTPLEM\",\"datatype\":\"DBR_DOUBLE\",\"datasize\":1,\"datahost\":\"hstmya0\",\"ioc\":null,\"active\":true},\"data\":[{\"d\":\"2018-01-01T00:00:00\",\"v\":73.458801}],\"returnCount\":1},\"R13XHTPLEM\":{\"metadata\":{\"name\":\"R13XHTPLEM\",\"datatype\":\"DBR_DOUBLE\",\"datasize\":1,\"datahost\":\"hstmya03\",\"ioc\":null,\"active\":true},\"data\":[{\"d\":\"2018-01-01T00:00:00\",\"v\":86.674896}],\"returnCount\":1}}}";
+        String expResult = "{\"channels\":{\"R12XHTPLEM\":{\"metadata\":{\"name\":\"R12XHTPLEM\",\"datatype\":\"DBR_DOUBLE\",\"datasize\":1,\"datahost\":\"hstmya0\",\"ioc\":null,\"active\":true},\"data\":[{\"d\":\"2018-01-01T00:00:00\",\"v\":73.4588}],\"returnCount\":1},\"R13XHTPLEM\":{\"metadata\":{\"name\":\"R13XHTPLEM\",\"datatype\":\"DBR_DOUBLE\",\"datasize\":1,\"datahost\":\"hstmya3\",\"ioc\":null,\"active\":true},\"data\":[{\"d\":\"2018-01-01T00:00:00\",\"v\":86.6749}],\"returnCount\":1}}}";
         String result = instance.mySampler(channels, date, stepSize, numSteps, deployment).toString();
         
         assertEquals(expResult, result);
@@ -53,7 +53,7 @@ public class MyaServiceTest extends TestCase {
         Date date = cal.getTime();
 
         MyaService instance = new MyaService();
-        String expResult = "{R12XHTPLEM=73.458801, R13XHTPLEM=86.674896}";
+        String expResult = "{R12XHTPLEM=73.4588, R13XHTPLEM=86.6749}";
         String result = instance.mySampler(channels, date, "history").toString();
         assertEquals(expResult, result);
     }    
