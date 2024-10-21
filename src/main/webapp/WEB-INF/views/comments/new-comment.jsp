@@ -41,10 +41,10 @@
 
                 jlab.requestStart();
 
-                var comment = $("#comment-field").val();
-                var topic = $("#topic-field").val();
+                let comment = $("#comment-field").val();
+                let topic = $("#topic-field").val();
 
-                var request = $.ajax({
+                let request = $.ajax({
                     url: jlab.contextPath + "/ajax/comments",
                     type: "POST",
                     data: {
@@ -59,11 +59,11 @@
                     $("#comment-field").val("");
 
             <%-- This string is a weird mix of javascript and JSTL so be careful when editing --%>
-                    var redirectUrl = "${pageContext.request.contextPath}${currentPath}?limit=${limit}&offset=${offset}&topic=" + topic.encodeXml();
+                    let redirectUrl = "${pageContext.request.contextPath}${currentPath}?limit=${requestScope.limit}&offset=${requestScope.offset}&topic=" + topic.encodeXml();
                     window.location.replace(redirectUrl);
                 }).fail(function (jqXHR, textStatus, errorThrown) {
-                    console.log("Comment submission failed: " + textStatus + " - " + errorThrown);
-                    console.log("Response text: " + jqXHR.responseText);
+                    window.console && console.log("Comment submission failed: " + textStatus + " - " + errorThrown);
+                    window.console && console.log("Response text: " + jqXHR.responseText);
                     alert("Comment submission failed.\nError: " + errorThrown);
                 }).always(function () {
                     jlab.requestEnd();
@@ -71,6 +71,16 @@
             };
 
             $(document).ready(function () {
+                let $topicSelect = $("#topic-select").select2({
+                    maximumSelectionSize: 1,
+                    width: 290
+                });
+                $topicSelect.on('select2:opening', function(e) {
+                    if ($(this).select2('data').length > 0) {
+                        e.preventDefault();
+                    }
+                });
+
                 $(document).on("click", "#send-feedback-button", function () {
                     jlab.comment.postComment();
                 });
@@ -88,18 +98,19 @@
                         <form method="post" action="ajax/comments">
                             <ul class="key-value-list">
                                 <li>
-                                    <div class="li-key"><label class="required-field" for="topic">Topic</label></div>
-                                    <c:choose>
-                                        <c:when test="${not empty topic}">
-                                            <div class="li-value"><input type="text" id="topic-field" name="topic" value='<c:out value="${topic}" escapeXml="true"></c:out>' disabled/></div>
-                                            </c:when>
-                                            <c:otherwise>
-                                            <div class="li-value"><input type="text" id="topic-field" name="topic" value='' /></div>
-                                            </c:otherwise>
-                                        </c:choose>
-                                </li>
+                                    <div class="li-key"><label for="topic-select">Topics</label></div>
+                                    <div class="li-value">
+                                        <select id="topic-select" class="multi-select" name="topic" multiple>
+                                            <c:forEach var="valid" items="${requestScope.validTopics}">
+                                                <c:choose>
+                                                    <c:when test="${requestScope.topic == valid}"><option value="${valid}" selected>${valid}</option></c:when>
+                                                    <c:otherwise><option value="${valid}">${valid}</option></c:otherwise>
+                                                </c:choose>
+                                            </c:forEach>
+                                        </select>
+                                    </div>
                                 <li>
-                                    <div class="li-key"><label class="required-field" for="comment">Comment</label></div>
+                                    <div class="li-key"><label class="required-field" for="comment-field">Comment</label></div>
                                     <div class="li-value"><textarea id="comment-field" name="comment"></textarea></div>
                                 </li>                                       
                             </ul>
@@ -114,10 +125,10 @@
                 </c:otherwise>
             </c:choose>
             <c:choose>
-                <c:when test="${topic ne null}"><h4>Comments for ${topic}</h4></c:when>
+                <c:when test="${requestScope.topic ne null}"><h4>Comments for <c:out value="${requestScope.topic}"/></h4></c:when>
                 <c:otherwise><h4>Comment History</h4></c:otherwise>
             </c:choose>
-            <t:comments-table comments="${comments}"></t:comments-table>
+            <t:comments-table comments="${requestScope.comments}"></t:comments-table>
             </section>
     </jsp:body>         
 </t:reports-page>
