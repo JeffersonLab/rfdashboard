@@ -69,7 +69,7 @@ dependencies {
 }
 
 war {
-    archiveName 'RFDashboard.war'
+    archiveFileName = 'RFDashboard.war'
     filesMatching('WEB-INF/web.xml') {
         filter {
             String line -> line.replaceAll('@VERSION@', project.version)
