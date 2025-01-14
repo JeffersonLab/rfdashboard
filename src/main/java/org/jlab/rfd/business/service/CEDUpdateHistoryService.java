@@ -41,7 +41,7 @@ public class CEDUpdateHistoryService {
     public CEDElementUpdateHistory getElementUpdateHistory(String elem, List<String> props, Date start, Date end) throws IOException, ParseException {
         CEDElementUpdateHistory updateHistory = new CEDElementUpdateHistory(elem);
         for (String prop : props) {
-            String query = CED_UPDATE_HISTORY_URL + elem + "/" + prop + "?output=json";
+            String query = CED_UPDATE_HISTORY_URL + elem + "/" + prop + "?out=json";
             URL url = new URL(query);
             InputStream in;
             try {
