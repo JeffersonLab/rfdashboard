@@ -31,6 +31,7 @@ import org.jlab.rfd.business.util.DateUtil;
 import org.jlab.rfd.model.CavityResponse;
 import org.jlab.rfd.model.Comment;
 import org.jlab.rfd.model.CryomoduleDataPoint;
+import org.jlab.rfd.model.LinacName;
 import org.jlab.rfd.presentation.util.RequestParamUtil;
 
 /**
@@ -73,6 +74,28 @@ public class CryomodulePerformance extends HttpServlet {
             throw new ServletException("Error parsing date parameter");
         }
 
+        String linac = (request.getParameter("linac") != null) ? request.getParameter("linac") : "";
+        LinacName linacName = null;
+        request.setAttribute("linac", linac);
+        switch (linac) {
+            case "inj":
+                linacName = LinacName.Injector;
+                break;
+            case "nl":
+                linacName = LinacName.North;
+                break;
+            case "sl":
+                linacName = LinacName.South;
+                break;
+            case "all":
+                break;
+            default:
+                redirectNeeded = true;
+                request.setAttribute("linac", "all");
+                break;
+        }
+
+
         String sortBy = (request.getParameter("sortBy") != null) ? request.getParameter("sortBy") : "";
         switch (sortBy) {
             case "name":
@@ -88,7 +111,8 @@ public class CryomodulePerformance extends HttpServlet {
         if (redirectNeeded) {
             String redirectUrl = request.getContextPath() + "/reports/cm-perf?date="
                     + URLEncoder.encode((String) request.getAttribute("date"), "UTF-8")
-                    + "&sortBy=" + URLEncoder.encode((String) request.getAttribute("sortBy"), "UTF-8");
+                    + "&sortBy=" + URLEncoder.encode((String) request.getAttribute("sortBy"), "UTF-8")
+                    + "&linac=" + URLEncoder.encode((String) request.getAttribute("linac"), "UTF-8");
             response.sendRedirect(response.encodeRedirectURL(redirectUrl));
             return;
         }
@@ -96,7 +120,7 @@ public class CryomodulePerformance extends HttpServlet {
         CryomoduleService cs = new CryomoduleService();
         List<CryomoduleDataPoint> cmList;
         try {
-            cmList = cs.getCryomoduleDataPoints(date);
+            cmList = cs.getCryomoduleDataPoints(date, linacName);
             switch ((String) request.getAttribute("sortBy")) {
                 case "name":
                     Collections.sort(cmList, new Comparator<CryomoduleDataPoint>() {
@@ -151,7 +175,7 @@ public class CryomodulePerformance extends HttpServlet {
         CavityService cavService = new CavityService();
         Map<String, CavityResponse> cavs;
         try {
-            cavs = cavService.getCavityDataMap(date);
+            cavs = cavService.getCavityDataMap(date, linacName);
         } catch (ParseException | SQLException ex) {
             LOGGER.log(Level.WARNING, "Error querying cavity datasources: {0}", ex.toString());
             throw new ServletException("Error querying comment database");

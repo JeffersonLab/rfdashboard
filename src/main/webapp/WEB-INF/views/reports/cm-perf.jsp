@@ -122,9 +122,20 @@
                             <select name="sortBy" required="true">
                                 <option value="perf" <c:if test='${sortBy == "perf"}'>selected</c:if>>Performance</option>
                                 <option value="name" <c:if test='${sortBy == "name"}'>selected</c:if>>Name</option>
-                                </select>
-                            </div>
-                            <input type="submit" value="Submit" />
+                            </select>
+                        </div>
+                        <div class="li-key">
+                            <label class="required-field" for="linac">Linac</label>
+                        </div>
+                        <div class="li-value">
+                            <select name="linac" required="true">
+                                <option value="all" <c:if test='${linac == "all"}'>selected</c:if>>All</option>
+                                <option value="inj" <c:if test='${linac == "inj"}'>selected</c:if>>Injector</option>
+                                <option value="nl" <c:if test='${linac == "nl"}'>selected</c:if>>North</option>
+                                <option value="sl" <c:if test='${linac == "sl"}'>selected</c:if>>South</option>
+                            </select>
+                        </div>
+                        <input type="submit" value="Submit" />
                         </fieldset>
                     </form>
                 </div>

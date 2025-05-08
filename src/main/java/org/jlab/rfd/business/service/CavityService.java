@@ -350,7 +350,28 @@ public class CavityService {
         }
     }
 
+    /**
+     * Get data for all cavities from all linacs.
+     * @param timestamp  The date to query data for
+     * @return A set of cavity responses with data for the requested date
+     * @throws IOException
+     * @throws ParseException
+     * @throws SQLException
+     */
     public Set<CavityResponse> getCavityData(Date timestamp) throws IOException, ParseException, SQLException {
+        return getCavityData(timestamp, null);
+    }
+
+    /**
+     * Get data for all cavities for a given date with an optional filter on linac.
+     * @param timestamp  The date to query data for
+     * @param linacName  Only return data for cavities that are in the specified linac.  All cavities if null.
+     * @return A set of cavity responses with data for the requested date
+     * @throws IOException
+     * @throws ParseException
+     * @throws SQLException
+     */
+    public Set<CavityResponse> getCavityData(Date timestamp, LinacName linacName) throws IOException, ParseException, SQLException {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         // Get the comments up through the end of the day of the specified date.  Then attach the comments to the cached
@@ -590,12 +611,16 @@ public class CavityService {
             }
         }
 
+        // Filter down to only the requested linac if one was specified.
+        if (linacName != null) {
+            data.removeIf(d -> !d.getLinacName().equals(linacName));
+        }
+
         return this.createCommentResponseSet(data, comments);
     }
 
     /**
-     * Convenience function for returning data as a map keyed on cavity name
-     * instead of a set
+     * Convenience function for returning data as a map keyed on cavity name instead of a set.  Return all cavities.
      *
      * @param timestamp Timestamp to look up data for
      * @return A Map of cavity names to cavity response objects
@@ -604,7 +629,22 @@ public class CavityService {
      * @throws SQLException   On database error
      */
     public Map<String, CavityResponse> getCavityDataMap(Date timestamp) throws IOException, ParseException, SQLException {
-        Set<CavityResponse> crs = getCavityData(timestamp);
+        return getCavityDataMap(timestamp, null);
+    }
+
+
+    /**
+     * Convenience function for returning data as a map keyed on cavity name instead of a set with linac filter.
+     *
+     * @param timestamp Timestamp to look up data for
+     * @param linacName Only return cavities from this linac.  Return all if null
+     * @return A Map of cavity names to cavity response objects
+     * @throws IOException    On non-ok CED server response
+     * @throws ParseException On error parsing JSON responses
+     * @throws SQLException   On database error
+     */
+    public Map<String, CavityResponse> getCavityDataMap(Date timestamp, LinacName linacName) throws IOException, ParseException, SQLException {
+        Set<CavityResponse> crs = getCavityData(timestamp, linacName);
 
         Map<String, CavityResponse> cavMap = new HashMap<>();
         for (CavityResponse cr : crs) {
