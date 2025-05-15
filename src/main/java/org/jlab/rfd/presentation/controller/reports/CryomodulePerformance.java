@@ -7,6 +7,7 @@ package org.jlab.rfd.presentation.controller.reports;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Collections;
@@ -14,7 +15,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,7 +58,7 @@ public class CryomodulePerformance extends HttpServlet {
 
         boolean redirectNeeded = false;
 
-        Date date = null;
+        Date date;
         try {
             // Only the first date supplied will be used
             List<Date> dates = RequestParamUtil.processDate(request);
@@ -110,9 +110,9 @@ public class CryomodulePerformance extends HttpServlet {
 
         if (redirectNeeded) {
             String redirectUrl = request.getContextPath() + "/reports/cm-perf?date="
-                    + URLEncoder.encode((String) request.getAttribute("date"), "UTF-8")
-                    + "&sortBy=" + URLEncoder.encode((String) request.getAttribute("sortBy"), "UTF-8")
-                    + "&linac=" + URLEncoder.encode((String) request.getAttribute("linac"), "UTF-8");
+                    + URLEncoder.encode((String) request.getAttribute("date"), StandardCharsets.UTF_8)
+                    + "&sortBy=" + URLEncoder.encode((String) request.getAttribute("sortBy"), StandardCharsets.UTF_8)
+                    + "&linac=" + URLEncoder.encode((String) request.getAttribute("linac"), StandardCharsets.UTF_8);
             response.sendRedirect(response.encodeRedirectURL(redirectUrl));
             return;
         }
@@ -123,7 +123,7 @@ public class CryomodulePerformance extends HttpServlet {
             cmList = cs.getCryomoduleDataPoints(date, linacName);
             switch ((String) request.getAttribute("sortBy")) {
                 case "name":
-                    Collections.sort(cmList, new Comparator<CryomoduleDataPoint>() {
+                    Collections.sort(cmList, new Comparator<>() {
                         @Override
                         public int compare(CryomoduleDataPoint c1, CryomoduleDataPoint c2) {
                             return c1.getName().compareTo(c2.getName());
@@ -131,7 +131,7 @@ public class CryomodulePerformance extends HttpServlet {
                     });
                     break;
                 case "perf":
-                    Collections.sort(cmList, new Comparator<CryomoduleDataPoint>() {
+                    Collections.sort(cmList, new Comparator<>() {
                         @Override
                         public int compare(CryomoduleDataPoint c1, CryomoduleDataPoint c2) {
                             // How to handle NaN
@@ -177,7 +177,7 @@ public class CryomodulePerformance extends HttpServlet {
         try {
             cavs = cavService.getCavityDataMap(date, linacName);
         } catch (ParseException | SQLException ex) {
-            LOGGER.log(Level.WARNING, "Error querying cavity datasources: {0}", ex.toString());
+            LOGGER.log(Level.WARNING, "Error querying cavity data sources: {0}", ex.toString());
             throw new ServletException("Error querying comment database");
         }
         request.setAttribute("cavityMap", cavs);
