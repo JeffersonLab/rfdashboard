@@ -184,11 +184,11 @@ public class CryomoduleService {
      * @return A List of CryomoduleDataPoints describing CEBAF cryomodules on
      * date.
      */
-    public List<CryomoduleDataPoint> getCryomoduleDataPoints(Date date) throws IOException, ParseException, SQLException {
+    public List<CryomoduleDataPoint> getCryomoduleDataPoints(Date date, LinacName linacName) throws IOException, ParseException, SQLException {
         List<CryomoduleDataPoint> cmList = new ArrayList<>();
 
         CavityService cs = new CavityService();
-        Set<CavityResponse> cavList = cs.getCavityData(date);
+        Set<CavityResponse> cavList = cs.getCavityData(date, linacName);
 
         // Mapped on EPICSName
         Map<String, Double[]> gsets = new HashMap<>();
