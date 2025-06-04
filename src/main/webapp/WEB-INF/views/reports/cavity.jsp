@@ -12,12 +12,16 @@
 <c:set var="title" value="Cavity Data"/>
 <t:reports-page title="${title}" pageStart="${requestScope.start}" pageEnd="${requestScope.end}"> 
     <jsp:attribute name="stylesheets">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/css/cavity.css"/>
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/css/cavity.css"/>
     </jsp:attribute>
     <jsp:attribute name="scripts">
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/utils.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/cavity-utils.js"></script>
-        <script type="text/javascript" src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/cavity.js"></script>
+        <script type="text/javascript"
+                src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/utils.js"></script>
+        <script type="text/javascript"
+                src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/cavity-utils.js"></script>
+        <script type="text/javascript"
+                src="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/js/cavity.js"></script>
         <script type="text/javascript">
             $(document).ready(function () {
                 jlab.util.initDateTimePickers();
@@ -37,8 +41,8 @@
             </div>
             <div id="page-details-dialog" class="dialog" title="Details">
                 <h3> Cavity Details</h3>
-                Cavity information provided here is pulled from the Archiver and the CED History deployment. All data is representative
-                of values from these sources at 12 AM on the dates provided.
+                Cavity information provided here is pulled from the Archiver and the CED History deployment. All data is
+                representative of values from these sources at 12 AM on the dates provided.
                 <h3>Page Controls</h3>
                 <ul>
                     <li>
@@ -76,12 +80,14 @@
                     <ul class="key-value-list">
                         <li>
                         </li>
-                            <div class="li-key">Start Time:</div>
-                            <div class="li-value"><input type="text" name="start" class="datetime-picker" value="${start}"></div>
+                        <div class="li-key">Start Time:</div>
+                        <div class="li-value"><input type="text" name="start" class="datetime-picker" value="${start}">
+                        </div>
                         </li>
                         <li>
                             <div class="li-key">End Time:</div>
-                            <div class="li-value"><input type="text" name="end" class="datetime-picker" value="${end}"></div>
+                            <div class="li-value"><input type="text" name="end" class="datetime-picker" value="${end}">
+                            </div>
                         </li>
 
 
@@ -94,7 +100,8 @@
                                     <c:forEach var="linac" items="${linacs}">
                                         <c:choose>
                                             <c:when test="${linac.value}">
-                                                <option value="${linac.key}" selected="selected">${cf:capitalizeFirst(linac.key)}</option>
+                                                <option value="${linac.key}"
+                                                        selected="selected">${cf:capitalizeFirst(linac.key)}</option>
                                             </c:when>
                                             <c:otherwise>
                                                 <option value="${linac.key}">${cf:capitalizeFirst(linac.key)}</option>
@@ -115,7 +122,8 @@
                                     <c:forEach var="type" items="${cmtypes}">
                                         <c:choose>
                                             <c:when test="${type.value}">
-                                                <option value="${type.key}" selected="selected">${cf:capitalizeFirst(type.key)}</option>
+                                                <option value="${type.key}"
+                                                        selected="selected">${cf:capitalizeFirst(type.key)}</option>
                                             </c:when>
                                             <c:otherwise>
                                                 <option value="${type.key}">${cf:capitalizeFirst(type.key)}</option>
@@ -130,11 +138,13 @@
                                 <label for="cav-property-selector">Cavity Properties</label>
                             </div>
                             <div class="li-value">
-                                <select id="cav-property-selector" class="multi-select" name="properties" multiple="multiple">
+                                <select id="cav-property-selector" class="multi-select" name="properties"
+                                        multiple="multiple">
                                     <c:forEach var="prop" items="${properties}">
                                         <c:choose>
                                             <c:when test="${prop.value}">
-                                                <option value="${prop.key}" selected="selected">${cf:capitalizeFirst(prop.key)}</option>
+                                                <option value="${prop.key}"
+                                                        selected="selected">${cf:capitalizeFirst(prop.key)}</option>
                                             </c:when>
                                             <c:otherwise>
                                                 <option value="${prop.key}">${cf:capitalizeFirst(prop.key)}</option>
@@ -159,13 +169,19 @@
             jlab.start = "${requestScope.start}";
             jlab.end = "${requestScope.end}";
             jlab.properties = new Array();
-            <c:forEach var="prop" items="${properties}">jlab.properties.push("${prop.key}");
+            <c:forEach var="prop" items="${properties}">
+            <c:if test="${prop.value}">jlab.properties.push("${prop.key}");
+            </c:if>
             </c:forEach>
             jlab.linacs = new Array();
-            <c:forEach var="linac" items="${linacs}">jlab.linacs.push("${linac.key}");
+            <c:forEach var="linac" items="${linacs}">
+            <c:if test="${linac.value}">jlab.linacs.push("${linac.key}");
+            </c:if>
             </c:forEach>
             jlab.cmtypes = new Array();
-            <c:forEach var="cmtype" items="${cmtypes}">jlab.cmtypes.push("${cmtype.key}");
+            <c:forEach var="cmtype" items="${cmtypes}">
+            <c:if test="${cmtype.value}">jlab.cmtypes.push("${cmtype.key}");
+            </c:if>
             </c:forEach>
             jlab.cavityData = ${requestScope.cavityData};
         </script>
