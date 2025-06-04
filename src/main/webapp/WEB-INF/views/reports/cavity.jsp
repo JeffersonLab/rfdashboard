@@ -14,6 +14,13 @@
     <jsp:attribute name="stylesheets">
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/resources/v${initParam.releaseNumber}/css/cavity.css"/>
+        <style>
+            /*Make the select2 boxes take up the full length.  Should consider :has(.multi-select) if that gains wider
+            adoption*/
+            .li-value {
+                width: 100%;
+            }
+        </style>
     </jsp:attribute>
     <jsp:attribute name="scripts">
         <script type="text/javascript"
@@ -66,7 +73,7 @@
                 <h3> Tables </h3>
                 The "Cavity Properties" table displays the selected properties for the start date, the end date, and
                 their delta. Cavities
-                can be filtered out based on their Linac location or Cryomoule type. This table supports a number of
+                can be filtered out based on their Linac location or Cryomodule type. This table supports a number of
                 features. It is sortable
                 by clicking/Shift-clicking the header fields of the columns. It supports filtering results by entering
                 search strings and
@@ -79,14 +86,15 @@
                 <form action="${pageContext.request.contextPath}/reports/cavity" method="get">
                     <ul class="key-value-list">
                         <li>
-                        </li>
-                        <div class="li-key">Start Time:</div>
-                        <div class="li-value"><input type="text" name="start" class="datetime-picker" value="${start}">
-                        </div>
+                            <div class="li-key"><label for=start-input">Start Time</label></div>
+                            <div class="li-value"><input id=start-input" type="text" name="start"
+                                                         class="datetime-picker" value="${requestScope.start}">
+                            </div>
                         </li>
                         <li>
-                            <div class="li-key">End Time:</div>
-                            <div class="li-value"><input type="text" name="end" class="datetime-picker" value="${end}">
+                            <div class="li-key"><label for="end-input">End Time</label></div>
+                            <div class="li-value"><input id="end-input" type="text" name="end" class="datetime-picker"
+                                                         value="${requestScope.end}">
                             </div>
                         </li>
 
@@ -97,7 +105,7 @@
                             </div>
                             <div class="li-value">
                                 <select id="linac-selector" class="multi-select" name="linacs" multiple="multiple">
-                                    <c:forEach var="linac" items="${linacs}">
+                                    <c:forEach var="linac" items="${requestScope.linacs}">
                                         <c:choose>
                                             <c:when test="${linac.value}">
                                                 <option value="${linac.key}"
@@ -119,7 +127,7 @@
                             </div>
                             <div class="li-value">
                                 <select id="cmtype-selector" class="multi-select" name="cmtypes" multiple="multiple">
-                                    <c:forEach var="type" items="${cmtypes}">
+                                    <c:forEach var="type" items="${requestScope.cmtypes}">
                                         <c:choose>
                                             <c:when test="${type.value}">
                                                 <option value="${type.key}"
@@ -140,7 +148,7 @@
                             <div class="li-value">
                                 <select id="cav-property-selector" class="multi-select" name="properties"
                                         multiple="multiple">
-                                    <c:forEach var="prop" items="${properties}">
+                                    <c:forEach var="prop" items="${requestScope.properties}">
                                         <c:choose>
                                             <c:when test="${prop.value}">
                                                 <option value="${prop.key}"
@@ -159,6 +167,7 @@
                 </form>
                 <hr>
             </div>
+                <%--suppress CheckTagEmptyBody --%>
             <t:tablesorter tableTitle="Cavity Properties<br/>(${requestScope.start} vs ${requestScope.end})"
                            widgetId="details-table"
                            filename="${requestScope.start}_${requestScope.end}_cavProps.csv"></t:tablesorter>
@@ -168,18 +177,18 @@
             var jlab = jlab || {};
             jlab.start = "${requestScope.start}";
             jlab.end = "${requestScope.end}";
-            jlab.properties = new Array();
-            <c:forEach var="prop" items="${properties}">
+            jlab.properties = [];
+            <c:forEach var="prop" items="${requestScope.properties}">
             <c:if test="${prop.value}">jlab.properties.push("${prop.key}");
             </c:if>
             </c:forEach>
-            jlab.linacs = new Array();
-            <c:forEach var="linac" items="${linacs}">
+            jlab.linacs = [];
+            <c:forEach var="linac" items="${requestScope.linacs}">
             <c:if test="${linac.value}">jlab.linacs.push("${linac.key}");
             </c:if>
             </c:forEach>
-            jlab.cmtypes = new Array();
-            <c:forEach var="cmtype" items="${cmtypes}">
+            jlab.cmtypes = [];
+            <c:forEach var="cmtype" items="${requestScope.cmtypes}">
             <c:if test="${cmtype.value}">jlab.cmtypes.push("${cmtype.key}");
             </c:if>
             </c:forEach>
