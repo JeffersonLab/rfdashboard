@@ -13,9 +13,9 @@ plugins {
 
 description "RF Dashboard app for CEBAF"
 group 'org.jlab'
-version '2.1.8'
-ext.releaseDate = 'January 14, 2025'
-ext.resourceNumber = '50'
+version '2.2.0'
+ext.releaseDate = 'June 11, 2025'
+ext.resourceNumber = '51'
 
 tasks.withType(JavaCompile) {
     options.release = 11
