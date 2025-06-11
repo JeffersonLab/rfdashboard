@@ -1,0 +1,1 @@
+ALTER TABLE rfgradteam_owner.cavity_cache ADD CAVITY_TYPE VARCHAR2(2048);
