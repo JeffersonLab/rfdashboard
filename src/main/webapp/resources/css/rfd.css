@@ -908,7 +908,6 @@ table.comments-table{
     font-size: 75%;
     border: 1px solid #ddd;
     border-collapse: collapse;
-    word-break: break-all;
     white-space: pre-line;
 }
 table.comments-table th, table.comments-table td, table.comments-table tr{
