@@ -180,6 +180,7 @@ CREATE TABLE rfgradteam_owner.cavity_cache (
        CAVITY_NAME                VARCHAR2(32)    NOT NULL,
        EPICS_NAME                 VARCHAR2(2048)  NOT NULL,
        MOD_ANODE_VOLTAGE          NUMBER(10, 6),
+       CAVITY_TYPE                VARCHAR2(2048),
        CRYOMODULE_TYPE            VARCHAR2(2048)  NOT NULL,
        GSET                       NUMBER(10, 6),
        ODVH                       NUMBER(10, 6),
