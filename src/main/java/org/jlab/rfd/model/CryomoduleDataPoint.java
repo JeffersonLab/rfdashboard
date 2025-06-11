@@ -81,12 +81,20 @@ public class CryomoduleDataPoint {
     }
 
     /**
+     * Return the nominal energy of this Cryomodule
+     * @return
+     */
+    public double getNominalEGain() {
+        return getNominalEGain(cmType);
+    }
+
+    /**
      * Returns the nominal energy of a Cryomodule based on CryomoduleType (E.g.,
      * C25 -> 25 MEV)
      *
-     * @return The nominal energy of the cryomodule
+     * @return The nominal energy of a cryomodule type
      */
-    public double getNominalEGain() {
+    public static double getNominalEGain(CryomoduleType cmType) {
         double energy;
 
         // Logic according to Jay - ignore the QTR and everything after it is sufficiently relativistic that length*gset = energy gain
