@@ -197,6 +197,45 @@ public class CavityDataPoint implements Cloneable {
         return tunerBad;
     }
 
+    public Double getEGain() {
+        return gset * length;
+    }
+
+    public double getNominalEGain() {
+        double energy;
+
+        // Logic according to Jay - ignore the QTR and everything after it is sufficiently relativistic that length*gset = energy gain
+        // Since everything is after the QTR (0L02), nominal energy gain should be based on the type of cryomodule
+        switch (cavityType) {
+            case C25:
+                energy = 25.;
+                break;
+            case C50:
+                energy = 50.;
+                break;
+            case C75:
+                energy = 75.;
+                break;
+            case C100:
+            case P1R:
+                energy = 100.;
+                break;
+            case None:
+                // Fall back on the cryomodule energy.
+                energy = CryomoduleDataPoint.getNominalEGain(cryomoduleType);
+                break;
+            case QTR:
+            default:
+                energy = Double.NaN;
+        }
+        // Cryomodule's have eight cavities, and we want the energy per cavity.
+        return energy / 8.0;
+    }
+
+    public double getEGainPerformance() {
+        return getEGain() / getNominalEGain() * 100.;
+    }
+
     public JsonObject toJson() {
         JsonObjectBuilder cavBuilder = Json.createObjectBuilder();
         cavBuilder.add("name", cavityName).add("linac", linacName.toString());
@@ -247,7 +286,7 @@ public class CavityDataPoint implements Cloneable {
         } else {
             cavBuilder.add("tripSlope", "");
         }
-        if (length!= null) {
+        if (length != null) {
             cavBuilder.add("length", length);
         } else {
             cavBuilder.add("length", "");
@@ -260,7 +299,9 @@ public class CavityDataPoint implements Cloneable {
             cavBuilder.add("modAnodeHarvester", modAnodeHarvesterGsetData.toJson());
         }
 
-        cavBuilder.add("moduleType", cryomoduleType.toString()).add("epicsName", epicsName);
+        cavBuilder.add("moduleType", cryomoduleType.toString());
+        cavBuilder.add("cavityType", cavityType.toString());
+        cavBuilder.add("epicsName", epicsName);
 
         return cavBuilder.build();
     }
