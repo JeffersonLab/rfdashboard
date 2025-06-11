@@ -20,12 +20,13 @@
                     <h2 id="left-column-header">Reports</h2>
                     <nav id="secondary-nav">
                         <ul> 
-                            <li${'/reports/cm-perf' eq currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/cm-perf">Cryomodule Perfomance</a></li>
-                            <li${'/reports/egain-hist' eq currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/egain-hist">Energy Gain History</a></li>
-                            <li${'/reports/cavity' eq currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/cavity?start=${pageStart}&end=${pageEnd}">Cavity Data</a></li>
-                            <li${'/reports/ced-prop-hist' eq currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/ced-prop-hist">RF Cavity Tool History</a></li>                     
-                            <li${'/reports/comments/history' eq currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/comments/history">Comment History</a></li>
-                            <li${'/reports/comments/new-comment' eq currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/comments/new-comment">New Comment</a></li>
+                            <li${'/reports/cm-perf' eq requestScope.currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/cm-perf">Cryomodule Performance</a></li>
+                            <li${'/reports/cavity-perf' eq requestScope.currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/cavity-perf">Cavity Performance</a></li>
+                            <li${'/reports/egain-hist' eq requestScope.currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/egain-hist">Energy Gain History</a></li>
+                            <li${'/reports/cavity' eq requestScope.currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/cavity?start=${pageStart}&end=${pageEnd}">Cavity Data</a></li>
+                            <li${'/reports/ced-prop-hist' eq requestScope.currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/ced-prop-hist">RF Cavity Tool History</a></li>
+                            <li${'/reports/comments/history' eq requestScope.currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/comments/history">Comment History</a></li>
+                            <li${'/reports/comments/new-comment' eq requestScope.currentPath ? ' class="current-secondary"' : ''}><a href="${pageContext.request.contextPath}/reports/comments/new-comment">New Comment</a></li>
                         </ul>               
                     </nav>
                 </section>
