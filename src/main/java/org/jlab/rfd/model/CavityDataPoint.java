@@ -49,6 +49,7 @@ public class CavityDataPoint implements Cloneable {
     private final Double length;
     private final boolean bypassed;
     private final boolean tunerBad;
+    private final CavityType cavityType;
 
     /**
      * Copy constructor
@@ -58,6 +59,7 @@ public class CavityDataPoint implements Cloneable {
     public CavityDataPoint(CavityDataPoint cdp) {
         this.timestamp = cdp.getTimestamp();
         this.cavityName = cdp.getCavityName();
+        this.cavityType = cdp.getCavityType();
         this.cryomoduleType = cdp.getCryomoduleType();
         this.modAnodeVoltage = cdp.getModAnodeVoltage();
         this.linacName = cdp.getLinacName();
@@ -78,10 +80,14 @@ public class CavityDataPoint implements Cloneable {
         this.zoneName = cdp.getZoneName();
     }
 
-    public CavityDataPoint(Date timestamp, String cavityName, CryomoduleType cryomoduleType,
-            Double modAnodeVoltage, String epicsName, Double gset, Double odvh,
-            String q0, String qExternal, Double maxGset, Double opsGsetMax, Double tripOffset, Double tripSlope,
-            Double length, CavityGsetData modAnodeHarvesterGsetData, boolean bypassed, boolean tunerBad) {
+    public CavityType getCavityType() {
+        return this.cavityType;
+    }
+
+    public CavityDataPoint(Date timestamp, String cavityName, CavityType cavityType, CryomoduleType cryomoduleType,
+                           Double modAnodeVoltage, String epicsName, Double gset, Double odvh,
+                           String q0, String qExternal, Double maxGset, Double opsGsetMax, Double tripOffset, Double tripSlope,
+                           Double length, CavityGsetData modAnodeHarvesterGsetData, boolean bypassed, boolean tunerBad) {
 
         if (!cavityName.matches("\\dL\\d\\d-\\d")) {
             LOGGER.log(Level.SEVERE, "Improper cavity name format - {0}", cavityName);
@@ -91,6 +97,7 @@ public class CavityDataPoint implements Cloneable {
         this.timestamp = timestamp;
         this.cavityName = cavityName;
         this.zoneName = cavityName.substring(0, 4);
+        this.cavityType = cavityType;
         this.cryomoduleType = cryomoduleType;
         this.modAnodeVoltage = modAnodeVoltage;
         this.linacName = CebafNames.cedZoneToEnglishLinac(cavityName.substring(0, 4));

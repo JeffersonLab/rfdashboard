@@ -36,6 +36,7 @@ public class CavityService {
     private static final String CED_INVENTORY_URL = AppConfig.getAppConfig().getCEDUrl() + "/inventory";
     private static final String MAV_MOVED_TO_MYA_DATE = "2022-03-01";
     private static final int CACHE_QUERY_CHUNK_SIZE = 180;
+    private static final String CAVITY_TYPE_INTRODUCED = "2018-11-01";
 
     // This manages concurrent access to the cache
     private static final Object CACHE_LOCK = new Object();
@@ -163,6 +164,8 @@ public class CavityService {
                         Date d;
                         String cavityName, epicsName, q0, qExternal;
                         CryomoduleType cryoModuleType;
+                        CavityType cavityType;
+                        String cavityTypeString;
                         boolean bypassed, tunerBad;
                         Double modAnodeVoltage, gset, odvh, maxGset, opsGsetMax, tripSlope, tripOffset, length;
                         CavityDataPoint cdp;
@@ -172,6 +175,12 @@ public class CavityService {
                             epicsName = rs.getString("EPICS_NAME");
                             modAnodeVoltage = getDouble(rs, "MOD_ANODE_VOLTAGE");
                             cryoModuleType = CryomoduleType.valueOf(rs.getString("CRYOMODULE_TYPE"));
+                            cavityTypeString = rs.getString("CAVITY_TYPE");
+                            if (rs.wasNull() || cavityTypeString.isEmpty()) {
+                                cavityType = CavityType.None;
+                            } else {
+                                cavityType = CavityType.valueOf(cavityTypeString);
+                            }
                             gset = getDouble(rs, "GSET");
                             odvh = getDouble(rs, "ODVH");
                             q0 = rs.getString("Q0");
@@ -184,8 +193,8 @@ public class CavityService {
                             bypassed = rs.getInt("BYPASSED") == 1;
                             tunerBad = rs.getInt("TUNER_BAD") == 1;
 
-                            cdp = new CavityDataPoint(d, cavityName, cryoModuleType, modAnodeVoltage, epicsName, gset, odvh, q0,
-                                    qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, length, null, bypassed, tunerBad);
+                            cdp = new CavityDataPoint(d, cavityName, cavityType, cryoModuleType, modAnodeVoltage, epicsName, gset, odvh,
+                                    q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope, length, null, bypassed, tunerBad);
                             dataMap.putIfAbsent(d, new HashSet<>());
                             dataMap.get(d).add(cdp);
                         }
@@ -216,10 +225,10 @@ public class CavityService {
                     CavityGsetData mah = mahData.get(cdp.getCavityName());
                     if (mah != null) {
                         CavityDataPoint copy = new CavityDataPoint(cdp.getTimestamp(), cdp.getCavityName(),
-                                cdp.getCryomoduleType(), cdp.getModAnodeVoltage(), cdp.getEpicsName(), cdp.getGset(),
-                                cdp.getOdvh(), cdp.getQ0(), cdp.getqExternal(), cdp.getMaxGset(), cdp.getOpsGsetMax(),
-                                cdp.getTripOffset(), cdp.getTripSlope(), cdp.getLength(), mah, cdp.isBypassed(),
-                                cdp.isTunerBad());
+                                cdp.getCavityType(), cdp.getCryomoduleType(), cdp.getModAnodeVoltage(),
+                                cdp.getEpicsName(), cdp.getGset(), cdp.getOdvh(), cdp.getQ0(), cdp.getqExternal(),
+                                cdp.getMaxGset(), cdp.getOpsGsetMax(), cdp.getTripOffset(), cdp.getTripSlope(),
+                                cdp.getLength(), mah, cdp.isBypassed(), cdp.isTunerBad());
                         out.add(copy);
                     } else {
                         out.add(cdp);
@@ -293,10 +302,12 @@ public class CavityService {
             PreparedStatement pstmt = null;
             ResultSet rs = null;
             String checkSQL = "SELECT QUERY_DATE FROM CAVITY_CACHE WHERE QUERY_DATE = TO_DATE(?, 'YYYY-MM-DD')";
+            // 18 names
+            //
             String sql = "INSERT INTO CAVITY_CACHE (CACHE_ID, QUERY_DATE, CAVITY_NAME, EPICS_NAME, " +
-                    " MOD_ANODE_VOLTAGE, CRYOMODULE_TYPE, GSET, ODVH, Q0, QEXTERNAL," +
+                    " MOD_ANODE_VOLTAGE, CAVITY_TYPE, CRYOMODULE_TYPE, GSET, ODVH, Q0, QEXTERNAL," +
                     " MAX_GSET, OPS_GSET_MAX, TRIP_OFFSET, TRIP_SLOPE, LENGTH, BYPASSED, TUNER_BAD) " +
-                    "VALUES (CAVITY_CACHE_SEQ.NEXTVAL, TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?," +
+                    "VALUES (CAVITY_CACHE_SEQ.NEXTVAL, TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?," +
                     " ?, ?)";
             try {
                 conn = SqlUtil.getConnection();
@@ -318,6 +329,11 @@ public class CavityService {
                             pstmt.setString(i++, cdp.getCavityName());
                             pstmt.setString(i++, cdp.getEpicsName());
                             i = setDouble(cdp.getModAnodeVoltage(), pstmt, i);
+                            if (cdp.getCavityType().equals(CavityType.None)) {
+                                pstmt.setString(i++, "");
+                            } else {
+                                pstmt.setString(i++, cdp.getCavityType().toString());
+                            }
                             pstmt.setString(i++, cdp.getCryomoduleType().toString());
                             i = setDouble(cdp.getGset(), pstmt, i);
                             i = setDouble(cdp.getOdvh(), pstmt, i);
@@ -372,6 +388,21 @@ public class CavityService {
      * @throws SQLException
      */
     public Set<CavityResponse> getCavityData(Date timestamp, LinacName linacName) throws IOException, ParseException, SQLException {
+        return getCavityData(timestamp, linacName, null);
+    }
+
+
+    /**
+     * Get data for all cavities for a given date with an optional filter on linac.
+     * @param timestamp  The date to query data for
+     * @param linacName  Only return data for cavities that are in the specified linac.  All cavities if null.
+     * @param cavityType  Only return data for cavities that are of the specified type.
+     * @return A set of cavity responses with data for the requested date
+     * @throws IOException
+     * @throws ParseException
+     * @throws SQLException
+     */
+    public Set<CavityResponse> getCavityData(Date timestamp, LinacName linacName, CavityType cavityType) throws IOException, ParseException, SQLException {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         // Get the comments up through the end of the day of the specified date.  Then attach the comments to the cached
@@ -385,8 +416,14 @@ public class CavityService {
         }
 
         String wrkspc = sdf.format(timestamp);
+
+        // CavityType became a property in Oct 2018
         String cavityQuery = "?t=CryoCavity&p=PhaseRMS,Q0,Qexternal,MaxGSET,OpsGsetMax,TripOffset,TripSlope,Length,"
                 + "Bypassed,TunerBad,EPICSName,ModAnode,Housed_by&out=json&ced=history&wrkspc=" + wrkspc;
+        if (timestamp.after(sdf.parse(CAVITY_TYPE_INTRODUCED))) {
+            cavityQuery = "?t=CryoCavity&p=PhaseRMS,Q0,Qexternal,MaxGSET,OpsGsetMax,TripOffset,TripSlope,Length,"
+                    + "Bypassed,TunerBad,EPICSName,ModAnode,Housed_by,CavityType&out=json&ced=history&wrkspc=" + wrkspc;
+        }
 
         // Check the cache.  If not there, run the query, build the results, check that somebody else hasn't already inserted this
         // into the cache, then add the query result to the cache.
@@ -401,6 +438,7 @@ public class CavityService {
         if (data == null) {
             LOGGER.log(Level.INFO, "Fetching cavity data for " + timestamp + ".");
             Map<String, CryomoduleType> cmTypes = new CryomoduleService().getCryoModuleTypes(timestamp);
+            Map<String, CavityType> cavTypes = new HashMap<>();
             data = new HashSet<>();
 
             //LOGGER.log(Level.FINEST, "CED Query: {0}", CED_INVENTORY_URL + cavityQuery);
@@ -409,6 +447,7 @@ public class CavityService {
             try (JsonReader reader = Json.createReader(in)) {
                 JsonArray elements = CEDUtils.processCEDResponse(reader);
                 CryomoduleType cmType;
+                CavityType cavType = CavityType.None;
 
                 // Construct a map of ced names to epics names
                 String epicsName;
@@ -427,21 +466,34 @@ public class CavityService {
                         throw new IOException("Cryocavity '" + cavityName + "' missing EPICSName in ced history '" + wrkspc);
                     }
                     name2Epics.put(cavityName, epicsName);
-                    if (cmTypes.get(zoneName).equals(CryomoduleType.C25) ||
-                            cmTypes.get(zoneName).equals(CryomoduleType.C50) ||
-                            cmTypes.get(zoneName).equals(CryomoduleType.C50T)) {
-                        names6GEV.add(cavityName);
-                    // Weird historical problem, the QTR used to be LLRF 1.0 (6GeV), but they never archived the PV.
-                    // But the QTR was swapped out to 3.0 controls so the KMAS PV was archived at some point.  Ignoring
-                    // the old style just means that before the upgrade we will get null / unknown for this cavity which
-                    // is correct.  I'll leave this little comment block here in case someone comes across this in the
-                    // future.
-                    // } else if (cmTypes.get(zoneName).equals(CryomoduleType.QTR)
-                    //        && timestamp.before(DateUtil.parseDateStringYMD(QTR_UPGRADE_TO_LLRF3_0_DATE))) {
-                    //     names6GEV.add(cavityName);
+                    // At some point we introduced an actual CavityType parameter instead of inferring from the ModuleType.
+                    cmType = cmTypes.get(zoneName);
+                    if (timestamp.before(sdf.parse(CAVITY_TYPE_INTRODUCED))) {
+                        if (cmType.equals(CryomoduleType.C25) ||
+                                cmType.equals(CryomoduleType.C50) ||
+                                cmType.equals(CryomoduleType.C50T)) {
+                            names6GEV.add(cavityName);
+                            // Weird historical problem, the QTR used to be LLRF 1.0 (6GeV), but they never archived the PV.
+                            // But the QTR was swapped out to 3.0 controls so the KMAS PV was archived at some point.  Ignoring
+                            // the old style just means that before the upgrade we will get null / unknown for this cavity which
+                            // is correct.  I'll leave this little comment block here in case someone comes across this in the
+                            // future.
+                            // } else if (cmTypes.get(zoneName).equals(CryomoduleType.QTR)
+                            //        && timestamp.before(DateUtil.parseDateStringYMD(QTR_UPGRADE_TO_LLRF3_0_DATE))) {
+                            //     names6GEV.add(cavityName);
+                        } else {
+                            names12GEV.add(cavityName);
+                        }
                     } else {
-                        names12GEV.add(cavityName);
+                        cavType = CavityType.valueOf(properties.getString("CavityType"));
+                        if (cavType.equals(CavityType.C25) ||
+                            cavType.equals(CavityType.C50)) {
+                            names6GEV.add(cavityName);
+                        } else {
+                            names12GEV.add(cavityName);
+                        }
                     }
+                    cavTypes.put(cavityName, cavType);
                 }
                 MyaService ms = new MyaService();
 
@@ -524,6 +576,7 @@ public class CavityService {
 
                     String cavityName = element.getString("name");
                     cmType = cmTypes.get(cavityName.substring(0, 4));
+                    cavType = cavTypes.get(cavityName);
 
                     JsonObject properties = element.getJsonObject("properties");
 
@@ -593,13 +646,13 @@ public class CavityService {
 
                     //  useMAH should cover the case that cgds is null
                     if (useMAH) {
-                        data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
-                                odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
-                                length, cgds.get(epicsName), bypassed, tunerBad));
+                        data.add(new CavityDataPoint(timestamp, cavityName, cavType, cmType, mav, epicsName,
+                                gsets.get(cavityName), odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset,
+                                tripSlope, length, cgds.get(epicsName), bypassed, tunerBad));
                     } else {
-                        data.add(new CavityDataPoint(timestamp, cavityName, cmType, mav, epicsName, gsets.get(cavityName),
-                                odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset, tripSlope,
-                                length, null, bypassed, tunerBad));
+                        data.add(new CavityDataPoint(timestamp, cavityName, cavType, cmType, mav, epicsName,
+                                gsets.get(cavityName), odvh, q0, qExternal, maxGset, opsGsetMax, tripOffset,
+                                tripSlope, length, null, bypassed, tunerBad));
                     }
                 }
             }
@@ -614,6 +667,10 @@ public class CavityService {
         // Filter down to only the requested linac if one was specified.
         if (linacName != null) {
             data.removeIf(d -> !d.getLinacName().equals(linacName));
+        }
+        // Filter down to only the requested cavity type if that filter was specified
+        if (cavityType != null) {
+            data.removeIf(d -> !d.getCavityType().equals(cavityType));
         }
 
         return this.createCommentResponseSet(data, comments);
