@@ -102,7 +102,7 @@ public class Cavity extends HttpServlet {
 
         List<String> pp = RequestParamUtil.processMultiValuedParameter(request, "properties");
         Set<String> propertiesParam = pp == null ? null : new HashSet<>(pp);
-        Set<String> allProps = new HashSet<>(Arrays.asList("cmtype", "linac", "length", "odvh", "opsGsetMax", "maxGset", "q0", "qExternal", "tripOffset",
+        Set<String> allProps = new HashSet<>(Arrays.asList("cmtype", "cavityType", "linac", "length", "odvh", "opsGsetMax", "maxGset", "q0", "qExternal", "tripOffset",
                 "tripSlope", "modAnode", "comments", "bypassed", "tunerBad", "gset"));
         Map<String, Boolean> properties = RequestParamUtil.generateMultiSelectionMap(allProps, propertiesParam, false);
         request.setAttribute("properties", properties);

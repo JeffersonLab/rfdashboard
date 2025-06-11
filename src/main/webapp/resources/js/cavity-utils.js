@@ -152,12 +152,15 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
     }
 
     // Setup the 2D cavity array with the header row
-    var cavArray = new Array();
-    var hArray = new Array();
+    var cavArray = [];
+    var hArray = [];
 
     hArray.push("Name");
     if (jlab.util.arrayIncludes(properties, "cmtype")) {
         hArray.push("Module Type");
+    }
+    if (jlab.util.arrayIncludes(properties, "cavityType")) {
+        hArray.push("Cavity Type");
     }
     if (jlab.util.arrayIncludes(properties, "linac")) {
         hArray.push("Linac");
@@ -166,6 +169,8 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
         let prop = properties[i];
         switch (prop) {
             case "cmtype":
+                break; //handled explicitly
+            case "cavityType":
                 break; //handled explicitly
             case "linac":
                 break; //handled explicitly
@@ -254,7 +259,7 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
             return;
         }
 
-        rowArray = new Array();
+        rowArray = [];
         rowArray.push("<div class=nobr>" + startCav.name + "<a class=cell-link href='https://ced.acc.jlab.org/elem/" + name + "' target='_blank'><span class='ui-icon ui-icon-extlink'></span></a><div>");
         if (jlab.util.arrayIncludes(properties, "cmtype")) {
             var cmtype = startCav.moduleType;
@@ -263,6 +268,14 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
             }
             rowArray.push(cmtype);
         }
+        if (jlab.util.arrayIncludes(properties, "cavityType")) {
+            var cavtype = startCav.cavityType;
+            if (startCav.cavityType !== endCav.cavityType) {
+                cavtype += "/" + endCav.cavityType;
+            }
+            rowArray.push(cavtype);
+        }
+
         if (jlab.util.arrayIncludes(properties, "linac")) {
             rowArray.push(startCav.linac);
         }
@@ -270,6 +283,8 @@ jlab.cavity.cavityMapsToTableArray = function (startMap, endMap, linacs, cmtypes
             let prop = properties[i];
             switch (prop) {
                 case "cmtype":
+                    break; //handled explicitly
+                case "cavityType":
                     break; //handled explicitly
                 case "linac":
                     break; //handled explicitly
@@ -359,7 +374,7 @@ jlab.cavity.formatCavityComment = function (cavity) {
  * @returns {undefined} An array containing the the start ("Old") string, the end ("New") string, and the delta string
  */
 jlab.cavity.processNumericTableEntry = function (startCav, endCav, prop, scientific) {
-    var out = new Array();
+    var out = [];
     var sp = startCav[prop];
     var ep = endCav[prop];
 
@@ -404,7 +419,7 @@ jlab.cavity.getTotalsByCMType = function (startMap, endMap) {
         return null;
     }
 
-    var outArray = new Array();
+    var outArray = [];
     outArray.push(["Subset",
         "Old GSET Count", "Old GSET Total", "Old GSET Mean", "New GSET Count", "New GSET Total", "New GSET Mean", "Delta GSET Total",
         "Old ODVH Count", "Old ODVH Total", "Old ODVH Mean", "New ODVH Count", "New ODVH Total", "New ODVH  Mean", "Delta ODVH Total"
