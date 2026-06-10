@@ -30,28 +30,21 @@ services:
 #      MYSQL_PASSWORD: password
 
   keycloak:
-    image: quay.io/keycloak/keycloak:20.0.2
+    image: jeffersonlab/keycloak:2.3.0
     hostname: keycloak
     container_name: keycloak
     ports:
       - "8081:8080"
       - "9991:9990"
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      # TLDR; You can't logout unless you set frontend to be your development hostname.
-      # If localhost, then rfd server tries to connect to itself and finds no one listening.  Need to expose
-      # keycloak port, and use dev system hostname to direct traffic to the proper system/port
-      KEYCLOAK_FRONTEND_HOSTNAME: 'localhost'
-      KEYCLOAK_FRONTEND_PORT: '8081'
-      KEYCLOAK_SERVER_URL: 'http://keycloak:8080'
-      KEYCLOAK_HOME: '/opt/keycloak'
-      KEYCLOAK_REALM: 'test-realm'
-      KEYCLOAK_RESOURCE: 'RFDashboard'
-      KEYCLOAK_SECRET: 'yHi6W2raPmLvPXoxqMA7VWbLAA2WN0eB'
+      KC_FRONTEND_URL: 'http://localhost:8081/auth'
+      KC_BACKEND_URL: 'http://localhost:8080/auth'
+      KC_HTTP_RELATIVE_PATH: '/auth'
+      KC_BOOTSTRAP_ADMIN_USERNAME: 'admin'
+      KC_BOOTSTRAP_ADMIN_PASSWORD: 'admin'
+
     volumes:
-      - ./docker/keycloak:/scripts
-    entrypoint: /scripts/docker-entrypoint.sh
+      - ./container/keycloak/initdb.d:/container-entrypoint-initdb.d
 
   puppet:
     image: slominskir/puppet-show:2.1.1
