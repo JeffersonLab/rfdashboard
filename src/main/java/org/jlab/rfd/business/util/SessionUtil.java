@@ -6,7 +6,7 @@
 package org.jlab.rfd.business.util;
 
 import java.security.Principal;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  *

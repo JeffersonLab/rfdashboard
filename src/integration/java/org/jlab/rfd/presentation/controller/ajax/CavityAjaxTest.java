@@ -4,7 +4,7 @@ import org.jlab.rfd.business.util.DateUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.json.*;
+import jakarta.json.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;

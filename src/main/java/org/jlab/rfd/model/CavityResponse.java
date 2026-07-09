@@ -1,10 +1,10 @@
 package org.jlab.rfd.model;
 
 import java.util.Map.Entry;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
 
 /**
  * This class represents a CavityDataPoint object , and other objects which may

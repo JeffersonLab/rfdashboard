@@ -1,8 +1,8 @@
 package org.jlab.rfd.model;
 
 import java.util.Date;
-import javax.json.Json;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import org.jlab.rfd.business.util.DateUtil;
 
 /**
