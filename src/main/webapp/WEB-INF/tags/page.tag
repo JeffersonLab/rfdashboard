@@ -2,7 +2,7 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-<%@taglib prefix="s" uri="http://jlab.org/jsp/smoothness" %>
+<%@taglib prefix="s" uri="jlab.tags.smoothness" %>
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="title"%>
 <%@attribute name="pageStart"%>
