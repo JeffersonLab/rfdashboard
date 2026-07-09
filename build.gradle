@@ -18,7 +18,7 @@ ext.releaseDate = 'June 11, 2025'
 ext.resourceNumber = '51'
 
 tasks.withType(JavaCompile) {
-    options.release = 11
+    options.release = 17
     options.encoding = 'UTF-8'
     options.compilerArgs += ["-Xlint:deprecation", "-Xlint:unchecked"]
 }
@@ -65,6 +65,8 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.glassfish:javax.json:1.1.4'
 
+    providedCompile 'org.hibernate:hibernate-core:6.6.19.Final'
+    providedCompile 'org.hibernate:hibernate-envers:6.6.19.Final'
     //providedCompile 'javax:javaee-api:8.0.1'
     //providedCompile 'javax.servlet:jstl:1.2'
     providedCompile 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
