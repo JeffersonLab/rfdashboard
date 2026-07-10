@@ -37,31 +37,15 @@ COPY --from=builder /app/build/libs/* /opt/wildfly/current/standalone/deployment
 ENV TZ='America/New_York'
 
 ## Used by app runtime smoothness weblib User Directory Cache
-#ENV KEYCLOAK_FRONTEND_SERVER_URL='http://localhost:8081/auth'
-#ENV KEYCLOAK_BACKEND_SERVER_URL='http://keycloak:8080/auth'
-#ENV KEYCLOAK_REALM='test-realm'
-#ENV KEYCLOAK_RESOURCE='dtm'
-#ENV KEYCLOAK_SECRET='yHi6W2raPmLvPXoxqMA7VWbLAA2WN0eB'
-#
-## Used by container-entrypoint.sh
-#ENV ORACLE_DATASOURCE='dtm'
-#ENV ORACLE_SERVER='oracle:1521'
-#ENV ORACLE_USER='DTM_OWNER'
-#ENV ORACLE_PASS='password'
-#ENV ORACLE_SERVICE='xepdb1'
-#
-## Used by app for path building
-#ENV PUPPET_SHOW_SERVER_URL='http://puppet:3000'
-#ENV BACKEND_SERVER_URL='http://dtm:8080'
-#ENV FRONTEND_SERVER_URL='https://localhost:8443'
-#
-## App specific (prob should be moved to DB Settings table)
-#ENV LOGBOOK_SERVER_URL='https://logbooks.jlab.org'
-#ENV RAR_DIR='/tmp'
+ENV KEYCLOAK_FRONTEND_SERVER_URL='http://localhost:8081/auth'
+ENV KEYCLOAK_BACKEND_SERVER_URL='http://keycloak:8080/auth'
+ENV KEYCLOAK_REALM='test-realm'
+ENV KEYCLOAK_RESOURCE='rfdashboard'
+ENV KEYCLOAK_SECRET='yHi6W2raPmLvPXoxqMA7VWbLAA2WN0eB'
 
-#RUN chsh -s /bin/bash jboss \
-#    && /server-setup.sh /server-setup.env wildfly_start_and_wait \
-#    && /server-setup.sh /server-setup.env config_email
-#RUN /app-setup.sh /app-setup.env
-#USER jboss:jboss
-#COPY --from=builder /app/build/libs/* /opt/jboss/wildfly/standalone/deployments
+## Used by container-entrypoint.sh (pulled from dtm example)
+ENV ORACLE_DATASOURCE='rfgradteam_rw'
+ENV ORACLE_SERVER='oracle:1521'
+ENV ORACLE_USER='rfgradteam_rw'
+ENV ORACLE_PASS='rfgradteam_rw'
+ENV ORACLE_SERVICE='xepdb1'
