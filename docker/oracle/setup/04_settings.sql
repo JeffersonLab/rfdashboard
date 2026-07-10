@@ -24,7 +24,7 @@ GRANT INSERT ON rfgradteam_owner.SETTING TO rfgradteam_rw;
 GRANT DELETE ON rfgradteam_owner.SETTING TO rfgradteam_rw;
 
 -- REQUIRED: Admin Config
-insert into SETTING (KEY, VALUE, TYPE, DESCRIPTION, TAG, WEIGHT) values ('ADMIN_ROLE_NAME', 'dtm-admin', 'STRING', 'App-specific Admin Role Name', 'AUTH', 1);
+insert into SETTING (KEY, VALUE, TYPE, DESCRIPTION, TAG, WEIGHT) values ('ADMIN_ROLE_NAME', 'rfdashboard-admin', 'STRING', 'App-specific Admin Role Name', 'AUTH', 1);
 
 -- OPTIONAL: CDN Config
 insert into SETTING (KEY, VALUE, TYPE, DESCRIPTION, TAG, WEIGHT) values ('SMOOTHNESS_CDN_ENABLED', 'N', 'BOOLEAN', 'Smoothness weblib resources from CDN.  Defaults to No = serve files locally. CDN is for minified files on shared Content Delivery Network (CDN) server - Nice for when multiple apps use same resources to have warm cache.', 'CDN', 1);
