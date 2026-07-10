@@ -87,6 +87,9 @@
                         <li ${fn:startsWith(currentPath, '/reports') ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/reports/cm-perf">Reports</a></li>
                         <li ${'/cryo' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/cryo?start=${pageStart}&end=${pageEnd}">Cryo</a></li>
                         <li ${'/links' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/links">Links</a></li>
+                        <c:if test="${pageContext.request.isUserInRole('rfdashboard-admin')}">
+                        <li ${fn:startsWith(requestScope.currentPath, '/setup') ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/setup/settings">Setup</a></li>
+                        </c:if>
                         <li ${'/help' eq currentPath ? 'class="current-primary"' : ''}><a href="${pageContext.request.contextPath}/help">Help</a></li>
                     </ul>
     </jsp:attribute>
