@@ -55,7 +55,7 @@ public class CavityAjaxTest {
         String expString = "{\"name\":\"2L19-3\",\"linac\":\"South\",\"gset\":5.18681,\"modAnodeVoltage_kv\":0.3," +
                 "\"odvh\":9.0,\"q0\":\"3.36E+09\",\"qExternal\":\"4.7E+06\",\"maxGset\":9.0,\"opsGsetMax\":\"\"," +
                 "\"tripOffset\":8.292,\"tripSlope\":0.924,\"length\":0.5,\"bypassed\":false,\"tunerBad\":false," +
-                "\"moduleType\":\"C25\",\"epicsName\":\"R2J3\"}";
+                "\"moduleType\":\"C25\",\"cavityType\":\"C25\",\"epicsName\":\"R2J3\"}";
 
         JsonObject exp;
         try (JsonReader reader = Json.createReader(new StringReader(expString))) {
