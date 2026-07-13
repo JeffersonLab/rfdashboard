@@ -18,7 +18,7 @@ ext.releaseDate = 'June 11, 2025'
 ext.resourceNumber = '51'
 
 tasks.withType(JavaCompile) {
-    options.release = 11
+    options.release = 17
     options.encoding = 'UTF-8'
     options.compilerArgs += ["-Xlint:deprecation", "-Xlint:unchecked"]
 }
@@ -47,6 +47,11 @@ task integrationTest(type: Test) {
     testClassesDirs = sourceSets.integration.output.classesDirs
     classpath = sourceSets.integration.runtimeClasspath
 
+    // The JVM timezone controls how the date is presented when converted to Instants (millis from epoch)
+    // The container sets it to America/New_York to match the production CEBAF server.  Set this here so that
+    // all of the output is consistent across production, containers, and integration tests
+    systemProperty 'user.timezone', 'America/New_York'
+
     maxHeapSize = '1G'
     testLogging {
         events "passed", "skipped", "failed"
@@ -57,15 +62,18 @@ task integrationTest(type: Test) {
 
 dependencies {
     // No matter what smoothness weblib MUST be included in WAR (https://github.com/JeffersonLab/smoothness/issues/4)
-    implementation 'org.jlab:smoothness-weblib:4.3.0'
+    implementation 'org.jlab:smoothness-weblib:5.0.2'
     // This dependency is used by the application.
     implementation 'org.tuckey:urlrewritefilter:4.0.4'
     // Use JUnit test framework.
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.glassfish:javax.json:1.1.4'
+    testImplementation 'org.eclipse.parsson:jakarta.json:1.1.9'
 
-    providedCompile 'javax:javaee-api:8.0.1'
-    providedCompile 'javax.servlet:jstl:1.2'
+    providedCompile 'org.hibernate:hibernate-core:6.6.19.Final'
+    providedCompile 'org.hibernate:hibernate-envers:6.6.19.Final'
+    providedCompile 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+    providedCompile 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.2'
+
 }
 
 war {

@@ -4,7 +4,7 @@ import org.jlab.rfd.business.util.DateUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.json.*;
+import jakarta.json.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -59,7 +59,7 @@ public class CavityCacheTest {
         String expString = "{\"name\":\"2L03-7\",\"linac\":\"South\",\"gset\":5.55455,\"modAnodeVoltage_kv\":0.0," +
                 "\"odvh\":7.0,\"q0\":\"5.74E+09\",\"qExternal\":\"7.63E+06\",\"maxGset\":7.0,\"opsGsetMax\":\"\"," +
                 "\"tripOffset\":6.567,\"tripSlope\":1.499,\"length\":0.5,\"bypassed\":false,\"tunerBad\":false," +
-                "\"moduleType\":\"C25\",\"epicsName\":\"R237\"}";
+                "\"moduleType\":\"C25\",\"cavityType\":\"C25\",\"epicsName\":\"R237\"}";
         JsonObject exp;
         try(JsonReader reader = Json.createReader(new StringReader(expString))) {
             exp = reader.readObject();

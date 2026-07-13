@@ -6,7 +6,7 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@taglib prefix="s" uri="http://jlab.org/jsp/smoothness"%>
+<%@taglib prefix="s" uri="jlab.tags.smoothness"%>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <c:set var="title" value="Help"/>
 <t:page title="${title}">

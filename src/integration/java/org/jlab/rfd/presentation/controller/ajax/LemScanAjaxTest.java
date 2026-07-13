@@ -3,9 +3,9 @@ package org.jlab.rfd.presentation.controller.ajax;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -81,7 +81,7 @@ public class LemScanAjaxTest {
     public void testBasicUsageReachScan() throws IOException {
 
         String expString = "{\"labels\":[\"Reach\"]," +
-                "\"data\":[[[1481932800000,\"1080.0208552556512\"],[1482019200000,\"1077.074019854189\"]]]}";
+                "\"data\":[[[1481950800000,\"1080.0208552556512\"],[1482037200000,\"1077.074019854189\"]]]}";
         JsonObject exp;
         try (JsonReader reader = Json.createReader(new StringReader(expString))) {
             exp = reader.readObject();

@@ -7,9 +7,9 @@ import org.jlab.rfd.model.CavityDataSpan;
 import org.jlab.rfd.model.CavityResponse;
 import org.jlab.rfd.presentation.util.RequestParamUtil;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.annotation.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;

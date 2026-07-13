@@ -8,10 +8,10 @@
         <param-name>appSpecificEnvPrefix</param-name>
         <param-value>RFD</param-value>
     </context-param>
-    <context-param>
-        <param-name>NotificationBar</param-name>
-        <param-value></param-value>
-    </context-param>
+<!--    <context-param>-->
+<!--        <param-name>NotificationBar</param-name>-->
+<!--        <param-value></param-value>-->
+<!--    </context-param>-->
     <context-param>
         <param-name>appName</param-name>
         <param-value>RF Dashboard</param-value>
@@ -28,6 +28,10 @@
         <param-name>releaseDate</param-name>
         <param-value>@RELEASE_DATE@</param-value>
     </context-param>
+    <listener>
+        <listener-class>org.jlab.smoothness.presentation.util.SettingsCacheInit</listener-class>
+        <description>We don't use @WebListener because we want this listener to be first in case others use DB Setting Cache</description>
+    </listener>
         <filter>
         <filter-name>UrlRewriteFilter</filter-name>
         <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
@@ -70,11 +74,28 @@
             <transport-guarantee>CONFIDENTIAL</transport-guarantee>
         </user-data-constraint>
     </security-constraint>
+    <security-constraint>
+        <display-name>Enforce Admin on setup pages</display-name>
+        <web-resource-collection>
+            <web-resource-name>Setup Pages</web-resource-name>
+            <url-pattern>/setup/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <!-- Must match the ADMIN_ROLE_NAME Setting value in the SETTING table -->
+            <role-name>rfdashboard-admin</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
     <login-config>
         <auth-method>OIDC</auth-method>
     </login-config>
     <security-role>
         <description>Every ACE user is a member of ipausers.</description>
         <role-name>ipausers</role-name>
+    </security-role>
+    <security-role>
+        <role-name>rfdashboard-admin</role-name>
     </security-role>
 </web-app>

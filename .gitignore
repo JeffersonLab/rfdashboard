@@ -16,3 +16,5 @@ build
 /.vscode/
 *.iml
 /out/
+
+.claude/
