@@ -58,17 +58,14 @@ task integrationTest(type: Test) {
 dependencies {
     // No matter what smoothness weblib MUST be included in WAR (https://github.com/JeffersonLab/smoothness/issues/4)
     implementation 'org.jlab:smoothness-weblib:5.0.2'
-//    implementation 'org.jlab:smoothness-weblib:4.3.0'
     // This dependency is used by the application.
     implementation 'org.tuckey:urlrewritefilter:4.0.4'
     // Use JUnit test framework.
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.glassfish:javax.json:1.1.4'
+    testImplementation 'org.eclipse.parsson:jakarta.json:1.1.9'
 
     providedCompile 'org.hibernate:hibernate-core:6.6.19.Final'
     providedCompile 'org.hibernate:hibernate-envers:6.6.19.Final'
-    //providedCompile 'javax:javaee-api:8.0.1'
-    //providedCompile 'javax.servlet:jstl:1.2'
     providedCompile 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
     providedCompile 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.2'
 
