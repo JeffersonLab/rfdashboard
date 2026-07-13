@@ -81,7 +81,7 @@ public class LemScanAjaxTest {
     public void testBasicUsageReachScan() throws IOException {
 
         String expString = "{\"labels\":[\"Reach\"]," +
-                "\"data\":[[[1481932800000,\"1080.0208552556512\"],[1482019200000,\"1077.074019854189\"]]]}";
+                "\"data\":[[[1481950800000,\"1080.0208552556512\"],[1482037200000,\"1077.074019854189\"]]]}";
         JsonObject exp;
         try (JsonReader reader = Json.createReader(new StringReader(expString))) {
             exp = reader.readObject();

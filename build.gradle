@@ -47,6 +47,11 @@ task integrationTest(type: Test) {
     testClassesDirs = sourceSets.integration.output.classesDirs
     classpath = sourceSets.integration.runtimeClasspath
 
+    // The JVM timezone controls how the date is presented when converted to Instants (millis from epoch)
+    // The container sets it to America/New_York to match the production CEBAF server.  Set this here so that
+    // all of the output is consistent across production, containers, and integration tests
+    systemProperty 'user.timezone', 'America/New_York'
+
     maxHeapSize = '1G'
     testLogging {
         events "passed", "skipped", "failed"
