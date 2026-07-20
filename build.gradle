@@ -15,7 +15,7 @@ description "RF Dashboard app for CEBAF"
 group 'org.jlab'
 version '3.0.1'
 ext.releaseDate = 'July 20, 2026'
-ext.resourceNumber = '52'
+ext.resourceNumber = '53'
 
 tasks.withType(JavaCompile) {
     options.release = 17
