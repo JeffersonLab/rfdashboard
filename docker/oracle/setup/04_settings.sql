@@ -19,8 +19,10 @@ CREATE TABLE RFGRADTEAM_OWNER.SETTING
 );
 
 CREATE OR REPLACE SYNONYM rfgradteam_rw.SETTING FOR rfgradteam_owner.SETTING;
+GRANT SELECT ON rfgradteam_owner.SETTING TO rfgradteam_read;
 GRANT SELECT ON rfgradteam_owner.SETTING TO rfgradteam_rw;
 GRANT INSERT ON rfgradteam_owner.SETTING TO rfgradteam_rw;
+GRANT UPDATE ON rfgradteam_owner.SETTING TO rfgradteam_rw;
 GRANT DELETE ON rfgradteam_owner.SETTING TO rfgradteam_rw;
 
 -- REQUIRED: Admin Config
